@@ -66,12 +66,12 @@ fn test_op_depth() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\0"]; // Representing 0
+    let expected_stack = array!["\0\0\0\0\0\0\0\0"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for empty stack");
 
     // Test case 2: Stack with one item
     let program = "OP_1 OP_DEPTH";
-    let mut compiler = CompilerTraitImpl::new(); // Create a new compiler instance
+    let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
 
@@ -82,12 +82,12 @@ fn test_op_depth() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 2, "Stack length is not 2");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01", "\0\0\0\0\0\0\0\x01"]; // [1, 1]
+    let expected_stack = array!["\0\0\0\0\0\0\0\x01", "\0\0\0\0\0\0\0\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for one item");
 
     // Test case 3: Stack with multiple items
     let program = "OP_1 OP_1 OP_ADD OP_1 OP_DEPTH";
-    let mut compiler = CompilerTraitImpl::new(); // Create a new compiler instance
+    let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
 
@@ -101,8 +101,6 @@ fn test_op_depth() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 3");
 
-    let expected_stack = array![
-        "\0\0\0\0\0\0\0\x02", "\0\0\0\0\0\0\0\x01", "\0\0\0\0\0\0\0\x02"
-    ]; // [2, 1, 2]
+    let expected_stack = array!["\0\0\0\0\0\0\0\x02", "\0\0\0\0\0\0\0\x01", "\0\0\0\0\0\0\0\x02"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for multiple items");
 }
