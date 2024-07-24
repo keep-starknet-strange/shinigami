@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="resources/shinigami-logo/shinigami.png" alt="shinigami-logo" height="300"/>
+  <img src="resources/shinigami-logo/shinigami.png" alt="shinigami-logo" height="260"/>
 
   ***Bitcoin Script VM in Cairo***
 
@@ -17,6 +17,7 @@
 Key features :
   - Bitcoin script interpretation and execution
   - Easily configurable VM ( enable different op-codes )
+  - In cairo, Bitcoin Script compiler
 
 ### Running
 
@@ -45,8 +46,8 @@ This will run the test-suite for all op-codes, integration, and test Bitcoin Scr
 ## References
 
 - [Bitcoin Script Wiki](https://en.bitcoin.it/wiki/Script)
-- [Telegram]()
-- [OnlyDust]()
+- [Telegram](https://t.me/ShinigamiStarknet)
+- [OnlyDust](https://app.onlydust.com/p/shinigami)
 
 ## Contributors ✨
 
