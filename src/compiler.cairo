@@ -1,3 +1,4 @@
+use core::dict::Felt252DictTrait;
 use shinigami::opcodes::Opcode;
 
 // Compiler that takes a Bitcoin Script program and compiles it into a bytecode
@@ -21,6 +22,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_0', Opcode::OP_0);
         opcodes.insert('OP_1', Opcode::OP_1);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
+        opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
         Compiler { opcodes }
     }
 
