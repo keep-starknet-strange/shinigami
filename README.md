@@ -16,9 +16,9 @@
 
 Key features :
 
-  - Bitcoin script interpretation and execution
-  - Easily configurable VM ( enable different op-codes )
-  - In cairo, Bitcoin Script compiler
+- Bitcoin script interpretation and execution
+- Easily configurable VM ( enable different op-codes )
+- In cairo, Bitcoin Script compiler
 
 ### Running
 
