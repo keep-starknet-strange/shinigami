@@ -53,8 +53,7 @@ fn test_op_add() {
 }
 
 #[test]
-fn test_op_depth() {
-    // Test case 1: Empty stack
+fn test_op_depth_empty_stack() {
     let program = "OP_DEPTH";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
@@ -68,8 +67,10 @@ fn test_op_depth() {
 
     let expected_stack = array!["\0\0\0\0\0\0\0\0"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for empty stack");
+}
 
-    // Test case 2: Stack with one item
+#[test]
+fn test_op_depth_one_item() {
     let program = "OP_1 OP_DEPTH";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
@@ -84,8 +85,10 @@ fn test_op_depth() {
 
     let expected_stack = array!["\0\0\0\0\0\0\0\x01", "\0\0\0\0\0\0\0\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for one item");
+}
 
-    // Test case 3: Stack with multiple items
+#[test]
+fn test_op_depth_multiple_items() {
     let program = "OP_1 OP_1 OP_ADD OP_1 OP_DEPTH";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
