@@ -51,3 +51,23 @@ fn test_op_add() {
     let expected_stack = array!["\0\0\0\0\0\0\0\x02"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
+#[test]
+fn test_op_1add() {
+    let program = "OP_1 OP_1ADD";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let res = engine.step();
+    assert!(res, "Execution of OP_1 failed");
+
+    let res = engine.step();
+    assert!(res, "Execution of OP_1ADD failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\0\0\0\0\0\0\0\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
