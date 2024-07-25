@@ -213,10 +213,10 @@ pub mod Opcode {
     }
 
     fn opcode_within(ref engine: Engine) {
-        let a = engine.dstack.pop_int();
-        let b = engine.dstack.pop_int();
-        let c = engine.dstack.pop_int();
-        engine.dstack.push_int(if a >= b && a < c {
+        let max_value = engine.dstack.pop_int();
+        let min_value = engine.dstack.pop_int();
+        let selected_value = engine.dstack.pop_int();
+        engine.dstack.push_int(if max_value >= min_value && max_value < selected_value {
             0
         } else {
             1
