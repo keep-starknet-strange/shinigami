@@ -191,7 +191,11 @@ pub mod Opcode {
     fn opcode_greaterthan(ref engine: Engine) {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
-        engine.dstack.push_int(if a > b { 0 } else { 1 });
+        engine.dstack.push_int(if a > b {
+            0
+        } else {
+            1
+        });
     }
 
     fn not_implemented(ref engine: Engine) {
