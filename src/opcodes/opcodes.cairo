@@ -1,6 +1,7 @@
 pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
+    pub const OP_TRUE: u8 = 81;
     pub const OP_ADD: u8 = 147;
 
     use shinigami::engine::Engine;
