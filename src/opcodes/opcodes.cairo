@@ -181,8 +181,6 @@ pub mod Opcode {
         // TODO: Error handling
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
-        let felt: felt252 = b.into() - a.into();
-        println!("{}", felt);
         engine.dstack.push_int(b - a);
     }
 
