@@ -1,4 +1,3 @@
-use core::dict::Felt252DictTrait;
 use shinigami::opcodes::Opcode;
 
 // Compiler that takes a Bitcoin Script program and compiles it into a bytecode
