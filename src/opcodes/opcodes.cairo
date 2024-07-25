@@ -197,9 +197,6 @@ pub mod Opcode {
     }
 
     fn opcode_max(ref engine: Engine) {
-        if engine.dstack.len() < 2 {
-            return ;
-        }
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
         engine.dstack.push_int(if a > b { a } else { b });
