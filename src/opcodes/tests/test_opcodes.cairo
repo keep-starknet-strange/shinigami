@@ -85,7 +85,6 @@ fn test_op_sub() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
-
 #[should_panic(expected: ('Option::unwrap failed.',))]
 #[test]
 fn test_op_sub_panic() {
@@ -105,4 +104,9 @@ fn test_op_sub_panic() {
         "\0\0\0\0\0\0\0\x03618502788666131213697322783095070105623107215331596699973092056135872020480"
     ];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+// ByteArray added to the stack (result of 1 - 2)
+// [DEBUG] 0x46a6158a16a947e5916b2a2ca68501a45e93d7110e81aa2d6438b1c57c879a3
+// [DEBUG] 0x0 ('')
+// [DEBUG] 0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffff0b
+// [DEBUG] 0x9 ('  ')
 }

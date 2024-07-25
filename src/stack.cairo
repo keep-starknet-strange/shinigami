@@ -21,6 +21,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn push_int(ref self: ScriptStack, value: i64) {
         let mut bytes = "";
         bytes.append_word(value.into(), 8);
+        println!("{}", bytes);
         self.push_byte_array(bytes);
     }
 
