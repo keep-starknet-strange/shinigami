@@ -205,14 +205,16 @@ pub mod Opcode {
     }
 
     fn opcode_within(ref engine: Engine) {
-        let max_value = engine.dstack.pop_int();
-        let min_value = engine.dstack.pop_int();
         let selected_value = engine.dstack.pop_int();
-        engine.dstack.push_int(if max_value >= min_value && max_value < selected_value {
-            0
-        } else {
-            1
-        });
+        let min_value = engine.dstack.pop_int();
+        let max_value = engine.dstack.pop_int();
+        engine
+            .dstack
+            .push_int(if max_value < selected_value && max_value >= min_value {
+                0
+            } else {
+                1
+            });
     }
 
     fn not_implemented(ref engine: Engine) {
