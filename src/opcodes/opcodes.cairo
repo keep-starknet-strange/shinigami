@@ -2,6 +2,7 @@ pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
     pub const OP_ADD: u8 = 147;
+    pub const OP_GREATERTHAN: u8 = 160;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
@@ -155,7 +156,20 @@ pub mod Opcode {
             145 => not_implemented(ref engine),
             146 => not_implemented(ref engine),
             147 => opcode_add(ref engine),
-            _ => not_implemented(ref engine)
+            148 => not_implemented(ref engine),
+            149 => not_implemented(ref engine),
+            150 => not_implemented(ref engine),
+            151 => not_implemented(ref engine),
+            152 => not_implemented(ref engine),
+            153 => not_implemented(ref engine),
+            154 => not_implemented(ref engine),
+            155 => not_implemented(ref engine),
+            156 => not_implemented(ref engine),
+            157 => not_implemented(ref engine),
+            158 => not_implemented(ref engine),
+            159 => not_implemented(ref engine),
+            160 => opcode_greaterthan(ref engine),
+            _ => not_implemented(ref engine),
         }
     }
 
@@ -172,6 +186,12 @@ pub mod Opcode {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
         engine.dstack.push_int(a + b);
+    }
+
+    fn opcode_greaterthan(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if a > b { 0 } else { 1 });
     }
 
     fn not_implemented(ref engine: Engine) {
