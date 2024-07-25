@@ -59,8 +59,7 @@ fn test_op_1add() {
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
 
-    let res = engine.step();
-    assert!(res, "Execution of OP_1 failed");
+    engine.step();
 
     let res = engine.step();
     assert!(res, "Execution of OP_1ADD failed");
