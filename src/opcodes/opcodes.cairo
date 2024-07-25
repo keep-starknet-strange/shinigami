@@ -1,8 +1,8 @@
 pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
-    pub const OP_ADD: u8 = 147;
     pub const OP_DEPTH: u8 = 116;
+    pub const OP_ADD: u8 = 147;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
