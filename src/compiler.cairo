@@ -20,6 +20,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         // Add the opcodes to the dict
         opcodes.insert('OP_0', Opcode::OP_0);
         opcodes.insert('OP_1', Opcode::OP_1);
+        opcodes.insert('OP_NEGATE', Opcode::OP_NEGATE);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
         Compiler { opcodes }

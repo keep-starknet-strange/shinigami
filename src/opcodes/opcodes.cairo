@@ -1,6 +1,7 @@
 pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
+    pub const OP_NEGATE: u8 = 143;
     pub const OP_ADD: u8 = 147;
     pub const OP_GREATERTHAN: u8 = 160;
 
@@ -151,7 +152,7 @@ pub mod Opcode {
             140 => not_implemented(ref engine),
             141 => not_implemented(ref engine),
             142 => not_implemented(ref engine),
-            143 => not_implemented(ref engine),
+            143 => opcode_negate(ref engine),
             144 => not_implemented(ref engine),
             145 => not_implemented(ref engine),
             146 => not_implemented(ref engine),
@@ -179,6 +180,11 @@ pub mod Opcode {
 
     fn opcode_n(n: i64, ref engine: Engine) {
         engine.dstack.push_int(n);
+    }
+
+    fn opcode_negate(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        engine.dstack.push_int(-a);
     }
 
     fn opcode_add(ref engine: Engine) {
