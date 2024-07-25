@@ -64,7 +64,7 @@ fn test_op_sub() {
     assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
-    // assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
     let expected_stack = array!["\0\0\0\0\0\0\0\x00"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
@@ -79,7 +79,7 @@ fn test_op_sub() {
     assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
-    // assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
     let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
@@ -99,8 +99,10 @@ fn test_op_sub_panic() {
     assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
-    // assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array![
+        "\0\0\0\0\0\0\0\x03618502788666131213697322783095070105623107215331596699973092056135872020480"
+    ];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
