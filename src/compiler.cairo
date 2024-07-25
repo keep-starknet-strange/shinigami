@@ -23,6 +23,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_NEGATE', Opcode::OP_NEGATE);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
+        opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
         Compiler { opcodes }
     }
 
