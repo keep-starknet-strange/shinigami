@@ -21,6 +21,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_0', Opcode::OP_0);
         opcodes.insert('OP_1', Opcode::OP_1);
         opcodes.insert('OP_TRUE', Opcode::OP_TRUE);
+        opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         Compiler { opcodes }
     }
