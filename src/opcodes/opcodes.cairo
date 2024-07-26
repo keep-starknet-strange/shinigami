@@ -2,9 +2,7 @@ pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
     pub const OP_2: u8 = 82;
-    pub const OP_ADD: u8 = 147;
     pub const OP_TRUE: u8 = 81;
-    pub const OP_2: u8 = 82;
     pub const OP_3: u8 = 83;
     pub const OP_4: u8 = 84;
     pub const OP_5: u8 = 85;
@@ -212,7 +210,7 @@ pub mod Opcode {
         let b = engine.dstack.pop_int();
         engine.dstack.push_int(a + b);
     }
-    
+
     fn opcode_sub(ref engine: Engine) {
         // TODO: Error handling
         let a = engine.dstack.pop_int();
