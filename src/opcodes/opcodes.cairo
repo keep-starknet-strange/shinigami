@@ -20,7 +20,9 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
+    pub const OP_GREATERTHAN: u8 = 160;
     pub const OP_MAX: u8 = 164;
+    pub const OP_WITHIN: u8 = 165;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
@@ -186,11 +188,12 @@ pub mod Opcode {
             157 => not_implemented(ref engine),
             158 => not_implemented(ref engine),
             159 => not_implemented(ref engine),
-            160 => not_implemented(ref engine),
+            160 => opcode_great_than(ref engine),
             161 => not_implemented(ref engine),
             162 => not_implemented(ref engine),
             163 => not_implemented(ref engine),
             164 => opcode_max(ref engine),
+            165 => opcode_within(ref engine),
             _ => not_implemented(ref engine)
         }
     }
@@ -225,6 +228,16 @@ pub mod Opcode {
         panic!("Opcode not implemented");
     }
 
+    fn opcode_great_than(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if b > a {
+            1
+        } else {
+            0
+        });
+    }
+
     fn opcode_max(ref engine: Engine) {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
@@ -232,6 +245,17 @@ pub mod Opcode {
             a
         } else {
             b
+        });
+    }
+
+    fn opcode_within(ref engine: Engine) {
+        let max = engine.dstack.pop_int();
+        let min = engine.dstack.pop_int();
+        let value = engine.dstack.pop_int();
+        engine.dstack.push_int(if value >= min && value < max {
+            1
+        } else {
+            0
         });
     }
 }
