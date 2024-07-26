@@ -22,6 +22,7 @@ pub mod Opcode {
     pub const OP_ADD: u8 = 147;
     pub const OP_GREATERTHAN: u8 = 160;
     pub const OP_MAX: u8 = 164;
+    pub const OP_WITHIN: u8 = 165;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
@@ -192,6 +193,7 @@ pub mod Opcode {
             162 => not_implemented(ref engine),
             163 => not_implemented(ref engine),
             164 => opcode_max(ref engine),
+            165 => opcode_within(ref engine),
             _ => not_implemented(ref engine)
         }
     }
@@ -243,6 +245,17 @@ pub mod Opcode {
             a
         } else {
             b
+        });
+    }
+
+    fn opcode_within(ref engine: Engine) {
+        let max = engine.dstack.pop_int();
+        let min = engine.dstack.pop_int();
+        let value = engine.dstack.pop_int();
+        engine.dstack.push_int(if value >= min && value <= max {
+            1
+        } else {
+            0
         });
     }
 }
