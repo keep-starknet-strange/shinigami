@@ -9,5 +9,6 @@ pub mod opcodes {
 }
 pub mod engine;
 pub mod stack;
+pub mod utils;
 
 mod main;
