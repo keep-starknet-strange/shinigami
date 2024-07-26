@@ -20,6 +20,7 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
+    pub const OP_GREATERTHAN: u8 = 160;
     pub const OP_MAX: u8 = 164;
 
     use shinigami::engine::Engine;
@@ -186,7 +187,7 @@ pub mod Opcode {
             157 => not_implemented(ref engine),
             158 => not_implemented(ref engine),
             159 => not_implemented(ref engine),
-            160 => not_implemented(ref engine),
+            160 => opcode_greater_than(ref engine),
             161 => not_implemented(ref engine),
             162 => not_implemented(ref engine),
             163 => not_implemented(ref engine),
@@ -223,6 +224,16 @@ pub mod Opcode {
 
     fn not_implemented(ref engine: Engine) {
         panic!("Opcode not implemented");
+    }
+
+    fn opcode_greater_than(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if b > a {
+            1
+        } else {
+            0
+        });
     }
 
     fn opcode_max(ref engine: Engine) {
