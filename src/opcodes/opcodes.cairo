@@ -21,6 +21,7 @@ pub mod Opcode {
     pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
     pub const OP_MAX: u8 = 164;
+    pub const OP_FROMALTSTACK: u8 = 108;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
@@ -134,7 +135,7 @@ pub mod Opcode {
             105 => not_implemented(ref engine),
             106 => not_implemented(ref engine),
             107 => not_implemented(ref engine),
-            108 => not_implemented(ref engine),
+            108 => opcode_fromaltstack(ref engine),
             109 => not_implemented(ref engine),
             110 => not_implemented(ref engine),
             111 => not_implemented(ref engine),
@@ -233,5 +234,11 @@ pub mod Opcode {
         } else {
             b
         });
+    }
+
+    fn opcode_fromaltstack(ref engine: Engine) {
+        //TODO: Error handling
+        let a = engine.astack.pop_byte_array();
+        engine.dstack.push_byte_array(a);
     }
 }
