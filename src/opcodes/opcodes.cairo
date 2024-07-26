@@ -199,6 +199,8 @@ pub mod Opcode {
         let b = engine.dstack.pop_int();
         engine.dstack.push_int(if a > b {
             0
+        } else if a == b {
+            0
         } else {
             1
         });
