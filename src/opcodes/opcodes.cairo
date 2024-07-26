@@ -1,8 +1,27 @@
 pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
+    pub const OP_TRUE: u8 = 81;
+    pub const OP_2: u8 = 82;
+    pub const OP_3: u8 = 83;
+    pub const OP_4: u8 = 84;
+    pub const OP_5: u8 = 85;
+    pub const OP_6: u8 = 86;
+    pub const OP_7: u8 = 87;
+    pub const OP_8: u8 = 88;
+    pub const OP_9: u8 = 89;
+    pub const OP_10: u8 = 90;
+    pub const OP_11: u8 = 91;
+    pub const OP_12: u8 = 92;
+    pub const OP_13: u8 = 93;
+    pub const OP_14: u8 = 94;
+    pub const OP_15: u8 = 95;
+    pub const OP_16: u8 = 96;
+    pub const OP_DEPTH: u8 = 116;
+    pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
     pub const OP_LESSTHANOREQUAL: u8 = 161;
+    pub const OP_MAX: u8 = 164;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
@@ -90,21 +109,21 @@ pub mod Opcode {
             79 => not_implemented(ref engine),
             80 => not_implemented(ref engine),
             81 => opcode_n(1, ref engine),
-            82 => not_implemented(ref engine),
-            83 => not_implemented(ref engine),
-            84 => not_implemented(ref engine),
-            85 => not_implemented(ref engine),
-            86 => not_implemented(ref engine),
-            87 => not_implemented(ref engine),
-            88 => not_implemented(ref engine),
-            89 => not_implemented(ref engine),
-            90 => not_implemented(ref engine),
-            91 => not_implemented(ref engine),
-            92 => not_implemented(ref engine),
-            93 => not_implemented(ref engine),
-            94 => not_implemented(ref engine),
-            95 => not_implemented(ref engine),
-            96 => not_implemented(ref engine),
+            82 => opcode_n(2, ref engine),
+            83 => opcode_n(3, ref engine),
+            84 => opcode_n(4, ref engine),
+            85 => opcode_n(5, ref engine),
+            86 => opcode_n(6, ref engine),
+            87 => opcode_n(7, ref engine),
+            88 => opcode_n(8, ref engine),
+            89 => opcode_n(9, ref engine),
+            90 => opcode_n(10, ref engine),
+            91 => opcode_n(11, ref engine),
+            92 => opcode_n(12, ref engine),
+            93 => opcode_n(13, ref engine),
+            94 => opcode_n(14, ref engine),
+            95 => opcode_n(15, ref engine),
+            96 => opcode_n(16, ref engine),
             97 => not_implemented(ref engine),
             98 => not_implemented(ref engine),
             99 => not_implemented(ref engine),
@@ -124,7 +143,7 @@ pub mod Opcode {
             113 => not_implemented(ref engine),
             114 => not_implemented(ref engine),
             115 => not_implemented(ref engine),
-            116 => not_implemented(ref engine),
+            116 => opcode_depth(ref engine),
             117 => not_implemented(ref engine),
             118 => not_implemented(ref engine),
             119 => not_implemented(ref engine),
@@ -147,7 +166,7 @@ pub mod Opcode {
             136 => not_implemented(ref engine),
             137 => not_implemented(ref engine),
             138 => not_implemented(ref engine),
-            139 => not_implemented(ref engine),
+            139 => opcode_1add(ref engine),
             140 => not_implemented(ref engine),
             141 => not_implemented(ref engine),
             142 => not_implemented(ref engine),
@@ -170,6 +189,9 @@ pub mod Opcode {
             159 => not_implemented(ref engine),
             160 => not_implemented(ref engine),
             161 => opcode_less_than_or_equal(ref engine),
+            162 => not_implemented(ref engine),
+            163 => not_implemented(ref engine),
+            164 => opcode_max(ref engine),
             _ => not_implemented(ref engine)
         }
     }
@@ -200,7 +222,28 @@ pub mod Opcode {
         }
     }
 
+    fn opcode_depth(ref engine: Engine) {
+        let depth: i64 = engine.dstack.len().into();
+        engine.dstack.push_int(depth);
+    }
+
+    fn opcode_1add(ref engine: Engine) {
+        let value = engine.dstack.pop_int();
+        let result = value + 1;
+        engine.dstack.push_int(result);
+    }
+
     fn not_implemented(ref engine: Engine) {
         panic!("Opcode not implemented");
+    }
+
+    fn opcode_max(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if a > b {
+            a
+        } else {
+            b
+        });
     }
 }
