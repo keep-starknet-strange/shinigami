@@ -35,6 +35,32 @@ fn test_op_1() {
 }
 
 #[test]
+fn test_op_1sub() {
+    let program = "OP_1 OP_1SUB";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[should_panic]
+#[test]
+fn test_op_1sub_empty_stack() {
+    let program = "OP_1SUB";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+    engine.get_dstack();
+}
+
+#[test]
 fn test_op_add() {
     let program = "OP_1 OP_1 OP_ADD";
     let mut compiler = CompilerTraitImpl::new();
