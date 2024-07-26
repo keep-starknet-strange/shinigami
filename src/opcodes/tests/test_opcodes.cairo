@@ -52,6 +52,7 @@ fn test_op_add() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
 fn test_op_max() {
     let program = "OP_1 OP_0 OP_MAX";
     let mut compiler = CompilerTraitImpl::new();
@@ -67,6 +68,7 @@ fn test_op_max() {
 
     let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
 
 fn test_op_depth_empty_stack() {
     let program = "OP_DEPTH";
