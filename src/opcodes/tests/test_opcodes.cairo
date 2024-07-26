@@ -103,7 +103,7 @@ fn test_op_within() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\0\0\0\0\0\0\0\0"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 

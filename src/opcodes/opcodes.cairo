@@ -252,7 +252,7 @@ pub mod Opcode {
         let max = engine.dstack.pop_int();
         let min = engine.dstack.pop_int();
         let value = engine.dstack.pop_int();
-        engine.dstack.push_int(if value >= min && value <= max {
+        engine.dstack.push_int(if value >= min && value < max {
             1
         } else {
             0
