@@ -2,6 +2,7 @@ pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
     pub const OP_DEPTH: u8 = 116;
+    pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
     pub const OP_MAX: u8 = 164;
 
@@ -148,7 +149,7 @@ pub mod Opcode {
             136 => not_implemented(ref engine),
             137 => not_implemented(ref engine),
             138 => not_implemented(ref engine),
-            139 => not_implemented(ref engine),
+            139 => opcode_1add(ref engine),
             140 => not_implemented(ref engine),
             141 => not_implemented(ref engine),
             142 => not_implemented(ref engine),
@@ -196,6 +197,12 @@ pub mod Opcode {
     fn opcode_depth(ref engine: Engine) {
         let depth: i64 = engine.dstack.len().into();
         engine.dstack.push_int(depth);
+    }
+
+    fn opcode_1add(ref engine: Engine) {
+        let value = engine.dstack.pop_int();
+        let result = value + 1;
+        engine.dstack.push_int(result);
     }
 
     fn not_implemented(ref engine: Engine) {
