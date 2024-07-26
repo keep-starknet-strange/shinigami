@@ -1,6 +1,7 @@
 pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
+    pub const OP_1SUB: u8 = 140;
     pub const OP_ADD: u8 = 147;
 
     use shinigami::engine::Engine;
@@ -147,7 +148,7 @@ pub mod Opcode {
             137 => not_implemented(ref engine),
             138 => not_implemented(ref engine),
             139 => not_implemented(ref engine),
-            140 => not_implemented(ref engine),
+            140 => opcode_1sub(ref engine),
             141 => not_implemented(ref engine),
             142 => not_implemented(ref engine),
             143 => not_implemented(ref engine),
@@ -172,6 +173,11 @@ pub mod Opcode {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
         engine.dstack.push_int(a + b);
+    }
+
+    fn opcode_1sub(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        engine.dstack.push_int(a - 1);
     }
 
     fn not_implemented(ref engine: Engine) {
