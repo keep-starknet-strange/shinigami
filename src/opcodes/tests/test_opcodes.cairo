@@ -1,4 +1,3 @@
-use core::byte_array::ByteArrayTrait;
 use shinigami::compiler::CompilerTraitImpl;
 use shinigami::engine::EngineTraitImpl;
 

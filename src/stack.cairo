@@ -1,4 +1,3 @@
-use core::nullable::NullableTrait;
 use core::dict::Felt252DictEntryTrait;
 use shinigami::utils;
 
