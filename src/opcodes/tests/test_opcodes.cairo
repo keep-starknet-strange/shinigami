@@ -137,7 +137,9 @@ fn test_op_depth_multiple_items() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 3");
 
-    let expected_stack = array!["\x02", "\x01", "\x02"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array![
+        "\x02", "\x01", "\x02"
+    ]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for multiple items");
 }
 
