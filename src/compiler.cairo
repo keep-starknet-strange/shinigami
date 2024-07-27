@@ -38,6 +38,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_16', Opcode::OP_16);
         opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
+        opcodes.insert('OP_NEGATE', Opcode::OP_NEGATE);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         Compiler { opcodes }
