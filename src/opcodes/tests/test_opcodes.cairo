@@ -29,8 +29,7 @@ fn test_op_1() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    // TODO: Is this the correct representation of 1?
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\x01"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -48,7 +47,7 @@ fn test_op_add() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x02"];
+    let expected_stack = array!["\x02"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -66,10 +65,11 @@ fn test_op_max() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\x01"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
 fn test_op_depth_empty_stack() {
     let program = "OP_DEPTH";
     let mut compiler = CompilerTraitImpl::new();
@@ -82,10 +82,11 @@ fn test_op_depth_empty_stack() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\0"];
+    let expected_stack = array!["\0"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for empty stack");
 }
 
+#[test]
 fn test_op_2() {
     let program = "OP_2";
     let mut compiler = CompilerTraitImpl::new();
@@ -97,7 +98,7 @@ fn test_op_2() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x02"];
+    let expected_stack = array!["\x02"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -115,7 +116,7 @@ fn test_op_depth_one_item() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 2, "Stack length is not 2");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01", "\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\x01", "\x01"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for one item");
 }
 
@@ -136,12 +137,12 @@ fn test_op_depth_multiple_items() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 3");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x02", "\0\0\0\0\0\0\0\x01", "\0\0\0\0\0\0\0\x02"];
+    let expected_stack = array!["\x02", "\x01", "\x02"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for multiple items");
 }
 
 #[test]
-fn test_op_TRUE() {
+fn test_op_true() {
     let program = "OP_TRUE";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
@@ -153,10 +154,11 @@ fn test_op_TRUE() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\x01"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
 fn test_op_1add() {
     let program = "OP_1 OP_1ADD";
     let mut compiler = CompilerTraitImpl::new();
@@ -171,7 +173,7 @@ fn test_op_1add() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x02"];
+    let expected_stack = array!["\x02"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -187,7 +189,7 @@ fn test_op_3() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x03"];
+    let expected_stack = array!["\x03"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -203,7 +205,7 @@ fn test_op_4() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x04"];
+    let expected_stack = array!["\x04"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -219,7 +221,7 @@ fn test_op_5() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x05"];
+    let expected_stack = array!["\x05"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -235,7 +237,7 @@ fn test_op_6() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x06"];
+    let expected_stack = array!["\x06"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -251,7 +253,7 @@ fn test_op_7() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x07"];
+    let expected_stack = array!["\x07"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -267,7 +269,7 @@ fn test_op_8() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x08"];
+    let expected_stack = array!["\x08"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -283,7 +285,7 @@ fn test_op_9() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x09"];
+    let expected_stack = array!["\x09"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -299,7 +301,7 @@ fn test_op_10() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x0a"];
+    let expected_stack = array!["\x0a"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -315,7 +317,7 @@ fn test_op_11() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x0b"];
+    let expected_stack = array!["\x0b"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -331,7 +333,7 @@ fn test_op_12() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x0c"];
+    let expected_stack = array!["\x0c"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -347,7 +349,7 @@ fn test_op_13() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x0d"];
+    let expected_stack = array!["\x0d"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -363,7 +365,7 @@ fn test_op_14() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x0e"];
+    let expected_stack = array!["\x0e"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -379,7 +381,7 @@ fn test_op_15() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x0f"];
+    let expected_stack = array!["\x0f"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -395,6 +397,6 @@ fn test_op_16() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x10"];
+    let expected_stack = array!["\x10"]; // Little endian 'sign-magnitude' representation
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }

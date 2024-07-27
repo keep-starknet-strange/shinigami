@@ -221,10 +221,6 @@ pub mod Opcode {
         engine.dstack.push_int(result);
     }
 
-    fn not_implemented(ref engine: Engine) {
-        panic!("Opcode not implemented");
-    }
-
     fn opcode_max(ref engine: Engine) {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
@@ -233,5 +229,9 @@ pub mod Opcode {
         } else {
             b
         });
+    }
+
+    fn not_implemented(ref engine: Engine) {
+        panic!("Opcode not implemented");
     }
 }

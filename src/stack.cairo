@@ -1,5 +1,6 @@
 use core::nullable::NullableTrait;
 use core::dict::Felt252DictEntryTrait;
+use shinigami::scriptnum::ScriptNum;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -19,8 +20,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn push_int(ref self: ScriptStack, value: i64) {
-        let mut bytes = "";
-        bytes.append_word(value.into(), 8);
+        let bytes = ScriptNum::wrap(value);
         self.push_byte_array(bytes);
     }
 
@@ -36,27 +36,9 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn pop_int(ref self: ScriptStack) -> i64 {
+        //TODO Error Handling
         let bytes = self.pop_byte_array();
-        // TODO: Error handling & MakeScriptNum
-        let bytes_len = bytes.len();
-        if bytes_len == 0 {
-            return 0;
-        }
-        let mut value: i64 = 0;
-        let mut i = 0;
-        if bytes_len < 8 {
-            while i < bytes_len {
-                value = value * 256 + bytes.at(i).unwrap().into();
-                i += 1;
-            };
-            return value;
-        } else {
-            while i < 8 {
-                value = value * 256 + bytes.at(bytes_len - 8 + i).unwrap().into();
-                i += 1;
-            };
-            return value;
-        }
+        ScriptNum::unwrap(bytes)
     }
 
     fn len(ref self: ScriptStack) -> usize {
