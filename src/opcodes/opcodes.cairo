@@ -21,13 +21,14 @@ pub mod Opcode {
     pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
     pub const OP_MAX: u8 = 164;
+    pub const OP_DATA_1 = 1;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
     pub fn execute(opcode: u8, ref engine: Engine) {
         match opcode {
             0 => opcode_false(ref engine),
-            1 => not_implemented(ref engine),
+            1 => opcode_data_1(ref engine),
             2 => not_implemented(ref engine),
             3 => not_implemented(ref engine),
             4 => not_implemented(ref engine),
@@ -233,5 +234,10 @@ pub mod Opcode {
         } else {
             b
         });
+    }
+
+    fn opcode_data_1(ref engine: Engine) {
+        let value =  engine.dstack.pop_byte_array();
+        engine.dstack.push_byte_array(value)
     }
 }
