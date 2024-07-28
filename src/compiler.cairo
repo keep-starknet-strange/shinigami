@@ -40,7 +40,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
-        opcode.insert('OP_DATA_1', Opcode::OP_DATA_1);
+        opcodes.insert('OP_DATA_1', Opcode::OP_DATA_1);
         Compiler { opcodes }
     }
 
