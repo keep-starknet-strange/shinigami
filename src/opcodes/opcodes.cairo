@@ -236,8 +236,7 @@ pub mod Opcode {
         });
     }
 
-    fn opcode_data_1(ref engine: Engine) {
-        let value = engine.dstack.pop_byte_array();
+    fn opcode_data_1(value: ByteArray ref engine: Engine) {
         engine.dstack.push_byte_array(value)
     }
 }
