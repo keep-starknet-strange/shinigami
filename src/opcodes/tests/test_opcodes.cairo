@@ -415,5 +415,4 @@ fn test_opcode_data_1() {
 
     let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-
 }

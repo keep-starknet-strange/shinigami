@@ -21,7 +21,7 @@ pub mod Opcode {
     pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
     pub const OP_MAX: u8 = 164;
-    pub const OP_DATA_1 = 1;
+    pub const OP_DATA_1: u8 = 1;
 
     use shinigami::engine::Engine;
     use shinigami::stack::ScriptStackTrait;
@@ -237,7 +237,7 @@ pub mod Opcode {
     }
 
     fn opcode_data_1(ref engine: Engine) {
-        let value =  engine.dstack.pop_byte_array();
+        let value = engine.dstack.pop_byte_array();
         engine.dstack.push_byte_array(value)
     }
 }
