@@ -71,8 +71,27 @@ fn test_op_max() {
 }
 
 #[test]
-fn test_op_within() {
-    let program = "OP_1 OP_0 OP_1 OP_WITHIN";
+fn test_op_within_true() {
+    let program = "OP_1 OP_0 OP_3 OP_WITHIN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_within_false() {
+    let program = "OP_2 OP_0 OP_1 OP_WITHIN";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
