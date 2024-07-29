@@ -114,6 +114,41 @@ fn test_op_negate_negative() {
 }
 
 #[test]
+fn test_op_abs_positive() {
+    let program = "OP_1 OP_2 OP_ABS";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step(); // Execute OP_1
+    let _ = engine.step(); // Execute OP_2
+    let res = engine.step(); // Execute OP_ABS
+    assert!(res, "Execution of OP_ABS failed for positive number");
+    
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+    let expected_stack = array!["", int_to_bytes(2), int_to_bytes(1)];
+    assert_eq!(dstack, expected_stack.span(), "Result is not ['', 2, 1]");
+}
+
+#[test]
+fn test_op_abs_negative() {
+    let program = "OP_1 OP_2 OP_NEGATE OP_ABS";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step(); // Execute OP_1
+    let _ = engine.step(); // Execute OP_2
+    let _ = engine.step(); // Execute OP_NEGATE
+    let res = engine.step(); // Execute OP_ABS
+    assert!(res, "Execution of OP_ABS failed for negative number");
+    
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+    let expected_stack = array!["", int_to_bytes(-2), int_to_bytes(1)];
+    assert_eq!(dstack, expected_stack.span(), "Result is not ['', -2, 1]");
+}
+
+#[test]
 fn test_op_add() {
     let program = "OP_1 OP_1 OP_ADD";
     let mut compiler = CompilerTraitImpl::new();
