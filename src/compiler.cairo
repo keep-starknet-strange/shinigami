@@ -41,9 +41,9 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
         opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
         opcodes.insert('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
-        opcodes.insert('OP_2SWAP',Opcode::OP_2SWAP);
+        opcodes.insert('OP_2SWAP', Opcode::OP_2SWAP);
         opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
-        opcodes.insert('OP_SWAP',Opcode::OP_SWAP);
+        opcodes.insert('OP_SWAP', Opcode::OP_SWAP);
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_1SUB', Opcode::OP_1SUB);
         opcodes.insert('OP_NEGATE', Opcode::OP_NEGATE);

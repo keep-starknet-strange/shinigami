@@ -1,8 +1,0 @@
-{
-  "editor.defaultFormatter": null,
-  "cairo1.scarbPath": "/home/varunx/.local/share/scarb-install/latest/bin/scarb",
-  "cairo1.corelibPath": "/home/varunx/.local/share/scarb-install/latest/bin/scarb",
-  "cairo1.languageServerPath": "/home/varunx/.local/share/scarb-install/latest/bin/scarb",
-  "cairo.cairoFormatPath": "./Scarb.toml",
-  "cairo1.enableLanguageServer": true
-}
