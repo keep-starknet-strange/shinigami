@@ -1,4 +1,5 @@
 pub mod compiler;
+pub mod cond_stack;
 pub mod opcodes {
     pub mod opcodes;
     mod tests {
