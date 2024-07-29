@@ -26,6 +26,7 @@ pub mod Opcode {
     pub const OP_NOT: u8 = 145;
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
+    pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
 
     use shinigami::engine::{Engine, EngineTrait};
@@ -196,7 +197,7 @@ pub mod Opcode {
             160 => not_implemented(ref engine),
             161 => not_implemented(ref engine),
             162 => not_implemented(ref engine),
-            163 => not_implemented(ref engine),
+            163 => opcode_min(ref engine),
             164 => opcode_max(ref engine),
             _ => not_implemented(ref engine)
         }
@@ -295,6 +296,17 @@ pub mod Opcode {
         } else {
             engine.dstack.push_int(0);
         }
+    }
+
+    fn opcode_min(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+
+        engine.dstack.push_int(if a < b {
+            a
+        } else {
+            b
+        });
     }
 
     fn not_implemented(ref engine: Engine) {
