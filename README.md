@@ -64,6 +64,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/AbdelStark"><img src="https://avatars.githubusercontent.com/u/45264458?v=4?s=100" width="100px;" alt="A₿del ∞/21M 🐺 - 🐱"/><br /><sub><b>A₿del ∞/21M 🐺 - 🐱</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=AbdelStark" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://okhaimie.com/"><img src="https://avatars.githubusercontent.com/u/57156589?v=4?s=100" width="100px;" alt="okhai"/><br /><sub><b>okhai</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=okhaimie-dev" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/supreme2580"><img src="https://avatars.githubusercontent.com/u/100731397?v=4?s=100" width="100px;" alt="Supreme Labs"/><br /><sub><b>Supreme Labs</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=supreme2580" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hakymulla"><img src="https://avatars.githubusercontent.com/u/25408889?v=4?s=100" width="100px;" alt="Kazeem Hakeem"/><br /><sub><b>Kazeem Hakeem</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=hakymulla" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
