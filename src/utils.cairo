@@ -51,3 +51,25 @@ pub fn int_to_bytes(mut value: i64) -> ByteArray {
 
     return bytes;
 }
+
+pub fn bytes_to_int(bytes: ByteArray) -> i64 {
+    let bytes_len = bytes.len();
+    if bytes_len == 0 {
+        return 0;
+    }
+    let mut value: i64 = 0;
+    let mut i = 0;
+    if bytes_len < 8 {
+        while i < bytes_len {
+            value = value * 256 + bytes.at(i).unwrap().into();
+            i += 1;
+        };
+        return value;
+    } else {
+        while i < 8 {
+            value = value * 256 + bytes.at(bytes_len - 8 + i).unwrap().into();
+            i += 1;
+        };
+        return value;
+    }
+}
