@@ -369,7 +369,7 @@ pub mod Opcode {
 
     fn opcode_data_1(value: ByteArray, ref engine: Engine) {
         engine.dstack.push_byte_array(value);
-
+    }
     fn opcode_within(ref engine: Engine) {
         let max = engine.dstack.pop_int();
         let min = engine.dstack.pop_int();
