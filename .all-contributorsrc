@@ -1,0 +1,25 @@
+{
+  "projectName": "shinigami",
+  "projectOwner": "keep-starknet-strange",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "gitmoji",
+  "contributors": [
+    {
+      "login": "b-j-roberts",
+      "name": "Brandon R",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54774639?v=4",
+      "profile": "https://github.com/b-j-roberts",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": false
+}

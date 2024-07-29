@@ -54,3 +54,18 @@ This will run the test-suite for all op-codes, integration, and test Bitcoin Scr
 ## Contributors ✨
 
 Thanks goes to these wonderful people. Follow the [contributors guide](https://github.com/keep-starknet-strange/art-peace/blob/main/CONTRIBUTING.md) if you'd like to take part.
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/b-j-roberts"><img src="https://avatars.githubusercontent.com/u/54774639?v=4?s=100" width="100px;" alt="Brandon R"/><br /><sub><b>Brandon R</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=b-j-roberts" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
