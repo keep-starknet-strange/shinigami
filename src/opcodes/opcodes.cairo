@@ -24,6 +24,7 @@ pub mod Opcode {
     pub const OP_FROMALTSTACK: u8 = 108;
     pub const OP_DEPTH: u8 = 116;
     pub const OP_1ADD: u8 = 139;
+    pub const OP_1SUB: u8 = 140;
     pub const OP_NOT: u8 = 145;
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
@@ -176,7 +177,7 @@ pub mod Opcode {
             137 => not_implemented(ref engine),
             138 => not_implemented(ref engine),
             139 => opcode_1add(ref engine),
-            140 => not_implemented(ref engine),
+            140 => opcode_1sub(ref engine),
             141 => not_implemented(ref engine),
             142 => not_implemented(ref engine),
             143 => not_implemented(ref engine),
@@ -320,6 +321,11 @@ pub mod Opcode {
         } else {
             b
         });
+    }
+
+    fn opcode_1sub(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        engine.dstack.push_int(a - 1);
     }
 
     fn not_implemented(ref engine: Engine) {
