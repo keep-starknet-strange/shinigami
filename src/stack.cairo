@@ -1,5 +1,5 @@
-use core::nullable::NullableTrait;
 use core::dict::Felt252DictEntryTrait;
+use shinigami::utils;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -19,8 +19,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn push_int(ref self: ScriptStack, value: i64) {
-        let mut bytes = "";
-        bytes.append_word(value.into(), 8);
+        let mut bytes = utils::int_to_bytes(value);
         self.push_byte_array(bytes);
     }
 

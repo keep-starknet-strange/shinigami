@@ -24,6 +24,7 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
+    pub const OP_SUB: u8 = 148;
     pub const OP_MAX: u8 = 164;
 
     use shinigami::engine::{Engine, EngineTrait};
@@ -179,7 +180,7 @@ pub mod Opcode {
             145 => not_implemented(ref engine),
             146 => not_implemented(ref engine),
             147 => opcode_add(ref engine),
-            148 => not_implemented(ref engine),
+            148 => opcode_sub(ref engine),
             149 => not_implemented(ref engine),
             150 => not_implemented(ref engine),
             151 => not_implemented(ref engine),
@@ -267,6 +268,13 @@ pub mod Opcode {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
         engine.dstack.push_int(a + b);
+    }
+
+    fn opcode_sub(ref engine: Engine) {
+        // TODO: Error handling
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(b - a);
     }
 
     fn opcode_depth(ref engine: Engine) {
