@@ -36,11 +36,21 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_14', Opcode::OP_14);
         opcodes.insert('OP_15', Opcode::OP_15);
         opcodes.insert('OP_16', Opcode::OP_16);
+        opcodes.insert('OP_IF', Opcode::OP_IF);
+        opcodes.insert('OP_NOTIF', Opcode::OP_NOTIF);
+        opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
+        opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
+        opcodes.insert('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
         opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_1SUB', Opcode::OP_1SUB);
+        opcodes.insert('OP_NOT', Opcode::OP_NOT);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
+        opcodes.insert('OP_SUB', Opcode::OP_SUB);
+        opcodes.insert('OP_LESSTHANOREQUAL', Opcode::OP_LESSTHANOREQUAL);
+        opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
+
         Compiler { opcodes }
     }
 

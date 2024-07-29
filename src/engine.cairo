@@ -1,5 +1,6 @@
 use shinigami::stack::{ScriptStack, ScriptStackImpl};
-use shinigami::opcodes::opcodes::Opcode::execute;
+use shinigami::cond_stack::{ConditionalStack, ConditionalStackImpl};
+use shinigami::opcodes::opcodes::Opcode::{execute, is_branching_opcode};
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -12,6 +13,8 @@ pub struct Engine {
     pub dstack: ScriptStack,
     // Alternate data stack
     pub astack: ScriptStack,
+    // Tracks conditonal execution state supporting nested conditionals
+    pub cond_stack: ConditionalStack,
 // TODO
 // ...
 }
@@ -34,6 +37,7 @@ pub impl EngineTraitImpl of EngineTrait {
             opcode_idx: 0,
             dstack: ScriptStackImpl::new(),
             astack: ScriptStackImpl::new(),
+            cond_stack: ConditionalStackImpl::new(),
         }
     }
 
@@ -50,6 +54,12 @@ pub impl EngineTraitImpl of EngineTrait {
             return false;
         }
 
+        if !self.cond_stack.branch_executing()
+            && !is_branching_opcode(self.script[self.opcode_idx]) {
+            self.opcode_idx += 1;
+            return true;
+        }
+
         let opcode = self.script[self.opcode_idx];
         execute(opcode, ref self);
         self.opcode_idx += 1;
@@ -61,6 +71,11 @@ pub impl EngineTraitImpl of EngineTrait {
             .opcode_idx < self
             .script
             .len() {
+                if !self.cond_stack.branch_executing()
+                    && !is_branching_opcode(self.script[self.opcode_idx]) {
+                    self.opcode_idx += 1;
+                    continue;
+                }
                 let opcode = self.script[self.opcode_idx];
                 execute(opcode, ref self);
                 self.opcode_idx += 1;
