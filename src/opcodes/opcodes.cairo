@@ -17,13 +17,18 @@ pub mod Opcode {
     pub const OP_14: u8 = 94;
     pub const OP_15: u8 = 95;
     pub const OP_16: u8 = 96;
+    pub const OP_IF: u8 = 99;
+    pub const OP_NOTIF: u8 = 100;
+    pub const OP_ELSE: u8 = 103;
+    pub const OP_ENDIF: u8 = 104;
     pub const OP_DEPTH: u8 = 116;
     pub const OP_1ADD: u8 = 139;
     pub const OP_ADD: u8 = 147;
     pub const OP_MAX: u8 = 164;
 
-    use shinigami::engine::Engine;
+    use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
+    use shinigami::cond_stack::ConditionalStackTrait;
     pub fn execute(opcode: u8, ref engine: Engine) {
         match opcode {
             0 => opcode_false(ref engine),
@@ -125,12 +130,12 @@ pub mod Opcode {
             96 => opcode_n(16, ref engine),
             97 => not_implemented(ref engine),
             98 => not_implemented(ref engine),
-            99 => not_implemented(ref engine),
-            100 => not_implemented(ref engine),
+            99 => opcode_if(ref engine),
+            100 => opcode_notif(ref engine),
             101 => not_implemented(ref engine),
             102 => not_implemented(ref engine),
-            103 => not_implemented(ref engine),
-            104 => not_implemented(ref engine),
+            103 => opcode_else(ref engine),
+            104 => opcode_endif(ref engine),
             105 => not_implemented(ref engine),
             106 => not_implemented(ref engine),
             107 => not_implemented(ref engine),
@@ -195,12 +200,66 @@ pub mod Opcode {
         }
     }
 
+    pub fn is_branching_opcode(opcode: u8) -> bool {
+        if opcode == OP_IF || opcode == OP_NOTIF || opcode == OP_ELSE || opcode == OP_ENDIF {
+            return true;
+        }
+        return false;
+    }
+
     fn opcode_false(ref engine: Engine) {
         engine.dstack.push_byte_array("");
     }
 
     fn opcode_n(n: i64, ref engine: Engine) {
         engine.dstack.push_int(n);
+    }
+
+    // TODO: MOve to cond_stack
+    const op_cond_false: u8 = 0;
+    const op_cond_true: u8 = 1;
+    const op_cond_skip: u8 = 2;
+    fn opcode_if(ref engine: Engine) {
+        let mut cond = op_cond_false;
+        // TODO: Pop if bool
+        if engine.cond_stack.branch_executing() {
+            let ok = engine.dstack.pop_bool();
+            if ok {
+                cond = op_cond_true;
+            }
+        } else {
+            cond = op_cond_skip;
+        }
+        engine.cond_stack.push(cond);
+    }
+
+    fn opcode_notif(ref engine: Engine) {
+        let mut cond = op_cond_false;
+        if engine.cond_stack.branch_executing() {
+            let ok = engine.dstack.pop_bool();
+            if !ok {
+                cond = op_cond_true;
+            }
+        } else {
+            cond = op_cond_skip;
+        }
+        engine.cond_stack.push(cond);
+    }
+
+    fn opcode_else(ref engine: Engine) {
+        if engine.cond_stack.len() == 0 {
+            panic!("No matching if");
+        }
+
+        engine.cond_stack.swap_condition();
+    }
+
+    fn opcode_endif(ref engine: Engine) {
+        if engine.cond_stack.len() == 0 {
+            panic!("No matching if");
+        }
+
+        engine.cond_stack.pop();
     }
 
     fn opcode_add(ref engine: Engine) {
