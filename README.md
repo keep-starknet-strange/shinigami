@@ -68,6 +68,9 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lomasson"><img src="https://avatars.githubusercontent.com/u/97454276?v=4?s=100" width="100px;" alt="lomasson"/><br /><sub><b>lomasson</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=lomasson" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://nextdoorhacker.com/"><img src="https://avatars.githubusercontent.com/u/40477?v=4?s=100" width="100px;" alt="Prasanna Gautam"/><br /><sub><b>Prasanna Gautam</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=prasincs" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.heyfemi.com/home"><img src="https://avatars.githubusercontent.com/u/53274579?v=4?s=100" width="100px;" alt="Olufemi Olumaiyegun"/><br /><sub><b>Olufemi Olumaiyegun</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=olufemi-olumaiyegun" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
