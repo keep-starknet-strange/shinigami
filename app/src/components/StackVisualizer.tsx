@@ -1,14 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 
 interface StackItem {
   id: number;
@@ -20,29 +12,24 @@ interface StackVisualizerProps {
 }
 
 const StackVisualizer: React.FC<StackVisualizerProps> = ({ stackContent }) => {
-  const chartData = stackContent.map((item) => ({
-    name: `Item ${item.id}`,
-    value: item.value.length,
-  }));
-
   return (
-    <div className="h-80">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="value" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer>
-      <div className="mt-4">
-        <h3 className="text-xl font-semibold mb-2">Stack Contents:</h3>
-        <ul className="list-disc pl-5">
+    <div className="h-64 overflow-y-auto retro-container p-2">
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th className="text-left">ID</th>
+            <th className="text-left">Value</th>
+          </tr>
+        </thead>
+        <tbody>
           {stackContent.map((item) => (
-            <li key={item.id}>{item.value}</li>
+            <tr key={item.id} className="border-t border-green-500">
+              <td className="py-2">{item.id}</td>
+              <td className="py-2">{item.value}</td>
+            </tr>
           ))}
-        </ul>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 };
