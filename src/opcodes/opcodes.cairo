@@ -1,8 +1,8 @@
 pub mod Opcode {
     pub const OP_0: u8 = 0;
     pub const OP_1: u8 = 81;
-    pub const OP_2: u8 = 82;
     pub const OP_TRUE: u8 = 81;
+    pub const OP_2: u8 = 82;
     pub const OP_3: u8 = 83;
     pub const OP_4: u8 = 84;
     pub const OP_5: u8 = 85;

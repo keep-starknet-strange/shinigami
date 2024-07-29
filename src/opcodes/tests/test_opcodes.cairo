@@ -96,6 +96,10 @@ fn test_op_sub() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
+    println!("{:?}", dstack);
+    let q: ByteArray = "Q";
+    let expected_stack = array![q];
+    println!("{:?}", expected_stack);
     // this is needed to evaluate the result because
     // array!["\x81"] fails with non ASCII character error
     let byte_array = dstack.at(dstack.len() - 1);
