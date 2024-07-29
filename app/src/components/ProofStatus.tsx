@@ -6,12 +6,12 @@ interface ProofStatusProps {
 
 const ProofStatus: React.FC<ProofStatusProps> = ({ isGenerating }) => {
   return (
-    <div className="mt-4">
-      <h3 className="text-xl font-semibold mb-2">Proof Status:</h3>
+    <div className="mt-4 retro-container p-2">
+      <h3 className="text-lg mb-2">PROOF STATUS:</h3>
       {isGenerating ? (
-        <p className="text-yellow-600">Generating proof...</p>
+        <p className="text-yellow-400 blink">GENERATING PROOF...</p>
       ) : (
-        <p className="text-green-600">Ready to generate proof</p>
+        <p className="text-green-400">READY TO GENERATE</p>
       )}
     </div>
   );
