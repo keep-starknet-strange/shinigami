@@ -1,5 +1,6 @@
 use shinigami::compiler::CompilerTraitImpl;
 use shinigami::engine::EngineTraitImpl;
+use shinigami::utils::int_to_bytes;
 
 #[test]
 fn test_op_0() {
@@ -96,18 +97,8 @@ fn test_op_sub() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    println!("{:?}", dstack);
-    let q: ByteArray = "Q";
-    let expected_stack = array![q];
-    println!("{:?}", expected_stack);
-    // this is needed to evaluate the result because
-    // array!["\x81"] fails with non ASCII character error
-    let byte_array = dstack.at(dstack.len() - 1);
-    let element = byte_array.at(byte_array.len() - 1).unwrap();
-
-    let expected_element: u8 = 0x81; // -1
-
-    assert_eq!(element, expected_element, "Stack is not equal to expected");
+    let expected_stack: Array<ByteArray> = array![int_to_bytes(-1)];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
 #[test]
@@ -160,7 +151,7 @@ fn test_op_if_true() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -180,7 +171,7 @@ fn test_op_notif_false() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -307,7 +298,7 @@ fn test_op_else_false() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
