@@ -313,6 +313,7 @@ pub mod Opcode {
         let result = value + 1;
         engine.dstack.push_int(result);
     }
+
     fn opcode_not(ref engine: Engine) {
         let m = engine.dstack.pop_int();
         if m == 0 {
