@@ -23,7 +23,7 @@ Key features :
 
 ## Supported Opcodes
 
-**38/99 opcodes supported (38.38%)**
+38/99 opcodes supported (38.38%).
 
 ```mermaid
 %%{init: {"pie": {"textPosition": 0.75}, "themeVariables": {"pieOuterStrokeWidth": "5px"}} }%%
