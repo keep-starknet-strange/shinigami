@@ -207,6 +207,23 @@ fn test_op_2() {
 }
 
 #[test]
+fn test_op_not() {
+    let program = "OP_1 OP_NOT";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
 fn test_op_depth_one_item() {
     let program = "OP_1 OP_DEPTH";
     let mut compiler = CompilerTraitImpl::new();

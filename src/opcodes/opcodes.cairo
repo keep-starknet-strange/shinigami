@@ -23,6 +23,7 @@ pub mod Opcode {
     pub const OP_ENDIF: u8 = 104;
     pub const OP_DEPTH: u8 = 116;
     pub const OP_1ADD: u8 = 139;
+    pub const OP_NOT: u8 = 145;
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
     pub const OP_MAX: u8 = 164;
@@ -177,7 +178,7 @@ pub mod Opcode {
             142 => not_implemented(ref engine),
             143 => not_implemented(ref engine),
             144 => not_implemented(ref engine),
-            145 => not_implemented(ref engine),
+            145 => opcode_not(ref engine),
             146 => not_implemented(ref engine),
             147 => opcode_add(ref engine),
             148 => opcode_sub(ref engine),
@@ -286,6 +287,14 @@ pub mod Opcode {
         let value = engine.dstack.pop_int();
         let result = value + 1;
         engine.dstack.push_int(result);
+    }
+    fn opcode_not(ref engine: Engine) {
+        let m = engine.dstack.pop_int();
+        if m == 0 {
+            engine.dstack.push_int(1);
+        } else {
+            engine.dstack.push_int(0);
+        }
     }
 
     fn not_implemented(ref engine: Engine) {
