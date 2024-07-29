@@ -51,6 +51,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_LESSTHAN', Opcode::OP_LESSTHAN);
         opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
         opcodes.insert('OP_LESSTHANOREQUAL', Opcode::OP_LESSTHANOREQUAL);
+        opcodes.insert('OP_GREATERTHANOREQUAL', Opcode::OP_GREATERTHANOREQUAL);
         opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
