@@ -125,6 +125,44 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
     }
 
+    fn rot_n(ref self: ScriptStack, n: u32) {
+        assert(n >= 1, 'attempt to rotate too few items');
+
+        let items_to_rotate = 3 * n;
+        assert(items_to_rotate <= self.len.try_into().unwrap(), 'not enough items on stack');
+
+        let mut i: u32 = 0;
+        while i < n {
+            let entry_index = (3 * n - 1).try_into().unwrap();
+            let value = self.nip_n(entry_index);
+            self.push_byte_array(value);
+            i += 1;
+        }
+    }
+
+    fn nip_n(ref self: ScriptStack, n: usize) -> ByteArray {
+        assert(n < self.len, 'not enough items on stack');
+
+        let idx = self.len - 1 - n;
+
+        let (entry, value) = self.data.entry(idx.into());
+        let nipped_value = value.deref();
+
+        self.data = entry.finalize(NullableTrait::new(""));
+
+        let mut i = idx;
+        while i < self.len
+            - 1 {
+                let (next_entry, next_value) = self.data.entry((i + 1).into());
+                self.data = next_entry.finalize(next_value);
+                i += 1;
+            };
+
+        self.len -= 1;
+
+        nipped_value
+    }
+
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = self.len;

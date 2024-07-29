@@ -691,3 +691,76 @@ fn test_op_lessthan_equal() {
     let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
+#[test]
+fn test_op_rot() {
+    let program = "OP_1 OP_2 OP_3 OP_ROT";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_ROT failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+
+    let expected_stack = array!["\x02", "\x03", "\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected after OP_ROT");
+}
+
+#[test]
+fn test_op_2rot() {
+    let program = "OP_1 OP_2 OP_3 OP_4 OP_5 OP_6 OP_2ROT";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+    engine.step();
+    engine.step();
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_2ROT failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 6, "Stack length is not 6");
+
+    let expected_stack = array!["\x03", "\x04", "\x05", "\x06", "\x01", "\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected after OP_2ROT");
+}
+
+#[test]
+fn test_op_rot_insufficient_items() {
+    let program = "OP_1 OP_2 OP_ROT";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(!res, "OP_ROT should fail with insufficient items");
+}
+
+#[test]
+fn test_op_2rot_insufficient_items() {
+    let program = "OP_1 OP_2 OP_3 OP_4 OP_5 OP_2ROT";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+    engine.step();
+    engine.step();
+    engine.step();
+
+    let res = engine.step();
+    assert!(!res, "OP_2ROT should fail with insufficient items");
+}

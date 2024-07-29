@@ -22,7 +22,9 @@ pub mod Opcode {
     pub const OP_ELSE: u8 = 103;
     pub const OP_ENDIF: u8 = 104;
     pub const OP_FROMALTSTACK: u8 = 108;
+    pub const OP_2ROT: u8 = 113;
     pub const OP_DEPTH: u8 = 116;
+    pub const OP_ROT: u8 = 123;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
     pub const OP_NEGATE: u8 = 143;
@@ -154,7 +156,7 @@ pub mod Opcode {
             110 => not_implemented(ref engine),
             111 => not_implemented(ref engine),
             112 => not_implemented(ref engine),
-            113 => not_implemented(ref engine),
+            113 => opcode_2rot(ref engine),
             114 => not_implemented(ref engine),
             115 => not_implemented(ref engine),
             116 => opcode_depth(ref engine),
@@ -164,7 +166,7 @@ pub mod Opcode {
             120 => not_implemented(ref engine),
             121 => not_implemented(ref engine),
             122 => not_implemented(ref engine),
-            123 => not_implemented(ref engine),
+            123 => opcode_rot(ref engine),
             124 => not_implemented(ref engine),
             125 => not_implemented(ref engine),
             126 => not_implemented(ref engine),
@@ -371,6 +373,14 @@ pub mod Opcode {
         } else {
             0
         });
+    }
+
+    fn opcode_2rot(ref engine: Engine) {
+        engine.dstack.rot_n(2);
+    }
+
+    fn opcode_rot(ref engine: Engine) {
+        engine.dstack.rot_n(1);
     }
 
     fn opcode_lessthan(ref engine: Engine) {
