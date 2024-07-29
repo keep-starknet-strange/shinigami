@@ -20,11 +20,30 @@ pub impl CompilerTraitImpl of CompilerTrait {
         // Add the opcodes to the dict
         opcodes.insert('OP_0', Opcode::OP_0);
         opcodes.insert('OP_1', Opcode::OP_1);
+        opcodes.insert('OP_TRUE', Opcode::OP_TRUE);
+        opcodes.insert('OP_2', Opcode::OP_2);
+        opcodes.insert('OP_3', Opcode::OP_3);
+        opcodes.insert('OP_4', Opcode::OP_4);
+        opcodes.insert('OP_5', Opcode::OP_5);
+        opcodes.insert('OP_6', Opcode::OP_6);
+        opcodes.insert('OP_7', Opcode::OP_7);
+        opcodes.insert('OP_8', Opcode::OP_8);
+        opcodes.insert('OP_9', Opcode::OP_9);
+        opcodes.insert('OP_10', Opcode::OP_10);
+        opcodes.insert('OP_11', Opcode::OP_11);
+        opcodes.insert('OP_12', Opcode::OP_12);
+        opcodes.insert('OP_13', Opcode::OP_13);
+        opcodes.insert('OP_14', Opcode::OP_14);
+        opcodes.insert('OP_15', Opcode::OP_15);
+        opcodes.insert('OP_16', Opcode::OP_16);
         opcodes.insert('OP_IF', Opcode::OP_IF);
         opcodes.insert('OP_NOTIF', Opcode::OP_NOTIF);
         opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
         opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
+        opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
+        opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
+        opcodes.insert('OP_MAX', Opcode::OP_MAX);
         Compiler { opcodes }
     }
 
