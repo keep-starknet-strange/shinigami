@@ -705,7 +705,7 @@ fn test_op_1negate() {
 
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x81"];
+    let expected_stack = array![int_to_bytes(-1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
