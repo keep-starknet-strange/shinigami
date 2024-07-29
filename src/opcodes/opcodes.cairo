@@ -25,6 +25,7 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
+    pub const OP_NEGATE: u8 = 143;
     pub const OP_NOT: u8 = 145;
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
@@ -183,7 +184,7 @@ pub mod Opcode {
             140 => opcode_1sub(ref engine),
             141 => not_implemented(ref engine),
             142 => not_implemented(ref engine),
-            143 => not_implemented(ref engine),
+            143 => opcode_negate(ref engine),
             144 => not_implemented(ref engine),
             145 => opcode_not(ref engine),
             146 => not_implemented(ref engine),
@@ -223,6 +224,11 @@ pub mod Opcode {
 
     fn opcode_n(n: i64, ref engine: Engine) {
         engine.dstack.push_int(n);
+    }
+
+    fn opcode_negate(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        engine.dstack.push_int(-a);
     }
 
     // TODO: MOve to cond_stack
