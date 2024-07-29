@@ -65,7 +65,7 @@ fn test_op_max() {
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
-    
+
     let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
@@ -288,7 +288,7 @@ fn test_op_else_true() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x00"];
+    let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -305,7 +305,6 @@ fn test_op_3() {
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
 
     let expected_stack = array!["\0\0\0\0\0\0\0\x03"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
