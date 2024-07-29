@@ -405,14 +405,12 @@ fn test_opcode_data_1() {
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-    let _ = engine.step();
-    let _ = engine.step();
     let res = engine.step();
-    assert!(res, "Execution of run failed");
+    assert!(res, "Execution of step failed");
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0\0\0\0\0\0\0\x01"];
+    let expected_stack = array!["0x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }

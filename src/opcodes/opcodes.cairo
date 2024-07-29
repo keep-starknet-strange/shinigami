@@ -28,7 +28,7 @@ pub mod Opcode {
     pub fn execute(opcode: u8, ref engine: Engine) {
         match opcode {
             0 => opcode_false(ref engine),
-            1 => opcode_data_1(value, ref engine),
+            1 => opcode_data_1("0x01", ref engine),
             2 => not_implemented(ref engine),
             3 => not_implemented(ref engine),
             4 => not_implemented(ref engine),
@@ -236,7 +236,7 @@ pub mod Opcode {
         });
     }
 
-    fn opcode_data_1(value: ByteArray ref engine: Engine) {
-        engine.dstack.push_byte_array(value)
+    fn opcode_data_1(value: ByteArray, ref engine: Engine) {
+        engine.dstack.push_byte_array(value);
     }
 }
