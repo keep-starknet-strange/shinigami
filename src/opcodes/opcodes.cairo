@@ -23,6 +23,7 @@ pub mod Opcode {
     pub const OP_ENDIF: u8 = 104;
     pub const OP_FROMALTSTACK: u8 = 108;
     pub const OP_DEPTH: u8 = 116;
+    pub const OP_EQUAL: u8 = 135;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
     pub const OP_NEGATE: u8 = 143;
@@ -176,7 +177,7 @@ pub mod Opcode {
             132 => not_implemented(ref engine),
             133 => not_implemented(ref engine),
             134 => not_implemented(ref engine),
-            135 => not_implemented(ref engine),
+            135 => opcode_equal(ref engine),
             136 => not_implemented(ref engine),
             137 => not_implemented(ref engine),
             138 => not_implemented(ref engine),
@@ -387,5 +388,15 @@ pub mod Opcode {
         //TODO: Error handling
         let a = engine.astack.pop_byte_array();
         engine.dstack.push_byte_array(a);
+    }
+
+    fn opcode_equal(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if a == b {
+            1
+        } else {
+            0
+        });
     }
 }
