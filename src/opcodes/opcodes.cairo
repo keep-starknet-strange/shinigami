@@ -343,7 +343,6 @@ pub mod Opcode {
         });
     }
 
-<<<<<<< HEAD
     fn opcode_lessthan(ref engine: Engine) {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
@@ -352,11 +351,11 @@ pub mod Opcode {
         } else {
             0
         });
-=======
+    }
+
     fn opcode_fromaltstack(ref engine: Engine) {
         //TODO: Error handling
         let a = engine.astack.pop_byte_array();
         engine.dstack.push_byte_array(a);
->>>>>>> main
     }
 }
