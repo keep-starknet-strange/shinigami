@@ -234,7 +234,11 @@ pub mod Opcode {
 
     fn opcode_abs(ref engine: Engine) {
         let value = engine.dstack.pop_int();
-        let abs_value = if value < 0 { -value } else { value };
+        let abs_value = if value < 0 {
+            -value
+        } else {
+            value
+        };
         engine.dstack.push_int(abs_value);
     }
 

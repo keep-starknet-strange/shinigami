@@ -123,7 +123,7 @@ fn test_op_abs_positive() {
     let _ = engine.step(); // Execute OP_2
     let res = engine.step(); // Execute OP_ABS
     assert!(res, "Execution of OP_ABS failed for positive number");
-    
+
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 3");
     let expected_stack = array!["", int_to_bytes(2), int_to_bytes(1)];
@@ -141,7 +141,7 @@ fn test_op_abs_negative() {
     let _ = engine.step(); // Execute OP_NEGATE
     let res = engine.step(); // Execute OP_ABS
     assert!(res, "Execution of OP_ABS failed for negative number");
-    
+
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 3");
     let expected_stack = array!["", int_to_bytes(-2), int_to_bytes(1)];
