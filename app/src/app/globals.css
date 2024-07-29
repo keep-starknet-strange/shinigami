@@ -1,0 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #000;
+  color: #0f0;
+  font-family: "Press Start 2P", cursive;
+}
+
+.retro-container {
+  border: 4px solid #0f0;
+  box-shadow:
+    0 0 10px #0f0,
+    inset 0 0 10px #0f0;
+}
+
+.retro-button {
+  background-color: #000;
+  border: 2px solid #0f0;
+  color: #0f0;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.retro-button:hover {
+  background-color: #0f0;
+  color: #000;
+  box-shadow: 0 0 10px #0f0;
+}
+
+.retro-input {
+  background-color: #000;
+  border: 2px solid #0f0;
+  color: #0f0;
+  padding: 10px;
+}

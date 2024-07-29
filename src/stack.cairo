@@ -1,5 +1,5 @@
-use core::nullable::NullableTrait;
 use core::dict::Felt252DictEntryTrait;
+use shinigami::utils;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -19,8 +19,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn push_int(ref self: ScriptStack, value: i64) {
-        let mut bytes = "";
-        bytes.append_word(value.into(), 8);
+        let mut bytes = utils::int_to_bytes(value);
         self.push_byte_array(bytes);
     }
 
@@ -38,25 +37,65 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn pop_int(ref self: ScriptStack) -> i64 {
         let bytes = self.pop_byte_array();
         // TODO: Error handling & MakeScriptNum
-        let bytes_len = bytes.len();
-        if bytes_len == 0 {
-            return 0;
-        }
-        let mut value: i64 = 0;
+        return utils::bytes_to_int(bytes);
+    }
+
+    fn pop_bool(ref self: ScriptStack) -> bool {
+        let bytes = self.pop_byte_array();
+
         let mut i = 0;
-        if bytes_len < 8 {
-            while i < bytes_len {
-                value = value * 256 + bytes.at(i).unwrap().into();
+        let mut ret_bool = false;
+        while i < bytes
+            .len() {
+                if bytes.at(i).unwrap() != 0 {
+                    // Can be negative zero
+                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
+                        ret_bool = false;
+                        break;
+                    }
+                    ret_bool = true;
+                    break;
+                }
                 i += 1;
             };
-            return value;
-        } else {
-            while i < 8 {
-                value = value * 256 + bytes.at(bytes_len - 8 + i).unwrap().into();
-                i += 1;
-            };
-            return value;
+        return ret_bool;
+    }
+
+    fn peek_byte_array(ref self: ScriptStack, idx: usize) -> ByteArray {
+        if idx >= self.len {
+            // TODO
+            panic!("peek_byte_array: stack underflow");
         }
+        let (entry, bytes) = self.data.entry(idx.into());
+        let bytes = bytes.deref();
+        self.data = entry.finalize(NullableTrait::new(bytes.clone()));
+        bytes
+    }
+
+    fn peek_int(ref self: ScriptStack, idx: usize) -> i64 {
+        let bytes = self.peek_byte_array(idx);
+        return utils::bytes_to_int(bytes);
+    }
+
+    fn peek_bool(ref self: ScriptStack, idx: usize) -> bool {
+        let bytes = self.peek_byte_array(idx);
+
+        let mut i = 0;
+        let mut ret_bool = false;
+        while i < bytes
+            .len() {
+                if bytes.at(i).unwrap() != 0 {
+                    // Can be negative zero
+                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
+                        ret_bool = false;
+                        break;
+                    }
+                    ret_bool = true;
+                    break;
+                }
+                i += 1;
+            };
+        return ret_bool;
     }
 
     fn len(ref self: ScriptStack) -> usize {
