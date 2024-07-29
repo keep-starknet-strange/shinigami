@@ -691,3 +691,21 @@ fn test_op_lessthan_equal() {
     let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
+#[test]
+fn test_op_1negate() {
+    let program = "OP_1NEGATE";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    // let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+    let dstack = engine.get_dstack();
+
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x81"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
