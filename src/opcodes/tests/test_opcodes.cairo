@@ -363,6 +363,42 @@ fn test_op_depth_empty_stack() {
 }
 
 #[test]
+fn test_op_size_zero_item() {
+    let program = "OP_0 OP_SIZE";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 2");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for zero item");
+}
+
+#[test]
+fn test_op_size_one_item() {
+    let program = "OP_1 OP_SIZE";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 2");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for one item");
+}
+
+#[test]
 fn test_op_not() {
     let program = "OP_1 OP_NOT";
     let mut compiler = CompilerTraitImpl::new();
