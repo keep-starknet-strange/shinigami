@@ -53,6 +53,38 @@ fn test_op_n_all() {
 }
 
 #[test]
+fn test_op_nop() {
+    let program = "OP_NOP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+}
+
+#[test]
+fn test_op_nop_with_add() {
+    let program = "OP_1 OP_1 OP_ADD OP_NOP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let prev_dstack = engine.get_dstack();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), prev_dstack.len(), "Stack length have changed");
+
+    assert_eq!(dstack, prev_dstack, "Stack have changed");
+}
+
+#[test]
 fn test_op_1sub() {
     let program = "OP_1 OP_1SUB";
     let mut compiler = CompilerTraitImpl::new();

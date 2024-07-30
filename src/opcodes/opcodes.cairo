@@ -18,6 +18,7 @@ pub mod Opcode {
     pub const OP_14: u8 = 94;
     pub const OP_15: u8 = 95;
     pub const OP_16: u8 = 96;
+    pub const OP_NOP: u8 = 97;
     pub const OP_IF: u8 = 99;
     pub const OP_NOTIF: u8 = 100;
     pub const OP_ELSE: u8 = 103;
@@ -139,7 +140,7 @@ pub mod Opcode {
             94 => opcode_n(14, ref engine),
             95 => opcode_n(15, ref engine),
             96 => opcode_n(16, ref engine),
-            97 => not_implemented(ref engine),
+            97 => opcode_nop(),
             98 => not_implemented(ref engine),
             99 => opcode_if(ref engine),
             100 => opcode_notif(ref engine),
@@ -277,6 +278,9 @@ pub mod Opcode {
         }
 
         engine.cond_stack.pop();
+    }
+
+    fn opcode_nop() { // NOP do nothing
     }
 
     fn opcode_add(ref engine: Engine) {

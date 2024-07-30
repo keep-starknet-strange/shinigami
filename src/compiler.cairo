@@ -37,6 +37,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_14', Opcode::OP_14);
         opcodes.insert('OP_15', Opcode::OP_15);
         opcodes.insert('OP_16', Opcode::OP_16);
+        opcodes.insert('OP_NOP', Opcode::OP_NOP);
         opcodes.insert('OP_IF', Opcode::OP_IF);
         opcodes.insert('OP_NOTIF', Opcode::OP_NOTIF);
         opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
