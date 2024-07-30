@@ -53,6 +53,38 @@ fn test_op_n_all() {
 }
 
 #[test]
+fn test_op_nop() {
+    let program = "OP_NOP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+}
+
+#[test]
+fn test_op_nop_with_add() {
+    let program = "OP_1 OP_1 OP_ADD OP_NOP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let prev_dstack = engine.get_dstack();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), prev_dstack.len(), "Stack length have changed");
+
+    assert_eq!(dstack, prev_dstack, "Stack have changed");
+}
+
+#[test]
 fn test_op_1sub() {
     let program = "OP_1 OP_1SUB";
     let mut compiler = CompilerTraitImpl::new();
@@ -575,6 +607,44 @@ fn test_op_min_same_value() {
 }
 
 #[test]
+fn test_bool_and_one() {
+    let program = "OP_1 OP_3 OP_BOOLAND";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_BOOLAND failed for 1 and 3");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 1 and 3");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 1 and 3");
+}
+
+#[test]
+fn test_bool_and_zero() {
+    let program = "OP_0 OP_4 OP_BOOLAND";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_BOOLAND failed for 0 and 4");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 0 and 4");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 0 and 4");
+}
+
+#[test]
 fn test_op_less_than_or_equal_true_for_less_than() {
     let program = "OP_2 OP_3 OP_LESSTHANOREQUAL";
     let mut compiler = CompilerTraitImpl::new();
@@ -726,5 +796,20 @@ fn test_equal_panic() {
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
     let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+fn test_op_1negate() {
+    let program = "OP_1NEGATE";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+    let dstack = engine.get_dstack();
+
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![int_to_bytes(-1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
