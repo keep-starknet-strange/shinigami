@@ -19,6 +19,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         let mut opcodes = Default::default();
         // Add the opcodes to the dict
         opcodes.insert('OP_0', Opcode::OP_0);
+        opcodes.insert('OP_1NEGATE', Opcode::OP_1NEGATE);
         opcodes.insert('OP_1', Opcode::OP_1);
         opcodes.insert('OP_TRUE', Opcode::OP_TRUE);
         opcodes.insert('OP_2', Opcode::OP_2);
