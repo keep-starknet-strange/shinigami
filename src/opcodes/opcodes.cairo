@@ -37,6 +37,7 @@ pub mod Opcode {
     pub const OP_LESSTHAN: u8 = 159;
     pub const OP_GREATERTHAN: u8 = 160;
     pub const OP_LESSTHANOREQUAL: u8 = 161;
+    pub const OP_GREATERTHANOREQUAL: u8 = 162;
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
@@ -208,7 +209,7 @@ pub mod Opcode {
             159 => opcode_lessthan(ref engine),
             160 => opcode_greater_than(ref engine),
             161 => opcode_less_than_or_equal(ref engine),
-            162 => not_implemented(ref engine),
+            162 => opcode_greater_than_or_equal(ref engine),
             163 => opcode_min(ref engine),
             164 => opcode_max(ref engine),
             165 => opcode_within(ref engine),
@@ -400,6 +401,17 @@ pub mod Opcode {
         } else {
             0
         });
+    }
+
+    fn opcode_greater_than_or_equal(ref engine: Engine) {
+        let v0 = engine.dstack.pop_int();
+        let v1 = engine.dstack.pop_int();
+
+        if v1 >= v0 {
+            engine.dstack.push_int(1);
+        } else {
+            engine.dstack.push_int(0);
+        }
     }
 
     fn opcode_fromaltstack(ref engine: Engine) {
