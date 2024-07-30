@@ -391,8 +391,8 @@ pub mod Opcode {
     }
 
     fn opcode_equal(ref engine: Engine) {
-        let a = engine.dstack.pop_int();
-        let b = engine.dstack.pop_int();
+        let a = engine.dstack.pop_byte_array();
+        let b = engine.dstack.pop_byte_array();
         engine.dstack.push_int(if a == b {
             1
         } else {
