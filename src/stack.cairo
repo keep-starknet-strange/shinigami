@@ -1,3 +1,4 @@
+use core::option::OptionTrait;
 use core::dict::Felt252DictEntryTrait;
 use shinigami::utils;
 
@@ -137,5 +138,19 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         };
 
         return result.span();
+    }
+
+    fn dup_n(ref self: ScriptStack, n: u32) {
+        if (n < 1) {
+            println!("attempt to dup {}", n);
+            // TODO: Better Error Handling
+            panic!("error invalid stack operation");
+        }
+        let mut i = n;
+        while i > 0 {
+            i -= 1;
+            let bytarr = self.peek_byte_array(self.len() - n);
+            self.push_byte_array(bytarr);
+        }
     }
 }

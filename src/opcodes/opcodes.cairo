@@ -35,6 +35,9 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+    pub const OP_DUP: u8 = 118;
+    pub const OP_2DUP: u8 = 110;
+    pub const OP_3DUP: u8 = 111;
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
@@ -151,15 +154,15 @@ pub mod Opcode {
             107 => not_implemented(ref engine),
             108 => opcode_fromaltstack(ref engine),
             109 => not_implemented(ref engine),
-            110 => not_implemented(ref engine),
-            111 => not_implemented(ref engine),
+            110 => opcode_2dup(ref engine),
+            111 => opcode_3dup(ref engine),
             112 => not_implemented(ref engine),
             113 => not_implemented(ref engine),
             114 => not_implemented(ref engine),
             115 => not_implemented(ref engine),
             116 => opcode_depth(ref engine),
             117 => not_implemented(ref engine),
-            118 => not_implemented(ref engine),
+            118 => opcode_dup(ref engine),
             119 => not_implemented(ref engine),
             120 => not_implemented(ref engine),
             121 => not_implemented(ref engine),
@@ -387,5 +390,17 @@ pub mod Opcode {
         //TODO: Error handling
         let a = engine.astack.pop_byte_array();
         engine.dstack.push_byte_array(a);
+    }
+
+    fn opcode_dup(ref engine: Engine) {
+        engine.dstack.dup_n(1);
+    }
+
+    fn opcode_2dup(ref engine: Engine) {
+        engine.dstack.dup_n(2);
+    }
+
+    fn opcode_3dup(ref engine: Engine) {
+        engine.dstack.dup_n(3);
     }
 }

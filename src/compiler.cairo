@@ -54,6 +54,9 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
+        opcodes.insert('OP_DUP', Opcode::OP_DUP);
+        opcodes.insert('OP_2DUP', Opcode::OP_2DUP);
+        opcodes.insert('OP_3DUP', Opcode::OP_3DUP);
 
         Compiler { opcodes }
     }

@@ -691,3 +691,58 @@ fn test_op_lessthan_equal() {
     let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
+#[test]
+fn test_op_dup() {
+    let program = "OP_1 OP_2 OP_DUP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+    // Expected stack => 1,2,2, But due to get_dstack() returns the reversed version bcoz of stack_to_span LIFO algo
+    let expected_stack = array!["\x02", "\x02", "\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_2dup() {
+    let program = "OP_1 OP_2 OP_2DUP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 4, "Stack length is not 4");
+    // Expected stack => 1, 2, 1, 2, But due to get_dstack() returns the reversed version bcoz of stack_to_span LIFO algo
+    let expected_stack = array!["\x02", "\x01", "\x02", "\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_3dup() {
+    let program = "OP_1 OP_2 OP_3 OP_3DUP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    engine.step();
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 6, "Stack length is not 6");
+    // Expected stack => 1, 2, 3, 1, 2, 3, But due to get_dstack() returns the reversed version bcoz of stack_to_span LIFO algo
+    let expected_stack = array!["\x03", "\x02", "\x01", "\x03", "\x02", "\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
