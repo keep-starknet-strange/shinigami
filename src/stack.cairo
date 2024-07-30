@@ -1,5 +1,5 @@
 use core::dict::Felt252DictEntryTrait;
-use shinigami::utils;
+use shinigami::scriptnum::ScriptNum;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -19,7 +19,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn push_int(ref self: ScriptStack, value: i64) {
-        let mut bytes = utils::int_to_bytes(value);
+        let bytes = ScriptNum::wrap(value);
         self.push_byte_array(bytes);
     }
 
@@ -35,9 +35,9 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn pop_int(ref self: ScriptStack) -> i64 {
+        //TODO Error Handling
         let bytes = self.pop_byte_array();
-        // TODO: Error handling & MakeScriptNum
-        return utils::bytes_to_int(bytes);
+        ScriptNum::unwrap(bytes)
     }
 
     fn pop_bool(ref self: ScriptStack) -> bool {
@@ -74,7 +74,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn peek_int(ref self: ScriptStack, idx: usize) -> i64 {
         let bytes = self.peek_byte_array(idx);
-        return utils::bytes_to_int(bytes);
+        ScriptNum::unwrap(bytes)
     }
 
     fn peek_bool(ref self: ScriptStack, idx: usize) -> bool {
