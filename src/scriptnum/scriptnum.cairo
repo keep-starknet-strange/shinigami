@@ -5,6 +5,10 @@ pub mod ScriptNum {
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
+        if input == 0 {
+            return "";
+        }
+
         let mut result: ByteArray = Default::default();
         let is_negative = {
             if input < 0 {

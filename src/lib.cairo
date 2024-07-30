@@ -1,6 +1,7 @@
 pub mod compiler;
 pub mod engine;
 pub mod stack;
+pub mod cond_stack;
 pub mod opcodes {
     pub mod opcodes;
     mod tests {

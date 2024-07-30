@@ -1,5 +1,20 @@
 use shinigami::compiler::CompilerTraitImpl;
 use shinigami::engine::EngineTraitImpl;
+use shinigami::scriptnum::ScriptNum;
+
+fn test_op_n(value: u8) {
+    let program = format!("OP_{}", value);
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array![ScriptNum::wrap(value.into())];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
 
 #[test]
 fn test_op_0() {
@@ -18,8 +33,28 @@ fn test_op_0() {
 }
 
 #[test]
-fn test_op_1() {
-    let program = "OP_1";
+fn test_op_n_all() {
+    test_op_n(1);
+    test_op_n(2);
+    test_op_n(3);
+    test_op_n(4);
+    test_op_n(5);
+    test_op_n(6);
+    test_op_n(7);
+    test_op_n(8);
+    test_op_n(9);
+    test_op_n(10);
+    test_op_n(11);
+    test_op_n(12);
+    test_op_n(13);
+    test_op_n(14);
+    test_op_n(15);
+    test_op_n(16);
+}
+
+#[test]
+fn test_op_nop() {
+    let program = "OP_NOP";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
@@ -27,9 +62,86 @@ fn test_op_1() {
     assert!(res, "Execution of step failed");
 
     let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+}
+
+#[test]
+fn test_op_nop_with_add() {
+    let program = "OP_1 OP_1 OP_ADD OP_NOP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let prev_dstack = engine.get_dstack();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), prev_dstack.len(), "Stack length have changed");
+
+    assert_eq!(dstack, prev_dstack, "Stack have changed");
+}
+
+#[test]
+fn test_op_1sub() {
+    let program = "OP_1 OP_1SUB";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_negate_1() {
+    let program = "OP_1 OP_NEGATE";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x01"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array![ScriptNum::wrap(-1)];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_negate_0() {
+    let program = "OP_0 OP_NEGATE";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_negate_negative() {
+    let program = "OP_1 OP_2 OP_SUB OP_NEGATE";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array![ScriptNum::wrap(1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -47,7 +159,110 @@ fn test_op_add() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x02"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array!["\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_sub() {
+    let program = "OP_1 OP_1 OP_SUB";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+
+    let program = "OP_2 OP_1 OP_SUB";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+
+    let program = "OP_1 OP_2 OP_SUB";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack: Array<ByteArray> = array![ScriptNum::wrap(-1)];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_greater_than_true() {
+    let program = "OP_1 OP_0 OP_GREATERTHAN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_greater_than_false() {
+    let program = "OP_0 OP_1 OP_GREATERTHAN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_greater_than_equal_false() {
+    let program = "OP_1 OP_1 OP_GREATERTHAN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack: Array<ByteArray> = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -65,7 +280,101 @@ fn test_op_max() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x01"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+fn test_op_if_false() {
+    let program = "OP_0 OP_IF OP_1 OP_ENDIF";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+
+    let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_if_true() {
+    let program = "OP_1 OP_IF OP_1 OP_ENDIF";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_notif_false() {
+    let program = "OP_0 OP_NOTIF OP_1 OP_ENDIF";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_within_true() {
+    let program = "OP_1 OP_0 OP_3 OP_WITHIN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_within_false() {
+    let program = "OP_2 OP_0 OP_1 OP_WITHIN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -82,23 +391,24 @@ fn test_op_depth_empty_stack() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0"];
+    let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for empty stack");
 }
 
 #[test]
-fn test_op_2() {
-    let program = "OP_2";
+fn test_op_not() {
+    let program = "OP_1 OP_NOT";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
     let res = engine.step();
-    assert!(res, "Execution of step failed");
+    assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x02"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -116,7 +426,7 @@ fn test_op_depth_one_item() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 2, "Stack length is not 2");
 
-    let expected_stack = array!["\x01", "\x01"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array!["\x01", "\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for one item");
 }
 
@@ -132,14 +442,12 @@ fn test_op_depth_multiple_items() {
     let _ = engine.step();
     let _ = engine.step();
     let res = engine.step();
-    assert!(res, "Execution of step failed");
+    assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 3");
 
-    let expected_stack = array![
-        "\x02", "\x01", "\x02"
-    ]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array!["\x02", "\x01", "\x02"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for multiple items");
 }
 
@@ -156,7 +464,47 @@ fn test_op_true() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x01"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_notif_true() {
+    let program = "OP_1 OP_NOTIF OP_1 OP_ENDIF";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+
+    let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_else_false() {
+    let program = "OP_0 OP_IF OP_0 OP_ELSE OP_1 OP_ENDIF";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -175,230 +523,259 @@ fn test_op_1add() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x02"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array!["\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+fn test_op_min_min_first() {
+    let program = "OP_1 OP_2 OP_MIN";
+
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
 #[test]
-fn test_op_3() {
-    let program = "OP_3";
+fn test_op_else_true() {
+    let program = "OP_1 OP_IF OP_0 OP_ELSE OP_1 OP_ENDIF";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+// TODO: No end_if, ...
+// TODO: Nested if statements tests
+
+#[test]
+fn test_op_min_min_second() {
+    let program = "OP_2 OP_1 OP_MIN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_min_same_value() {
+    let program = "OP_1 OP_1 OP_MIN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_bool_and_one() {
+    let program = "OP_1 OP_3 OP_BOOLAND";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_BOOLAND failed for 1 and 3");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 1 and 3");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 1 and 3");
+}
+
+#[test]
+fn test_bool_and_zero() {
+    let program = "OP_0 OP_4 OP_BOOLAND";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_BOOLAND failed for 0 and 4");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 0 and 4");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 0 and 4");
+}
+
+#[test]
+fn test_op_less_than_or_equal_true_for_less_than() {
+    let program = "OP_2 OP_3 OP_LESSTHANOREQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+
+    let res = engine.step();
+    assert!(res, "Execution of OP_LESSTHANOREQUAL failed for 2 <= 3");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 2 <= 3");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 2 <= 3");
+}
+
+#[test]
+fn test_op_less_than_or_equal_true_for_equal() {
+    let program = "OP_2 OP_2 OP_LESSTHANOREQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+
+    let res = engine.step();
+    assert!(res, "Execution of OP_LESSTHANOREQUAL failed for 2 <= 2");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 2 <= 2");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 2 <= 2");
+}
+
+#[test]
+fn test_op_less_than_or_equal_false_for_greater_than() {
+    let program = "OP_3 OP_2 OP_LESSTHANOREQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+
+    let res = engine.step();
+    assert!(res, "Execution of OP_LESSTHANOREQUAL failed for 3 <= 2");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 3 <= 2");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 3 <= 2");
+}
+
+
+#[test]
+fn test_op_lessthan() {
+    let program = "OP_1 OP_2 OP_LESSTHAN";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
     let res = engine.step();
     assert!(res, "Execution of step failed");
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x03"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
 #[test]
-fn test_op_4() {
-    let program = "OP_4";
+fn test_op_lessthan_reverse() {
+    let program = "OP_2 OP_1 OP_LESSTHAN";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
     let res = engine.step();
     assert!(res, "Execution of step failed");
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x04"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
 #[test]
-fn test_op_5() {
-    let program = "OP_5";
+fn test_op_lessthan_equal() {
+    let program = "OP_1 OP_1 OP_LESSTHAN";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
     let res = engine.step();
     assert!(res, "Execution of step failed");
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x05"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
 #[test]
-fn test_op_6() {
-    let program = "OP_6";
+fn test_op_1negate() {
+    let program = "OP_1NEGATE";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
     let res = engine.step();
-    assert!(res, "Execution of step failed");
-
+    assert!(res, "Execution of run failed");
     let dstack = engine.get_dstack();
+
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\x06"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_7() {
-    let program = "OP_7";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x07"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_8() {
-    let program = "OP_8";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x08"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_9() {
-    let program = "OP_9";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x09"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_10() {
-    let program = "OP_10";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x0a"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_11() {
-    let program = "OP_11";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x0b"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_12() {
-    let program = "OP_12";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x0c"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_13() {
-    let program = "OP_13";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x0d"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_14() {
-    let program = "OP_14";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x0e"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_15() {
-    let program = "OP_15";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x0f"]; // Little endian 'sign-magnitude' representation
-    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
-}
-
-#[test]
-fn test_op_16() {
-    let program = "OP_16";
-    let mut compiler = CompilerTraitImpl::new();
-    let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
-    let res = engine.step();
-    assert!(res, "Execution of step failed");
-
-    let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["\x10"]; // Little endian 'sign-magnitude' representation
+    let expected_stack = array![ScriptNum::wrap(-1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
