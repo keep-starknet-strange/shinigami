@@ -707,12 +707,47 @@ fn test_op_less_than_or_equal_false_for_greater_than() {
 }
 
 #[test]
+fn test_op_numnotequal_true() {
+    let program = "OP_2 OP_3 OP_NUMNOTEQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_NUMNOTEQUAL failed for 2 != 3");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 2 != 3");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 1 != 2");
+}
+
+#[test]
+fn test_op_numnotequal_false() {
+    let program = "OP_3 OP_3 OP_NUMNOTEQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_NUMNOTEQUAL failed for 3 != 3");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 3 != 3");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 3 != 3");
+}
+
 fn test_op_greater_than_or_equal_true_for_greater_than() {
     let program = "OP_3 OP_2 OP_GREATERTHANOREQUAL";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-
     engine.step();
     engine.step();
 
