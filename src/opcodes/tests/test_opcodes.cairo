@@ -1,6 +1,6 @@
 use shinigami::compiler::CompilerTraitImpl;
 use shinigami::engine::EngineTraitImpl;
-use shinigami::utils::int_to_bytes;
+use shinigami::scriptnum::ScriptNum;
 
 fn test_op_n(value: u8) {
     let program = format!("OP_{}", value);
@@ -12,7 +12,7 @@ fn test_op_n(value: u8) {
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
-    let expected_stack = array![int_to_bytes(value.into())];
+    let expected_stack = array![ScriptNum::wrap(value.into())];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -112,7 +112,7 @@ fn test_op_negate_1() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array![int_to_bytes(-1)];
+    let expected_stack = array![ScriptNum::wrap(-1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -141,7 +141,7 @@ fn test_op_negate_negative() {
     assert!(res, "Execution of run failed");
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
-    let expected_stack = array![int_to_bytes(1)];
+    let expected_stack = array![ScriptNum::wrap(1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -207,7 +207,7 @@ fn test_op_sub() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack: Array<ByteArray> = array![int_to_bytes(-1)];
+    let expected_stack: Array<ByteArray> = array![ScriptNum::wrap(-1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -378,6 +378,7 @@ fn test_op_within_false() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
 fn test_op_depth_empty_stack() {
     let program = "OP_DEPTH";
     let mut compiler = CompilerTraitImpl::new();
@@ -390,7 +391,7 @@ fn test_op_depth_empty_stack() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array!["\0"];
+    let expected_stack = array![""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for empty stack");
 }
 
@@ -451,7 +452,7 @@ fn test_op_depth_multiple_items() {
 }
 
 #[test]
-fn test_op_TRUE() {
+fn test_op_true() {
     let program = "OP_TRUE";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
@@ -507,6 +508,7 @@ fn test_op_else_false() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
 fn test_op_1add() {
     let program = "OP_1 OP_1ADD";
     let mut compiler = CompilerTraitImpl::new();
@@ -774,7 +776,6 @@ fn test_op_1negate() {
 
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
-    let expected_stack = array![int_to_bytes(-1)];
+    let expected_stack = array![ScriptNum::wrap(-1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
-
