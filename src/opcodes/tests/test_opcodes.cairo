@@ -698,7 +698,6 @@ fn test_op_1negate() {
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-    // let _ = engine.step();
     let res = engine.step();
     assert!(res, "Execution of run failed");
     let dstack = engine.get_dstack();

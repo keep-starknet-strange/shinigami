@@ -1,5 +1,6 @@
 pub mod Opcode {
     pub const OP_0: u8 = 0;
+    pub const OP_1NEGATE: u8 = 79;
     pub const OP_1: u8 = 81;
     pub const OP_TRUE: u8 = 81;
     pub const OP_2: u8 = 82;
@@ -35,7 +36,6 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
-    pub const OP_1NEGATE: u8 = 79;
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
