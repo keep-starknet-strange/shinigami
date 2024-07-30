@@ -607,6 +607,44 @@ fn test_op_min_same_value() {
 }
 
 #[test]
+fn test_bool_and_one() {
+    let program = "OP_1 OP_3 OP_BOOLAND";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_BOOLAND failed for 1 and 3");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 1 and 3");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 1 and 3");
+}
+
+#[test]
+fn test_bool_and_zero() {
+    let program = "OP_0 OP_4 OP_BOOLAND";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_BOOLAND failed for 0 and 4");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1 for 0 and 4");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 0 and 4");
+}
+
+#[test]
 fn test_op_less_than_or_equal_true_for_less_than() {
     let program = "OP_2 OP_3 OP_LESSTHANOREQUAL";
     let mut compiler = CompilerTraitImpl::new();

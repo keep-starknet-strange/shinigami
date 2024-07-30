@@ -31,6 +31,7 @@ pub mod Opcode {
     pub const OP_NOT: u8 = 145;
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
+    pub const OP_BOOLAND: u8 = 154;
     pub const OP_LESSTHAN: u8 = 159;
     pub const OP_GREATERTHAN: u8 = 160;
     pub const OP_LESSTHANOREQUAL: u8 = 161;
@@ -197,7 +198,7 @@ pub mod Opcode {
             151 => not_implemented(ref engine),
             152 => not_implemented(ref engine),
             153 => not_implemented(ref engine),
-            154 => not_implemented(ref engine),
+            154 => opcode_bool_and(ref engine),
             155 => not_implemented(ref engine),
             156 => not_implemented(ref engine),
             157 => not_implemented(ref engine),
@@ -373,6 +374,16 @@ pub mod Opcode {
         let min = engine.dstack.pop_int();
         let value = engine.dstack.pop_int();
         engine.dstack.push_int(if value >= min && value < max {
+            1
+        } else {
+            0
+        });
+    }
+
+    fn opcode_bool_and(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if a != 0 && b != 0 {
             1
         } else {
             0
