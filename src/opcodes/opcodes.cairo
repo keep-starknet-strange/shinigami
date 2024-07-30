@@ -415,7 +415,7 @@ pub mod Opcode {
         } else {
             0
         });
-
+    }
     fn opcode_1negate(ref engine: Engine) {
         engine.dstack.push_int(-1);
     }
