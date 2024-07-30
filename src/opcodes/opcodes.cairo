@@ -22,7 +22,9 @@ pub mod Opcode {
     pub const OP_ELSE: u8 = 103;
     pub const OP_ENDIF: u8 = 104;
     pub const OP_FROMALTSTACK: u8 = 108;
+    pub const OP_2DROP: u8 = 109;
     pub const OP_DEPTH: u8 = 116;
+    pub const OP_DROP: u8 = 117;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
     pub const OP_NEGATE: u8 = 143;
@@ -150,7 +152,7 @@ pub mod Opcode {
             106 => not_implemented(ref engine),
             107 => not_implemented(ref engine),
             108 => opcode_fromaltstack(ref engine),
-            109 => not_implemented(ref engine),
+            109 => opcode_2drop(ref engine),
             110 => not_implemented(ref engine),
             111 => not_implemented(ref engine),
             112 => not_implemented(ref engine),
@@ -158,7 +160,7 @@ pub mod Opcode {
             114 => not_implemented(ref engine),
             115 => not_implemented(ref engine),
             116 => opcode_depth(ref engine),
-            117 => not_implemented(ref engine),
+            117 => opcode_drop(ref engine),
             118 => not_implemented(ref engine),
             119 => not_implemented(ref engine),
             120 => not_implemented(ref engine),
@@ -387,5 +389,20 @@ pub mod Opcode {
         //TODO: Error handling
         let a = engine.astack.pop_byte_array();
         engine.dstack.push_byte_array(a);
+    }
+
+    fn opcode_2drop(ref engine: Engine) {
+        if engine.dstack.len() < 2 {
+            panic!("Stack underflow");
+        }
+        engine.dstack.pop_byte_array();
+        engine.dstack.pop_byte_array();
+    }
+
+    fn opcode_drop(ref engine: Engine) {
+        if engine.dstack.len() == 0 {
+            panic!("Stack underflow");
+        }
+        engine.dstack.pop_byte_array();
     }
 }
