@@ -115,37 +115,51 @@ fn test_op_negate_negative() {
 
 #[test]
 fn test_op_abs_positive() {
-    let program = "OP_1 OP_2 OP_ABS";
+    let program = "OP_2 OP_ABS";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-    let _ = engine.step(); // Execute OP_1
-    let _ = engine.step(); // Execute OP_2
-    let res = engine.step(); // Execute OP_ABS
+    let _ = engine.step();
+    let res = engine.step();
     assert!(res, "Execution of OP_ABS failed for positive number");
 
     let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 3, "Stack length is not 3");
-    let expected_stack = array!["", int_to_bytes(2), int_to_bytes(1)];
-    assert_eq!(dstack, expected_stack.span(), "Result is not ['', 2, 1]");
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array!["\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Result is not [2]");
 }
 
 #[test]
 fn test_op_abs_negative() {
-    let program = "OP_1 OP_2 OP_NEGATE OP_ABS";
+    let program = "OP_0 OP_1SUB OP_ABS";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-    let _ = engine.step(); // Execute OP_1
-    let _ = engine.step(); // Execute OP_2
-    let _ = engine.step(); // Execute OP_NEGATE
-    let res = engine.step(); // Execute OP_ABS
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
     assert!(res, "Execution of OP_ABS failed for negative number");
 
     let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 3, "Stack length is not 3");
-    let expected_stack = array!["", int_to_bytes(-2), int_to_bytes(1)];
-    assert_eq!(dstack, expected_stack.span(), "Result is not ['', -2, 1]");
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array![int_to_bytes(1)];
+    assert_eq!(dstack, expected_stack.span(), "Result is not [2]");
+}
+
+#[test]
+fn test_op_abs_zero() {
+    let program = "OP_0 OP_ABS";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_ABS failed for zero");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Result is not [0]");
 }
 
 #[test]
