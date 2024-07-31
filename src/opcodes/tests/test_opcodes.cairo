@@ -859,6 +859,23 @@ fn test_op_lessthan_equal() {
 }
 
 #[test]
+fn test_op_equal() {
+    let program = "OP_1 OP_1 OP_EQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
 fn test_op_dup() {
     let program = "OP_1 OP_2 OP_DUP";
     let mut compiler = CompilerTraitImpl::new();
@@ -894,6 +911,24 @@ fn test_op_drop() {
 }
 
 #[test]
+#[should_panic]
+fn test_equal_panic() {
+    let program = "OP_0 OP_1 OP_EQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array!["\x01"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
 fn test_op_2dup() {
     let program = "OP_1 OP_2 OP_2DUP";
     let mut compiler = CompilerTraitImpl::new();
