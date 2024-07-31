@@ -450,6 +450,7 @@ fn test_op_2swap_mid() {
 }
 
 #[test]
+#[should_panic]
 fn test_op_2swap_underflow() {
     let program = "OP_1 OP_2 OP_3 OP_2SWAP";
     let mut compiler = CompilerTraitImpl::new();
@@ -458,9 +459,9 @@ fn test_op_2swap_underflow() {
 
     let _ = engine.step(); //push 1
     let _ = engine.step(); //push 2
-    let res = engine.step(); //push 3
+    let _ = engine.step(); //push 3
+    let res = engine.step(); //OP_2SWAP
 
-    assert!(res, "pop_byte_array: stack underflow");
 }
 
 #[test]
