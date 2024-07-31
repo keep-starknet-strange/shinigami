@@ -459,9 +459,10 @@ fn test_op_swap() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 1");
 
-    let expected_stack = array!["\x02", "\x03", "\x01"];
+    let expected_stack = array!["\x01", "\x03", "\x02",];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
 
 #[test]
 fn test_op_swap_mid() {
@@ -480,7 +481,7 @@ fn test_op_swap_mid() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 5, "Stack length is not 1");
 
-    let expected_stack = array!["\x05", "\x04", "\x02", "\x03", "\x01"];
+    let expected_stack = array!["\x01", "\x03", "\x02", "\x04", "\x05"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -496,7 +497,7 @@ fn test_op_2swap() {
     let _ = engine.step(); //push 3
     let _ = engine.step(); //push 4
     let dstack = engine.get_dstack();
-    let expected_stack = array!["\x04", "\x03", "\x02", "\x01"];
+    let expected_stack = array!["\x01", "\x02", "\x03", "\x04"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 
     let res = engine.step(); //execute op_2swap
@@ -505,7 +506,7 @@ fn test_op_2swap() {
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 4, "Stack length is not 1");
 
-    let expected_stack = array!["\x02", "\x01", "\x04", "\x03"];
+    let expected_stack = array!["\x03", "\x04", "\x01", "\x02"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
@@ -527,7 +528,7 @@ fn test_op_2swap_mid() {
     assert!(res, "Execution of step failed");
     assert_eq!(dstack.len(), 6, "Stack length is not 1");
 
-    let expected_stack = array!["\x06", "\x05", "\x02", "\x01", "\x04", "\x03"];
+    let expected_stack = array!["\x03", "\x04", "\x01", "\x02", "\x05", "\x06"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
