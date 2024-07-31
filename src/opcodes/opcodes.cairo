@@ -30,6 +30,7 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
+    pub const OP_TUCK: u8 = 125;
     pub const OP_EQUAL: u8 = 135;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
@@ -178,7 +179,7 @@ pub mod Opcode {
             122 => not_implemented(ref engine),
             123 => not_implemented(ref engine),
             124 => not_implemented(ref engine),
-            125 => not_implemented(ref engine),
+            125 => opcode_tuck(ref engine),
             126 => not_implemented(ref engine),
             127 => not_implemented(ref engine),
             128 => not_implemented(ref engine),
@@ -466,6 +467,17 @@ pub mod Opcode {
 
     fn opcode_3dup(ref engine: Engine) {
         engine.dstack.dup_n(3);
+    }
+
+    fn opcode_tuck(ref engine: Engine) {
+        if engine.dstack.len() < 2 {
+            panic!("Stack underflow");
+        }
+        let top = engine.dstack.pop_byte_array();
+        let second = engine.dstack.pop_byte_array();
+        engine.dstack.push_byte_array(top.clone());
+        engine.dstack.push_byte_array(second);
+        engine.dstack.push_byte_array(top);
     }
 
     fn opcode_2drop(ref engine: Engine) {

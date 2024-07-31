@@ -925,6 +925,37 @@ fn test_op_equal() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
+fn test_op_tuck() {
+    let program = "OP_1 OP_2 OP_TUCK";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+    
+    let expected_stack = array!["\x02", "\x01", "\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+#[should_panic(expected: "Stack underflow")]
+fn test_op_tuck_underflow() {
+    let program = "OP_1 OP_TUCK";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+}
+
 fn test_op_dup() {
     let program = "OP_1 OP_2 OP_DUP";
     let mut compiler = CompilerTraitImpl::new();
