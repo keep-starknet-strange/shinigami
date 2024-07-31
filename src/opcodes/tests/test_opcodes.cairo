@@ -456,9 +456,9 @@ fn test_op_size_zero_item() {
     assert!(res, "Execution of step failed");
 
     let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 2");
+    assert_eq!(dstack.len(), 2, "Stack length is not 2");
 
-    let expected_stack = array![""];
+    let expected_stack = array!["", ""];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for zero item");
 }
 
@@ -474,9 +474,9 @@ fn test_op_size_one_item() {
     assert!(res, "Execution of step failed");
 
     let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 1, "Stack length is not 2");
+    assert_eq!(dstack.len(), 2, "Stack length is not 2");
 
-    let expected_stack = array!["\x01"];
+    let expected_stack = array!["\x01", "\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for one item");
 }
 

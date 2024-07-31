@@ -335,7 +335,7 @@ pub mod Opcode {
     }
 
     fn opcode_size(ref engine: Engine) {
-        let size = engine.dstack.pop_byte_array().len().into();
+        let size = engine.dstack.peek_byte_array(0).len().into();
         engine.dstack.push_int(size);
     }
 
