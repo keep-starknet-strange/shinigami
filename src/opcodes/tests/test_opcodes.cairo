@@ -1076,7 +1076,6 @@ fn test_op__0_not_equal() {
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
 
-    // engine.step();
     engine.step();
     let res = engine.step();
     assert!(res, "Execution of OP_ABS failed for negative number");

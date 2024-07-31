@@ -490,12 +490,11 @@ pub mod Opcode {
 
     fn opcode_0_not_equal(ref engine: Engine) {
         let a = engine.dstack.pop_int();
-        
+
         engine.dstack.push_int(if a != 0 {
             1
         } else {
             0
         })
-        
     }
 }
