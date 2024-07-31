@@ -42,6 +42,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_NOTIF', Opcode::OP_NOTIF);
         opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
         opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
+        opcodes.insert('OP_TOALTSTACK', Opcode::OP_TOALTSTACK);
         opcodes.insert('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
         opcodes.insert('OP_2DROP', Opcode::OP_2DROP);
         opcodes.insert('OP_2DUP', Opcode::OP_2DUP);
