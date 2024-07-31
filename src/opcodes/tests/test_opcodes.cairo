@@ -931,7 +931,7 @@ fn test_op_tuck() {
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-    
+
     engine.step();
     engine.step();
     let res = engine.step();
@@ -939,7 +939,7 @@ fn test_op_tuck() {
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 3, "Stack length is not 3");
-    
+
     let expected_stack = array!["\x02", "\x01", "\x02"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
