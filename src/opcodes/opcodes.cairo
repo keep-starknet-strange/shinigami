@@ -30,6 +30,7 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
+    pub const OP_TUCK: u8 = 125;
     pub const OP_EQUAL: u8 = 135;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
@@ -178,7 +179,7 @@ pub mod Opcode {
             122 => not_implemented(ref engine),
             123 => not_implemented(ref engine),
             124 => not_implemented(ref engine),
-            125 => not_implemented(ref engine),
+            125 => opcode_tuck(ref engine),
             126 => not_implemented(ref engine),
             127 => not_implemented(ref engine),
             128 => not_implemented(ref engine),
@@ -485,5 +486,10 @@ pub mod Opcode {
 
     fn opcode_1negate(ref engine: Engine) {
         engine.dstack.push_int(-1);
+    }
+
+
+    fn opcode_tuck(ref engine: Engine) {
+        engine.dstack.tuck();
     }
 }
