@@ -543,7 +543,6 @@ fn test_op_2swap_underflow() {
     let _ = engine.step(); //push 2
     let _ = engine.step(); //push 3
     let res = engine.step(); //OP_2SWAP
-
 }
 
 #[test]
