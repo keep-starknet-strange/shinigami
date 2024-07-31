@@ -135,6 +135,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "pidb",
+      "name": "Jackson Xu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25273209?v=4",
+      "profile": "https://github.com/pidb",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -200,6 +200,9 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/harsh-ps-2003"><img src="https://avatars.githubusercontent.com/u/119954739?v=4?s=100" width="100px;" alt="Harsh Pratap Singh"/><br /><sub><b>Harsh Pratap Singh</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=harsh-ps-2003" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/j1mbo64"><img src="https://avatars.githubusercontent.com/u/83956685?v=4?s=100" width="100px;" alt="j1mbo64"/><br /><sub><b>j1mbo64</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=j1mbo64" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/pidb"><img src="https://avatars.githubusercontent.com/u/25273209?v=4?s=100" width="100px;" alt="Jackson Xu"/><br /><sub><b>Jackson Xu</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=pidb" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
