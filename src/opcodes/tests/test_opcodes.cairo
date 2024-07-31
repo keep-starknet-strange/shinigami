@@ -931,14 +931,14 @@ fn test_op_toaltstack() {
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-    
+
     let _ = engine.step();
     let res = engine.step();
     assert!(res, "Execution of OP_TOALTSTACK failed");
 
     let dstack = engine.get_dstack();
     let astack = engine.get_astack();
-    
+
     assert_eq!(dstack.len(), 0, "Main stack should be empty");
     assert_eq!(astack.len(), 1, "Alt stack should have 1 element");
 
