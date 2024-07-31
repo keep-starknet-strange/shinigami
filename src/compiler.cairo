@@ -53,6 +53,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_1SUB', Opcode::OP_1SUB);
         opcodes.insert('OP_NEGATE', Opcode::OP_NEGATE);
+        opcodes.insert('OP_ABS', Opcode::OP_ABS);
         opcodes.insert('OP_NOT', Opcode::OP_NOT);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_SUB', Opcode::OP_SUB);
