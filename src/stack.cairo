@@ -142,7 +142,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn dup_n(ref self: ScriptStack, n: u32) {
         if (n < 1) {
-            println!("attempt to dup {}", n);
             // TODO: Better Error Handling
             panic!("error invalid stack operation");
         }

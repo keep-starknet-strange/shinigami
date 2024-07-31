@@ -25,8 +25,11 @@ pub mod Opcode {
     pub const OP_ENDIF: u8 = 104;
     pub const OP_FROMALTSTACK: u8 = 108;
     pub const OP_2DROP: u8 = 109;
+    pub const OP_2DUP: u8 = 110;
+    pub const OP_3DUP: u8 = 111;
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
+    pub const OP_DUP: u8 = 118;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
     pub const OP_NEGATE: u8 = 143;
@@ -42,9 +45,6 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
-    pub const OP_DUP: u8 = 118;
-    pub const OP_2DUP: u8 = 110;
-    pub const OP_3DUP: u8 = 111;
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
