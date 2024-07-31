@@ -66,6 +66,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
+        opcodes.insert('OP_0NOTEQUAL', Opcode::OP_0NOTEQUAL);
 
         Compiler { opcodes }
     }
