@@ -1071,20 +1071,19 @@ fn test_op_1negate() {
 
 #[test]
 fn test_op_ifdup() {
-    let program = "OP_0 OP_1 OP_IFDUP";
+    let program = "OP_0 OP_1 OP_2 OP_IFDUP";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
 
-    // let _ = engine.step();
-    // let _ = engine.step();
+    engine.step();
     engine.step();
     let res = engine.step();
     assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 2, "Stack length is not 2");
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
 
-    let expected_stack = array!["", "\x01"];
+    let expected_stack = array!["", "\x01", "\x02"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
