@@ -174,7 +174,7 @@ fn test_op_abs_negative() {
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
-    let expected_stack = array![int_to_bytes(1)];
+    let expected_stack = array![ScriptNum::wrap(1)];
     assert_eq!(dstack, expected_stack.span(), "Result is not [2]");
 }
 
