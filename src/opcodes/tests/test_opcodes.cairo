@@ -557,6 +557,59 @@ fn test_op_else_false() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+
+#[test]
+#[should_panic(expected: "Invalid stack operation")]
+fn test_op_verify_empty_stack() {
+    let program = "OP_VERIFY";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+
+    let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_verify_true() {
+    let program = "OP_TRUE OP_VERIFY";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+
+    let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+#[should_panic(expected: "Verify failed")]
+fn test_op_verify_false() {
+    let program = "OP_0 OP_VERIFY";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0");
+
+    let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
 #[test]
 fn test_op_1add() {
     let program = "OP_1 OP_1ADD";
