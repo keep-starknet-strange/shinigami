@@ -1,3 +1,4 @@
+use core::option::OptionTrait;
 use core::dict::Felt252DictEntryTrait;
 use shinigami::scriptnum::ScriptNum;
 
@@ -66,7 +67,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             // TODO
             panic!("peek_byte_array: stack underflow");
         }
-        let (entry, bytes) = self.data.entry(idx.into());
+        let (entry, bytes) = self.data.entry((self.len - idx - 1).into());
         let bytes = bytes.deref();
         self.data = entry.finalize(NullableTrait::new(bytes.clone()));
         bytes
@@ -127,15 +128,29 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
-        let mut i = self.len;
-        while i > 0 {
-            i -= 1;
-            let (entry, arr) = self.data.entry(i.into());
-            let arr = arr.deref();
-            result.append(arr.clone());
-            self.data = entry.finalize(NullableTrait::new(arr));
-        };
+        let mut i = 0;
+        while i < self
+            .len {
+                let (entry, arr) = self.data.entry(i.into());
+                let arr = arr.deref();
+                result.append(arr.clone());
+                self.data = entry.finalize(NullableTrait::new(arr));
+                i += 1
+            };
 
         return result.span();
+    }
+
+    fn dup_n(ref self: ScriptStack, n: u32) {
+        if (n < 1) {
+            // TODO: Better Error Handling
+            panic!("error invalid stack operation");
+        }
+        let mut i = n;
+        while i > 0 {
+            i -= 1;
+            let bytearr = self.peek_byte_array(n - 1);
+            self.push_byte_array(bytearr);
+        }
     }
 }

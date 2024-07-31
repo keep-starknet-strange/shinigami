@@ -859,6 +859,22 @@ fn test_op_lessthan_equal() {
 }
 
 #[test]
+fn test_op_dup() {
+    let program = "OP_1 OP_2 OP_DUP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+    let expected_stack = array!["\x01", "\x02", "\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
 fn test_op_drop() {
     let program = "OP_1 OP_1 OP_DROP";
     let mut compiler = CompilerTraitImpl::new();
@@ -878,6 +894,23 @@ fn test_op_drop() {
 }
 
 #[test]
+fn test_op_2dup() {
+    let program = "OP_1 OP_2 OP_2DUP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 4, "Stack length is not 4");
+
+    let expected_stack = array!["\x01", "\x02", "\x01", "\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
 fn test_op_2drop() {
     let program = "OP_1 OP_2 OP_2DROP";
     let mut compiler = CompilerTraitImpl::new();
@@ -893,6 +926,24 @@ fn test_op_2drop() {
     assert_eq!(dstack.len(), 0, "Stack length is not 0");
 
     let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_3dup() {
+    let program = "OP_1 OP_2 OP_3 OP_3DUP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    engine.step();
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 6, "Stack length is not 6");
+    let expected_stack = array!["\x01", "\x02", "\x03", "\x01", "\x02", "\x03"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
