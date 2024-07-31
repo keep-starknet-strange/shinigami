@@ -18,8 +18,34 @@
 Key features :
 
 - Bitcoin script interpretation and execution
-- Easily configurable VM ( enable different op-codes )
+- Easily configurable VM ( enable different opcodes )
 - In cairo, Bitcoin Script compiler
+
+## Usage
+
+### Running
+
+```bash
+scarb cairo-run --available-gas=200000000
+```
+
+This will run the provided Bitcoin Script in Cairo.
+
+### Building
+
+```bash
+scarb build
+```
+
+This will compile all the components.
+
+### Testing
+
+```bash
+scarb test
+```
+
+This will run the test-suite for all opcodes, integration, and testing Scripts.
 
 ## Supported Opcodes
 
@@ -57,7 +83,7 @@ pie showData
 | OP_14                  | 0x5e      |     ✅     | The number 14 is pushed onto the stack.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | OP_15                  | 0x5f      |     ✅     | The number 15 is pushed onto the stack.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | OP_16                  | 0x60      |     ✅     | The number 16 is pushed onto the stack.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| OP_NOP                 | 0x61      |           | Does nothing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| OP_NOP                 | 0x61      |     ✅     | Does nothing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | OP_VER                 | 0x62      |           | Transaction is invalid unless occurring in an unexecuted OP_IF branch                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | OP_IF                  | 0x63      |     ✅     | If the top stack value is not False, the statements are executed. The top stack value is removed.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | OP_NOTIF               | 0x64      |     ✅     | If the top stack value is False, the statements are executed. The top stack value is removed.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -142,35 +168,11 @@ pie showData
 | OP_NOP4-OP_NOP10       | 0xb3-0xb9 |           | The word is ignored. Does not mark transaction as invalid.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | OP_CHECKSIGADD         | 0xba      |           | Increments n by one and returns to the stack if the signature is valid for the public key and transaction. Only available in tapscript.                                                                                                                                                                                                                                                                                                                                                                                            |
 
-### Running
-
-```bash
-scarb cairo-run --available-gas=200000000
-```
-
-This will run the provided Bitcoin Script in Cairo.
-
-### Building
-
-```bash
-scarb build
-```
-
-This will compile all the components.
-
-### Testing
-
-```bash
-scarb test
-```
-
-This will run the test-suite for all op-codes, integration, and test Bitcoin Scripts.
-
 ## References
 
+- [Shinigami Telegram](https://t.me/ShinigamiStarknet)
+- [Shinigami OnlyDust](https://app.onlydust.com/p/shinigami)
 - [Bitcoin Script Wiki](https://en.bitcoin.it/wiki/Script)
-- [Telegram](https://t.me/ShinigamiStarknet)
-- [OnlyDust](https://app.onlydust.com/p/shinigami)
 
 ## Contributors ✨
 
