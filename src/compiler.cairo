@@ -19,6 +19,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         let mut opcodes = Default::default();
         // Add the opcodes to the dict
         opcodes.insert('OP_0', Opcode::OP_0);
+        opcodes.insert('OP_1NEGATE', Opcode::OP_1NEGATE);
         opcodes.insert('OP_1', Opcode::OP_1);
         opcodes.insert('OP_TRUE', Opcode::OP_TRUE);
         opcodes.insert('OP_2', Opcode::OP_2);
@@ -36,11 +37,14 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_14', Opcode::OP_14);
         opcodes.insert('OP_15', Opcode::OP_15);
         opcodes.insert('OP_16', Opcode::OP_16);
+        opcodes.insert('OP_NOP', Opcode::OP_NOP);
         opcodes.insert('OP_IF', Opcode::OP_IF);
         opcodes.insert('OP_NOTIF', Opcode::OP_NOTIF);
         opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
         opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
         opcodes.insert('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
+        opcodes.insert('OP_2DROP', Opcode::OP_2DROP);
+        opcodes.insert('OP_DROP', Opcode::OP_DROP);
         opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_1SUB', Opcode::OP_1SUB);
@@ -48,9 +52,12 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_NOT', Opcode::OP_NOT);
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_SUB', Opcode::OP_SUB);
+        opcodes.insert('OP_BOOLAND', Opcode::OP_BOOLAND);
+        opcodes.insert('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
         opcodes.insert('OP_LESSTHAN', Opcode::OP_LESSTHAN);
         opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
         opcodes.insert('OP_LESSTHANOREQUAL', Opcode::OP_LESSTHANOREQUAL);
+        opcodes.insert('OP_GREATERTHANOREQUAL', Opcode::OP_GREATERTHANOREQUAL);
         opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
