@@ -77,6 +77,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_VER', Opcode::OP_VER);
         opcodes.insert('OP_TUCK', Opcode::OP_TUCK);
         opcodes.insert('OP_BOOLOR', Opcode::OP_BOOLOR);
+        opcodes.insert('OP_IFDUP', Opcode::OP_IFDUP);
 
         Compiler { opcodes }
     }

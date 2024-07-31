@@ -180,7 +180,7 @@ pub mod Opcode {
             112 => not_implemented(ref engine),
             113 => not_implemented(ref engine),
             114 => opcode_2swap(ref engine),
-            115 => not_implemented(ref engine),
+            115 => opcode_ifdup(ref engine),
             116 => opcode_depth(ref engine),
             117 => opcode_drop(ref engine),
             118 => opcode_dup(ref engine),
