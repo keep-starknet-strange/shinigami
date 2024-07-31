@@ -43,6 +43,12 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
         opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
         opcodes.insert('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
+        opcodes.insert('OP_2DROP', Opcode::OP_2DROP);
+        opcodes.insert('OP_2DUP', Opcode::OP_2DUP);
+        opcodes.insert('OP_3DUP', Opcode::OP_3DUP);
+        opcodes.insert('OP_DROP', Opcode::OP_DROP);
+        opcodes.insert('OP_DUP', Opcode::OP_DUP);
+        opcodes.insert('OP_EQUAL', Opcode::OP_EQUAL);
         opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_1SUB', Opcode::OP_1SUB);
@@ -51,13 +57,14 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_SUB', Opcode::OP_SUB);
         opcodes.insert('OP_BOOLAND', Opcode::OP_BOOLAND);
+        opcodes.insert('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
         opcodes.insert('OP_LESSTHAN', Opcode::OP_LESSTHAN);
         opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
         opcodes.insert('OP_LESSTHANOREQUAL', Opcode::OP_LESSTHANOREQUAL);
+        opcodes.insert('OP_GREATERTHANOREQUAL', Opcode::OP_GREATERTHANOREQUAL);
         opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
-        opcodes.insert('OP_EQUAL', Opcode::OP_EQUAL);
 
         Compiler { opcodes }
     }

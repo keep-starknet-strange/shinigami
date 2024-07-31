@@ -24,7 +24,12 @@ pub mod Opcode {
     pub const OP_ELSE: u8 = 103;
     pub const OP_ENDIF: u8 = 104;
     pub const OP_FROMALTSTACK: u8 = 108;
+    pub const OP_2DROP: u8 = 109;
+    pub const OP_2DUP: u8 = 110;
+    pub const OP_3DUP: u8 = 111;
     pub const OP_DEPTH: u8 = 116;
+    pub const OP_DROP: u8 = 117;
+    pub const OP_DUP: u8 = 118;
     pub const OP_EQUAL: u8 = 135;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
@@ -33,9 +38,11 @@ pub mod Opcode {
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
     pub const OP_BOOLAND: u8 = 154;
+    pub const OP_NUMNOTEQUAL: u8 = 158;
     pub const OP_LESSTHAN: u8 = 159;
     pub const OP_GREATERTHAN: u8 = 160;
     pub const OP_LESSTHANOREQUAL: u8 = 161;
+    pub const OP_GREATERTHANOREQUAL: u8 = 162;
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
@@ -154,16 +161,16 @@ pub mod Opcode {
             106 => not_implemented(ref engine),
             107 => not_implemented(ref engine),
             108 => opcode_fromaltstack(ref engine),
-            109 => not_implemented(ref engine),
-            110 => not_implemented(ref engine),
-            111 => not_implemented(ref engine),
+            109 => opcode_2drop(ref engine),
+            110 => opcode_2dup(ref engine),
+            111 => opcode_3dup(ref engine),
             112 => not_implemented(ref engine),
             113 => not_implemented(ref engine),
             114 => not_implemented(ref engine),
             115 => not_implemented(ref engine),
             116 => opcode_depth(ref engine),
-            117 => not_implemented(ref engine),
-            118 => not_implemented(ref engine),
+            117 => opcode_drop(ref engine),
+            118 => opcode_dup(ref engine),
             119 => not_implemented(ref engine),
             120 => not_implemented(ref engine),
             121 => not_implemented(ref engine),
@@ -203,11 +210,11 @@ pub mod Opcode {
             155 => not_implemented(ref engine),
             156 => not_implemented(ref engine),
             157 => not_implemented(ref engine),
-            158 => not_implemented(ref engine),
+            158 => opcode_numnotequal(ref engine),
             159 => opcode_lessthan(ref engine),
             160 => opcode_greater_than(ref engine),
             161 => opcode_less_than_or_equal(ref engine),
-            162 => not_implemented(ref engine),
+            162 => opcode_greater_than_or_equal(ref engine),
             163 => opcode_min(ref engine),
             164 => opcode_max(ref engine),
             165 => opcode_within(ref engine),
@@ -381,6 +388,16 @@ pub mod Opcode {
         });
     }
 
+    fn opcode_numnotequal(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if a != b {
+            1
+        } else {
+            0
+        });
+    }
+
     fn opcode_bool_and(ref engine: Engine) {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
@@ -401,6 +418,17 @@ pub mod Opcode {
         });
     }
 
+    fn opcode_greater_than_or_equal(ref engine: Engine) {
+        let v0 = engine.dstack.pop_int();
+        let v1 = engine.dstack.pop_int();
+
+        if v1 >= v0 {
+            engine.dstack.push_int(1);
+        } else {
+            engine.dstack.push_int(0);
+        }
+    }
+
     fn opcode_fromaltstack(ref engine: Engine) {
         //TODO: Error handling
         let a = engine.astack.pop_byte_array();
@@ -416,6 +444,34 @@ pub mod Opcode {
             0
         });
     }
+
+    fn opcode_dup(ref engine: Engine) {
+        engine.dstack.dup_n(1);
+    }
+
+    fn opcode_2dup(ref engine: Engine) {
+        engine.dstack.dup_n(2);
+    }
+
+    fn opcode_3dup(ref engine: Engine) {
+        engine.dstack.dup_n(3);
+    }
+
+    fn opcode_2drop(ref engine: Engine) {
+        if engine.dstack.len() < 2 {
+            panic!("Stack underflow");
+        }
+        engine.dstack.pop_byte_array();
+        engine.dstack.pop_byte_array();
+    }
+
+    fn opcode_drop(ref engine: Engine) {
+        if engine.dstack.len() == 0 {
+            panic!("Stack underflow");
+        }
+        engine.dstack.pop_byte_array();
+    }
+
     fn opcode_1negate(ref engine: Engine) {
         engine.dstack.push_int(-1);
     }
