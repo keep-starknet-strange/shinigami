@@ -31,6 +31,7 @@ pub mod Opcode {
     pub const OP_2DUP: u8 = 110;
     pub const OP_3DUP: u8 = 111;
     pub const OP_2SWAP: u8 = 114;
+    pub const OP_IFDUP: u8 = 115;
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
@@ -58,7 +59,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
-
+    pub const OP_IFDUP: u8 = 166;
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
