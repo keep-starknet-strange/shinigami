@@ -27,10 +27,12 @@ pub mod Opcode {
     pub const OP_2DROP: u8 = 109;
     pub const OP_2DUP: u8 = 110;
     pub const OP_3DUP: u8 = 111;
+    pub const OP_2SWAP: u8 = 114;
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
     pub const OP_EQUAL: u8 = 135;
+    pub const OP_SWAP: u8 = 124;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
     pub const OP_NEGATE: u8 = 143;
@@ -167,7 +169,7 @@ pub mod Opcode {
             111 => opcode_3dup(ref engine),
             112 => not_implemented(ref engine),
             113 => not_implemented(ref engine),
-            114 => not_implemented(ref engine),
+            114 => opcode_2swap(ref engine),
             115 => not_implemented(ref engine),
             116 => opcode_depth(ref engine),
             117 => opcode_drop(ref engine),
@@ -177,7 +179,7 @@ pub mod Opcode {
             121 => not_implemented(ref engine),
             122 => not_implemented(ref engine),
             123 => not_implemented(ref engine),
-            124 => not_implemented(ref engine),
+            124 => opcode_swap(ref engine),
             125 => not_implemented(ref engine),
             126 => not_implemented(ref engine),
             127 => not_implemented(ref engine),
@@ -331,6 +333,24 @@ pub mod Opcode {
     fn opcode_depth(ref engine: Engine) {
         let depth: i64 = engine.dstack.len().into();
         engine.dstack.push_int(depth);
+    }
+
+    fn opcode_swap(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(a);
+        engine.dstack.push_int(b);
+    }
+
+    fn opcode_2swap(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        let c = engine.dstack.pop_int();
+        let d = engine.dstack.pop_int();
+        engine.dstack.push_int(b);
+        engine.dstack.push_int(a);
+        engine.dstack.push_int(d);
+        engine.dstack.push_int(c);
     }
 
     fn opcode_1add(ref engine: Engine) {
