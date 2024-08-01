@@ -67,6 +67,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
         opcodes.insert('OP_RESERVED1', Opcode::OP_RESERVED1);
+        opcodes.insert('OP_RESERVED2', Opcode::OP_RESERVED2);
 
         Compiler { opcodes }
     }

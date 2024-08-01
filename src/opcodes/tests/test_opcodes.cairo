@@ -1077,6 +1077,16 @@ fn test_op_reserved1() {
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
 
-     engine.step();
-   
+    engine.step();
+}
+
+#[test]
+#[should_panic(expected: "attempt to execute reserved opcode 2")]
+fn test_op_reserved2() {
+    let program = "OP_RESERVED2";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
 }

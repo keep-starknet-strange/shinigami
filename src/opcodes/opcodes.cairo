@@ -194,7 +194,7 @@ pub mod Opcode {
             135 => opcode_equal(ref engine),
             136 => not_implemented(ref engine),
             137 => opcode_reserved1(ref engine),
-            138 => not_implemented(ref engine),
+            138 => opcode_reserved2(ref engine),
             139 => opcode_1add(ref engine),
             140 => opcode_1sub(ref engine),
             141 => not_implemented(ref engine),
@@ -492,5 +492,9 @@ pub mod Opcode {
 
     fn opcode_reserved1(ref engine: Engine) {
         panic!("attempt to execute reserved opcode 1");
+    }
+
+    fn opcode_reserved2(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 2");
     }
 }
