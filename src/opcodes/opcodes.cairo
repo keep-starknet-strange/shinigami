@@ -37,6 +37,7 @@ pub mod Opcode {
     pub const OP_TUCK: u8 = 125;
     pub const OP_EQUAL: u8 = 135;
     pub const OP_SWAP: u8 = 124;
+    pub const OP_SIZE: u8 = 130;
     pub const OP_RESERVED1: u8 = 137;
     pub const OP_RESERVED2: u8 = 138;
     pub const OP_1ADD: u8 = 139;
@@ -194,7 +195,7 @@ pub mod Opcode {
             127 => not_implemented(ref engine),
             128 => not_implemented(ref engine),
             129 => not_implemented(ref engine),
-            130 => not_implemented(ref engine),
+            130 => opcode_size(ref engine),
             131 => not_implemented(ref engine),
             132 => not_implemented(ref engine),
             133 => not_implemented(ref engine),
@@ -353,6 +354,11 @@ pub mod Opcode {
     fn opcode_depth(ref engine: Engine) {
         let depth: i64 = engine.dstack.len().into();
         engine.dstack.push_int(depth);
+    }
+
+    fn opcode_size(ref engine: Engine) {
+        let size = engine.dstack.peek_byte_array(0).len().into();
+        engine.dstack.push_int(size);
     }
 
     fn opcode_swap(ref engine: Engine) {
