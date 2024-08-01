@@ -154,7 +154,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
     }
 
-
     fn tuck(ref self: ScriptStack) {
         if self.len() < 2 {
             panic!("pop_byte_array: stack underflow");
