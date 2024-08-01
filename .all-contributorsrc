@@ -153,6 +153,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "varun-doshi",
+      "name": "Varun Doshi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61531351?v=4",
+      "profile": "https://varun-doshi.vercel.app/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
