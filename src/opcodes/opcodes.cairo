@@ -43,6 +43,7 @@ pub mod Opcode {
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
     pub const OP_BOOLAND: u8 = 154;
+    pub const OP_BOOLOR: u8 = 155;
     pub const OP_NUMEQUAL: u8 = 156;
     pub const OP_NUMNOTEQUAL: u8 = 158;
     pub const OP_LESSTHAN: u8 = 159;
@@ -213,7 +214,7 @@ pub mod Opcode {
             152 => not_implemented(ref engine),
             153 => not_implemented(ref engine),
             154 => opcode_bool_and(ref engine),
-            155 => not_implemented(ref engine),
+            155 => opcode_bool_or(ref engine),
             156 => opcode_numequal(ref engine),
             157 => not_implemented(ref engine),
             158 => opcode_numnotequal(ref engine),
@@ -537,5 +538,16 @@ pub mod Opcode {
 
     fn opcode_1negate(ref engine: Engine) {
         engine.dstack.push_int(-1);
+    }
+
+    fn opcode_bool_or(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+
+        engine.dstack.push_int(if a != 0 || b != 0 {
+            1
+        } else {
+            0
+        });
     }
 }
