@@ -700,10 +700,8 @@ fn test_opcode_data_1() {
     let mut engine = EngineTraitImpl::new(bytecode);
     let res = engine.step();
     assert!(res, "Execution of step failed");
-
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
-
-    let expected_stack = array!["0x01"];
+    let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
