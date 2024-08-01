@@ -6,9 +6,9 @@ use shinigami::opcodes::opcodes::Opcode::{execute, is_branching_opcode};
 #[derive(Destruct)]
 pub struct Engine {
     // The script to execute
-    script: @ByteArray,
+    pub script: @ByteArray,
     // Program counter within the current script
-    opcode_idx: usize,
+    pub opcode_idx: usize,
     // Primary data stack
     pub dstack: ScriptStack,
     // Alternate data stack
