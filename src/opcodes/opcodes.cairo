@@ -23,6 +23,7 @@ pub mod Opcode {
     pub const OP_NOTIF: u8 = 100;
     pub const OP_ELSE: u8 = 103;
     pub const OP_ENDIF: u8 = 104;
+    pub const OP_VERIFY: u8 = 105;
     pub const OP_TOALTSTACK: u8 = 107;
     pub const OP_FROMALTSTACK: u8 = 108;
     pub const OP_2DROP: u8 = 109;
@@ -162,7 +163,7 @@ pub mod Opcode {
             102 => not_implemented(ref engine),
             103 => opcode_else(ref engine),
             104 => opcode_endif(ref engine),
-            105 => not_implemented(ref engine),
+            105 => opcode_verify(ref engine),
             106 => not_implemented(ref engine),
             107 => opcode_toaltstack(ref engine),
             108 => opcode_fromaltstack(ref engine),
@@ -302,6 +303,17 @@ pub mod Opcode {
         }
 
         engine.cond_stack.pop();
+    }
+
+    fn opcode_verify(ref engine: Engine) {
+        if engine.dstack.len() < 1 {
+            panic!("Invalid stack operation")
+        }
+
+        let verified = engine.dstack.pop_bool();
+        if !verified {
+            panic!("Verify failed")
+        }
     }
 
     fn opcode_nop() { // NOP do nothing
