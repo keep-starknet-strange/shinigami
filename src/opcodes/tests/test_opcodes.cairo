@@ -1065,6 +1065,38 @@ fn test_op_equal() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
+fn test_op_toaltstack() {
+    let program = "OP_1 OP_TOALTSTACK";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_TOALTSTACK failed");
+
+    let dstack = engine.get_dstack();
+    let astack = engine.get_astack();
+
+    assert_eq!(dstack.len(), 0, "Main stack should be empty");
+    assert_eq!(astack.len(), 1, "Alt stack should have 1 element");
+
+    let expected_astack = array!["\x01"];
+    assert_eq!(astack, expected_astack.span(), "Alt stack is not equal to expected");
+}
+
+#[test]
+#[should_panic(expected: "Stack underflow")]
+fn test_op_toaltstack_underflow() {
+    let program = "OP_TOALTSTACK";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+}
+
 fn test_op_dup() {
     let program = "OP_1 OP_2 OP_DUP";
     let mut compiler = CompilerTraitImpl::new();

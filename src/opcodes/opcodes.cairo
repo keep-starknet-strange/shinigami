@@ -23,6 +23,7 @@ pub mod Opcode {
     pub const OP_NOTIF: u8 = 100;
     pub const OP_ELSE: u8 = 103;
     pub const OP_ENDIF: u8 = 104;
+    pub const OP_TOALTSTACK: u8 = 107;
     pub const OP_FROMALTSTACK: u8 = 108;
     pub const OP_2DROP: u8 = 109;
     pub const OP_2DUP: u8 = 110;
@@ -163,7 +164,7 @@ pub mod Opcode {
             104 => opcode_endif(ref engine),
             105 => not_implemented(ref engine),
             106 => not_implemented(ref engine),
-            107 => not_implemented(ref engine),
+            107 => opcode_toaltstack(ref engine),
             108 => opcode_fromaltstack(ref engine),
             109 => opcode_2drop(ref engine),
             110 => opcode_2dup(ref engine),
@@ -469,6 +470,14 @@ pub mod Opcode {
         } else {
             engine.dstack.push_int(0);
         }
+    }
+
+    fn opcode_toaltstack(ref engine: Engine) {
+        if engine.dstack.len() == 0 {
+            panic!("Stack underflow");
+        }
+        let value = engine.dstack.pop_byte_array();
+        engine.astack.push_byte_array(value);
     }
 
     fn opcode_fromaltstack(ref engine: Engine) {
