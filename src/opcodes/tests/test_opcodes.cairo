@@ -1294,6 +1294,25 @@ fn test_op_1negate() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+
+#[test]
+fn test_opcode_tuck() {
+    let program = "OP_1 OP_2 OP_TUCK";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+
+    let expected_stack = array!["\x02", "\x01", "\x02"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
 #[test]
 fn test_op_bool_or() {
     let program = "OP_0 OP_1 OP_BOOLOR";
@@ -1304,6 +1323,7 @@ fn test_op_bool_or() {
     engine.step();
     engine.step();
     let res = engine.step();
+
     assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
