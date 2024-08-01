@@ -1068,3 +1068,20 @@ fn test_op_1negate() {
     let expected_stack = array![ScriptNum::wrap(-1)];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
+#[test]
+fn test_op_pick() {
+    let program = "OP_1 OP_PICK";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+    // let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![ScriptNum::wrap(1)];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}

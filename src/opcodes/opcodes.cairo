@@ -47,6 +47,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+    pub const OP_PICK: u8 = 121;
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
@@ -174,7 +175,7 @@ pub mod Opcode {
             118 => opcode_dup(ref engine),
             119 => not_implemented(ref engine),
             120 => not_implemented(ref engine),
-            121 => not_implemented(ref engine),
+            121 => opcode_pick(ref engine),
             122 => not_implemented(ref engine),
             123 => not_implemented(ref engine),
             124 => not_implemented(ref engine),
@@ -485,5 +486,10 @@ pub mod Opcode {
 
     fn opcode_1negate(ref engine: Engine) {
         engine.dstack.push_int(-1);
+    }
+
+    fn opcode_pick(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        engine.dstack.push_int(a);
     }
 }
