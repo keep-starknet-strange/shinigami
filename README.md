@@ -202,6 +202,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/pidb"><img src="https://avatars.githubusercontent.com/u/25273209?v=4?s=100" width="100px;" alt="Jackson Xu"/><br /><sub><b>Jackson Xu</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=pidb" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/estherbreath"><img src="https://avatars.githubusercontent.com/u/107428391?v=4?s=100" width="100px;" alt="Esther Breath"/><br /><sub><b>Esther Breath</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=estherbreath" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
