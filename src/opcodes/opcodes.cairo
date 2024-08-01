@@ -49,6 +49,7 @@ pub mod Opcode {
     pub const OP_WITHIN: u8 = 165;
     pub const OP_RESERVED1: u8 = 137;
     pub const OP_RESERVED2: u8 = 138;
+    pub const OP_VER: u8 = 98;
 
 
     use shinigami::engine::{Engine, EngineTrait};
@@ -154,7 +155,7 @@ pub mod Opcode {
             95 => opcode_n(15, ref engine),
             96 => opcode_n(16, ref engine),
             97 => opcode_nop(),
-            98 => not_implemented(ref engine),
+            98 => opcode_ver(ref engine),
             99 => opcode_if(ref engine),
             100 => opcode_notif(ref engine),
             101 => not_implemented(ref engine),
@@ -496,5 +497,8 @@ pub mod Opcode {
 
     fn opcode_reserved2(ref engine: Engine) {
         panic!("attempt to execute reserved opcode 2");
+    }
+    fn opcode_ver(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode ver");
     }
 }

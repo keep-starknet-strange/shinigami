@@ -1090,3 +1090,15 @@ fn test_op_reserved2() {
 
     engine.step();
 }
+
+
+#[test]
+#[should_panic(expected: "attempt to execute reserved opcode ver")]
+fn test_op_ver() {
+    let program = "OP_VER";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+}
