@@ -47,6 +47,9 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+    pub const OP_RESERVED1: u8 = 137;
+    pub const OP_RESERVED2: u8 = 138;
+
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
@@ -190,7 +193,7 @@ pub mod Opcode {
             134 => not_implemented(ref engine),
             135 => opcode_equal(ref engine),
             136 => not_implemented(ref engine),
-            137 => not_implemented(ref engine),
+            137 => opcode_reserved1(ref engine),
             138 => not_implemented(ref engine),
             139 => opcode_1add(ref engine),
             140 => opcode_1sub(ref engine),
@@ -485,5 +488,9 @@ pub mod Opcode {
 
     fn opcode_1negate(ref engine: Engine) {
         engine.dstack.push_int(-1);
+    }
+
+    fn opcode_reserved1(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 1");
     }
 }
