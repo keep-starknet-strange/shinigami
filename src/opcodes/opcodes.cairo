@@ -59,7 +59,6 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
-    pub const OP_IFDUP: u8 = 166;
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
@@ -577,5 +576,13 @@ pub mod Opcode {
         } else {
             0
         });
+    }
+
+    fn opcode_ifdup(ref engine: Engine) {
+        let a = engine.dstack.peek_bool(0);
+
+        if a {
+            engine.dstack.dup_n(1);
+        }
     }
 }
