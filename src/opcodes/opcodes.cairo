@@ -19,6 +19,7 @@ pub mod Opcode {
     pub const OP_15: u8 = 95;
     pub const OP_16: u8 = 96;
     pub const OP_NOP: u8 = 97;
+    pub const OP_VER: u8 = 98;
     pub const OP_IF: u8 = 99;
     pub const OP_NOTIF: u8 = 100;
     pub const OP_ELSE: u8 = 103;
@@ -36,6 +37,8 @@ pub mod Opcode {
     pub const OP_TUCK: u8 = 125;
     pub const OP_EQUAL: u8 = 135;
     pub const OP_SWAP: u8 = 124;
+    pub const OP_RESERVED1: u8 = 137;
+    pub const OP_RESERVED2: u8 = 138;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
     pub const OP_NEGATE: u8 = 143;
@@ -54,6 +57,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
@@ -158,7 +162,7 @@ pub mod Opcode {
             95 => opcode_n(15, ref engine),
             96 => opcode_n(16, ref engine),
             97 => opcode_nop(),
-            98 => not_implemented(ref engine),
+            98 => opcode_ver(ref engine),
             99 => opcode_if(ref engine),
             100 => opcode_notif(ref engine),
             101 => not_implemented(ref engine),
@@ -197,8 +201,8 @@ pub mod Opcode {
             134 => not_implemented(ref engine),
             135 => opcode_equal(ref engine),
             136 => not_implemented(ref engine),
-            137 => not_implemented(ref engine),
-            138 => not_implemented(ref engine),
+            137 => opcode_reserved1(ref engine),
+            138 => opcode_reserved2(ref engine),
             139 => opcode_1add(ref engine),
             140 => opcode_1sub(ref engine),
             141 => not_implemented(ref engine),
@@ -541,6 +545,17 @@ pub mod Opcode {
         engine.dstack.push_int(-1);
     }
 
+    fn opcode_reserved1(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 1");
+    }
+
+    fn opcode_reserved2(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 2");
+    }
+
+    fn opcode_ver(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode ver");
+    }
 
     fn opcode_tuck(ref engine: Engine) {
         engine.dstack.tuck();

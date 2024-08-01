@@ -1294,6 +1294,16 @@ fn test_op_1negate() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+#[test]
+#[should_panic(expected: "attempt to execute reserved opcode 1")]
+fn test_op_reserved1() {
+    let program = "OP_RESERVED1";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+}
 
 #[test]
 fn test_opcode_tuck() {
@@ -1313,13 +1323,35 @@ fn test_opcode_tuck() {
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
 
+
+#[test]
+#[should_panic(expected: "attempt to execute reserved opcode 2")]
+fn test_op_reserved2() {
+    let program = "OP_RESERVED2";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+}
+
+#[test]
+#[should_panic(expected: "attempt to execute reserved opcode ver")]
+fn test_op_ver() {
+    let program = "OP_VER";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+}
+
 #[test]
 fn test_op_bool_or() {
     let program = "OP_0 OP_1 OP_BOOLOR";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
-
     engine.step();
     engine.step();
     let res = engine.step();
