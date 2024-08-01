@@ -60,6 +60,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_SUB', Opcode::OP_SUB);
         opcodes.insert('OP_BOOLAND', Opcode::OP_BOOLAND);
+        opcodes.insert('OP_NUMEQUAL', Opcode::OP_NUMEQUAL);
         opcodes.insert('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
         opcodes.insert('OP_LESSTHAN', Opcode::OP_LESSTHAN);
         opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
