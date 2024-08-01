@@ -19,19 +19,27 @@ pub mod Opcode {
     pub const OP_15: u8 = 95;
     pub const OP_16: u8 = 96;
     pub const OP_NOP: u8 = 97;
+    pub const OP_VER: u8 = 98;
     pub const OP_IF: u8 = 99;
     pub const OP_NOTIF: u8 = 100;
     pub const OP_ELSE: u8 = 103;
     pub const OP_ENDIF: u8 = 104;
+    pub const OP_VERIFY: u8 = 105;
+    pub const OP_TOALTSTACK: u8 = 107;
     pub const OP_FROMALTSTACK: u8 = 108;
     pub const OP_2DROP: u8 = 109;
     pub const OP_2DUP: u8 = 110;
     pub const OP_3DUP: u8 = 111;
+    pub const OP_2SWAP: u8 = 114;
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
+    pub const OP_TUCK: u8 = 125;
     pub const OP_EQUAL: u8 = 135;
+    pub const OP_SWAP: u8 = 124;
     pub const OP_SIZE: u8 = 130;
+    pub const OP_RESERVED1: u8 = 137;
+    pub const OP_RESERVED2: u8 = 138;
     pub const OP_1ADD: u8 = 139;
     pub const OP_1SUB: u8 = 140;
     pub const OP_NEGATE: u8 = 143;
@@ -40,6 +48,8 @@ pub mod Opcode {
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
     pub const OP_BOOLAND: u8 = 154;
+    pub const OP_BOOLOR: u8 = 155;
+    pub const OP_NUMEQUAL: u8 = 156;
     pub const OP_NUMNOTEQUAL: u8 = 158;
     pub const OP_LESSTHAN: u8 = 159;
     pub const OP_GREATERTHAN: u8 = 160;
@@ -48,6 +58,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::stack::ScriptStackTrait;
@@ -152,23 +163,23 @@ pub mod Opcode {
             95 => opcode_n(15, ref engine),
             96 => opcode_n(16, ref engine),
             97 => opcode_nop(),
-            98 => not_implemented(ref engine),
+            98 => opcode_ver(ref engine),
             99 => opcode_if(ref engine),
             100 => opcode_notif(ref engine),
             101 => not_implemented(ref engine),
             102 => not_implemented(ref engine),
             103 => opcode_else(ref engine),
             104 => opcode_endif(ref engine),
-            105 => not_implemented(ref engine),
+            105 => opcode_verify(ref engine),
             106 => not_implemented(ref engine),
-            107 => not_implemented(ref engine),
+            107 => opcode_toaltstack(ref engine),
             108 => opcode_fromaltstack(ref engine),
             109 => opcode_2drop(ref engine),
             110 => opcode_2dup(ref engine),
             111 => opcode_3dup(ref engine),
             112 => not_implemented(ref engine),
             113 => not_implemented(ref engine),
-            114 => not_implemented(ref engine),
+            114 => opcode_2swap(ref engine),
             115 => not_implemented(ref engine),
             116 => opcode_depth(ref engine),
             117 => opcode_drop(ref engine),
@@ -178,8 +189,8 @@ pub mod Opcode {
             121 => not_implemented(ref engine),
             122 => not_implemented(ref engine),
             123 => not_implemented(ref engine),
-            124 => not_implemented(ref engine),
-            125 => not_implemented(ref engine),
+            124 => opcode_swap(ref engine),
+            125 => opcode_tuck(ref engine),
             126 => not_implemented(ref engine),
             127 => not_implemented(ref engine),
             128 => not_implemented(ref engine),
@@ -191,8 +202,8 @@ pub mod Opcode {
             134 => not_implemented(ref engine),
             135 => opcode_equal(ref engine),
             136 => not_implemented(ref engine),
-            137 => not_implemented(ref engine),
-            138 => not_implemented(ref engine),
+            137 => opcode_reserved1(ref engine),
+            138 => opcode_reserved2(ref engine),
             139 => opcode_1add(ref engine),
             140 => opcode_1sub(ref engine),
             141 => not_implemented(ref engine),
@@ -209,8 +220,8 @@ pub mod Opcode {
             152 => not_implemented(ref engine),
             153 => not_implemented(ref engine),
             154 => opcode_bool_and(ref engine),
-            155 => not_implemented(ref engine),
-            156 => not_implemented(ref engine),
+            155 => opcode_bool_or(ref engine),
+            156 => opcode_numequal(ref engine),
             157 => not_implemented(ref engine),
             158 => opcode_numnotequal(ref engine),
             159 => opcode_lessthan(ref engine),
@@ -301,6 +312,17 @@ pub mod Opcode {
         engine.cond_stack.pop();
     }
 
+    fn opcode_verify(ref engine: Engine) {
+        if engine.dstack.len() < 1 {
+            panic!("Invalid stack operation")
+        }
+
+        let verified = engine.dstack.pop_bool();
+        if !verified {
+            panic!("Verify failed")
+        }
+    }
+
     fn opcode_nop() { // NOP do nothing
     }
 
@@ -337,6 +359,24 @@ pub mod Opcode {
     fn opcode_size(ref engine: Engine) {
         let size = engine.dstack.peek_byte_array(0).len().into();
         engine.dstack.push_int(size);
+    }
+
+    fn opcode_swap(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(a);
+        engine.dstack.push_int(b);
+    }
+
+    fn opcode_2swap(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        let c = engine.dstack.pop_int();
+        let d = engine.dstack.pop_int();
+        engine.dstack.push_int(b);
+        engine.dstack.push_int(a);
+        engine.dstack.push_int(d);
+        engine.dstack.push_int(c);
     }
 
     fn opcode_1add(ref engine: Engine) {
@@ -405,6 +445,16 @@ pub mod Opcode {
         });
     }
 
+    fn opcode_numequal(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if a == b {
+            1
+        } else {
+            0
+        });
+    }
+
     fn opcode_numnotequal(ref engine: Engine) {
         let a = engine.dstack.pop_int();
         let b = engine.dstack.pop_int();
@@ -444,6 +494,14 @@ pub mod Opcode {
         } else {
             engine.dstack.push_int(0);
         }
+    }
+
+    fn opcode_toaltstack(ref engine: Engine) {
+        if engine.dstack.len() == 0 {
+            panic!("Stack underflow");
+        }
+        let value = engine.dstack.pop_byte_array();
+        engine.astack.push_byte_array(value);
     }
 
     fn opcode_fromaltstack(ref engine: Engine) {
@@ -491,5 +549,32 @@ pub mod Opcode {
 
     fn opcode_1negate(ref engine: Engine) {
         engine.dstack.push_int(-1);
+    }
+
+    fn opcode_reserved1(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 1");
+    }
+
+    fn opcode_reserved2(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 2");
+    }
+
+    fn opcode_ver(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode ver");
+    }
+
+    fn opcode_tuck(ref engine: Engine) {
+        engine.dstack.tuck();
+    }
+
+    fn opcode_bool_or(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+
+        engine.dstack.push_int(if a != 0 || b != 0 {
+            1
+        } else {
+            0
+        });
     }
 }
