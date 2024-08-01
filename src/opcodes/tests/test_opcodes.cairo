@@ -1070,20 +1070,37 @@ fn test_op_1negate() {
 }
 
 #[test]
-fn test_op_ifdup() {
-    let program = "OP_0 OP_1 OP_2 OP_IFDUP";
+fn test_op_ifdup_zero_top_stack() {
+    let program = "OP_0 OP_IFDUP";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
 
     engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+fn test_op_ifdup_non_zero_top_stack() {
+    let program = "OP_1 OP_IFDUP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
     engine.step();
     let res = engine.step();
     assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
-    assert_eq!(dstack.len(), 3, "Stack length is not 3");
+    assert_eq!(dstack.len(), 2, "Stack length is not 1");
 
-    let expected_stack = array!["", "\x01", "\x02"];
+    let expected_stack = array!["\x01", "\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }

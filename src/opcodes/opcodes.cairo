@@ -489,9 +489,10 @@ pub mod Opcode {
     }
 
     fn opcode_ifdup(ref engine: Engine) {
-        let a = engine.dstack.peek_byte_array(0);
-        if a.len() != 0 {
-            engine.dstack.push_byte_array(a)
+        let a = engine.dstack.peek_bool(0);
+
+        if a {
+            engine.dstack.dup_n(1);
         }
     }
 }
