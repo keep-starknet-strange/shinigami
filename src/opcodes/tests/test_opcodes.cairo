@@ -1398,3 +1398,14 @@ fn test_op_bool_or() {
     let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
+#[test]
+#[should_panic(expected: "attempt to execute reserved opcode ver")]
+fn test_op_reserved() {
+    let program = "OP_RESERVED";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+}

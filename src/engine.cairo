@@ -15,7 +15,7 @@ pub struct Engine {
     pub astack: ScriptStack,
     // Tracks conditonal execution state supporting nested conditionals
     pub cond_stack: ConditionalStack,
-// TODO
+    // TODO
 // ...
 }
 
@@ -67,22 +67,19 @@ pub impl EngineTraitImpl of EngineTrait {
     }
 
     fn execute(ref self: Engine) -> Result<ByteArray, felt252> {
-        while self
-            .opcode_idx < self
-            .script
-            .len() {
-                if !self.cond_stack.branch_executing()
-                    && !is_branching_opcode(self.script[self.opcode_idx]) {
-                    self.opcode_idx += 1;
-                    continue;
-                }
-                let opcode = self.script[self.opcode_idx];
-                execute(opcode, ref self);
+        while self.opcode_idx < self.script.len() {
+            if !self.cond_stack.branch_executing()
+                && !is_branching_opcode(self.script[self.opcode_idx]) {
                 self.opcode_idx += 1;
+                continue;
+            }
+            let opcode = self.script[self.opcode_idx];
+            execute(opcode, ref self);
+            self.opcode_idx += 1;
             // TODO: remove debug
-            // self.dstack.print();
-            // println!("==================");
-            };
+        // self.dstack.print();
+        // println!("==================");
+        };
 
         // TODO: CheckErrorCondition
         if self.dstack.len() < 1 {

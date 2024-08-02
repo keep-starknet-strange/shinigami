@@ -58,6 +58,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+    pub const OP_RESERVED: u8 = 80;
 
 
     use shinigami::engine::{Engine, EngineTrait};
@@ -145,7 +146,7 @@ pub mod Opcode {
             77 => not_implemented(ref engine),
             78 => not_implemented(ref engine),
             79 => opcode_1negate(ref engine),
-            80 => not_implemented(ref engine),
+            80 => opcode_reserved(ref engine),
             81 => opcode_n(1, ref engine),
             82 => opcode_n(2, ref engine),
             83 => opcode_n(3, ref engine),
@@ -508,6 +509,10 @@ pub mod Opcode {
         //TODO: Error handling
         let a = engine.astack.pop_byte_array();
         engine.dstack.push_byte_array(a);
+    }
+
+    fn opcode_reserved(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode");
     }
 
     fn opcode_equal(ref engine: Engine) {

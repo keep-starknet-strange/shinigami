@@ -46,19 +46,18 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
         let mut i = 0;
         let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
+        while i < bytes.len() {
+            if bytes.at(i).unwrap() != 0 {
+                // Can be negative zero
+                if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
+                    ret_bool = false;
                     break;
                 }
-                i += 1;
-            };
+                ret_bool = true;
+                break;
+            }
+            i += 1;
+        };
         return ret_bool;
     }
 
@@ -83,19 +82,18 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
         let mut i = 0;
         let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
+        while i < bytes.len() {
+            if bytes.at(i).unwrap() != 0 {
+                // Can be negative zero
+                if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
+                    ret_bool = false;
                     break;
                 }
-                i += 1;
-            };
+                ret_bool = true;
+                break;
+            }
+            i += 1;
+        };
         return ret_bool;
     }
 
@@ -129,14 +127,13 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = 0;
-        while i < self
-            .len {
-                let (entry, arr) = self.data.entry(i.into());
-                let arr = arr.deref();
-                result.append(arr.clone());
-                self.data = entry.finalize(NullableTrait::new(arr));
-                i += 1
-            };
+        while i < self.len {
+            let (entry, arr) = self.data.entry(i.into());
+            let arr = arr.deref();
+            result.append(arr.clone());
+            self.data = entry.finalize(NullableTrait::new(arr));
+            i += 1
+        };
 
         return result.span();
     }

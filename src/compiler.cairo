@@ -72,6 +72,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
+        opcodes.insert('OP_RESERVED', Opcode::OP_RESERVED);
         opcodes.insert('OP_RESERVED1', Opcode::OP_RESERVED1);
         opcodes.insert('OP_RESERVED2', Opcode::OP_RESERVED2);
         opcodes.insert('OP_VER', Opcode::OP_VER);
@@ -91,25 +92,24 @@ pub impl CompilerTraitImpl of CompilerTrait {
         let mut i = 0;
         let mut word_len = 0;
         let mut current_word: felt252 = '';
-        while i < script
-            .len() {
-                let char = script[i].into();
-                if char == seperator {
-                    let opcode = self.opcodes.get(current);
-                    current_word = current_word * byte_shift + opcode.into();
-                    word_len += 1;
-                    if word_len >= max_word_size {
-                        // Add the current word to the bytecode representation
-                        bytecode.append_word(current_word, max_word_size);
-                        word_len = 0;
-                    }
-                    current = '';
-                } else {
-                    // Add the char to the bytecode representation
-                    current = current * byte_shift + char;
+        while i < script.len() {
+            let char = script[i].into();
+            if char == seperator {
+                let opcode = self.opcodes.get(current);
+                current_word = current_word * byte_shift + opcode.into();
+                word_len += 1;
+                if word_len >= max_word_size {
+                    // Add the current word to the bytecode representation
+                    bytecode.append_word(current_word, max_word_size);
+                    word_len = 0;
                 }
-                i += 1;
-            };
+                current = '';
+            } else {
+                // Add the char to the bytecode representation
+                current = current * byte_shift + char;
+            }
+            i += 1;
+        };
         // Handle the last opcode
         if current != '' {
             let opcode = self.opcodes.get(current);
