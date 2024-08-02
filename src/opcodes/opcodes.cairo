@@ -34,6 +34,7 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
+    pub const OP_NIP: u8 = 119;
     pub const OP_TUCK: u8 = 125;
     pub const OP_EQUAL: u8 = 135;
     pub const OP_SWAP: u8 = 124;
@@ -184,7 +185,7 @@ pub mod Opcode {
             116 => opcode_depth(ref engine),
             117 => opcode_drop(ref engine),
             118 => opcode_dup(ref engine),
-            119 => not_implemented(ref engine),
+            119 => opcode_nip(ref engine),
             120 => not_implemented(ref engine),
             121 => not_implemented(ref engine),
             122 => not_implemented(ref engine),
@@ -576,5 +577,9 @@ pub mod Opcode {
         } else {
             0
         });
+    }
+
+    fn opcode_nip(ref engine: Engine) {
+        engine.dstack.nip_n(1);
     }
 }

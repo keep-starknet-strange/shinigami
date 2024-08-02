@@ -1398,3 +1398,36 @@ fn test_op_bool_or() {
     let expected_stack = array!["\x01"];
     assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
 }
+
+#[test]
+fn test_op_nip() {
+    let program = "OP_1 OP_2 OP_3 OP_4 OP_NIP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    engine.step();
+    engine.step();
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 4, "Stack length is not 4");
+
+    let expected_stack = array!["\x01", "", "\x03", "\x04"];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected");
+}
+
+#[test]
+#[should_panic(expected: "nip_n: index out of range")]
+fn test_op_nip_() {
+    let program = "OP_NIP";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let res = engine.step();
+    assert!(res, "Execution of step failed");
+}

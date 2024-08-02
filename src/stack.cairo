@@ -167,4 +167,21 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.push_byte_array(next_element);
         self.push_byte_array(top_element);
     }
+
+    fn nip_n(ref self: ScriptStack, idx: usize) {
+        if idx > self.len || idx < 0 {
+            panic!("nip_n: index out of range");
+        }
+
+        let mut i = 0;
+        while i < self
+            .len {
+                if i == idx {
+                    let (entry, _arr) = self.data.entry(i.into());
+                    self.data = entry.finalize(NullableTrait::new(""));
+                }
+
+                i += 1;
+            };
+    }
 }
