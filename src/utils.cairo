@@ -71,3 +71,40 @@ pub fn int_to_hex(value: u8) -> felt252 {
 
     upper_half.into() * byte_shift.into() + lower_half.into()
 }
+pub fn u256_from_byte_array_with_offset(ref arr: ByteArray, offset: usize, len: usize) -> u256 {
+	let mut high: u128 = 0;
+	let mut low: u128 = 0;
+	let total_bytes = arr.len();
+	let mut i: usize = 0;
+	let mut high_bytes: usize = 0;
+	let mut low_bytes: usize = 16;
+	let mut arr_high = arr.clone();
+	let mut arr_low = arr.clone();
+
+	// Return 0 if offset out of bound or len greater than 32 bytes
+	if offset >= total_bytes || len > 32 {
+		return u256{high: 0,low:0}; 
+	}
+
+	let available_bytes = total_bytes - offset;
+	let read_bytes = if available_bytes < len {
+		available_bytes
+	} else {
+		len
+	};
+
+	if read_bytes > 16 {
+		high_bytes = read_bytes - 16;
+	} else if read_bytes < 16 {
+		low_bytes = read_bytes;
+	}
+	while i < high_bytes{
+		high = high * 256 + arr_high[i + offset].into();
+		i+=1;
+	};
+	while i < read_bytes {
+		low = low * 256 + arr_low[i + offset].into();
+		i+=1;
+	};
+	u256{high,low}
+}

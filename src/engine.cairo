@@ -3,6 +3,7 @@ use shinigami::cond_stack::{ConditionalStack, ConditionalStackImpl};
 use shinigami::opcodes::opcodes::Opcode;
 use shinigami::opcodes::flow;
 use shinigami::errors::Error;
+use shinigami::scriptflags::ScriptFlags;
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -17,6 +18,11 @@ pub struct Engine {
     pub astack: ScriptStack,
     // Tracks conditonal execution state supporting nested conditionals
     pub cond_stack: ConditionalStack,
+    // Execution behaviour flags
+	flags: u32,
+
+
+    
 // TODO
 // ...
 }
@@ -32,6 +38,12 @@ pub trait EngineTrait {
     fn step(ref self: Engine) -> Result<bool, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
     fn execute(ref self: Engine) -> Result<ByteArray, felt252>;
+    // Add the specified flag to the script engine instance.
+	fn add_flag(ref self: Engine, flag: ScriptFlags);
+	// Return true if the script engine instance has the specified flag set.
+	fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool;
+
+	fn is_witness_version_active(ref self: Engine, _value: u32) -> bool;
 }
 
 pub impl EngineTraitImpl of EngineTrait {
@@ -42,6 +54,7 @@ pub impl EngineTraitImpl of EngineTrait {
             dstack: ScriptStackImpl::new(),
             astack: ScriptStackImpl::new(),
             cond_stack: ConditionalStackImpl::new(),
+            flags: 0,
         }
     }
 
@@ -132,4 +145,17 @@ pub impl EngineTraitImpl of EngineTrait {
             }
         }
     }
+
+    fn add_flag(ref self: Engine, flag: ScriptFlags){
+		self.flags = self.flags | flag.into();
+	}
+
+	fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool {
+		self.flags & flag.into() == flag.into()
+	}
+
+	fn is_witness_version_active(ref self: Engine, _value: u32) -> bool{
+		// if self.witness_version < val
+		return true;
+	}
 }

@@ -34,5 +34,16 @@ pub mod scriptnum {
     }
     pub(crate) use scriptnum::ScriptNum;
 }
+pub mod scriptflags;
+pub mod signature {
+    pub mod signature;
+    mod tests {
+        #[cfg(test)]
+        mod test_signature;
+    }
+    pub(crate) use signature::BaseSigVerifier;
+}
+
+pub mod utils;
 
 mod main;
