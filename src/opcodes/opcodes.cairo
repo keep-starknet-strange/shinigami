@@ -242,4 +242,347 @@ pub mod Opcode {
             _ => utils::not_implemented(ref engine)
         }
     }
+
+    pub fn is_branching_opcode(opcode: u8) -> bool {
+        if opcode == OP_IF || opcode == OP_NOTIF || opcode == OP_ELSE || opcode == OP_ENDIF {
+            return true;
+        }
+        return false;
+    }
+
+    fn opcode_false(ref engine: Engine) {
+        engine.dstack.push_byte_array("");
+    }
+
+    fn opcode_n(n: i64, ref engine: Engine) {
+        engine.dstack.push_int(n);
+    }
+
+    fn opcode_negate(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        engine.dstack.push_int(-a);
+    }
+
+    fn opcode_abs(ref engine: Engine) {
+        let value = engine.dstack.pop_int();
+        let abs_value = if value < 0 {
+            -value
+        } else {
+            value
+        };
+        engine.dstack.push_int(abs_value);
+    }
+
+    // TODO: MOve to cond_stack
+    const op_cond_false: u8 = 0;
+    const op_cond_true: u8 = 1;
+    const op_cond_skip: u8 = 2;
+    fn opcode_if(ref engine: Engine) {
+        let mut cond = op_cond_false;
+        // TODO: Pop if bool
+        if engine.cond_stack.branch_executing() {
+            let ok = engine.dstack.pop_bool();
+            if ok {
+                cond = op_cond_true;
+            }
+        } else {
+            cond = op_cond_skip;
+        }
+        engine.cond_stack.push(cond);
+    }
+
+    fn opcode_notif(ref engine: Engine) {
+        let mut cond = op_cond_false;
+        if engine.cond_stack.branch_executing() {
+            let ok = engine.dstack.pop_bool();
+            if !ok {
+                cond = op_cond_true;
+            }
+        } else {
+            cond = op_cond_skip;
+        }
+        engine.cond_stack.push(cond);
+    }
+
+    fn opcode_else(ref engine: Engine) {
+        if engine.cond_stack.len() == 0 {
+            panic!("No matching if");
+        }
+
+        engine.cond_stack.swap_condition();
+    }
+
+    fn opcode_endif(ref engine: Engine) {
+        if engine.cond_stack.len() == 0 {
+            panic!("No matching if");
+        }
+
+        engine.cond_stack.pop();
+    }
+
+    fn opcode_verify(ref engine: Engine) {
+        if engine.dstack.len() < 1 {
+            panic!("Invalid stack operation")
+        }
+
+        let verified = engine.dstack.pop_bool();
+        if !verified {
+            panic!("Verify failed")
+        }
+    }
+
+    fn opcode_nop() { // NOP do nothing
+    }
+
+    fn opcode_add(ref engine: Engine) {
+        // TODO: Error handling
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(a + b);
+    }
+
+    fn opcode_less_than_or_equal(ref engine: Engine) {
+        let v0 = engine.dstack.pop_int();
+        let v1 = engine.dstack.pop_int();
+
+        if v1 <= v0 {
+            engine.dstack.push_bool(true);
+        } else {
+            engine.dstack.push_bool(false);
+        }
+    }
+
+    fn opcode_sub(ref engine: Engine) {
+        // TODO: Error handling
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(b - a);
+    }
+
+    fn opcode_depth(ref engine: Engine) {
+        let depth: i64 = engine.dstack.len().into();
+        engine.dstack.push_int(depth);
+    }
+
+    fn opcode_size(ref engine: Engine) {
+        let size = engine.dstack.peek_byte_array(0).len().into();
+        engine.dstack.push_int(size);
+    }
+
+    fn opcode_swap(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(a);
+        engine.dstack.push_int(b);
+    }
+
+    fn opcode_2swap(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        let c = engine.dstack.pop_int();
+        let d = engine.dstack.pop_int();
+        engine.dstack.push_int(b);
+        engine.dstack.push_int(a);
+        engine.dstack.push_int(d);
+        engine.dstack.push_int(c);
+    }
+
+    fn opcode_1add(ref engine: Engine) {
+        let value = engine.dstack.pop_int();
+        let result = value + 1;
+        engine.dstack.push_int(result);
+    }
+
+    fn opcode_not(ref engine: Engine) {
+        let m = engine.dstack.pop_int();
+        if m == 0 {
+            engine.dstack.push_bool(true);
+        } else {
+            engine.dstack.push_bool(false);
+        }
+    }
+
+    fn opcode_min(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+
+        engine.dstack.push_int(if a < b {
+            a
+        } else {
+            b
+        });
+    }
+
+    fn opcode_1sub(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        engine.dstack.push_int(a - 1);
+    }
+
+    fn not_implemented(ref engine: Engine) {
+        panic!("Opcode not implemented");
+    }
+
+    fn opcode_greater_than(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_bool(if b > a {
+            true
+        } else {
+            false
+        });
+    }
+
+    fn opcode_max(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_int(if a > b {
+            a
+        } else {
+            b
+        });
+    }
+
+    fn opcode_within(ref engine: Engine) {
+        let max = engine.dstack.pop_int();
+        let min = engine.dstack.pop_int();
+        let value = engine.dstack.pop_int();
+        engine.dstack.push_bool(if value >= min && value < max {
+            true
+        } else {
+            false
+        });
+    }
+
+    fn opcode_numequal(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_bool(if a == b {
+            true
+        } else {
+            false
+        });
+    }
+
+    fn opcode_numnotequal(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_bool(if a != b {
+            true
+        } else {
+            false
+        });
+    }
+
+    fn opcode_bool_and(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_bool(if a != 0 && b != 0 {
+            true
+        } else {
+            false
+        });
+    }
+
+    fn opcode_lessthan(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        engine.dstack.push_bool(if b < a {
+            true
+        } else {
+            false
+        });
+    }
+
+    fn opcode_greater_than_or_equal(ref engine: Engine) {
+        let v0 = engine.dstack.pop_int();
+        let v1 = engine.dstack.pop_int();
+
+        if v1 >= v0 {
+            engine.dstack.push_bool(true);
+        } else {
+            engine.dstack.push_bool(false);
+        }
+    }
+
+    fn opcode_toaltstack(ref engine: Engine) {
+        if engine.dstack.len() == 0 {
+            panic!("Stack underflow");
+        }
+        let value = engine.dstack.pop_byte_array();
+        engine.astack.push_byte_array(value);
+    }
+
+    fn opcode_fromaltstack(ref engine: Engine) {
+        //TODO: Error handling
+        let a = engine.astack.pop_byte_array();
+        engine.dstack.push_byte_array(a);
+    }
+
+    fn opcode_equal(ref engine: Engine) {
+        let a = engine.dstack.pop_byte_array();
+        let b = engine.dstack.pop_byte_array();
+        engine.dstack.push_bool(if a == b {
+            true
+        } else {
+            false
+        });
+    }
+
+    fn opcode_dup(ref engine: Engine) {
+        engine.dstack.dup_n(1);
+    }
+
+    fn opcode_2dup(ref engine: Engine) {
+        engine.dstack.dup_n(2);
+    }
+
+    fn opcode_3dup(ref engine: Engine) {
+        engine.dstack.dup_n(3);
+    }
+
+    fn opcode_2drop(ref engine: Engine) {
+        if engine.dstack.len() < 2 {
+            panic!("Stack underflow");
+        }
+        engine.dstack.pop_byte_array();
+        engine.dstack.pop_byte_array();
+    }
+
+    fn opcode_drop(ref engine: Engine) {
+        if engine.dstack.len() == 0 {
+            panic!("Stack underflow");
+        }
+        engine.dstack.pop_byte_array();
+    }
+
+    fn opcode_1negate(ref engine: Engine) {
+        engine.dstack.push_int(-1);
+    }
+
+    fn opcode_reserved1(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 1");
+    }
+
+    fn opcode_reserved2(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode 2");
+    }
+
+    fn opcode_ver(ref engine: Engine) {
+        panic!("attempt to execute reserved opcode ver");
+    }
+
+    fn opcode_tuck(ref engine: Engine) {
+        engine.dstack.tuck();
+    }
+
+    fn opcode_bool_or(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+
+        engine.dstack.push_bool(if a != 0 || b != 0 {
+            true
+        } else {
+            false
+        });
+    }
 }
