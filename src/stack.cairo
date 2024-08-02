@@ -1,5 +1,6 @@
+use core::option::OptionTrait;
 use core::dict::Felt252DictEntryTrait;
-use shinigami::utils;
+use shinigami::scriptnum::ScriptNum;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -19,7 +20,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn push_int(ref self: ScriptStack, value: i64) {
-        let mut bytes = utils::int_to_bytes(value);
+        let bytes = ScriptNum::wrap(value);
         self.push_byte_array(bytes);
     }
 
@@ -35,9 +36,9 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn pop_int(ref self: ScriptStack) -> i64 {
+        //TODO Error Handling
         let bytes = self.pop_byte_array();
-        // TODO: Error handling & MakeScriptNum
-        return utils::bytes_to_int(bytes);
+        ScriptNum::unwrap(bytes)
     }
 
     fn pop_bool(ref self: ScriptStack) -> bool {
@@ -66,7 +67,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             // TODO
             panic!("peek_byte_array: stack underflow");
         }
-        let (entry, bytes) = self.data.entry(idx.into());
+        let (entry, bytes) = self.data.entry((self.len - idx - 1).into());
         let bytes = bytes.deref();
         self.data = entry.finalize(NullableTrait::new(bytes.clone()));
         bytes
@@ -74,7 +75,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn peek_int(ref self: ScriptStack, idx: usize) -> i64 {
         let bytes = self.peek_byte_array(idx);
-        return utils::bytes_to_int(bytes);
+        ScriptNum::unwrap(bytes)
     }
 
     fn peek_bool(ref self: ScriptStack, idx: usize) -> bool {
@@ -168,15 +169,43 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
-        let mut i = self.len;
-        while i > 0 {
-            i -= 1;
-            let (entry, arr) = self.data.entry(i.into());
-            let arr = arr.deref();
-            result.append(arr.clone());
-            self.data = entry.finalize(NullableTrait::new(arr));
-        };
+        let mut i = 0;
+        while i < self
+            .len {
+                let (entry, arr) = self.data.entry(i.into());
+                let arr = arr.deref();
+                result.append(arr.clone());
+                self.data = entry.finalize(NullableTrait::new(arr));
+                i += 1
+            };
 
         return result.span();
+    }
+
+    fn dup_n(ref self: ScriptStack, n: u32) {
+        if (n < 1) {
+            // TODO: Better Error Handling
+            panic!("error invalid stack operation");
+        }
+        let mut i = n;
+        while i > 0 {
+            i -= 1;
+            let bytearr = self.peek_byte_array(n - 1);
+            self.push_byte_array(bytearr);
+        }
+    }
+
+
+    fn tuck(ref self: ScriptStack) {
+        if self.len() < 2 {
+            panic!("pop_byte_array: stack underflow");
+        }
+
+        let top_element = self.pop_byte_array();
+        let next_element = self.pop_byte_array();
+
+        self.push_byte_array(top_element.clone());
+        self.push_byte_array(next_element);
+        self.push_byte_array(top_element);
     }
 }
