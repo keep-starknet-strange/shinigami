@@ -1070,7 +1070,7 @@ fn test_op_1negate() {
 }
 
 #[test]
-fn test_op__0_not_equal() {
+fn test_op__0_not_equal_one() {
     let program = "OP_1 OP_0NOTEQUAL";
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
@@ -1078,11 +1078,29 @@ fn test_op__0_not_equal() {
 
     engine.step();
     let res = engine.step();
-    assert!(res, "Execution of OP_ABS failed for negative number");
+    assert!(res, "Execution of run failed");
 
     let dstack = engine.get_dstack();
     assert_eq!(dstack.len(), 1, "Stack length is not 1");
 
     let expected_stack = array![ScriptNum::wrap(1)];
-    assert_eq!(dstack, expected_stack.span(), "Result is not [2]");
+    assert_eq!(dstack, expected_stack.span(), "Result is not [1]");
+}
+
+#[test]
+fn test_op__0_not_equal_zero() {
+    let program = "OP_0 OP_0NOTEQUAL";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of run failed");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 1, "Stack length is not 1");
+
+    let expected_stack = array![""];
+    assert_eq!(dstack, expected_stack.span(), "Result is not [\"\"]");
 }
