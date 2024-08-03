@@ -41,7 +41,9 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_IF', Opcode::OP_IF);
         opcodes.insert('OP_NOTIF', Opcode::OP_NOTIF);
         opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
+        opcodes.insert('OP_VERIFY', Opcode::OP_VERIFY);
         opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
+        opcodes.insert('OP_TOALTSTACK', Opcode::OP_TOALTSTACK);
         opcodes.insert('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
         opcodes.insert('OP_2DROP', Opcode::OP_2DROP);
         opcodes.insert('OP_2DUP', Opcode::OP_2DUP);
@@ -49,7 +51,10 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_DROP', Opcode::OP_DROP);
         opcodes.insert('OP_DUP', Opcode::OP_DUP);
         opcodes.insert('OP_EQUAL', Opcode::OP_EQUAL);
+        opcodes.insert('OP_2SWAP', Opcode::OP_2SWAP);
         opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
+        opcodes.insert('OP_SIZE', Opcode::OP_SIZE);
+        opcodes.insert('OP_SWAP', Opcode::OP_SWAP);
         opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
         opcodes.insert('OP_1SUB', Opcode::OP_1SUB);
         opcodes.insert('OP_NEGATE', Opcode::OP_NEGATE);
@@ -58,6 +63,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_ADD', Opcode::OP_ADD);
         opcodes.insert('OP_SUB', Opcode::OP_SUB);
         opcodes.insert('OP_BOOLAND', Opcode::OP_BOOLAND);
+        opcodes.insert('OP_NUMEQUAL', Opcode::OP_NUMEQUAL);
         opcodes.insert('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
         opcodes.insert('OP_LESSTHAN', Opcode::OP_LESSTHAN);
         opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
@@ -66,6 +72,11 @@ pub impl CompilerTraitImpl of CompilerTrait {
         opcodes.insert('OP_MIN', Opcode::OP_MIN);
         opcodes.insert('OP_MAX', Opcode::OP_MAX);
         opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
+        opcodes.insert('OP_RESERVED1', Opcode::OP_RESERVED1);
+        opcodes.insert('OP_RESERVED2', Opcode::OP_RESERVED2);
+        opcodes.insert('OP_VER', Opcode::OP_VER);
+        opcodes.insert('OP_TUCK', Opcode::OP_TUCK);
+        opcodes.insert('OP_BOOLOR', Opcode::OP_BOOLOR);
         opcodes.insert('OP_0NOTEQUAL', Opcode::OP_0NOTEQUAL);
 
         Compiler { opcodes }

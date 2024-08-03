@@ -153,4 +153,18 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             self.push_byte_array(bytearr);
         }
     }
+
+
+    fn tuck(ref self: ScriptStack) {
+        if self.len() < 2 {
+            panic!("pop_byte_array: stack underflow");
+        }
+
+        let top_element = self.pop_byte_array();
+        let next_element = self.pop_byte_array();
+
+        self.push_byte_array(top_element.clone());
+        self.push_byte_array(next_element);
+        self.push_byte_array(top_element);
+    }
 }
