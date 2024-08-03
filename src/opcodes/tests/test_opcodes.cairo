@@ -983,6 +983,46 @@ fn test_op_numequal_false() {
 }
 
 #[test]
+fn test_op_numequalverify_true() {
+    let program = "OP_2 OP_2 OP_NUMEQUALVERIFY";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_NUMEQUALVERIFY failed for 2 == 2");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 1 for 2 == 2");
+
+    let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 2 == 2");
+}
+
+#[test]
+#[should_panic(expected: "NumEqualVerify failed")]
+fn test_op_numequalverify_false() {
+    let program = "OP_2 OP_3 OP_NUMEQUALVERIFY";
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    let mut engine = EngineTraitImpl::new(bytecode);
+
+    let _ = engine.step();
+    let _ = engine.step();
+    let res = engine.step();
+    assert!(res, "Execution of OP_NUMEQUALVERIFY failed for 2 != 3");
+
+    let dstack = engine.get_dstack();
+    assert_eq!(dstack.len(), 0, "Stack length is not 0 for 2 != 3");
+
+    let expected_stack = array![];
+    assert_eq!(dstack, expected_stack.span(), "Stack is not equal to expected for 2 != 3");
+}
+
+
+#[test]
 fn test_op_numnotequal_true() {
     let program = "OP_2 OP_3 OP_NUMNOTEQUAL";
     let mut compiler = CompilerTraitImpl::new();

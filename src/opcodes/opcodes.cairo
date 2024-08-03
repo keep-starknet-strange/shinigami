@@ -50,6 +50,7 @@ pub mod Opcode {
     pub const OP_BOOLAND: u8 = 154;
     pub const OP_BOOLOR: u8 = 155;
     pub const OP_NUMEQUAL: u8 = 156;
+    pub const OP_NUMEQUALVERIFY: u8 = 157;
     pub const OP_NUMNOTEQUAL: u8 = 158;
     pub const OP_LESSTHAN: u8 = 159;
     pub const OP_GREATERTHAN: u8 = 160;
@@ -222,7 +223,7 @@ pub mod Opcode {
             154 => opcode_bool_and(ref engine),
             155 => opcode_bool_or(ref engine),
             156 => opcode_numequal(ref engine),
-            157 => not_implemented(ref engine),
+            157 => opcode_numequalverify(ref engine),
             158 => opcode_numnotequal(ref engine),
             159 => opcode_lessthan(ref engine),
             160 => opcode_greater_than(ref engine),
@@ -453,6 +454,14 @@ pub mod Opcode {
         } else {
             0
         });
+    }
+
+    fn opcode_numequalverify(ref engine: Engine) {
+        let a = engine.dstack.pop_int();
+        let b = engine.dstack.pop_int();
+        if a != b {
+            panic!("NumEqualVerify failed")
+        }
     }
 
     fn opcode_numnotequal(ref engine: Engine) {
