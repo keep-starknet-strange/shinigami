@@ -12,6 +12,7 @@ pub mod opcodes {
     pub mod splice;
     pub mod bitwise;
     pub mod arithmetic;
+    pub mod crypto;
     pub mod utils;
     #[cfg(test)]
     mod tests {
@@ -43,7 +44,4 @@ pub mod signature {
     }
     pub(crate) use signature::BaseSigVerifier;
 }
-
-pub mod utils;
-
 mod main;
