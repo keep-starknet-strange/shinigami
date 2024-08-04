@@ -25,6 +25,16 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.push_byte_array(bytes);
     }
 
+    fn push_bool(ref self: ScriptStack, value: bool) {
+        if value {
+            let mut v: ByteArray = Default::default();
+            v.append_byte(1);
+            self.push_byte_array(v);
+        } else {
+            self.push_byte_array(Default::default());
+        }
+    }
+
     fn pop_byte_array(ref self: ScriptStack) -> Result<ByteArray, felt252> {
         if self.len == 0 {
             return Result::Err(Error::STACK_UNDERFLOW);
