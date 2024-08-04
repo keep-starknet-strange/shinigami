@@ -5,7 +5,10 @@ use shinigami::opcodes::Opcode;
 use shinigami::opcodes::utils;
 
 pub fn is_branching_opcode(opcode: u8) -> bool {
-    if opcode == Opcode::OP_IF || opcode == Opcode::OP_NOTIF || opcode == Opcode::OP_ELSE || opcode == Opcode::OP_ENDIF {
+    if opcode == Opcode::OP_IF
+        || opcode == Opcode::OP_NOTIF
+        || opcode == Opcode::OP_ELSE
+        || opcode == Opcode::OP_ENDIF {
         return true;
     }
     return false;

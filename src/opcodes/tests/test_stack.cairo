@@ -86,7 +86,13 @@ fn test_op_swap_mid() {
     let program = "OP_1 OP_2 OP_3 OP_SWAP OP_4 OP_5";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 5);
-    let expected_dstack = array![ScriptNum::wrap(1), ScriptNum::wrap(3), ScriptNum::wrap(2), ScriptNum::wrap(4), ScriptNum::wrap(5)];
+    let expected_dstack = array![
+        ScriptNum::wrap(1),
+        ScriptNum::wrap(3),
+        ScriptNum::wrap(2),
+        ScriptNum::wrap(4),
+        ScriptNum::wrap(5)
+    ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
 
@@ -118,7 +124,9 @@ fn test_op_2dup() {
     let program = "OP_1 OP_2 OP_2DUP";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 4);
-    let expected_dstack = array![ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(1), ScriptNum::wrap(2)];
+    let expected_dstack = array![
+        ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(1), ScriptNum::wrap(2)
+    ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
 
@@ -127,7 +135,14 @@ fn test_op_3dup() {
     let program = "OP_1 OP_2 OP_3 OP_3DUP";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 6);
-    let expected_dstack = array![ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(3), ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(3)];
+    let expected_dstack = array![
+        ScriptNum::wrap(1),
+        ScriptNum::wrap(2),
+        ScriptNum::wrap(3),
+        ScriptNum::wrap(1),
+        ScriptNum::wrap(2),
+        ScriptNum::wrap(3)
+    ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
 
@@ -136,7 +151,9 @@ fn test_op_2swap() {
     let program = "OP_1 OP_2 OP_3 OP_4 OP_2SWAP";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 4);
-    let expected_dstack = array![ScriptNum::wrap(3), ScriptNum::wrap(4), ScriptNum::wrap(1), ScriptNum::wrap(2)];
+    let expected_dstack = array![
+        ScriptNum::wrap(3), ScriptNum::wrap(4), ScriptNum::wrap(1), ScriptNum::wrap(2)
+    ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
 
@@ -145,7 +162,14 @@ fn test_op_2swap_mid() {
     let program = "OP_1 OP_2 OP_3 OP_4 OP_2SWAP OP_5 OP_6";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 6);
-    let expected_dstack = array![ScriptNum::wrap(3), ScriptNum::wrap(4), ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(5), ScriptNum::wrap(6)];
+    let expected_dstack = array![
+        ScriptNum::wrap(3),
+        ScriptNum::wrap(4),
+        ScriptNum::wrap(1),
+        ScriptNum::wrap(2),
+        ScriptNum::wrap(5),
+        ScriptNum::wrap(6)
+    ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
 
