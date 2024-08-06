@@ -1,6 +1,8 @@
 use core::option::OptionTrait;
 use core::dict::Felt252DictEntryTrait;
 use shinigami::scriptnum::ScriptNum;
+use shinigami::errors::Error;
+use shinigami::utils;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -24,79 +26,44 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.push_byte_array(bytes);
     }
 
-    fn pop_byte_array(ref self: ScriptStack) -> ByteArray {
+    fn pop_byte_array(ref self: ScriptStack) -> Result<ByteArray, felt252> {
         if self.len == 0 {
-            // TODO
-            panic!("pop_byte_array: stack underflow");
+            return Result::Err(Error::STACK_UNDERFLOW);
         }
         self.len -= 1;
         let (entry, bytes) = self.data.entry(self.len.into());
         self.data = entry.finalize(NullableTrait::new(""));
-        bytes.deref()
+        return Result::Ok(bytes.deref());
     }
 
-    fn pop_int(ref self: ScriptStack) -> i64 {
-        //TODO Error Handling
-        let bytes = self.pop_byte_array();
-        ScriptNum::unwrap(bytes)
+    fn pop_int(ref self: ScriptStack) -> Result<i64, felt252> {
+        let value = self.pop_byte_array()?;
+        return Result::Ok(ScriptNum::unwrap(value));
     }
 
-    fn pop_bool(ref self: ScriptStack) -> bool {
-        let bytes = self.pop_byte_array();
-
-        let mut i = 0;
-        let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
-                    break;
-                }
-                i += 1;
-            };
-        return ret_bool;
+    fn pop_bool(ref self: ScriptStack) -> Result<bool, felt252> {
+        let bytes = self.pop_byte_array()?;
+        return Result::Ok(utils::byte_array_to_bool(@bytes));
     }
 
-    fn peek_byte_array(ref self: ScriptStack, idx: usize) -> ByteArray {
+    fn peek_byte_array(ref self: ScriptStack, idx: usize) -> Result<ByteArray, felt252> {
         if idx >= self.len {
-            // TODO
-            panic!("peek_byte_array: stack underflow");
+            return Result::Err(Error::STACK_OUT_OF_RANGE);
         }
         let (entry, bytes) = self.data.entry((self.len - idx - 1).into());
         let bytes = bytes.deref();
         self.data = entry.finalize(NullableTrait::new(bytes.clone()));
-        bytes
+        return Result::Ok(bytes);
     }
 
-    fn peek_int(ref self: ScriptStack, idx: usize) -> i64 {
-        let bytes = self.peek_byte_array(idx);
-        ScriptNum::unwrap(bytes)
+    fn peek_int(ref self: ScriptStack, idx: usize) -> Result<i64, felt252> {
+        let bytes = self.peek_byte_array(idx)?;
+        return Result::Ok(ScriptNum::unwrap(bytes));
     }
 
-    fn peek_bool(ref self: ScriptStack, idx: usize) -> bool {
-        let bytes = self.peek_byte_array(idx);
-
-        let mut i = 0;
-        let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
-                    break;
-                }
-                i += 1;
-            };
-        return ret_bool;
+    fn peek_bool(ref self: ScriptStack, idx: usize) -> Result<bool, felt252> {
+        let bytes = self.peek_byte_array(idx)?;
+        return Result::Ok(utils::byte_array_to_bool(@bytes));
     }
 
     fn len(ref self: ScriptStack) -> usize {
@@ -141,47 +108,51 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         return result.span();
     }
 
-    fn dup_n(ref self: ScriptStack, n: u32) {
+    fn dup_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        // TODO: STACK_OUT_OF_RANGE?
         if (n < 1) {
-            // TODO: Better Error Handling
-            panic!("error invalid stack operation");
+            return Result::Err('dup_n: invalid n value');
         }
         let mut i = n;
+        let mut err = '';
         while i > 0 {
             i -= 1;
-            let bytearr = self.peek_byte_array(n - 1);
-            self.push_byte_array(bytearr);
+            let value = self.peek_byte_array(n - 1);
+            if value.is_err() {
+                break;
+            }
+            self.push_byte_array(value.unwrap());
+        };
+        if err != '' {
+            return Result::Err(err);
         }
+        return Result::Ok(());
     }
 
-
-    fn tuck(ref self: ScriptStack) {
-        if self.len() < 2 {
-            panic!("pop_byte_array: stack underflow");
-        }
-
-        let top_element = self.pop_byte_array();
-        let next_element = self.pop_byte_array();
+    fn tuck(ref self: ScriptStack) -> Result<(), felt252> {
+        let top_element = self.pop_byte_array()?;
+        let next_element = self.pop_byte_array()?;
 
         self.push_byte_array(top_element.clone());
         self.push_byte_array(next_element);
         self.push_byte_array(top_element);
+        return Result::Ok(());
     }
 
-    fn nip_n(ref self: ScriptStack, idx: usize) {
-        if idx > self.len || idx < 0 {
-            panic!("nip_n: index out of range");
-        }
+    fn nip_n(ref self: ScriptStack, idx: usize) -> Result<ByteArray, felt252> {
+        let value = self.peek_byte_array(idx)?;
 
+        // Shift all elements above idx down by one
         let mut i = 0;
-        while i < self
-            .len {
-                if i == idx {
-                    let (entry, _arr) = self.data.entry(i.into());
-                    self.data = entry.finalize(NullableTrait::new(""));
-                }
-
-                i += 1;
-            };
+        while i < idx {
+            let next_value = self.peek_byte_array(i).unwrap();
+            let (entry, _) = self.data.entry((self.len - idx + i - 1).into());
+            self.data = entry.finalize(NullableTrait::new(next_value));
+            i += 1;
+        };
+        let (last_entry, _) = self.data.entry((self.len - 1).into());
+        self.data = last_entry.finalize(NullableTrait::new(""));
+        self.len -= 1;
+        return Result::Ok(value);
     }
 }
