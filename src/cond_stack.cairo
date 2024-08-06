@@ -15,8 +15,12 @@ pub impl ConditionalStackImpl of ConditionalStackTrait {
         self.len += 1;
     }
 
-    fn pop(ref self: ConditionalStack) {
+    fn pop(ref self: ConditionalStack) -> Result<(), felt252> {
+        if self.len == 0 {
+            return Result::Err('pop: conditional stack is empty');
+        }
         self.len -= 1;
+        return Result::Ok(());
     }
 
     fn branch_executing(ref self: ConditionalStack) -> bool {

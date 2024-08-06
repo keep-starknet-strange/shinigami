@@ -2,11 +2,27 @@ pub mod compiler;
 pub mod engine;
 pub mod stack;
 pub mod cond_stack;
+pub mod utils;
+pub mod errors;
 pub mod opcodes {
     pub mod opcodes;
+    pub mod constants;
+    pub mod flow;
+    pub mod stack;
+    pub mod splice;
+    pub mod bitwise;
+    pub mod arithmetic;
+    pub mod utils;
+    #[cfg(test)]
     mod tests {
-        #[cfg(test)]
-        mod test_opcodes;
+        mod test_constants;
+        mod test_flow;
+        mod test_stack;
+        mod test_splice;
+        mod test_bitwise;
+        mod test_arithmetic;
+        mod test_reserved;
+        mod utils;
     }
     pub(crate) use opcodes::Opcode;
 }

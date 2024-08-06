@@ -1,4 +1,5 @@
 use shinigami::opcodes::Opcode;
+use shinigami::utils;
 
 // Compiler that takes a Bitcoin Script program and compiles it into a bytecode
 #[derive(Destruct)]
@@ -10,121 +11,151 @@ pub struct Compiler {
 pub trait CompilerTrait {
     // Create a compiler, initializing the opcode dict
     fn new() -> Compiler;
+    // Adds an opcode "OP_XXX" to the opcodes dict under: "OP_XXX" and "XXX"
+    fn add_opcode(ref self: Compiler, name: felt252, opcode: u8);
     // Compiles a program like "OP_1 OP_2 OP_ADD" into a bytecode run by the Engine.
     fn compile(self: Compiler, script: ByteArray) -> ByteArray;
 }
 
 pub impl CompilerTraitImpl of CompilerTrait {
     fn new() -> Compiler {
-        let mut opcodes = Default::default();
+        let mut compiler = Compiler { opcodes: Default::default() };
         // Add the opcodes to the dict
-        opcodes.insert('OP_0', Opcode::OP_0);
-        opcodes.insert('OP_1NEGATE', Opcode::OP_1NEGATE);
-        opcodes.insert('OP_1', Opcode::OP_1);
-        opcodes.insert('OP_TRUE', Opcode::OP_TRUE);
-        opcodes.insert('OP_2', Opcode::OP_2);
-        opcodes.insert('OP_3', Opcode::OP_3);
-        opcodes.insert('OP_4', Opcode::OP_4);
-        opcodes.insert('OP_5', Opcode::OP_5);
-        opcodes.insert('OP_6', Opcode::OP_6);
-        opcodes.insert('OP_7', Opcode::OP_7);
-        opcodes.insert('OP_8', Opcode::OP_8);
-        opcodes.insert('OP_9', Opcode::OP_9);
-        opcodes.insert('OP_10', Opcode::OP_10);
-        opcodes.insert('OP_11', Opcode::OP_11);
-        opcodes.insert('OP_12', Opcode::OP_12);
-        opcodes.insert('OP_13', Opcode::OP_13);
-        opcodes.insert('OP_14', Opcode::OP_14);
-        opcodes.insert('OP_15', Opcode::OP_15);
-        opcodes.insert('OP_16', Opcode::OP_16);
-        opcodes.insert('OP_NOP', Opcode::OP_NOP);
-        opcodes.insert('OP_IF', Opcode::OP_IF);
-        opcodes.insert('OP_NOTIF', Opcode::OP_NOTIF);
-        opcodes.insert('OP_ELSE', Opcode::OP_ELSE);
-        opcodes.insert('OP_VERIFY', Opcode::OP_VERIFY);
-        opcodes.insert('OP_ENDIF', Opcode::OP_ENDIF);
-        opcodes.insert('OP_TOALTSTACK', Opcode::OP_TOALTSTACK);
-        opcodes.insert('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
-        opcodes.insert('OP_2DROP', Opcode::OP_2DROP);
-        opcodes.insert('OP_2DUP', Opcode::OP_2DUP);
-        opcodes.insert('OP_3DUP', Opcode::OP_3DUP);
-        opcodes.insert('OP_DROP', Opcode::OP_DROP);
-        opcodes.insert('OP_DUP', Opcode::OP_DUP);
-        opcodes.insert('OP_EQUAL', Opcode::OP_EQUAL);
-        opcodes.insert('OP_2SWAP', Opcode::OP_2SWAP);
-        opcodes.insert('OP_DEPTH', Opcode::OP_DEPTH);
-        opcodes.insert('OP_SIZE', Opcode::OP_SIZE);
-        opcodes.insert('OP_SWAP', Opcode::OP_SWAP);
-        opcodes.insert('OP_1ADD', Opcode::OP_1ADD);
-        opcodes.insert('OP_1SUB', Opcode::OP_1SUB);
-        opcodes.insert('OP_NEGATE', Opcode::OP_NEGATE);
-        opcodes.insert('OP_ABS', Opcode::OP_ABS);
-        opcodes.insert('OP_NOT', Opcode::OP_NOT);
-        opcodes.insert('OP_ADD', Opcode::OP_ADD);
-        opcodes.insert('OP_SUB', Opcode::OP_SUB);
-        opcodes.insert('OP_BOOLAND', Opcode::OP_BOOLAND);
-        opcodes.insert('OP_NUMEQUAL', Opcode::OP_NUMEQUAL);
-        opcodes.insert('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
-        opcodes.insert('OP_LESSTHAN', Opcode::OP_LESSTHAN);
-        opcodes.insert('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
-        opcodes.insert('OP_LESSTHANOREQUAL', Opcode::OP_LESSTHANOREQUAL);
-        opcodes.insert('OP_GREATERTHANOREQUAL', Opcode::OP_GREATERTHANOREQUAL);
-        opcodes.insert('OP_MIN', Opcode::OP_MIN);
-        opcodes.insert('OP_MAX', Opcode::OP_MAX);
-        opcodes.insert('OP_WITHIN', Opcode::OP_WITHIN);
-        opcodes.insert('OP_RESERVED', Opcode::OP_RESERVED);
-        opcodes.insert('OP_RESERVED1', Opcode::OP_RESERVED1);
-        opcodes.insert('OP_RESERVED2', Opcode::OP_RESERVED2);
-        opcodes.insert('OP_VER', Opcode::OP_VER);
-        opcodes.insert('OP_TUCK', Opcode::OP_TUCK);
-        opcodes.insert('OP_BOOLOR', Opcode::OP_BOOLOR);
+        compiler.add_opcode('OP_0', Opcode::OP_0);
+        compiler.add_opcode('OP_FALSE', Opcode::OP_0);
+        compiler.add_opcode('OP_DATA_1', Opcode::OP_DATA_1);
+        compiler.add_opcode('OP_DATA_2', Opcode::OP_DATA_2);
+        compiler.add_opcode('OP_DATA_3', Opcode::OP_DATA_3);
+        compiler.add_opcode('OP_DATA_4', Opcode::OP_DATA_4);
+        compiler.add_opcode('OP_DATA_5', Opcode::OP_DATA_5);
+        compiler.add_opcode('OP_DATA_6', Opcode::OP_DATA_6);
+        compiler.add_opcode('OP_PUSHDATA1', Opcode::OP_PUSHDATA1);
+        compiler.add_opcode('OP_1NEGATE', Opcode::OP_1NEGATE);
+        compiler.add_opcode('OP_1', Opcode::OP_1);
+        compiler.add_opcode('OP_TRUE', Opcode::OP_TRUE);
+        compiler.add_opcode('OP_2', Opcode::OP_2);
+        compiler.add_opcode('OP_3', Opcode::OP_3);
+        compiler.add_opcode('OP_4', Opcode::OP_4);
+        compiler.add_opcode('OP_5', Opcode::OP_5);
+        compiler.add_opcode('OP_6', Opcode::OP_6);
+        compiler.add_opcode('OP_7', Opcode::OP_7);
+        compiler.add_opcode('OP_8', Opcode::OP_8);
+        compiler.add_opcode('OP_9', Opcode::OP_9);
+        compiler.add_opcode('OP_10', Opcode::OP_10);
+        compiler.add_opcode('OP_11', Opcode::OP_11);
+        compiler.add_opcode('OP_12', Opcode::OP_12);
+        compiler.add_opcode('OP_13', Opcode::OP_13);
+        compiler.add_opcode('OP_14', Opcode::OP_14);
+        compiler.add_opcode('OP_15', Opcode::OP_15);
+        compiler.add_opcode('OP_16', Opcode::OP_16);
+        compiler.add_opcode('OP_NOP', Opcode::OP_NOP);
+        compiler.add_opcode('OP_IF', Opcode::OP_IF);
+        compiler.add_opcode('OP_NOTIF', Opcode::OP_NOTIF);
+        compiler.add_opcode('OP_ELSE', Opcode::OP_ELSE);
+        compiler.add_opcode('OP_ENDIF', Opcode::OP_ENDIF);
+        compiler.add_opcode('OP_VERIFY', Opcode::OP_VERIFY);
+        compiler.add_opcode('OP_RETURN', Opcode::OP_RETURN);
+        compiler.add_opcode('OP_TOALTSTACK', Opcode::OP_TOALTSTACK);
+        compiler.add_opcode('OP_FROMALTSTACK', Opcode::OP_FROMALTSTACK);
+        compiler.add_opcode('OP_2DROP', Opcode::OP_2DROP);
+        compiler.add_opcode('OP_2DUP', Opcode::OP_2DUP);
+        compiler.add_opcode('OP_3DUP', Opcode::OP_3DUP);
+        compiler.add_opcode('OP_DROP', Opcode::OP_DROP);
+        compiler.add_opcode('OP_DUP', Opcode::OP_DUP);
+        compiler.add_opcode('OP_NIP', Opcode::OP_NIP);
+        compiler.add_opcode('OP_EQUAL', Opcode::OP_EQUAL);
+        compiler.add_opcode('OP_EQUALVERIFY', Opcode::OP_EQUALVERIFY);
+        compiler.add_opcode('OP_2ROT', Opcode::OP_2ROT);
+        compiler.add_opcode('OP_2SWAP', Opcode::OP_2SWAP);
+        compiler.add_opcode('OP_IFDUP', Opcode::OP_IFDUP);
+        compiler.add_opcode('OP_DEPTH', Opcode::OP_DEPTH);
+        compiler.add_opcode('OP_SIZE', Opcode::OP_SIZE);
+        compiler.add_opcode('OP_ROT', Opcode::OP_ROT);
+        compiler.add_opcode('OP_SWAP', Opcode::OP_SWAP);
+        compiler.add_opcode('OP_1ADD', Opcode::OP_1ADD);
+        compiler.add_opcode('OP_1SUB', Opcode::OP_1SUB);
+        compiler.add_opcode('OP_NEGATE', Opcode::OP_NEGATE);
+        compiler.add_opcode('OP_ABS', Opcode::OP_ABS);
+        compiler.add_opcode('OP_NOT', Opcode::OP_NOT);
+        compiler.add_opcode('OP_ADD', Opcode::OP_ADD);
+        compiler.add_opcode('OP_SUB', Opcode::OP_SUB);
+        compiler.add_opcode('OP_BOOLAND', Opcode::OP_BOOLAND);
+        compiler.add_opcode('OP_NUMEQUAL', Opcode::OP_NUMEQUAL);
+        compiler.add_opcode('OP_NUMEQUALVERIFY', Opcode::OP_NUMEQUALVERIFY);
+        compiler.add_opcode('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
+        compiler.add_opcode('OP_LESSTHAN', Opcode::OP_LESSTHAN);
+        compiler.add_opcode('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
+        compiler.add_opcode('OP_LESSTHANOREQUAL', Opcode::OP_LESSTHANOREQUAL);
+        compiler.add_opcode('OP_GREATERTHANOREQUAL', Opcode::OP_GREATERTHANOREQUAL);
+        compiler.add_opcode('OP_MIN', Opcode::OP_MIN);
+        compiler.add_opcode('OP_MAX', Opcode::OP_MAX);
+        compiler.add_opcode('OP_WITHIN', Opcode::OP_WITHIN);
+        compiler.add_opcode('OP_RESERVED', Opcode::OP_RESERVED);
+        compiler.add_opcode('OP_RESERVED1', Opcode::OP_RESERVED1);
+        compiler.add_opcode('OP_RESERVED2', Opcode::OP_RESERVED2);
+        compiler.add_opcode('OP_VER', Opcode::OP_VER);
+        compiler.add_opcode('OP_TUCK', Opcode::OP_TUCK);
+        compiler.add_opcode('OP_BOOLOR', Opcode::OP_BOOLOR);
 
-        Compiler { opcodes }
+        compiler
+    }
+
+    fn add_opcode(ref self: Compiler, name: felt252, opcode: u8) {
+        // Insert opcode formatted like OP_XXX
+        self.opcodes.insert(name, opcode);
+
+        // Remove OP_ prefix and insert opcode XXX
+        let nameu256 = name.into();
+        let mut name_mask: u256 = 1;
+        while name_mask < nameu256 {
+            name_mask = name_mask * 256; // Shift left 1 byte
+        };
+        name_mask = name_mask / 16_777_216; // Shift right 3 bytes
+        self.opcodes.insert((nameu256 % name_mask).try_into().unwrap(), opcode);
     }
 
     // TODO: Why self is mutable?
     fn compile(mut self: Compiler, script: ByteArray) -> ByteArray {
         let mut bytecode = "";
         let seperator = ' ';
-        let byte_shift = 256;
-        let max_word_size = 31;
-        let mut current: felt252 = '';
+
+        // Split the script into opcodes / data
+        let mut split_script: Array<ByteArray> = array![];
+        let mut current = "";
         let mut i = 0;
-        let mut word_len = 0;
-        let mut current_word: felt252 = '';
-        while i < script.len() {
+        let script_len = script.len();
+        while i < script_len {
             let char = script[i].into();
             if char == seperator {
-                let opcode = self.opcodes.get(current);
-                current_word = current_word * byte_shift + opcode.into();
-                word_len += 1;
-                if word_len >= max_word_size {
-                    // Add the current word to the bytecode representation
-                    bytecode.append_word(current_word, max_word_size);
-                    word_len = 0;
+                if current == "" {
+                    i += 1;
+                    continue;
                 }
-                current = '';
+                split_script.append(current);
+                current = "";
             } else {
-                // Add the char to the bytecode representation
-                current = current * byte_shift + char;
+                current.append_byte(char);
             }
             i += 1;
         };
         // Handle the last opcode
-        if current != '' {
-            let opcode = self.opcodes.get(current);
-            current_word = current_word * byte_shift + opcode.into();
-            word_len += 1;
-            if word_len >= max_word_size {
-                // Add the current word to the bytecode representation
-                bytecode.append_word(current_word, max_word_size);
-                word_len = 0;
+        if current != "" {
+            split_script.append(current);
+        }
+
+        // Compile the script into bytecode
+        let mut i = 0;
+        let script_len = split_script.len();
+        while i < script_len {
+            let script_item = split_script.at(i);
+            if utils::is_hex(script_item) {
+                ByteArrayTrait::append(ref bytecode, @utils::hex_to_bytecode(script_item));
+            } else {
+                // TODO: Check opcode exists
+                bytecode.append_byte(self.opcodes.get(utils::byte_array_to_felt252(script_item)));
             }
-        }
-        if word_len > 0 {
-            // Add the current word to the bytecode representation
-            bytecode.append_word(current_word, word_len);
-        }
+            i += 1;
+        };
 
         bytecode
     }
