@@ -207,6 +207,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://varun-doshi.vercel.app/"><img src="https://avatars.githubusercontent.com/u/61531351?v=4?s=100" width="100px;" alt="Varun Doshi"/><br /><sub><b>Varun Doshi</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=varun-doshi" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kateberryd"><img src="https://avatars.githubusercontent.com/u/35270183?v=4?s=100" width="100px;" alt="Zintarh"/><br /><sub><b>Zintarh</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=kateberryd" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/EjembiEmmanuel"><img src="https://avatars.githubusercontent.com/u/83036156?v=4?s=100" width="100px;" alt="Oche"/><br /><sub><b>Oche</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=EjembiEmmanuel" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Gift-Naomi"><img src="https://avatars.githubusercontent.com/u/149405096?v=4?s=100" width="100px;" alt="Mystic"/><br /><sub><b>Mystic</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Gift-Naomi" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
