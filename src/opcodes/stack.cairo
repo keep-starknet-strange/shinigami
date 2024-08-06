@@ -1,5 +1,6 @@
 use shinigami::engine::{Engine, EngineTrait};
 use shinigami::stack::ScriptStackTrait;
+use shinigami::utils;
 
 pub fn opcode_toaltstack(ref engine: Engine) -> Result<(), felt252> {
     let value = engine.dstack.pop_byte_array()?;
@@ -34,6 +35,15 @@ pub fn opcode_swap(ref engine: Engine) -> Result<(), felt252> {
     let b = engine.dstack.pop_int()?;
     engine.dstack.push_int(a);
     engine.dstack.push_int(b);
+    return Result::Ok(());
+}
+
+pub fn opcode_ifdup(ref engine: Engine) -> Result<(), felt252> {
+    let a = engine.dstack.peek_byte_array(0)?;
+
+    if utils::byte_array_to_bool(@a) {
+        engine.dstack.push_byte_array(a);
+    }
     return Result::Ok(());
 }
 

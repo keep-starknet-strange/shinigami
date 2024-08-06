@@ -65,6 +65,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_EQUAL', Opcode::OP_EQUAL);
         compiler.add_opcode('OP_EQUALVERIFY', Opcode::OP_EQUALVERIFY);
         compiler.add_opcode('OP_2SWAP', Opcode::OP_2SWAP);
+        compiler.add_opcode('OP_IFDUP', Opcode::OP_IFDUP);
         compiler.add_opcode('OP_DEPTH', Opcode::OP_DEPTH);
         compiler.add_opcode('OP_SIZE', Opcode::OP_SIZE);
         compiler.add_opcode('OP_SWAP', Opcode::OP_SWAP);

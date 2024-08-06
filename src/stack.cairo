@@ -2,6 +2,7 @@ use core::option::OptionTrait;
 use core::dict::Felt252DictEntryTrait;
 use shinigami::scriptnum::ScriptNum;
 use shinigami::errors::Error;
+use shinigami::utils;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -42,23 +43,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn pop_bool(ref self: ScriptStack) -> Result<bool, felt252> {
         let bytes = self.pop_byte_array()?;
-
-        let mut i = 0;
-        let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
-                    break;
-                }
-                i += 1;
-            };
-        return Result::Ok(ret_bool);
+        return Result::Ok(utils::byte_array_to_bool(@bytes));
     }
 
     fn peek_byte_array(ref self: ScriptStack, idx: usize) -> Result<ByteArray, felt252> {
@@ -78,23 +63,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn peek_bool(ref self: ScriptStack, idx: usize) -> Result<bool, felt252> {
         let bytes = self.peek_byte_array(idx)?;
-
-        let mut i = 0;
-        let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
-                    break;
-                }
-                i += 1;
-            };
-        return Result::Ok(ret_bool);
+        return Result::Ok(utils::byte_array_to_bool(@bytes));
     }
 
     fn len(ref self: ScriptStack) -> usize {
@@ -158,7 +127,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
         return Result::Ok(());
     }
-
 
     fn tuck(ref self: ScriptStack) -> Result<(), felt252> {
         let top_element = self.pop_byte_array()?;
