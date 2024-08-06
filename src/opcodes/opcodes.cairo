@@ -43,6 +43,7 @@ pub mod Opcode {
     pub const OP_DEPTH: u8 = 116;
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
+    pub const OP_NIP: u8 = 119;
     pub const OP_SWAP: u8 = 124;
     pub const OP_TUCK: u8 = 125;
     pub const OP_SIZE: u8 = 130;
@@ -192,7 +193,7 @@ pub mod Opcode {
             116 => stack::opcode_depth(ref engine),
             117 => stack::opcode_drop(ref engine),
             118 => stack::opcode_dup(ref engine),
-            119 => utils::not_implemented(ref engine),
+            119 => stack::opcode_nip(ref engine),
             120 => utils::not_implemented(ref engine),
             121 => utils::not_implemented(ref engine),
             122 => utils::not_implemented(ref engine),

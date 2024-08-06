@@ -205,3 +205,28 @@ fn test_op_2swap_underflow() {
     let program = "OP_1 OP_2 OP_3 OP_2SWAP";
     let _ = utils::test_compile_and_run_err(program, Error::STACK_UNDERFLOW);
 }
+
+#[test]
+fn test_op_nip() {
+    let program = "OP_1 OP_2 OP_NIP";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_dstack = array![ScriptNum::wrap(2)];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
+fn test_op_nip_multi() {
+    let program = "OP_1 OP_2 OP_3 OP_NIP";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 2);
+    let expected_dstack = array![ScriptNum::wrap(1), ScriptNum::wrap(3)];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
+fn test_op_nip_out_of_bounds() {
+    let program = "OP_NIP";
+    let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
+    utils::check_dstack_size(ref engine, 0);
+}

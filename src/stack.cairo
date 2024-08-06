@@ -109,6 +109,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn dup_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        // TODO: STACK_OUT_OF_RANGE?
         if (n < 1) {
             return Result::Err('dup_n: invalid n value');
         }
@@ -136,5 +137,22 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.push_byte_array(next_element);
         self.push_byte_array(top_element);
         return Result::Ok(());
+    }
+
+    fn nip_n(ref self: ScriptStack, idx: usize) -> Result<ByteArray, felt252> {
+        let value = self.peek_byte_array(idx)?;
+
+        // Shift all elements above idx down by one
+        let mut i = 0;
+        while i < idx {
+            let next_value = self.peek_byte_array(i).unwrap();
+            let (entry, _) = self.data.entry((self.len - idx + i - 1).into());
+            self.data = entry.finalize(NullableTrait::new(next_value));
+            i += 1;
+        };
+        let (last_entry, _) = self.data.entry((self.len - 1).into());
+        self.data = last_entry.finalize(NullableTrait::new(""));
+        self.len -= 1;
+        return Result::Ok(value);
     }
 }

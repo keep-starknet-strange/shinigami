@@ -38,6 +38,11 @@ pub fn opcode_swap(ref engine: Engine) -> Result<(), felt252> {
     return Result::Ok(());
 }
 
+pub fn opcode_nip(ref engine: Engine) -> Result<(), felt252> {
+    engine.dstack.nip_n(1)?;
+    return Result::Ok(());
+}
+
 pub fn opcode_ifdup(ref engine: Engine) -> Result<(), felt252> {
     let a = engine.dstack.peek_byte_array(0)?;
 
