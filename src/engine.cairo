@@ -1,6 +1,8 @@
 use shinigami::stack::{ScriptStack, ScriptStackImpl};
 use shinigami::cond_stack::{ConditionalStack, ConditionalStackImpl};
-use shinigami::opcodes::opcodes::Opcode::{execute, is_branching_opcode};
+use shinigami::opcodes::opcodes::Opcode;
+use shinigami::opcodes::flow;
+use shinigami::errors::Error;
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -22,10 +24,12 @@ pub struct Engine {
 pub trait EngineTrait {
     // Create a new Engine with the given script
     fn new(script: ByteArray) -> Engine;
+    // Pulls the next len bytes from the script and advances the program counter
+    fn pull_data(ref self: Engine, len: usize) -> ByteArray;
     fn get_dstack(ref self: Engine) -> Span<ByteArray>;
     fn get_astack(ref self: Engine) -> Span<ByteArray>;
     // Executes the next instruction in the script
-    fn step(ref self: Engine) -> bool; // TODO return type w/ error handling
+    fn step(ref self: Engine) -> Result<bool, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
     fn execute(ref self: Engine) -> Result<ByteArray, felt252>;
 }
@@ -41,6 +45,22 @@ pub impl EngineTraitImpl of EngineTrait {
         }
     }
 
+    // TODO: Test multiple of these in a row
+    // TODO: Pull data version for numbers
+    fn pull_data(ref self: Engine, len: usize) -> ByteArray {
+        // TODO: optimize
+        // TODO: check bounds with error handling
+        let mut data = "";
+        let mut i = self.opcode_idx + 1;
+        let end = i + len;
+        while i < end {
+            data.append_byte(self.script[i]);
+            i += 1;
+        };
+        self.opcode_idx = end - 1;
+        return data;
+    }
+
     fn get_dstack(ref self: Engine) -> Span<ByteArray> {
         return self.dstack.stack_to_span();
     }
@@ -49,49 +69,52 @@ pub impl EngineTraitImpl of EngineTrait {
         return self.astack.stack_to_span();
     }
 
-    fn step(ref self: Engine) -> bool {
+    fn step(ref self: Engine) -> Result<bool, felt252> {
         if self.opcode_idx >= self.script.len() {
-            return false;
+            return Result::Ok(false);
         }
 
         if !self.cond_stack.branch_executing()
-            && !is_branching_opcode(self.script[self.opcode_idx]) {
+            && !flow::is_branching_opcode(self.script[self.opcode_idx]) {
             self.opcode_idx += 1;
-            return true;
+            return Result::Ok(true);
         }
 
         let opcode = self.script[self.opcode_idx];
-        execute(opcode, ref self);
+        Opcode::execute(opcode, ref self)?;
         self.opcode_idx += 1;
-        return true;
+        return Result::Ok(true);
     }
 
     fn execute(ref self: Engine) -> Result<ByteArray, felt252> {
+        let mut err = '';
         while self
             .opcode_idx < self
             .script
             .len() {
                 if !self.cond_stack.branch_executing()
-                    && !is_branching_opcode(self.script[self.opcode_idx]) {
+                    && !flow::is_branching_opcode(self.script[self.opcode_idx]) {
                     self.opcode_idx += 1;
                     continue;
                 }
                 let opcode = self.script[self.opcode_idx];
-                execute(opcode, ref self);
+                let res = Opcode::execute(opcode, ref self);
+                if res.is_err() {
+                    err = res.unwrap_err();
+                    break;
+                }
                 self.opcode_idx += 1;
-            // TODO: remove debug
-            // self.dstack.print();
-            // println!("==================");
             };
+        if err != '' {
+            return Result::Err(err);
+        }
 
         // TODO: CheckErrorCondition
         if self.dstack.len() < 1 {
-            return Result::Err('Stack empty at end of script');
-        } else if self.dstack.len() > 1 {
-            return Result::Err('Stack must contain item');
+            return Result::Err(Error::SCRIPT_EMPTY_STACK);
         } else {
-            // TODO: pop bool
-            let top_stack = self.dstack.pop_byte_array();
+            // TODO: pop bool?
+            let top_stack = self.dstack.peek_byte_array(0)?;
             let ret_val = top_stack.clone();
             let mut is_ok = false;
             let mut i = 0;
@@ -105,7 +128,7 @@ pub impl EngineTraitImpl of EngineTrait {
             if is_ok {
                 return Result::Ok(ret_val);
             } else {
-                return Result::Err('Script failed');
+                return Result::Err(Error::SCRIPT_FAILED);
             }
         }
     }

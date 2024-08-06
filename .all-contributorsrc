@@ -144,6 +144,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "estherbreath",
+      "name": "Esther Breath",
+      "avatar_url": "https://avatars.githubusercontent.com/u/107428391?v=4",
+      "profile": "https://github.com/estherbreath",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "varun-doshi",
+      "name": "Varun Doshi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61531351?v=4",
+      "profile": "https://varun-doshi.vercel.app/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kateberryd",
+      "name": "Zintarh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35270183?v=4",
+      "profile": "https://github.com/kateberryd",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
