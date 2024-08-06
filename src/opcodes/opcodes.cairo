@@ -59,6 +59,7 @@ pub mod Opcode {
     pub const OP_NEGATE: u8 = 143;
     pub const OP_ABS: u8 = 144;
     pub const OP_NOT: u8 = 145;
+    pub const OP_0NOTEQUAL: u8 = 146;
     pub const OP_ADD: u8 = 147;
     pub const OP_SUB: u8 = 148;
     pub const OP_BOOLAND: u8 = 154;
@@ -73,6 +74,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::opcodes::{constants, flow, stack, splice, bitwise, arithmetic, utils};
@@ -224,7 +226,7 @@ pub mod Opcode {
             143 => arithmetic::opcode_negate(ref engine),
             144 => arithmetic::opcode_abs(ref engine),
             145 => arithmetic::opcode_not(ref engine),
-            146 => utils::not_implemented(ref engine),
+            146 => arithmetic::opcode_0_not_equal(ref engine),
             147 => arithmetic::opcode_add(ref engine),
             148 => arithmetic::opcode_sub(ref engine),
             149 => utils::not_implemented(ref engine),

@@ -42,6 +42,17 @@ pub fn opcode_not(ref engine: Engine) -> Result<(), felt252> {
     return Result::Ok(());
 }
 
+pub fn opcode_0_not_equal(ref engine: Engine) -> Result<(), felt252> {
+    let a = engine.dstack.pop_int()?;
+
+    engine.dstack.push_int(if a != 0 {
+        1
+    } else {
+        0
+    });
+    return Result::Ok(());
+}
+
 pub fn opcode_add(ref engine: Engine) -> Result<(), felt252> {
     let a = engine.dstack.pop_int()?;
     let b = engine.dstack.pop_int()?;

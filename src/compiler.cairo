@@ -77,6 +77,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_NEGATE', Opcode::OP_NEGATE);
         compiler.add_opcode('OP_ABS', Opcode::OP_ABS);
         compiler.add_opcode('OP_NOT', Opcode::OP_NOT);
+        compiler.add_opcode('OP_0NOTEQUAL', Opcode::OP_0NOTEQUAL);
         compiler.add_opcode('OP_ADD', Opcode::OP_ADD);
         compiler.add_opcode('OP_SUB', Opcode::OP_SUB);
         compiler.add_opcode('OP_BOOLAND', Opcode::OP_BOOLAND);
