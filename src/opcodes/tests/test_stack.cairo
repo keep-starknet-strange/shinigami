@@ -230,3 +230,42 @@ fn test_op_nip_out_of_bounds() {
     let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
     utils::check_dstack_size(ref engine, 0);
 }
+
+#[test]
+fn test_op_rot() {
+    let program = "OP_1 OP_2 OP_3 OP_ROT";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 3);
+    let expected_dstack = array![ScriptNum::wrap(2), ScriptNum::wrap(3), ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
+fn test_op_2rot() {
+    let program = "OP_1 OP_2 OP_3 OP_4 OP_5 OP_6 OP_2ROT";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 6);
+    let expected_dstack = array![
+        ScriptNum::wrap(3),
+        ScriptNum::wrap(4),
+        ScriptNum::wrap(5),
+        ScriptNum::wrap(6),
+        ScriptNum::wrap(1),
+        ScriptNum::wrap(2)
+    ];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
+fn test_op_rot_insufficient_items() {
+    let program = "OP_1 OP_2 OP_ROT";
+    let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
+    utils::check_dstack_size(ref engine, 2);
+}
+
+#[test]
+fn test_op_2rot_insufficient_items() {
+    let program = "OP_1 OP_2 OP_3 OP_4 OP_5 OP_2ROT";
+    let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
+    utils::check_dstack_size(ref engine, 5);
+}

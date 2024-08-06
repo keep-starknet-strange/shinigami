@@ -84,3 +84,13 @@ pub fn opcode_2swap(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.push_int(c);
     return Result::Ok(());
 }
+
+pub fn opcode_2rot(ref engine: Engine) -> Result<(), felt252> {
+    engine.dstack.rot_n(2)?;
+    return Result::Ok(());
+}
+
+pub fn opcode_rot(ref engine: Engine) -> Result<(), felt252> {
+    engine.dstack.rot_n(1)?;
+    return Result::Ok(());
+}

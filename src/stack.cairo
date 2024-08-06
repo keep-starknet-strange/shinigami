@@ -93,6 +93,28 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
     }
 
+    fn rot_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        if n < 1 {
+            return Result::Err('rot_n: invalid n value');
+        }
+        let mut err = '';
+        let entry_index = 3 * n - 1;
+        let mut i = n;
+        while i > 0 {
+            let res = self.nip_n(entry_index);
+            if res.is_err() {
+                err = res.unwrap_err();
+                break;
+            }
+            self.push_byte_array(res.unwrap());
+            i -= 1;
+        };
+        if err != '' {
+            return Result::Err(err);
+        }
+        return Result::Ok(());
+    }
+
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = 0;
@@ -145,7 +167,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         // Shift all elements above idx down by one
         let mut i = 0;
         while i < idx {
-            let next_value = self.peek_byte_array(i).unwrap();
+            let next_value = self.peek_byte_array(idx - i - 1).unwrap();
             let (entry, _) = self.data.entry((self.len - idx + i - 1).into());
             self.data = entry.finalize(NullableTrait::new(next_value));
             i += 1;
