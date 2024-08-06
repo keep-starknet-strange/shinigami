@@ -177,6 +177,20 @@ fn test_op_numequal_false() {
 }
 
 #[test]
+fn test_op_numequalverify_true() {
+    let program = "OP_2 OP_2 OP_NUMEQUALVERIFY";
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_EMPTY_STACK);
+    utils::check_dstack_size(ref engine, 0);
+}
+
+#[test]
+fn test_op_numequalverify_false() {
+    let program = "OP_2 OP_3 OP_NUMEQUALVERIFY";
+    let mut engine = utils::test_compile_and_run_err(program, Error::VERIFY_FAILED);
+    utils::check_dstack_size(ref engine, 0);
+}
+
+#[test]
 fn test_op_numnotequal_true() {
     let program = "OP_2 OP_3 OP_NUMNOTEQUAL";
     let mut engine = utils::test_compile_and_run(program);

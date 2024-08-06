@@ -81,6 +81,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_SUB', Opcode::OP_SUB);
         compiler.add_opcode('OP_BOOLAND', Opcode::OP_BOOLAND);
         compiler.add_opcode('OP_NUMEQUAL', Opcode::OP_NUMEQUAL);
+        compiler.add_opcode('OP_NUMEQUALVERIFY', Opcode::OP_NUMEQUALVERIFY);
         compiler.add_opcode('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
         compiler.add_opcode('OP_LESSTHAN', Opcode::OP_LESSTHAN);
         compiler.add_opcode('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
