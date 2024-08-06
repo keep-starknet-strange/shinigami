@@ -1,5 +1,6 @@
 use core::byte_array::ByteArray;
 use shinigami::scriptnum::ScriptNum;
+
 #[test]
 fn test_scriptnum_wrap_unwrap() {
     let mut int = 0;
