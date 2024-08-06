@@ -157,4 +157,4 @@ pub impl CompilerTraitImpl of CompilerTrait {
 
         bytecode
     }
-  }
+}
