@@ -8,6 +8,7 @@ pub mod Opcode {
     pub const OP_DATA_6: u8 = 6;
     pub const OP_PUSHDATA1: u8 = 76;
     pub const OP_1NEGATE: u8 = 79;
+    pub const OP_RESERVED: u8 = 80;
     pub const OP_TRUE: u8 = 81;
     pub const OP_1: u8 = 81;
     pub const OP_2: u8 = 82;
@@ -157,7 +158,7 @@ pub mod Opcode {
             77 => utils::not_implemented(ref engine),
             78 => utils::not_implemented(ref engine),
             79 => constants::opcode_1negate(ref engine),
-            80 => utils::not_implemented(ref engine),
+            80 => utils::opcode_reserved("reserved", ref engine),
             81 => constants::opcode_n(1, ref engine),
             82 => constants::opcode_n(2, ref engine),
             83 => constants::opcode_n(3, ref engine),
