@@ -1,3 +1,4 @@
+use core::traits::TryInto;
 use core::option::OptionTrait;
 use core::dict::Felt252DictEntryTrait;
 use shinigami::scriptnum::ScriptNum;
@@ -186,5 +187,11 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.data = last_entry.finalize(NullableTrait::new(""));
         self.len -= 1;
         return Result::Ok(value);
+    }
+
+    fn roll_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        let value = self.nip_n(n)?;
+        self.push_byte_array(value);
+        return Result::Ok(());
     }
 }
