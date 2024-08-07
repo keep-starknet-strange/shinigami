@@ -22,6 +22,7 @@ pub mod opcodes {
         mod test_bitwise;
         mod test_arithmetic;
         mod test_reserved;
+        mod test_disabled;
         mod utils;
     }
     pub(crate) use opcodes::Opcode;

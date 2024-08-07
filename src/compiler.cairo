@@ -97,6 +97,21 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_VER', Opcode::OP_VER);
         compiler.add_opcode('OP_TUCK', Opcode::OP_TUCK);
         compiler.add_opcode('OP_BOOLOR', Opcode::OP_BOOLOR);
+        compiler.add_opcode('OP_CAT', Opcode::OP_CAT);
+        compiler.add_opcode('OP_SUBSTR', Opcode::OP_SUBSTR);
+        compiler.add_opcode('OP_LEFT', Opcode::OP_LEFT);
+        compiler.add_opcode('OP_RIGHT', Opcode::OP_RIGHT);
+        compiler.add_opcode('OP_INVERT', Opcode::OP_INVERT);
+        compiler.add_opcode('OP_AND', Opcode::OP_AND);
+        compiler.add_opcode('OP_OR', Opcode::OP_OR);
+        compiler.add_opcode('OP_XOR', Opcode::OP_XOR);
+        compiler.add_opcode('OP_2MUL', Opcode::OP_2MUL);
+        compiler.add_opcode('OP_2DIV', Opcode::OP_2DIV);
+        compiler.add_opcode('OP_MUL', Opcode::OP_MUL);
+        compiler.add_opcode('OP_DIV', Opcode::OP_DIV);
+        compiler.add_opcode('OP_MOD', Opcode::OP_MOD);
+        compiler.add_opcode('OP_LSHIFT', Opcode::OP_LSHIFT);
+        compiler.add_opcode('OP_RSHIFT', Opcode::OP_RSHIFT);
 
         compiler
     }

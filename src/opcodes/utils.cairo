@@ -17,3 +17,7 @@ pub fn not_implemented(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_reserved(msg: ByteArray, ref engine: Engine) -> Result<(), felt252> {
     return Result::Err(Error::OPCODE_RESERVED);
 }
+
+pub fn opcode_disabled(ref engine: Engine) -> Result<(), felt252> {
+    return Result::Err(Error::OPCODE_DISABLED);
+}
