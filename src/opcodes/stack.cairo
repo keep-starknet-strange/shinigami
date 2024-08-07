@@ -1,3 +1,7 @@
+use core::traits::TryInto;
+use core::result::ResultTrait;
+use core::option::OptionTrait;
+use core::traits::Into;
 use shinigami::engine::{Engine, EngineTrait};
 use shinigami::scriptnum::ScriptNum;
 use shinigami::stack::ScriptStackTrait;
@@ -100,5 +104,11 @@ pub fn opcode_2rot(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_rot(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.rot_n(1)?;
+    return Result::Ok(());
+}
+
+pub fn opcode_roll(ref engine: Engine) -> Result<(), felt252> {
+    let value = engine.dstack.pop_int()?;
+    engine.dstack.roll_n(value.try_into().unwrap())?;
     return Result::Ok(());
 }
