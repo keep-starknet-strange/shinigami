@@ -94,6 +94,12 @@ pub impl EngineTraitImpl of EngineTrait {
             .len() {
                 if !self.cond_stack.branch_executing()
                     && !flow::is_branching_opcode(self.script[self.opcode_idx]) {
+                    let non_ex_opcode = self.script[self.opcode_idx];
+                    let res = Opcode::check_disabled(non_ex_opcode, ref self);
+                    if res.is_err() {
+                        err = res.unwrap_err();
+                        break;
+                    }
                     self.opcode_idx += 1;
                     continue;
                 }

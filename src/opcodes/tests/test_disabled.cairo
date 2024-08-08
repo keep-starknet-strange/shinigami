@@ -69,7 +69,6 @@ fn test_disabled_opcodes_else_block() {
 
 
 #[test]
-#[ignore]
 // This test should fail as the opcode is disabled
 // However since the if block is skipped so is the disabled opcode
 // TODO(109) we should be emulating how the inteperter handles disabled opcodes if blocks in core
