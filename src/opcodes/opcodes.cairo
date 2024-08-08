@@ -1,6 +1,6 @@
 pub mod Opcode {
     use core::result::ResultTrait;
-pub const OP_0: u8 = 0;
+    pub const OP_0: u8 = 0;
     pub const OP_DATA_1: u8 = 1;
     pub const OP_DATA_2: u8 = 2;
     pub const OP_DATA_3: u8 = 3;
