@@ -49,7 +49,7 @@ pub fn opcode_nip(ref engine: Engine) -> Result<(), felt252> {
 }
 
 pub fn opcode_pick(ref engine: Engine) -> Result<(), felt252> {
-    let a = engine.dstack.pop_int()?; // return i64
+    let a = engine.dstack.pop_int()?;
     engine.dstack.pick_n(ScriptNum::int_32(a))?;
 
     return Result::Ok(());

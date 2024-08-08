@@ -99,15 +99,15 @@ pub mod ScriptNum {
         value.try_into().unwrap()
     }
 
-    pub fn int_32(mut n: i64) -> i64 {
-        if n > MAX_INT32 {
-            return MAX_INT32;
+    pub fn int_32(mut n: i64) -> i32 {
+        if n > 2147483647 {
+            return 2147483647;
         }
 
-        if n < MIN_INT32 {
-            return MIN_INT32;
+        if n < -2147483648 {
+            return -2147483648;
         }
 
-        return n;
+        return n.try_into().unwrap();
     }
 }
