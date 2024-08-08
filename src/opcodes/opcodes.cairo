@@ -89,6 +89,14 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+    pub const OP_NOP1: u8 = 176;
+    pub const OP_NOP4: u8 = 179;
+    pub const OP_NOP5: u8 = 180;
+    pub const OP_NOP6: u8 = 181;
+    pub const OP_NOP7: u8 = 182;
+    pub const OP_NOP8: u8 = 183;
+    pub const OP_NOP9: u8 = 184;
+    pub const OP_NOP10: u8 = 185;
 
 
     use shinigami::engine::{Engine, EngineTrait};
@@ -261,6 +269,26 @@ pub mod Opcode {
             163 => arithmetic::opcode_min(ref engine),
             164 => arithmetic::opcode_max(ref engine),
             165 => arithmetic::opcode_within(ref engine),
+            166 => utils::not_implemented(ref engine),
+            167 => utils::not_implemented(ref engine),
+            168 => utils::not_implemented(ref engine),
+            169 => utils::not_implemented(ref engine),
+            170 => utils::not_implemented(ref engine),
+            171 => utils::not_implemented(ref engine),
+            172 => utils::not_implemented(ref engine),
+            173 => utils::not_implemented(ref engine),
+            174 => utils::not_implemented(ref engine),
+            175 => utils::not_implemented(ref engine),
+            176 => utils::opcode_reserved("NOP1", ref engine),
+            177 => utils::not_implemented(ref engine),
+            178 => utils::not_implemented(ref engine),
+            179 => utils::opcode_reserved("NOP4", ref engine),
+            180 => utils::opcode_reserved("NOP5", ref engine),
+            181 => utils::opcode_reserved("NOP6", ref engine),
+            182 => utils::opcode_reserved("NOP7", ref engine),
+            183 => utils::opcode_reserved("NOP8", ref engine),
+            184 => utils::opcode_reserved("NOP9", ref engine),
+            185 => utils::opcode_reserved("NOP10", ref engine),
             _ => utils::not_implemented(ref engine)
         }
     }

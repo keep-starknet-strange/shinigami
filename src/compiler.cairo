@@ -112,6 +112,14 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_MOD', Opcode::OP_MOD);
         compiler.add_opcode('OP_LSHIFT', Opcode::OP_LSHIFT);
         compiler.add_opcode('OP_RSHIFT', Opcode::OP_RSHIFT);
+        compiler.add_opcode('OP_NOP1', Opcode::OP_NOP1);
+        compiler.add_opcode('OP_NOP4', Opcode::OP_NOP4);
+        compiler.add_opcode('OP_NOP5', Opcode::OP_NOP5);
+        compiler.add_opcode('OP_NOP6', Opcode::OP_NOP6);
+        compiler.add_opcode('OP_NOP7', Opcode::OP_NOP7);
+        compiler.add_opcode('OP_NOP8', Opcode::OP_NOP8);
+        compiler.add_opcode('OP_NOP9', Opcode::OP_NOP9);
+        compiler.add_opcode('OP_NOP10', Opcode::OP_NOP10);
 
         compiler
     }
