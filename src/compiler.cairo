@@ -63,6 +63,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_DROP', Opcode::OP_DROP);
         compiler.add_opcode('OP_DUP', Opcode::OP_DUP);
         compiler.add_opcode('OP_NIP', Opcode::OP_NIP);
+        compiler.add_opcode('OP_PICK', Opcode::OP_PICK);
         compiler.add_opcode('OP_EQUAL', Opcode::OP_EQUAL);
         compiler.add_opcode('OP_EQUALVERIFY', Opcode::OP_EQUALVERIFY);
         compiler.add_opcode('OP_2ROT', Opcode::OP_2ROT);

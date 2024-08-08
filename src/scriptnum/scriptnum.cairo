@@ -1,7 +1,10 @@
 // Wrapper around Bitcoin Script 'sign-magnitude' 4 byte integer.
 pub mod ScriptNum {
+    use core::traits::TryInto;
     const BYTESHIFT: i64 = 256;
     const MAX_BYTE_LEN: usize = 4;
+    const MAX_INT32: i64 = 2147483647;
+    const MIN_INT32: i64 = -2147483648;
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
@@ -94,5 +97,17 @@ pub mod ScriptNum {
             value = value / byteshift;
         };
         value.try_into().unwrap()
+    }
+
+    pub fn int_32(mut n: i64) -> i64 {
+        if n > MAX_INT32 {
+            return MAX_INT32;
+        }
+
+        if n < MIN_INT32 {
+            return MIN_INT32;
+        }
+
+        return n;
     }
 }
