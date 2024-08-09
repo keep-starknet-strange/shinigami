@@ -75,12 +75,12 @@ fn test_op_data(value: u8) {
 
 #[test]
 fn test_op_data_all() {
-    test_op_data(1);
-    test_op_data(2);
-    test_op_data(3);
-    test_op_data(4);
-    test_op_data(5);
-    test_op_data(6);
+    let mut n = 1;
+
+    while n <= 75 {
+        test_op_data(n);
+        n += 1;
+    }
 }
 
 #[test]
