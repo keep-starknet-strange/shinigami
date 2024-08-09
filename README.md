@@ -176,9 +176,15 @@ pie showData
 - [Shinigami OnlyDust](https://app.onlydust.com/p/shinigami)
 - [Bitcoin Script Wiki](https://en.bitcoin.it/wiki/Script)
 
+## Acknowledgements
+
+Special thanks for these projects.
+
+- [btcd](https://github.com/btcsuite/btcd/tree/master) : Bitcoin full node implementation written in Go, which heavily inspired the design of the Bitcoin Script engine in Shinigami. The amazing documentation and comments in btcd have been a gold mine and are appreciated.
+
 ## Contributors ✨
 
-Thanks goes to these wonderful people. Follow the [contributors guide](https://github.com/keep-starknet-strange/art-peace/blob/main/CONTRIBUTING.md) if you'd like to take part.
+Also, thanks goes to these wonderful people. Follow the [contributors guide](https://github.com/keep-starknet-strange/shinigami/blob/main/CONTRIBUTING.md) if you'd like to take part.
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
