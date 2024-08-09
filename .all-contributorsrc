@@ -216,6 +216,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "0xBEEFCAF3",
+      "name": "Armin Sabouri",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24356537?v=4",
+      "profile": "https://github.com/0xBEEFCAF3",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

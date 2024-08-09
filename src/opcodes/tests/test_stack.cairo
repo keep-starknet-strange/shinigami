@@ -216,6 +216,27 @@ fn test_op_nip() {
 }
 
 #[test]
+fn test_op_pick() {
+    let program = "OP_2 OP_0 OP_PICK";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 2);
+    let expected_dstack = array![ScriptNum::wrap(2), ScriptNum::wrap(2)];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
+fn test_op_pick_2() {
+    let program = "OP_1 OP_2 OP_3 OP_2 OP_PICK";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 4);
+    let expected_dstack = array![
+        ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(3), ScriptNum::wrap(1)
+    ];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+
+#[test]
 fn test_op_nip_multi() {
     let program = "OP_1 OP_2 OP_3 OP_NIP";
     let mut engine = utils::test_compile_and_run(program);

@@ -2,6 +2,8 @@
 pub mod ScriptNum {
     const BYTESHIFT: i64 = 256;
     const MAX_BYTE_LEN: usize = 4;
+    const MAX_INT32: i32 = 2147483647;
+    const MIN_INT32: i32 = -2147483648;
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
@@ -93,5 +95,17 @@ pub mod ScriptNum {
             value = value / byteshift;
         };
         value.try_into().unwrap()
+    }
+
+    pub fn to_int32(mut n: i64) -> i32 {
+        if n > MAX_INT32.into() {
+            return MAX_INT32;
+        }
+
+        if n < MIN_INT32.into() {
+            return MIN_INT32;
+        }
+
+        return n.try_into().unwrap();
     }
 }

@@ -29,7 +29,78 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_DATA_4', Opcode::OP_DATA_4);
         compiler.add_opcode('OP_DATA_5', Opcode::OP_DATA_5);
         compiler.add_opcode('OP_DATA_6', Opcode::OP_DATA_6);
+        compiler.add_opcode('OP_DATA_7', Opcode::OP_DATA_7);
+        compiler.add_opcode('OP_DATA_8', Opcode::OP_DATA_8);
+        compiler.add_opcode('OP_DATA_9', Opcode::OP_DATA_9);
+        compiler.add_opcode('OP_DATA_10', Opcode::OP_DATA_10);
+        compiler.add_opcode('OP_DATA_11', Opcode::OP_DATA_11);
+        compiler.add_opcode('OP_DATA_12', Opcode::OP_DATA_12);
+        compiler.add_opcode('OP_DATA_13', Opcode::OP_DATA_13);
+        compiler.add_opcode('OP_DATA_14', Opcode::OP_DATA_14);
+        compiler.add_opcode('OP_DATA_15', Opcode::OP_DATA_15);
+        compiler.add_opcode('OP_DATA_16', Opcode::OP_DATA_16);
+        compiler.add_opcode('OP_DATA_17', Opcode::OP_DATA_17);
+        compiler.add_opcode('OP_DATA_18', Opcode::OP_DATA_18);
+        compiler.add_opcode('OP_DATA_19', Opcode::OP_DATA_19);
+        compiler.add_opcode('OP_DATA_20', Opcode::OP_DATA_20);
+        compiler.add_opcode('OP_DATA_21', Opcode::OP_DATA_21);
+        compiler.add_opcode('OP_DATA_22', Opcode::OP_DATA_22);
+        compiler.add_opcode('OP_DATA_23', Opcode::OP_DATA_23);
+        compiler.add_opcode('OP_DATA_24', Opcode::OP_DATA_24);
+        compiler.add_opcode('OP_DATA_25', Opcode::OP_DATA_25);
+        compiler.add_opcode('OP_DATA_26', Opcode::OP_DATA_26);
+        compiler.add_opcode('OP_DATA_27', Opcode::OP_DATA_27);
+        compiler.add_opcode('OP_DATA_28', Opcode::OP_DATA_28);
+        compiler.add_opcode('OP_DATA_29', Opcode::OP_DATA_29);
+        compiler.add_opcode('OP_DATA_30', Opcode::OP_DATA_30);
+        compiler.add_opcode('OP_DATA_31', Opcode::OP_DATA_31);
+        compiler.add_opcode('OP_DATA_32', Opcode::OP_DATA_32);
+        compiler.add_opcode('OP_DATA_33', Opcode::OP_DATA_33);
+        compiler.add_opcode('OP_DATA_34', Opcode::OP_DATA_34);
+        compiler.add_opcode('OP_DATA_35', Opcode::OP_DATA_35);
+        compiler.add_opcode('OP_DATA_36', Opcode::OP_DATA_36);
+        compiler.add_opcode('OP_DATA_37', Opcode::OP_DATA_37);
+        compiler.add_opcode('OP_DATA_38', Opcode::OP_DATA_38);
+        compiler.add_opcode('OP_DATA_39', Opcode::OP_DATA_39);
+        compiler.add_opcode('OP_DATA_40', Opcode::OP_DATA_40);
+        compiler.add_opcode('OP_DATA_41', Opcode::OP_DATA_41);
+        compiler.add_opcode('OP_DATA_42', Opcode::OP_DATA_42);
+        compiler.add_opcode('OP_DATA_43', Opcode::OP_DATA_43);
+        compiler.add_opcode('OP_DATA_44', Opcode::OP_DATA_44);
+        compiler.add_opcode('OP_DATA_45', Opcode::OP_DATA_45);
+        compiler.add_opcode('OP_DATA_46', Opcode::OP_DATA_46);
+        compiler.add_opcode('OP_DATA_47', Opcode::OP_DATA_47);
+        compiler.add_opcode('OP_DATA_48', Opcode::OP_DATA_48);
+        compiler.add_opcode('OP_DATA_49', Opcode::OP_DATA_49);
+        compiler.add_opcode('OP_DATA_50', Opcode::OP_DATA_50);
+        compiler.add_opcode('OP_DATA_51', Opcode::OP_DATA_51);
+        compiler.add_opcode('OP_DATA_52', Opcode::OP_DATA_52);
+        compiler.add_opcode('OP_DATA_53', Opcode::OP_DATA_53);
+        compiler.add_opcode('OP_DATA_54', Opcode::OP_DATA_54);
+        compiler.add_opcode('OP_DATA_55', Opcode::OP_DATA_55);
+        compiler.add_opcode('OP_DATA_56', Opcode::OP_DATA_56);
+        compiler.add_opcode('OP_DATA_57', Opcode::OP_DATA_57);
+        compiler.add_opcode('OP_DATA_58', Opcode::OP_DATA_58);
+        compiler.add_opcode('OP_DATA_59', Opcode::OP_DATA_59);
+        compiler.add_opcode('OP_DATA_60', Opcode::OP_DATA_60);
+        compiler.add_opcode('OP_DATA_61', Opcode::OP_DATA_61);
+        compiler.add_opcode('OP_DATA_62', Opcode::OP_DATA_62);
+        compiler.add_opcode('OP_DATA_63', Opcode::OP_DATA_63);
+        compiler.add_opcode('OP_DATA_64', Opcode::OP_DATA_64);
+        compiler.add_opcode('OP_DATA_65', Opcode::OP_DATA_65);
+        compiler.add_opcode('OP_DATA_66', Opcode::OP_DATA_66);
+        compiler.add_opcode('OP_DATA_67', Opcode::OP_DATA_67);
+        compiler.add_opcode('OP_DATA_68', Opcode::OP_DATA_68);
+        compiler.add_opcode('OP_DATA_69', Opcode::OP_DATA_69);
+        compiler.add_opcode('OP_DATA_70', Opcode::OP_DATA_70);
+        compiler.add_opcode('OP_DATA_71', Opcode::OP_DATA_71);
+        compiler.add_opcode('OP_DATA_72', Opcode::OP_DATA_72);
+        compiler.add_opcode('OP_DATA_73', Opcode::OP_DATA_73);
+        compiler.add_opcode('OP_DATA_74', Opcode::OP_DATA_74);
+        compiler.add_opcode('OP_DATA_75', Opcode::OP_DATA_75);
         compiler.add_opcode('OP_PUSHDATA1', Opcode::OP_PUSHDATA1);
+        compiler.add_opcode('OP_PUSHDATA2', Opcode::OP_PUSHDATA2);
+        compiler.add_opcode('OP_PUSHDATA4', Opcode::OP_PUSHDATA4);
         compiler.add_opcode('OP_1NEGATE', Opcode::OP_1NEGATE);
         compiler.add_opcode('OP_1', Opcode::OP_1);
         compiler.add_opcode('OP_TRUE', Opcode::OP_TRUE);
@@ -63,6 +134,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_DROP', Opcode::OP_DROP);
         compiler.add_opcode('OP_DUP', Opcode::OP_DUP);
         compiler.add_opcode('OP_NIP', Opcode::OP_NIP);
+        compiler.add_opcode('OP_PICK', Opcode::OP_PICK);
         compiler.add_opcode('OP_EQUAL', Opcode::OP_EQUAL);
         compiler.add_opcode('OP_EQUALVERIFY', Opcode::OP_EQUALVERIFY);
         compiler.add_opcode('OP_2ROT', Opcode::OP_2ROT);
@@ -112,6 +184,14 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_MOD', Opcode::OP_MOD);
         compiler.add_opcode('OP_LSHIFT', Opcode::OP_LSHIFT);
         compiler.add_opcode('OP_RSHIFT', Opcode::OP_RSHIFT);
+        compiler.add_opcode('OP_NOP1', Opcode::OP_NOP1);
+        compiler.add_opcode('OP_NOP4', Opcode::OP_NOP4);
+        compiler.add_opcode('OP_NOP5', Opcode::OP_NOP5);
+        compiler.add_opcode('OP_NOP6', Opcode::OP_NOP6);
+        compiler.add_opcode('OP_NOP7', Opcode::OP_NOP7);
+        compiler.add_opcode('OP_NOP8', Opcode::OP_NOP8);
+        compiler.add_opcode('OP_NOP9', Opcode::OP_NOP9);
+        compiler.add_opcode('OP_NOP10', Opcode::OP_NOP10);
         compiler.add_opcode('OP_SHA256', Opcode::OP_SHA256);
         compiler
     }
@@ -166,6 +246,10 @@ pub impl CompilerTraitImpl of CompilerTrait {
             let script_item = split_script.at(i);
             if utils::is_hex(script_item) {
                 ByteArrayTrait::append(ref bytecode, @utils::hex_to_bytecode(script_item));
+            } else if utils::is_string(script_item) {
+                ByteArrayTrait::append(ref bytecode, @utils::string_to_bytecode(script_item));
+            } else if utils::is_number(script_item) {
+                ByteArrayTrait::append(ref bytecode, @utils::number_to_bytecode(script_item));
             } else {
                 // TODO: Check opcode exists
                 bytecode.append_byte(self.opcodes.get(utils::byte_array_to_felt252(script_item)));
