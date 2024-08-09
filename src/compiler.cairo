@@ -29,7 +29,13 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_DATA_4', Opcode::OP_DATA_4);
         compiler.add_opcode('OP_DATA_5', Opcode::OP_DATA_5);
         compiler.add_opcode('OP_DATA_6', Opcode::OP_DATA_6);
+        compiler.add_opcode('OP_DATA_7', Opcode::OP_DATA_7);
+        compiler.add_opcode('OP_DATA_8', Opcode::OP_DATA_8);
+        compiler.add_opcode('OP_DATA_9', Opcode::OP_DATA_9);
+        compiler.add_opcode('OP_DATA_75', Opcode::OP_DATA_75);
         compiler.add_opcode('OP_PUSHDATA1', Opcode::OP_PUSHDATA1);
+        compiler.add_opcode('OP_PUSHDATA2', Opcode::OP_PUSHDATA2);
+        compiler.add_opcode('OP_PUSHDATA4', Opcode::OP_PUSHDATA4);
         compiler.add_opcode('OP_1NEGATE', Opcode::OP_1NEGATE);
         compiler.add_opcode('OP_1', Opcode::OP_1);
         compiler.add_opcode('OP_TRUE', Opcode::OP_TRUE);
@@ -144,6 +150,10 @@ pub impl CompilerTraitImpl of CompilerTrait {
             let script_item = split_script.at(i);
             if utils::is_hex(script_item) {
                 ByteArrayTrait::append(ref bytecode, @utils::hex_to_bytecode(script_item));
+            } else if utils::is_string(script_item) {
+                ByteArrayTrait::append(ref bytecode, @utils::string_to_bytecode(script_item));
+            } else if utils::is_number(script_item) {
+                ByteArrayTrait::append(ref bytecode, @utils::number_to_bytecode(script_item));
             } else {
                 // TODO: Check opcode exists
                 bytecode.append_byte(self.opcodes.get(utils::byte_array_to_felt252(script_item)));
