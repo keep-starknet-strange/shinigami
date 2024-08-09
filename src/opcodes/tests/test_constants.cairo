@@ -103,7 +103,6 @@ fn test_op_push_data1() {
     let expected_stack = array![hex_to_bytecode(@"0x42434445464748494A4B4C4D4E4F5051")];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
-
 #[test]
 fn test_op_push_data2() {
     let program = "OP_PUSHDATA2 0x0100 0x42";

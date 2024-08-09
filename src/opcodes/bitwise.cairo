@@ -5,10 +5,10 @@ use shinigami::opcodes::utils;
 pub fn opcode_equal(ref engine: Engine) -> Result<(), felt252> {
     let a = engine.dstack.pop_byte_array()?;
     let b = engine.dstack.pop_byte_array()?;
-    engine.dstack.push_int(if a == b {
-        1
+    engine.dstack.push_bool(if a == b {
+        true
     } else {
-        0
+        false
     });
     return Result::Ok(());
 }

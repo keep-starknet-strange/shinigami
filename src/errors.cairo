@@ -6,4 +6,5 @@ pub mod Error {
     pub const VERIFY_FAILED: felt252 = 'Verify failed';
     pub const OPCODE_RESERVED: felt252 = 'Opcode reserved';
     pub const OPCODE_NOT_IMPLEMENTED: felt252 = 'Opcode not implemented';
+    pub const OPCODE_DISABLED: felt252 = 'Opcode is disabled';
 }

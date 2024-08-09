@@ -181,3 +181,22 @@ pub fn int_to_hex(value: u8) -> felt252 {
 
     upper_half.into() * byte_shift.into() + lower_half.into()
 }
+
+pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
+    let mut i = 0;
+    let mut ret_bool = false;
+    while i < bytes
+        .len() {
+            if bytes.at(i).unwrap() != 0 {
+                // Can be negative zero
+                if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
+                    ret_bool = false;
+                    break;
+                }
+                ret_bool = true;
+                break;
+            }
+            i += 1;
+        };
+    ret_bool
+}

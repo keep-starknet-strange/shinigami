@@ -68,21 +68,27 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_3DUP', Opcode::OP_3DUP);
         compiler.add_opcode('OP_DROP', Opcode::OP_DROP);
         compiler.add_opcode('OP_DUP', Opcode::OP_DUP);
+        compiler.add_opcode('OP_NIP', Opcode::OP_NIP);
         compiler.add_opcode('OP_EQUAL', Opcode::OP_EQUAL);
         compiler.add_opcode('OP_EQUALVERIFY', Opcode::OP_EQUALVERIFY);
+        compiler.add_opcode('OP_2ROT', Opcode::OP_2ROT);
         compiler.add_opcode('OP_2SWAP', Opcode::OP_2SWAP);
+        compiler.add_opcode('OP_IFDUP', Opcode::OP_IFDUP);
         compiler.add_opcode('OP_DEPTH', Opcode::OP_DEPTH);
         compiler.add_opcode('OP_SIZE', Opcode::OP_SIZE);
+        compiler.add_opcode('OP_ROT', Opcode::OP_ROT);
         compiler.add_opcode('OP_SWAP', Opcode::OP_SWAP);
         compiler.add_opcode('OP_1ADD', Opcode::OP_1ADD);
         compiler.add_opcode('OP_1SUB', Opcode::OP_1SUB);
         compiler.add_opcode('OP_NEGATE', Opcode::OP_NEGATE);
         compiler.add_opcode('OP_ABS', Opcode::OP_ABS);
         compiler.add_opcode('OP_NOT', Opcode::OP_NOT);
+        compiler.add_opcode('OP_0NOTEQUAL', Opcode::OP_0NOTEQUAL);
         compiler.add_opcode('OP_ADD', Opcode::OP_ADD);
         compiler.add_opcode('OP_SUB', Opcode::OP_SUB);
         compiler.add_opcode('OP_BOOLAND', Opcode::OP_BOOLAND);
         compiler.add_opcode('OP_NUMEQUAL', Opcode::OP_NUMEQUAL);
+        compiler.add_opcode('OP_NUMEQUALVERIFY', Opcode::OP_NUMEQUALVERIFY);
         compiler.add_opcode('OP_NUMNOTEQUAL', Opcode::OP_NUMNOTEQUAL);
         compiler.add_opcode('OP_LESSTHAN', Opcode::OP_LESSTHAN);
         compiler.add_opcode('OP_GREATERTHAN', Opcode::OP_GREATERTHAN);
@@ -91,11 +97,27 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_MIN', Opcode::OP_MIN);
         compiler.add_opcode('OP_MAX', Opcode::OP_MAX);
         compiler.add_opcode('OP_WITHIN', Opcode::OP_WITHIN);
+        compiler.add_opcode('OP_RESERVED', Opcode::OP_RESERVED);
         compiler.add_opcode('OP_RESERVED1', Opcode::OP_RESERVED1);
         compiler.add_opcode('OP_RESERVED2', Opcode::OP_RESERVED2);
         compiler.add_opcode('OP_VER', Opcode::OP_VER);
         compiler.add_opcode('OP_TUCK', Opcode::OP_TUCK);
         compiler.add_opcode('OP_BOOLOR', Opcode::OP_BOOLOR);
+        compiler.add_opcode('OP_CAT', Opcode::OP_CAT);
+        compiler.add_opcode('OP_SUBSTR', Opcode::OP_SUBSTR);
+        compiler.add_opcode('OP_LEFT', Opcode::OP_LEFT);
+        compiler.add_opcode('OP_RIGHT', Opcode::OP_RIGHT);
+        compiler.add_opcode('OP_INVERT', Opcode::OP_INVERT);
+        compiler.add_opcode('OP_AND', Opcode::OP_AND);
+        compiler.add_opcode('OP_OR', Opcode::OP_OR);
+        compiler.add_opcode('OP_XOR', Opcode::OP_XOR);
+        compiler.add_opcode('OP_2MUL', Opcode::OP_2MUL);
+        compiler.add_opcode('OP_2DIV', Opcode::OP_2DIV);
+        compiler.add_opcode('OP_MUL', Opcode::OP_MUL);
+        compiler.add_opcode('OP_DIV', Opcode::OP_DIV);
+        compiler.add_opcode('OP_MOD', Opcode::OP_MOD);
+        compiler.add_opcode('OP_LSHIFT', Opcode::OP_LSHIFT);
+        compiler.add_opcode('OP_RSHIFT', Opcode::OP_RSHIFT);
 
         compiler
     }
