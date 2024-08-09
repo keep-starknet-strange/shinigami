@@ -89,7 +89,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
-
+    pub const OP_SHA256: u8 = 168;
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::opcodes::{constants, flow, stack, splice, bitwise, arithmetic, utils};
@@ -261,6 +261,9 @@ pub mod Opcode {
             163 => arithmetic::opcode_min(ref engine),
             164 => arithmetic::opcode_max(ref engine),
             165 => arithmetic::opcode_within(ref engine),
+            166 => utils::not_implemented(ref engine),
+            167 => utils::not_implemented(ref engine),
+            168 => stack::opcode_sha256(ref engine),
             _ => utils::not_implemented(ref engine)
         }
     }

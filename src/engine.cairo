@@ -17,7 +17,7 @@ pub struct Engine {
     pub astack: ScriptStack,
     // Tracks conditonal execution state supporting nested conditionals
     pub cond_stack: ConditionalStack,
-// TODO
+    // TODO
 // ...
 }
 
@@ -88,23 +88,20 @@ pub impl EngineTraitImpl of EngineTrait {
 
     fn execute(ref self: Engine) -> Result<ByteArray, felt252> {
         let mut err = '';
-        while self
-            .opcode_idx < self
-            .script
-            .len() {
-                if !self.cond_stack.branch_executing()
-                    && !flow::is_branching_opcode(self.script[self.opcode_idx]) {
-                    self.opcode_idx += 1;
-                    continue;
-                }
-                let opcode = self.script[self.opcode_idx];
-                let res = Opcode::execute(opcode, ref self);
-                if res.is_err() {
-                    err = res.unwrap_err();
-                    break;
-                }
+        while self.opcode_idx < self.script.len() {
+            if !self.cond_stack.branch_executing()
+                && !flow::is_branching_opcode(self.script[self.opcode_idx]) {
                 self.opcode_idx += 1;
-            };
+                continue;
+            }
+            let opcode = self.script[self.opcode_idx];
+            let res = Opcode::execute(opcode, ref self);
+            if res.is_err() {
+                err = res.unwrap_err();
+                break;
+            }
+            self.opcode_idx += 1;
+        };
         if err != '' {
             return Result::Err(err);
         }

@@ -2,3 +2,6 @@
 name = "shinigami"
 version = "0.1.0"
 edition = "2023_11"
+
+[dev-dependencies]
+cairo_test = "2.7.0"
