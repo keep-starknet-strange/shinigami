@@ -220,6 +220,7 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ooochoche"><img src="https://avatars.githubusercontent.com/u/101812348?v=4?s=100" width="100px;" alt="Benedict Ejembi"/><br /><sub><b>Benedict Ejembi</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=ooochoche" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/0xSpyC"><img src="https://avatars.githubusercontent.com/u/97438738?v=4?s=100" width="100px;" alt="0xSpyC"/><br /><sub><b>0xSpyC</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=0xSpyC" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/0xBEEFCAF3"><img src="https://avatars.githubusercontent.com/u/24356537?v=4" width="100px;" alt="0xBEEFCAF3"/><br /><sub><b>0xBEEFCAF3</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=0xBEEFCAF3" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
