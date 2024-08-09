@@ -269,3 +269,12 @@ fn test_op_2rot_insufficient_items() {
     let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
     utils::check_dstack_size(ref engine, 5);
 }
+
+#[test]
+fn test_opcode_sha256() {
+    let program = "OP_1 OP_SHA256";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_dstack = array!["@1274352175"];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}

@@ -112,7 +112,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_MOD', Opcode::OP_MOD);
         compiler.add_opcode('OP_LSHIFT', Opcode::OP_LSHIFT);
         compiler.add_opcode('OP_RSHIFT', Opcode::OP_RSHIFT);
-
+        compiler.add_opcode('OP_SHA256', Opcode::OP_SHA256);
         compiler
     }
 
