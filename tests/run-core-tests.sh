@@ -54,26 +54,28 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     RESULT=$(cd $BASE_DIR && scarb cairo-run --no-build $JOINED_INPUT)
     SUCCESS_RES="Run completed successfully, returning \[1\]"
     FAILURE_RES="Run completed successfully, returning \[0\]"
+    SCRIPT_RESULT=""
     if echo "$RESULT" | grep -q "$SUCCESS_RES"; then
-        RESULT="OK"
+        SCRIPT_RESULT="OK"
     elif echo "$RESULT" | grep -q "$FAILURE_RES"; then
-        RESULT="FAIL"
+        SCRIPT_RESULT="FAIL"
     else
-        RESULT="PANIC"
+        SCRIPT_RESULT="PANIC"
     fi
-    echo "  Expected : $expected_scripterror -- Result   : $RESULT"
+    echo "  Expected : $expected_scripterror -- Result   : $SCRIPT_RESULT"
     # echo if result is expected w/ color
-    if [ "$RESULT" == "$expected_scripterror" ]; then
+    if [ "$SCRIPT_RESULT" == "$expected_scripterror" ]; then
         echo -e "  \033[0;32mPASS\033[0m"
         PASSED=$((PASSED+1))
     else
         echo -e "  \033[0;31mFAIL\033[0m"
         FAILED=$((FAILED+1))
+        echo "$RESULT"
     fi
     echo
 
     SCRIPT_IDX=$((SCRIPT_IDX+1))
-    if [ $SCRIPT_IDX -eq 30 ]; then
+    if [ $SCRIPT_IDX -eq 50 ]; then
       break #TODO: Remove this line
     fi
   done
