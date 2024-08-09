@@ -52,7 +52,10 @@ pub impl EngineTraitImpl of EngineTrait {
         // TODO: check bounds with error handling
         let mut data = "";
         let mut i = self.opcode_idx + 1;
-        let end = i + len;
+        let mut end = i + len;
+        if end > self.script.len() {
+            end = self.script.len();
+        }
         while i < end {
             data.append_byte(self.script[i]);
             i += 1;
