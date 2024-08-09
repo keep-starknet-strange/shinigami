@@ -99,7 +99,7 @@ pub fn opcode_rot(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;
     let [res, _, _, _, _, _, _, _,] = compute_sha256_byte_array(arr);
-    let res_byte: ByteArray = format!("@{}", res);
+    let res_byte: ByteArray = format!("{}", res);
     engine.dstack.push_byte_array(res_byte);
     return Result::Ok(());
 }
