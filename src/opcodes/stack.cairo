@@ -1,7 +1,3 @@
-use core::traits::Into;
-use core::option::OptionTrait;
-use core::result::ResultTrait;
-use core::traits::TryInto;
 use shinigami::engine::{Engine, EngineTrait};
 use shinigami::scriptnum::ScriptNum;
 use shinigami::stack::ScriptStackTrait;
@@ -50,7 +46,7 @@ pub fn opcode_nip(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_pick(ref engine: Engine) -> Result<(), felt252> {
     let a = engine.dstack.pop_int()?;
-    engine.dstack.pick_n(ScriptNum::int_32(a))?;
+    engine.dstack.pick_n(ScriptNum::to_int32(a))?;
 
     return Result::Ok(());
 }
