@@ -7,4 +7,5 @@ pub mod Error {
     pub const OPCODE_RESERVED: felt252 = 'Opcode reserved';
     pub const OPCODE_NOT_IMPLEMENTED: felt252 = 'Opcode not implemented';
     pub const OPCODE_DISABLED: felt252 = 'Opcode is disabled';
+    pub const OPCODE_OVER_FAILED: felt252 = 'Failed perform op on stack';
 }

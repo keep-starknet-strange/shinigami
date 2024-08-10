@@ -290,3 +290,22 @@ fn test_op_2rot_insufficient_items() {
     let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
     utils::check_dstack_size(ref engine, 5);
 }
+
+#[test]
+fn test_opcode_over() {
+    let program = "OP_OVER";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 0);
+    let expected_dstack = array![ScriptNum::wrap(0)];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+
+#[test]
+fn test_opcode_2over() {
+    let program = "OP_2OVER";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 0);
+    let expected_dstack = array![ScriptNum::wrap(0)];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
