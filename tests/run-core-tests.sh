@@ -70,12 +70,13 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     else
         echo -e "  \033[0;31mFAIL\033[0m"
         FAILED=$((FAILED+1))
+        echo "scarb cairo-run '$JOINED_INPUT'"
         echo "$RESULT"
     fi
     echo
 
     SCRIPT_IDX=$((SCRIPT_IDX+1))
-    if [ $SCRIPT_IDX -eq 50 ]; then
+    if [ $SCRIPT_IDX -eq 100 ]; then
       break #TODO: Remove this line
     fi
   done
