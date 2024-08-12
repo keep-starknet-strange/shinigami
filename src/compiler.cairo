@@ -1,3 +1,4 @@
+use core::dict::Felt252Dict;
 use shinigami::opcodes::Opcode;
 use shinigami::utils;
 
