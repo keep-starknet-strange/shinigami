@@ -1,4 +1,5 @@
 pub mod Opcode {
+    use core::result::ResultTrait;
     pub const OP_0: u8 = 0;
     pub const OP_DATA_1: u8 = 1;
     pub const OP_DATA_2: u8 = 2;
@@ -362,6 +363,28 @@ pub mod Opcode {
             184 => flow::opcode_nop(),
             185 => flow::opcode_nop(),
             _ => utils::not_implemented(ref engine)
+        }
+    }
+
+    pub fn is_opcode_disabled(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
+        if opcode == OP_CAT
+            || opcode == OP_SUBSTR
+            || opcode == OP_LEFT
+            || opcode == OP_RIGHT
+            || opcode == OP_INVERT
+            || opcode == OP_AND
+            || opcode == OP_OR
+            || opcode == OP_XOR
+            || opcode == OP_2MUL
+            || opcode == OP_2DIV
+            || opcode == OP_MUL
+            || opcode == OP_DIV
+            || opcode == OP_MOD
+            || opcode == OP_LSHIFT
+            || opcode == OP_RSHIFT {
+            return utils::opcode_disabled(ref engine);
+        } else {
+            return Result::Ok(());
         }
     }
 }
