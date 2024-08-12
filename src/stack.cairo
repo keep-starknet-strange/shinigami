@@ -193,7 +193,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         return Result::Ok(());
     }
 
-    fn over_n(ref self: ScriptStack, n: u32) -> Result<ByteArray, felt252> {
+    fn over_n(ref self: ScriptStack, mut n: u32) -> Result<ByteArray, felt252> {
         if n < 1 {
             return Result::Err(Error::OPCODE_OVER_FAILED);
         }
@@ -202,8 +202,9 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             let so = self.peek_byte_array(entry);
 
             self.push_byte_array(so.unwrap());
+            n -= 1;
         };
 
-        return Result::Ok("completed");
+        return Result::Ok((""));
     }
 }

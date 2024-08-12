@@ -191,7 +191,9 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_NOP7', Opcode::OP_NOP7);
         compiler.add_opcode('OP_NOP8', Opcode::OP_NOP8);
         compiler.add_opcode('OP_NOP9', Opcode::OP_NOP9);
-        compiler.add_opcode('OP_NOP10', Opcode::OP_NOP10);
+        compiler.add_opcode('OP_NOP9', Opcode::OP_NOP9);
+        compiler.add_opcode('OP_OVER', Opcode::OP_OVER);
+        compiler.add_opcode('OP_2OVER', Opcode::OP_2OVER);
 
         compiler
     }
