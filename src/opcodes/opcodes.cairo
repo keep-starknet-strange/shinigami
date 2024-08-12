@@ -367,21 +367,21 @@ pub mod Opcode {
     }
 
     pub fn is_opcode_disabled(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
-        if opcode == 126
-            || opcode == 127
-            || opcode == 128
-            || opcode == 129
-            || opcode == 131
-            || opcode == 132
-            || opcode == 133
-            || opcode == 134
-            || opcode == 141
-            || opcode == 142
-            || opcode == 149
-            || opcode == 150
-            || opcode == 151
-            || opcode == 152
-            || opcode == 153 {
+        if opcode == OP_CAT
+            || opcode == OP_SUBSTR
+            || opcode == OP_LEFT
+            || opcode == OP_RIGHT
+            || opcode == OP_INVERT
+            || opcode == OP_AND
+            || opcode == OP_OR
+            || opcode == OP_XOR
+            || opcode == OP_2MUL
+            || opcode == OP_2DIV
+            || opcode == OP_MUL
+            || opcode == OP_DIV
+            || opcode == OP_MOD
+            || opcode == OP_LSHIFT
+            || opcode == OP_RSHIFT {
             return utils::opcode_disabled(ref engine);
         } else {
             return Result::Ok(());
