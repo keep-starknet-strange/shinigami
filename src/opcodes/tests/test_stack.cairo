@@ -236,7 +236,6 @@ fn test_op_pick_2() {
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
 
-
 #[test]
 fn test_op_nip_multi() {
     let program = "OP_1 OP_2 OP_3 OP_NIP";
@@ -290,6 +289,30 @@ fn test_op_2rot_insufficient_items() {
     let program = "OP_1 OP_2 OP_3 OP_4 OP_5 OP_2ROT";
     let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
     utils::check_dstack_size(ref engine, 5);
+}
+
+#[test]
+fn test_opcode_over() {
+    let program = "OP_1 OP_2 OP_OVER";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 3);
+    let expected_dstack = array![ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+#[test]
+fn test_opcode_2over() {
+    let program = "OP_1 OP_2 OP_3 OP_4 OP_2OVER";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 6);
+    let expected_dstack = array![
+        ScriptNum::wrap(1),
+        ScriptNum::wrap(2),
+        ScriptNum::wrap(3),
+        ScriptNum::wrap(4),
+        ScriptNum::wrap(1),
+        ScriptNum::wrap(2)
+    ];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
 
 #[test]

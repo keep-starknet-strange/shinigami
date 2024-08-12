@@ -103,6 +103,15 @@ pub fn opcode_rot(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.rot_n(1)?;
     return Result::Ok(());
 }
+pub fn opcode_over(ref engine: Engine) -> Result<(), felt252> {
+    engine.dstack.over_n(1)?;
+    return Result::Ok(());
+}
+
+pub fn opcode_2over(ref engine: Engine) -> Result<(), felt252> {
+    engine.dstack.over_n(2)?;
+    return Result::Ok(());
+}
 
 pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;
