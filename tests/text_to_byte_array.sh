@@ -21,7 +21,8 @@ done
 
 CAIRO_STRINGS=()
 for (( i=0; i<${#GROUPED_TEXTS[@]}; i++ )); do
-  CAIRO_STRINGS[$i]=$(starkli to-cairo-string "${GROUPED_TEXTS[$i]}")
+  # TODO: --dec
+  CAIRO_STRINGS[$i]=$(starkli to-cairo-string -- "${GROUPED_TEXTS[$i]}")
 done
 
 BYTE_ARRAY="["

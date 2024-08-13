@@ -11,4 +11,4 @@ test-cairo:
 
 test-core:
 	@echo "Running bitcoin-core tests..."
-	@./tests/run-core-tests.sh
+	@./tests/run-core-tests.sh 0 500

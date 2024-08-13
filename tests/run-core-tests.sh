@@ -11,6 +11,15 @@ cd $BASE_DIR && scarb build
 echo "Shinigami built successfully!"
 echo
 
+START=0
+if [ -n "$1" ]; then
+  START=$1
+fi
+END=100
+if [ -n "$2" ]; then
+  END=$2
+fi
+
 # Run the script_tests.json tests
 # TODO: Pull from bitcoin-core repo?
 SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests.json
@@ -25,6 +34,10 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     # If line contains one string, ie ["XXX"], skip it
     if [[ $line != *\"*\"*\,\"*\"* ]]; then
         continue
+    fi
+    if [ $SCRIPT_IDX -lt $START ]; then
+      SCRIPT_IDX=$((SCRIPT_IDX+1))
+      continue
     fi
     # Otherwise, line encoded like [[wit..., amount]?, scriptSig, scriptPubKey, flags, expected_scripterror, ... comments]
     # Extract line data
@@ -76,7 +89,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     echo
 
     SCRIPT_IDX=$((SCRIPT_IDX+1))
-    if [ $SCRIPT_IDX -eq 100 ]; then
+    if [ $SCRIPT_IDX -eq $END ]; then
       break #TODO: Remove this line
     fi
   done

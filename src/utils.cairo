@@ -37,6 +37,11 @@ pub fn is_number(script_item: @ByteArray) -> bool {
     if first == minus {
         return script_item.len() > 1;
     }
+    if script_item.len() > 1 {
+        let second = script_item[1];
+        // Some opcodes start with a number; like 2ROT
+        return first >= zero && first <= nine && second >= zero && second <= nine;
+    }
     first >= zero && first <= nine
 }
 
