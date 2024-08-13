@@ -110,6 +110,7 @@ pub mod Opcode {
     pub const OP_2DROP: u8 = 109;
     pub const OP_2DUP: u8 = 110;
     pub const OP_3DUP: u8 = 111;
+    pub const OP_2OVER: u8 = 112;
     pub const OP_2ROT: u8 = 113;
     pub const OP_2SWAP: u8 = 114;
     pub const OP_IFDUP: u8 = 115;
@@ -117,6 +118,7 @@ pub mod Opcode {
     pub const OP_DROP: u8 = 117;
     pub const OP_DUP: u8 = 118;
     pub const OP_NIP: u8 = 119;
+    pub const OP_OVER: u8 = 120;
     pub const OP_PICK: u8 = 121;
     pub const OP_ROT: u8 = 123;
     pub const OP_SWAP: u8 = 124;
@@ -162,6 +164,7 @@ pub mod Opcode {
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
     pub const OP_RIPEMD160: u8 = 166;
+    pub const OP_SHA256: u8 = 168;
     pub const OP_NOP1: u8 = 176;
     pub const OP_NOP4: u8 = 179;
     pub const OP_NOP5: u8 = 180;
@@ -170,7 +173,6 @@ pub mod Opcode {
     pub const OP_NOP8: u8 = 183;
     pub const OP_NOP9: u8 = 184;
     pub const OP_NOP10: u8 = 185;
-
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::opcodes::{constants, flow, stack, splice, bitwise, arithmetic, crypto, utils};
@@ -288,7 +290,7 @@ pub mod Opcode {
             109 => stack::opcode_2drop(ref engine),
             110 => stack::opcode_2dup(ref engine),
             111 => stack::opcode_3dup(ref engine),
-            112 => utils::not_implemented(ref engine),
+            112 => stack::opcode_2over(ref engine),
             113 => stack::opcode_2rot(ref engine),
             114 => stack::opcode_2swap(ref engine),
             115 => stack::opcode_ifdup(ref engine),
@@ -296,7 +298,7 @@ pub mod Opcode {
             117 => stack::opcode_drop(ref engine),
             118 => stack::opcode_dup(ref engine),
             119 => stack::opcode_nip(ref engine),
-            120 => utils::not_implemented(ref engine),
+            120 => stack::opcode_over(ref engine),
             121 => stack::opcode_pick(ref engine),
             122 => utils::not_implemented(ref engine),
             123 => stack::opcode_rot(ref engine),
@@ -344,7 +346,7 @@ pub mod Opcode {
             165 => arithmetic::opcode_within(ref engine),
             166 => crypto::opcode_ripemd160(ref engine),
             167 => utils::not_implemented(ref engine),
-            168 => utils::not_implemented(ref engine),
+            168 => crypto::opcode_sha256(ref engine),
             169 => utils::not_implemented(ref engine),
             170 => utils::not_implemented(ref engine),
             171 => utils::not_implemented(ref engine),
@@ -363,6 +365,28 @@ pub mod Opcode {
             184 => flow::opcode_nop(),
             185 => flow::opcode_nop(),
             _ => utils::not_implemented(ref engine)
+        }
+    }
+
+    pub fn is_opcode_disabled(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
+        if opcode == OP_CAT
+            || opcode == OP_SUBSTR
+            || opcode == OP_LEFT
+            || opcode == OP_RIGHT
+            || opcode == OP_INVERT
+            || opcode == OP_AND
+            || opcode == OP_OR
+            || opcode == OP_XOR
+            || opcode == OP_2MUL
+            || opcode == OP_2DIV
+            || opcode == OP_MUL
+            || opcode == OP_DIV
+            || opcode == OP_MOD
+            || opcode == OP_LSHIFT
+            || opcode == OP_RSHIFT {
+            return utils::opcode_disabled(ref engine);
+        } else {
+            return Result::Ok(());
         }
     }
 }

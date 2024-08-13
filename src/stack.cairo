@@ -191,4 +191,24 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.push_byte_array(so);
         return Result::Ok(());
     }
+
+    fn over_n(ref self: ScriptStack, mut n: u32) -> Result<(), felt252> {
+        if n < 1 {
+            return Result::Err('over_n: invalid n value');
+        }
+        let entry: u32 = (2 * n) - 1;
+        let mut err = '';
+        while n > 0 {
+            let res = self.peek_byte_array(entry);
+            if res.is_err() {
+                err = res.unwrap_err();
+                break;
+            }
+
+            self.push_byte_array(res.unwrap());
+            n -= 1;
+        };
+
+        return Result::Ok(());
+    }
 }

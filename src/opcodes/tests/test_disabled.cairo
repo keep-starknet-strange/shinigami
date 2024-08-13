@@ -66,11 +66,6 @@ fn test_disabled_opcodes_else_block() {
 
 
 #[test]
-#[ignore]
-// This test should fail as the opcode is disabled
-// However since the if block is skipped so is the disabled opcode
-// TODO(109) we should be emulating how the inteperter handles disabled opcodes if blocks in core
-// https://github.com/bitcoin/bitcoin/blob/master/src/script/interpreter.cpp#L456
 fn test_disabled_opcode_in_unexecd_if_block() {
     let disabled_opcodes = disabled_opcodes();
     let mut i: usize = 0;
