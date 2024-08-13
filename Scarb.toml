@@ -3,5 +3,8 @@ name = "shinigami"
 version = "0.1.0"
 edition = "2024_07"
 
+[dependencies]
+ripemd160 = { git = "https://github.com/j1mbo64/ripemd160_cairo.git" }
+
 [dev-dependencies]
 cairo_test = "2.7.0"

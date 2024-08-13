@@ -12,6 +12,7 @@ pub mod opcodes {
     pub mod splice;
     pub mod bitwise;
     pub mod arithmetic;
+    pub mod crypto;
     pub mod utils;
     #[cfg(test)]
     mod tests {
@@ -22,6 +23,7 @@ pub mod opcodes {
         mod test_bitwise;
         mod test_arithmetic;
         mod test_reserved;
+        mod test_crypto;
         mod test_disabled;
         mod utils;
     }
