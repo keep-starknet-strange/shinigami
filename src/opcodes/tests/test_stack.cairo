@@ -1,7 +1,6 @@
 use shinigami::scriptnum::ScriptNum;
 use shinigami::opcodes::tests::utils;
 use shinigami::errors::Error;
-use shinigami::utils::hex_to_bytecode;
 
 #[test]
 fn test_op_toaltstack() {
@@ -312,17 +311,5 @@ fn test_opcode_2over() {
         ScriptNum::wrap(1),
         ScriptNum::wrap(2)
     ];
-    utils::check_expected_dstack(ref engine, expected_dstack.span());
-}
-
-#[test]
-fn test_opcode_sha256() {
-    let program = "OP_1 OP_SHA256";
-    let mut engine = utils::test_compile_and_run(program);
-    utils::check_dstack_size(ref engine, 1);
-    let hex_data: ByteArray = hex_to_bytecode(
-        @"0x4BF5122F344554C53BDE2EBB8CD2B7E3D1600AD631C385A5D7CCE23C7785459A"
-    );
-    let expected_dstack = array![hex_data];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }

@@ -2,7 +2,6 @@ use shinigami::engine::{Engine, EngineTrait};
 use shinigami::scriptnum::ScriptNum;
 use shinigami::stack::ScriptStackTrait;
 use shinigami::utils;
-use core::sha256::compute_sha256_byte_array;
 
 pub fn opcode_toaltstack(ref engine: Engine) -> Result<(), felt252> {
     let value = engine.dstack.pop_byte_array()?;
@@ -110,18 +109,5 @@ pub fn opcode_over(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_2over(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.over_n(2)?;
-    return Result::Ok(());
-}
-
-pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
-    let arr = @engine.dstack.pop_byte_array()?;
-    let res = compute_sha256_byte_array(arr).span();
-    let mut res_bytes: ByteArray = "";
-    let mut i: usize = 0;
-    while i < res.len() {
-        res_bytes.append_word((*res[i]).into(), 4);
-        i += 1;
-    };
-    engine.dstack.push_byte_array(res_bytes);
     return Result::Ok(());
 }
