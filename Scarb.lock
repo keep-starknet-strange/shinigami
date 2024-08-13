@@ -2,5 +2,13 @@
 version = 1
 
 [[package]]
+name = "ripemd160"
+version = "0.1.0"
+source = "git+https://github.com/j1mbo64/ripemd160_cairo.git#bebe67c235b12e0a3668f49c78423d4eff6d7131"
+
+[[package]]
 name = "shinigami"
 version = "0.1.0"
+dependencies = [
+ "ripemd160",
+]

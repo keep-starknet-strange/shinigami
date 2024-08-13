@@ -109,4 +109,12 @@ pub fn opcode_verif(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_vernotif(ref engine: Engine) -> Result<(), felt252> {
     return Err(felt252::from_bytes("OP_NOTVERIF is reserved and cannot be executed."));
+pub fn opcode_over(ref engine: Engine) -> Result<(), felt252> {
+    engine.dstack.over_n(1)?;
+    return Result::Ok(());
+}
+
+pub fn opcode_2over(ref engine: Engine) -> Result<(), felt252> {
+    engine.dstack.over_n(2)?;
+    return Result::Ok(());
 }

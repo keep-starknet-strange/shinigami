@@ -1,3 +1,4 @@
+use core::dict::Felt252Dict;
 use shinigami::opcodes::Opcode;
 use shinigami::utils;
 
@@ -165,6 +166,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_MIN', Opcode::OP_MIN);
         compiler.add_opcode('OP_MAX', Opcode::OP_MAX);
         compiler.add_opcode('OP_WITHIN', Opcode::OP_WITHIN);
+        compiler.add_opcode('OP_RIPEMD160', Opcode::OP_RIPEMD160);
         compiler.add_opcode('OP_RESERVED', Opcode::OP_RESERVED);
         compiler.add_opcode('OP_RESERVED1', Opcode::OP_RESERVED1);
         compiler.add_opcode('OP_RESERVED2', Opcode::OP_RESERVED2);
@@ -194,6 +196,11 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_NOP8', Opcode::OP_NOP8);
         compiler.add_opcode('OP_NOP9', Opcode::OP_NOP9);
         compiler.add_opcode('OP_NOP10', Opcode::OP_NOP10);
+        compiler.add_opcode('OP_OVER', Opcode::OP_OVER);
+        compiler.add_opcode('OP_2OVER', Opcode::OP_2OVER);
+        compiler.add_opcode('OP_SHA256', Opcode::OP_SHA256);
+        compiler.add_opcode('OP_HASH160', Opcode::OP_HASH160);
+        compiler.add_opcode('OP_HASH256', Opcode::OP_HASH256);
 
         compiler
     }
