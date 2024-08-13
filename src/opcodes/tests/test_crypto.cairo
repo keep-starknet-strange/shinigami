@@ -66,6 +66,134 @@ fn test_opcode_sha256_14_double_sha256() {
 }
 
 #[test]
+fn test_op_hash160() {
+    // 0x5368696E6967616D69 == 'Shinigami'
+    let program = "OP_PUSHDATA1 0x09 0x5368696E6967616D69 OP_HASH160";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![hex_to_bytecode(@"0x122ACAB01A6C742866AA84B2DD65870BC1210769")];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash160_1() {
+    let program = "OP_1 OP_HASH160";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![hex_to_bytecode(@"0xC51B66BCED5E4491001BD702669770DCCF440982")];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash160_2() {
+    let program = "OP_2 OP_HASH160";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![hex_to_bytecode(@"0xA6BB94C8792C395785787280DC188D114E1F339B")];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash160_data_8() {
+    let program = "OP_DATA_8 0x0102030405060708 OP_HASH160";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![hex_to_bytecode(@"0x16421b3d07efa2543203d69c093984eba95f9d0d")];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash160_push_data_2() {
+    let byte_data: ByteArray =
+        "0x000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9FA0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBFC0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF";
+    let program = format!("OP_PUSHDATA2 0x0100 {} OP_HASH160", byte_data);
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_dstack = array![hex_to_bytecode(@"0x07A536D93E0B9A779874E1287A226B8230CDA46E")];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
+fn test_op_hash160_14_double_hash160() {
+    let program = "OP_14 OP_HASH160 OP_HASH160";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![hex_to_bytecode(@"0x03DD47CAF3B9A1EC04C224DB9CB0E6AE0FEEC59E")];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash256() {
+    // 0x5368696E6967616D69 == 'Shinigami'
+    let program = "OP_PUSHDATA1 0x09 0x5368696E6967616D69 OP_HASH256";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![
+        hex_to_bytecode(@"0x39C02658ED1416713CF4098382E80D07786EED7004FC3FD89B38C7165FDABC80")
+    ];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash256_1() {
+    let program = "OP_1 OP_HASH256";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![
+        hex_to_bytecode(@"0x9C12CFDC04C74584D787AC3D23772132C18524BC7AB28DEC4219B8FC5B425F70")
+    ];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash256_2() {
+    let program = "OP_2 OP_HASH256";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![
+        hex_to_bytecode(@"0x1CC3ADEA40EBFD94433AC004777D68150CCE9DB4C771BC7DE1B297A7B795BBBA")
+    ];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash256_data_8() {
+    let program = "OP_DATA_8 0x0102030405060708 OP_HASH256";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![
+        hex_to_bytecode(@"0x2502FA942289B144EDB4CD31C0313624C030885420A86363CE91589D78F8295A")
+    ];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_hash256_push_data_2() {
+    let byte_data: ByteArray =
+        "0x000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9FA0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBFC0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF";
+    let program = format!("OP_PUSHDATA2 0x0100 {} OP_HASH256", byte_data);
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let hex_data: ByteArray = hex_to_bytecode(
+        @"0x60BD11C69262F84DDFEA5F0D116D40AF862C4DD8C2A92FB90E368B132E8FA89C"
+    );
+    let expected_dstack = array![hex_data];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
+fn test_op_hash256_14_double_hash256() {
+    let program = "OP_14 OP_HASH256 OP_HASH256";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let hex_data: ByteArray = hex_to_bytecode(
+        @"0x26AA6C7A9B46E9C409F09C179F7DEFF54F7AF5571D38DE5E5D9BA3932B91F55B"
+    );
+    let expected_dstack = array![hex_data];
+    utils::check_expected_dstack(ref engine, expected_dstack.span());
+}
+
+#[test]
 fn test_op_ripemd160() {
     // 0x5368696E6967616D69 == 'Shinigami'
     let program = "OP_PUSHDATA1 0x09 0x5368696E6967616D69 OP_RIPEMD160";

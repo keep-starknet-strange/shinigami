@@ -21,7 +21,8 @@ done
 
 CAIRO_STRINGS=()
 for (( i=0; i<${#GROUPED_TEXTS[@]}; i++ )); do
-  CAIRO_STRINGS[$i]=$(starkli to-cairo-string "${GROUPED_TEXTS[$i]}")
+  # TODO: --dec
+  CAIRO_STRINGS[$i]=$(starkli to-cairo-string -- "${GROUPED_TEXTS[$i]}")
 done
 
 BYTE_ARRAY="["
@@ -33,7 +34,7 @@ else
   for (( i=0; i<$CURRENT_INDEX; i++ )); do
     CAIRO_STRING_UPPER=$(echo ${CAIRO_STRINGS[$i]} | sed 's/0x//g' | tr '[:lower:]' '[:upper:]')
     DECIMAL_VALUE=$(echo "ibase=16; ${CAIRO_STRING_UPPER}" | bc | tr -d '\\\n')
-    BYTE_ARRAY="${BYTE_ARRAY}\"${DECIMAL_VALUE}\""
+    BYTE_ARRAY="${BYTE_ARRAY}${DECIMAL_VALUE}"
     if [ $i -lt $((CURRENT_INDEX-1)) ]; then
       BYTE_ARRAY="${BYTE_ARRAY},"
     fi
@@ -47,7 +48,7 @@ if [ $MOD_INDEX -eq 0 ]; then
 else
   CAIRO_STRING_UPPER=$(echo ${CAIRO_STRINGS[$CURRENT_INDEX]} | sed 's/0x//g' | tr '[:lower:]' '[:upper:]')
   DECIMAL_VALUE=$(echo "ibase=16; ${CAIRO_STRING_UPPER}" | bc | tr -d '\\\n')
-  BYTE_ARRAY="${BYTE_ARRAY}\"${DECIMAL_VALUE}\",$MOD_INDEX]"
+  BYTE_ARRAY="${BYTE_ARRAY}${DECIMAL_VALUE},$MOD_INDEX]"
 fi
 
 echo $BYTE_ARRAY
