@@ -1,5 +1,4 @@
 pub mod Opcode {
-    use core::result::ResultTrait;
     pub const OP_0: u8 = 0;
     pub const OP_DATA_1: u8 = 1;
     pub const OP_DATA_2: u8 = 2;
@@ -164,6 +163,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+    pub const OP_SHA256: u8 = 168;
     pub const OP_NOP1: u8 = 176;
     pub const OP_NOP4: u8 = 179;
     pub const OP_NOP5: u8 = 180;
@@ -173,9 +173,8 @@ pub mod Opcode {
     pub const OP_NOP9: u8 = 184;
     pub const OP_NOP10: u8 = 185;
 
-
     use shinigami::engine::{Engine, EngineTrait};
-    use shinigami::opcodes::{constants, flow, stack, splice, bitwise, arithmetic, utils};
+    use shinigami::opcodes::{constants, flow, stack, splice, bitwise, arithmetic, crypto, utils};
     pub fn execute(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
         match opcode {
             0 => constants::opcode_false(ref engine),
@@ -346,7 +345,7 @@ pub mod Opcode {
             165 => arithmetic::opcode_within(ref engine),
             166 => utils::not_implemented(ref engine),
             167 => utils::not_implemented(ref engine),
-            168 => utils::not_implemented(ref engine),
+            168 => crypto::opcode_sha256(ref engine),
             169 => utils::not_implemented(ref engine),
             170 => utils::not_implemented(ref engine),
             171 => utils::not_implemented(ref engine),

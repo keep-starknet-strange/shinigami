@@ -56,12 +56,11 @@ pub mod ScriptNum {
             return 0;
         }
         let snap_input = @input;
-        while i < snap_input.len()
-            - 1 {
-                result += snap_input.at(i).unwrap().into() * multiplier;
-                multiplier *= BYTESHIFT;
-                i += 1;
-            };
+        while i < snap_input.len() - 1 {
+            result += snap_input.at(i).unwrap().into() * multiplier;
+            multiplier *= BYTESHIFT;
+            i += 1;
+        };
         // Recover value and sign from 'sign-magnitude' byte.
         let sign_byte: i64 = input.at(i).unwrap().into();
         if sign_byte >= 128 {
