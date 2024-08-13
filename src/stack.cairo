@@ -127,14 +127,13 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = 0;
-        while i < self
-            .len {
-                let (entry, arr) = self.data.entry(i.into());
-                let arr = arr.deref();
-                result.append(arr.clone());
-                self.data = entry.finalize(NullableTrait::new(arr));
-                i += 1
-            };
+        while i < self.len {
+            let (entry, arr) = self.data.entry(i.into());
+            let arr = arr.deref();
+            result.append(arr.clone());
+            self.data = entry.finalize(NullableTrait::new(arr));
+            i += 1
+        };
 
         return result.span();
     }
