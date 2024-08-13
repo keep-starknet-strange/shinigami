@@ -109,11 +109,11 @@ pub impl EngineTraitImpl of EngineTrait {
             return Result::Err(err);
         }
 
-    // Check if the opcode is always illegal (reserved).
-    if is_opcode_always_illegal(op) {
-        let err_msg = format!("Attempt to execute reserved opcode: {}", op);
-        return Err(Error::OPCODE_RESERVED);
-    }
+        // Check if the opcode is always illegal (reserved).
+        if is_opcode_always_illegal(op) {
+            let err_msg = format!("Attempt to execute reserved opcode: {}", op);
+            return Err(Error::OPCODE_RESERVED);
+        }
 
         // TODO: CheckErrorCondition
         if self.dstack.len() < 1 {
