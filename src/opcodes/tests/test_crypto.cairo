@@ -128,9 +128,9 @@ fn test_op_hash256() {
     let program = "OP_PUSHDATA1 0x09 0x5368696E6967616D69 OP_HASH256";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
-    let expected_stack = array![hex_to_bytecode(
-        @"0x39C02658ED1416713CF4098382E80D07786EED7004FC3FD89B38C7165FDABC80"
-    )];
+    let expected_stack = array![
+        hex_to_bytecode(@"0x39C02658ED1416713CF4098382E80D07786EED7004FC3FD89B38C7165FDABC80")
+    ];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 
@@ -139,9 +139,9 @@ fn test_op_hash256_1() {
     let program = "OP_1 OP_HASH256";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
-    let expected_stack = array![hex_to_bytecode(
-        @"0x9C12CFDC04C74584D787AC3D23772132C18524BC7AB28DEC4219B8FC5B425F70"
-    )];
+    let expected_stack = array![
+        hex_to_bytecode(@"0x9C12CFDC04C74584D787AC3D23772132C18524BC7AB28DEC4219B8FC5B425F70")
+    ];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 
@@ -150,9 +150,9 @@ fn test_op_hash256_2() {
     let program = "OP_2 OP_HASH256";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
-    let expected_stack = array![hex_to_bytecode(
-        @"0x1CC3ADEA40EBFD94433AC004777D68150CCE9DB4C771BC7DE1B297A7B795BBBA"
-    )];
+    let expected_stack = array![
+        hex_to_bytecode(@"0x1CC3ADEA40EBFD94433AC004777D68150CCE9DB4C771BC7DE1B297A7B795BBBA")
+    ];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 
@@ -161,9 +161,9 @@ fn test_op_hash256_data_8() {
     let program = "OP_DATA_8 0x0102030405060708 OP_HASH256";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
-    let expected_stack = array![hex_to_bytecode(
-        @"0x2502FA942289B144EDB4CD31C0313624C030885420A86363CE91589D78F8295A"
-    )];
+    let expected_stack = array![
+        hex_to_bytecode(@"0x2502FA942289B144EDB4CD31C0313624C030885420A86363CE91589D78F8295A")
+    ];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 
@@ -175,7 +175,7 @@ fn test_op_hash256_push_data_2() {
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-      @"0x60BD11C69262F84DDFEA5F0D116D40AF862C4DD8C2A92FB90E368B132E8FA89C"
+        @"0x60BD11C69262F84DDFEA5F0D116D40AF862C4DD8C2A92FB90E368B132E8FA89C"
     );
     let expected_dstack = array![hex_data];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
