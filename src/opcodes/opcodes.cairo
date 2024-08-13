@@ -165,6 +165,8 @@ pub mod Opcode {
     pub const OP_WITHIN: u8 = 165;
     pub const OP_RIPEMD160: u8 = 166;
     pub const OP_SHA256: u8 = 168;
+    pub const OP_HASH160: u8 = 169;
+    pub const OP_HASH256: u8 = 170;
     pub const OP_NOP1: u8 = 176;
     pub const OP_NOP4: u8 = 179;
     pub const OP_NOP5: u8 = 180;
@@ -347,8 +349,8 @@ pub mod Opcode {
             166 => crypto::opcode_ripemd160(ref engine),
             167 => utils::not_implemented(ref engine),
             168 => crypto::opcode_sha256(ref engine),
-            169 => utils::not_implemented(ref engine),
-            170 => utils::not_implemented(ref engine),
+            169 => crypto::opcode_hash160(ref engine),
+            170 => crypto::opcode_hash256(ref engine),
             171 => utils::not_implemented(ref engine),
             172 => utils::not_implemented(ref engine),
             173 => utils::not_implemented(ref engine),
