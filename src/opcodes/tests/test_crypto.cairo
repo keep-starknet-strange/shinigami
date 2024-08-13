@@ -109,9 +109,7 @@ fn test_ripemd160_push_data_2() {
     let program = format!("OP_PUSHDATA2 0x0100 {} OP_RIPEMD160", byte_data);
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
-    let hex_data: ByteArray = hex_to_bytecode(
-        @"0x9C4FA072DB2C871A5635E37F791E93AB45049676"
-    );
+    let hex_data: ByteArray = hex_to_bytecode(@"0x9C4FA072DB2C871A5635E37F791E93AB45049676");
     let expected_dstack = array![hex_data];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
