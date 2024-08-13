@@ -1,4 +1,4 @@
-use core::dict::Felt252DictEntryTrait;
+use core::dict::{Felt252Dict, Felt252DictEntryTrait};
 use shinigami::scriptnum::ScriptNum;
 use shinigami::errors::Error;
 use shinigami::utils;
