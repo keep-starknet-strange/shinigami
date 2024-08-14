@@ -172,6 +172,18 @@ pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
     value
 }
 
+// TODO: More efficient way to do this
+pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
+    let byte_shift = 256;
+    let mut byte_array = "";
+    let mut valueU256: u256 = value.into();
+    while valueU256 > 0 {
+        byte_array.append_byte((valueU256 % byte_shift).try_into().unwrap());
+        valueU256 /= byte_shift;
+    };
+    byte_array.rev()
+}
+
 pub fn int_to_hex(value: u8) -> felt252 {
     let half_byte_shift = 16;
     let byte_shift = 256;
