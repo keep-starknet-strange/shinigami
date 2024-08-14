@@ -1,5 +1,6 @@
 use shinigami::compiler::CompilerTraitImpl;
 use shinigami::engine::EngineTraitImpl;
+use shinigami::utils;
 
 #[derive(Clone, Drop)]
 struct InputData {
@@ -16,11 +17,14 @@ fn main(input: InputData) -> u8 {
     let bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode);
     let res = engine.execute();
-    if res.is_ok() {
-        println!("Execution successful");
-        1
-    } else {
-        println!("Execution failed");
-        0
+    match res {
+        Result::Ok(_) => {
+            println!("Execution successful");
+            1
+        },
+        Result::Err(e) => {
+            println!("Execution failed: {}", utils::felt252_to_byte_array(e));
+            0
+        }
     }
 }
