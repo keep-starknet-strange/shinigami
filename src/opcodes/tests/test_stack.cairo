@@ -293,9 +293,9 @@ fn test_op_2rot_insufficient_items() {
 
 #[test]
 fn test_op_roll() {
-    let program = "OP_1 OP_2 OP_3 OP_ROLL";
+    let program = "OP_4 OP_3 OP_2 OP_1 OP_ROLL";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 3);
-    let expected_dstack = array![ScriptNum::wrap(3), ScriptNum::wrap(1), ScriptNum::wrap(2)];
+    let expected_dstack = array![ScriptNum::wrap(4), ScriptNum::wrap(2), ScriptNum::wrap(3)];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }

@@ -195,8 +195,12 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         return Result::Ok(());
     }
 
-    fn roll_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
-        let value = self.nip_n(n)?;
+    fn roll_n(ref self: ScriptStack, n: i32) -> Result<(), felt252> {
+        if n >= self.len.try_into().unwrap() {
+            return Result::Err(Error::STACK_OUT_OF_RANGE);
+        }
+
+        let value = self.nip_n(n.try_into().unwrap())?;
         self.push_byte_array(value);
         return Result::Ok(());
     }
