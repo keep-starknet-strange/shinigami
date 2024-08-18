@@ -159,6 +159,18 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         return Result::Ok(());
     }
 
+    fn swap_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        if n < 1 {
+            return Result::Err('swap_n: invalid n value');
+        }
+        let top_element = self.pop_byte_array()?;
+        let next_element = self.pop_byte_array()?;
+
+        self.push_byte_array(top_element);
+        self.push_byte_array(next_element);
+        return Result::Ok(());
+    }
+
     fn tuck(ref self: ScriptStack) -> Result<(), felt252> {
         let top_element = self.pop_byte_array()?;
         let next_element = self.pop_byte_array()?;
