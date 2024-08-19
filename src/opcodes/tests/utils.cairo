@@ -4,7 +4,7 @@ use shinigami::engine::{Engine, EngineTraitImpl};
 pub fn test_compile_and_run(program: ByteArray) -> Engine {
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
+    let mut engine = EngineTraitImpl::new(bytecode, Option::None, Option::None);
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
@@ -13,7 +13,7 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine {
 pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> Engine {
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
+    let mut engine = EngineTraitImpl::new(bytecode, Option::None, Option::None);
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();

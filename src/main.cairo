@@ -15,7 +15,7 @@ fn main(input: InputData) -> u8 {
     println!("Running Bitcoin Script: '{}'", program);
     let mut compiler = CompilerTraitImpl::new();
     let bytecode = compiler.compile(program);
-    let mut engine = EngineTraitImpl::new(bytecode);
+    let mut engine = EngineTraitImpl::new(bytecode, Option::None, Option::None);
     let res = engine.execute();
     match res {
         Result::Ok(_) => {

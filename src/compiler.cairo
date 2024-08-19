@@ -199,6 +199,8 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_SHA256', Opcode::OP_SHA256);
         compiler.add_opcode('OP_HASH160', Opcode::OP_HASH160);
         compiler.add_opcode('OP_HASH256', Opcode::OP_HASH256);
+        compiler.add_opcode('OP_CHECKSIG', Opcode::OP_CHECKSIG);
+        compiler.add_opcode('OP_CODESEPARATOR', Opcode::OP_CODESEPARATOR);
 
         compiler
     }
