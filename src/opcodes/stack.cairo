@@ -1,7 +1,3 @@
-use core::traits::TryInto;
-use core::result::ResultTrait;
-use core::option::OptionTrait;
-use core::traits::Into;
 use shinigami::engine::{Engine, EngineTrait};
 use shinigami::scriptnum::ScriptNum;
 use shinigami::stack::ScriptStackTrait;
