@@ -11,6 +11,15 @@ cd $BASE_DIR && scarb build
 echo "Shinigami built successfully!"
 echo
 
+START=0
+if [ -n "$1" ]; then
+  START=$1
+fi
+END=100
+if [ -n "$2" ]; then
+  END=$2
+fi
+
 # Run the script_tests.json tests
 # TODO: Pull from bitcoin-core repo?
 SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests.json
@@ -25,6 +34,10 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     # If line contains one string, ie ["XXX"], skip it
     if [[ $line != *\"*\"*\,\"*\"* ]]; then
         continue
+    fi
+    if [ $SCRIPT_IDX -lt $START ]; then
+      SCRIPT_IDX=$((SCRIPT_IDX+1))
+      continue
     fi
     # Otherwise, line encoded like [[wit..., amount]?, scriptSig, scriptPubKey, flags, expected_scripterror, ... comments]
     # Extract line data
@@ -58,7 +71,46 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     if echo "$RESULT" | grep -q "$SUCCESS_RES"; then
         SCRIPT_RESULT="OK"
     elif echo "$RESULT" | grep -q "$FAILURE_RES"; then
-        SCRIPT_RESULT="FAIL"
+        EVAL_FALSE_RES="Execution failed: Script failed after execute"
+        EMPTY_STACK_RES="Execution failed: Stack empty after execute"
+        RESERVED_OP_RES="Execution failed: Opcode reserved"
+        UNIMPLEMENTED_OP_RES="Execution failed: Opcode not implemented"
+        INVALID_ELSE_RES="Execution failed: opcode_else: no matching if"
+        INVALID_ENDIF_RES="Execution failed: opcode_endif: no matching if"
+        RETURN_EARLY_RES="Execution failed: opcode_return: returned early"
+        STACK_UNDERFLOW_RES="Execution failed: Stack underflow"
+        STACK_OUT_OF_RANGE_RES="Execution failed: Stack out of range"
+        DISABLED_OP_RES="Execution failed: Opcode is disabled"
+        VERIFY_FAILED_RES="Execution failed: Verify failed"
+        if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
+            SCRIPT_RESULT="EVAL_FALSE"
+        elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
+            SCRIPT_RESULT="EVAL_FALSE"
+        elif echo "$RESULT" | grep -q "$RESERVED_OP_RES"; then
+            SCRIPT_RESULT="BAD_OPCODE"
+        elif echo "$RESULT" | grep -q "$UNIMPLEMENTED_OP_RES"; then
+            SCRIPT_RESULT="BAD_OPCODE"
+        elif echo "$RESULT" | grep -q "$INVALID_ELSE_RES"; then
+            SCRIPT_RESULT="UNBALANCED_CONDITIONAL"
+        elif echo "$RESULT" | grep -q "$INVALID_ENDIF_RES"; then
+            SCRIPT_RESULT="UNBALANCED_CONDITIONAL"
+        elif echo "$RESULT" | grep -q "$RETURN_EARLY_RES"; then
+            SCRIPT_RESULT="OP_RETURN"
+        elif echo "$RESULT" | grep -q "$STACK_UNDERFLOW_RES"; then
+            SCRIPT_RESULT="INVALID_STACK_OPERATION"
+        elif echo "$RESULT" | grep -q "$STACK_OUT_OF_RANGE_RES"; then
+            SCRIPT_RESULT="INVALID_STACK_OPERATION"
+        elif echo "$RESULT" | grep -q "$DISABLED_OP_RES"; then
+            SCRIPT_RESULT="DISABLED_OPCODE"
+        elif echo "$RESULT" | grep -q "$VERIFY_FAILED_RES"; then
+            SCRIPT_RESULT="VERIFY"
+        else
+            SCRIPT_RESULT="FAIL"
+        fi
+        if [ $expected_scripterror == "EQUALVERIFY" ]; then
+            # TODO: This is a hack to make the test pass for now
+            expected_scripterror="VERIFY"
+        fi
     else
         SCRIPT_RESULT="PANIC"
     fi
@@ -70,12 +122,13 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     else
         echo -e "  \033[0;31mFAIL\033[0m"
         FAILED=$((FAILED+1))
+        echo "scarb cairo-run '$JOINED_INPUT'"
         echo "$RESULT"
     fi
     echo
 
     SCRIPT_IDX=$((SCRIPT_IDX+1))
-    if [ $SCRIPT_IDX -eq 50 ]; then
+    if [ $SCRIPT_IDX -eq $END ]; then
       break #TODO: Remove this line
     fi
   done

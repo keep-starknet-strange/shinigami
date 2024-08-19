@@ -27,64 +27,55 @@ fn disabled_opcodes() -> core::array::Array<ByteArray> {
 fn test_op_code_disabled() {
     let disabled_opcodes = disabled_opcodes();
     let mut i: usize = 0;
-    while i < disabled_opcodes
-        .len() {
-            let mut engine = utils::test_compile_and_run_err(
-                disabled_opcodes.at(i).clone(), Error::OPCODE_DISABLED
-            );
-            utils::check_dstack_size(ref engine, 0);
-            i += 1;
-        }
+    while i < disabled_opcodes.len() {
+        let mut engine = utils::test_compile_and_run_err(
+            disabled_opcodes.at(i).clone(), Error::OPCODE_DISABLED
+        );
+        utils::check_dstack_size(ref engine, 0);
+        i += 1;
+    }
 }
 
 #[test]
 fn test_disabled_opcodes_if_block() {
     let disabled_opcodes = disabled_opcodes();
     let mut i: usize = 0;
-    while i < disabled_opcodes
-        .len() {
-            let program = format!(
-                "OP_1 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone()
-            );
-            let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
-            utils::check_dstack_size(ref engine, 0);
-            i += 1;
-        }
+    while i < disabled_opcodes.len() {
+        let program = format!(
+            "OP_1 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone()
+        );
+        let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
+        utils::check_dstack_size(ref engine, 0);
+        i += 1;
+    }
 }
 
 #[test]
 fn test_disabled_opcodes_else_block() {
     let disabled_opcodes = disabled_opcodes();
     let mut i: usize = 0;
-    while i < disabled_opcodes
-        .len() {
-            let program = format!(
-                "OP_0 OP_IF OP_DROP OP_ELSE {} OP_ENDIF", disabled_opcodes.at(i).clone()
-            );
-            let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
-            utils::check_dstack_size(ref engine, 0);
-            i += 1;
-        }
+    while i < disabled_opcodes.len() {
+        let program = format!(
+            "OP_0 OP_IF OP_DROP OP_ELSE {} OP_ENDIF", disabled_opcodes.at(i).clone()
+        );
+        let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
+        utils::check_dstack_size(ref engine, 0);
+        i += 1;
+    }
 }
 
 
 #[test]
-#[ignore]
-// This test should fail as the opcode is disabled
-// However since the if block is skipped so is the disabled opcode
-// TODO(109) we should be emulating how the inteperter handles disabled opcodes if blocks in core
-// https://github.com/bitcoin/bitcoin/blob/master/src/script/interpreter.cpp#L456
 fn test_disabled_opcode_in_unexecd_if_block() {
     let disabled_opcodes = disabled_opcodes();
     let mut i: usize = 0;
-    while i < disabled_opcodes
-        .len() {
-            let program = format!(
-                "OP_0 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone()
-            );
-            let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
-            utils::check_dstack_size(ref engine, 0);
-            i += 1;
-        }
+    while i < disabled_opcodes.len() {
+        let program = format!(
+            "OP_0 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone()
+        );
+        let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
+        utils::check_dstack_size(ref engine, 0);
+        i += 1;
+    }
 }
 

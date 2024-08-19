@@ -37,6 +37,11 @@ pub fn is_number(script_item: @ByteArray) -> bool {
     if first == minus {
         return script_item.len() > 1;
     }
+    if script_item.len() > 1 {
+        let second = script_item[1];
+        // Some opcodes start with a number; like 2ROT
+        return first >= zero && first <= nine && second >= zero && second <= nine;
+    }
     first >= zero && first <= nine
 }
 
@@ -47,20 +52,25 @@ pub fn is_number(script_item: @ByteArray) -> bool {
 pub fn hex_to_bytecode(script_item: @ByteArray) -> ByteArray {
     let half_byte_shift = 16;
     let zero_string = '0';
-    let a_string = 'A';
+    let a_string_lower = 'a';
+    let a_string_capital = 'A';
     let mut i = 2;
     let mut bytecode = "";
     let script_item_len = script_item.len();
     while i < script_item_len {
         let mut upper_half_byte = 0;
         let mut lower_half_byte = 0;
-        if script_item[i] >= a_string {
-            upper_half_byte = (script_item[i].into() - a_string + 10) * half_byte_shift;
+        if script_item[i] >= a_string_lower {
+            upper_half_byte = (script_item[i].into() - a_string_lower + 10) * half_byte_shift;
+        } else if script_item[i] >= a_string_capital {
+            upper_half_byte = (script_item[i].into() - a_string_capital + 10) * half_byte_shift;
         } else {
             upper_half_byte = (script_item[i].into() - zero_string) * half_byte_shift;
         }
-        if script_item[i + 1] >= a_string {
-            lower_half_byte = script_item[i + 1].into() - a_string + 10;
+        if script_item[i + 1] >= a_string_lower {
+            lower_half_byte = script_item[i + 1].into() - a_string_lower + 10;
+        } else if script_item[i + 1] >= a_string_capital {
+            lower_half_byte = script_item[i + 1].into() - a_string_capital + 10;
         } else {
             lower_half_byte = script_item[i + 1].into() - zero_string;
         }
@@ -162,6 +172,18 @@ pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
     value
 }
 
+// TODO: More efficient way to do this
+pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
+    let byte_shift = 256;
+    let mut byte_array = "";
+    let mut valueU256: u256 = value.into();
+    while valueU256 > 0 {
+        byte_array.append_byte((valueU256 % byte_shift).try_into().unwrap());
+        valueU256 /= byte_shift;
+    };
+    byte_array.rev()
+}
+
 pub fn int_to_hex(value: u8) -> felt252 {
     let half_byte_shift = 16;
     let byte_shift = 256;
@@ -185,18 +207,17 @@ pub fn int_to_hex(value: u8) -> felt252 {
 pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     let mut i = 0;
     let mut ret_bool = false;
-    while i < bytes
-        .len() {
-            if bytes.at(i).unwrap() != 0 {
-                // Can be negative zero
-                if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                    ret_bool = false;
-                    break;
-                }
-                ret_bool = true;
+    while i < bytes.len() {
+        if bytes.at(i).unwrap() != 0 {
+            // Can be negative zero
+            if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
+                ret_bool = false;
                 break;
             }
-            i += 1;
-        };
+            ret_bool = true;
+            break;
+        }
+        i += 1;
+    };
     ret_bool
 }

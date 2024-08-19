@@ -1,6 +1,4 @@
-use core::traits::TryInto;
-use core::option::OptionTrait;
-use core::dict::Felt252DictEntryTrait;
+use core::dict::{Felt252Dict, Felt252DictEntryTrait};
 use shinigami::scriptnum::ScriptNum;
 use shinigami::errors::Error;
 use shinigami::utils;
@@ -129,14 +127,13 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = 0;
-        while i < self
-            .len {
-                let (entry, arr) = self.data.entry(i.into());
-                let arr = arr.deref();
-                result.append(arr.clone());
-                self.data = entry.finalize(NullableTrait::new(arr));
-                i += 1
-            };
+        while i < self.len {
+            let (entry, arr) = self.data.entry(i.into());
+            let arr = arr.deref();
+            result.append(arr.clone());
+            self.data = entry.finalize(NullableTrait::new(arr));
+            i += 1
+        };
 
         return result.span();
     }
@@ -202,6 +199,26 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
         let value = self.nip_n(n.try_into().unwrap())?;
         self.push_byte_array(value);
+        return Result::Ok(());
+    }
+
+    fn over_n(ref self: ScriptStack, mut n: u32) -> Result<(), felt252> {
+        if n < 1 {
+            return Result::Err('over_n: invalid n value');
+        }
+        let entry: u32 = (2 * n) - 1;
+        let mut err = '';
+        while n > 0 {
+            let res = self.peek_byte_array(entry);
+            if res.is_err() {
+                err = res.unwrap_err();
+                break;
+            }
+
+            self.push_byte_array(res.unwrap());
+            n -= 1;
+        };
+
         return Result::Ok(());
     }
 }
