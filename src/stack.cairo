@@ -187,7 +187,12 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn pick_n(ref self: ScriptStack, idx: i32) -> Result<(), felt252> {
+        if idx < 0 {
+            return Result::Err(Error::INVALID_STACK_OPS);
+        }
+
         let so = self.peek_byte_array(idx.try_into().unwrap())?;
+
         self.push_byte_array(so);
         return Result::Ok(());
     }

@@ -7,6 +7,7 @@ pub mod Error {
     pub const OPCODE_RESERVED: felt252 = 'Opcode reserved';
     pub const OPCODE_NOT_IMPLEMENTED: felt252 = 'Opcode not implemented';
     pub const OPCODE_DISABLED: felt252 = 'Opcode is disabled';
+    pub const INVALID_STACK_OPS: felt252 = 'Invalid Stack Operation';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
