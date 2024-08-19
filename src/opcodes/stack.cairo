@@ -102,6 +102,13 @@ pub fn opcode_rot(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.rot_n(1)?;
     return Result::Ok(());
 }
+
+pub fn opcode_roll(ref engine: Engine) -> Result<(), felt252> {
+    let value = engine.dstack.pop_int()?;
+    engine.dstack.roll_n(ScriptNum::to_int32(value))?;
+    return Result::Ok(());
+}
+
 pub fn opcode_over(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.over_n(1)?;
     return Result::Ok(());
