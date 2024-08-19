@@ -30,4 +30,7 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .clip-trapezium {
+    clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
+  }
 }
