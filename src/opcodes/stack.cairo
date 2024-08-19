@@ -32,10 +32,7 @@ pub fn opcode_dup(ref engine: Engine) -> Result<(), felt252> {
 }
 
 pub fn opcode_swap(ref engine: Engine) -> Result<(), felt252> {
-    let a = engine.dstack.pop_int()?;
-    let b = engine.dstack.pop_int()?;
-    engine.dstack.push_int(a);
-    engine.dstack.push_int(b);
+    engine.dstack.swap_n(1)?;
     return Result::Ok(());
 }
 
