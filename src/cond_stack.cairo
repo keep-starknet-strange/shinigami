@@ -1,3 +1,5 @@
+use core::dict::Felt252Dict;
+
 #[derive(Destruct)]
 pub struct ConditionalStack {
     stack: Felt252Dict<u8>,

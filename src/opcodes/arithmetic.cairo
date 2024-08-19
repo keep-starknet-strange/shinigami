@@ -1,5 +1,6 @@
 use shinigami::engine::{Engine, EngineTrait};
 use shinigami::stack::ScriptStackTrait;
+use shinigami::opcodes::utils;
 
 pub fn opcode_1add(ref engine: Engine) -> Result<(), felt252> {
     let value = engine.dstack.pop_int()?;
@@ -38,6 +39,17 @@ pub fn opcode_not(ref engine: Engine) -> Result<(), felt252> {
     } else {
         engine.dstack.push_bool(false);
     }
+    return Result::Ok(());
+}
+
+pub fn opcode_0_not_equal(ref engine: Engine) -> Result<(), felt252> {
+    let a = engine.dstack.pop_int()?;
+
+    engine.dstack.push_int(if a != 0 {
+        1
+    } else {
+        0
+    });
     return Result::Ok(());
 }
 
@@ -86,6 +98,12 @@ pub fn opcode_numequal(ref engine: Engine) -> Result<(), felt252> {
     } else {
         false
     });
+    return Result::Ok(());
+}
+
+pub fn opcode_numequalverify(ref engine: Engine) -> Result<(), felt252> {
+    opcode_numequal(ref engine)?;
+    utils::abstract_verify(ref engine)?;
     return Result::Ok(());
 }
 

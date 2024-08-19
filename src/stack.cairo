@@ -1,7 +1,7 @@
-use core::option::OptionTrait;
-use core::dict::Felt252DictEntryTrait;
+use core::dict::{Felt252Dict, Felt252DictEntryTrait};
 use shinigami::scriptnum::ScriptNum;
 use shinigami::errors::Error;
+use shinigami::utils;
 
 #[derive(Destruct)]
 pub struct ScriptStack {
@@ -52,23 +52,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn pop_bool(ref self: ScriptStack) -> Result<bool, felt252> {
         let bytes = self.pop_byte_array()?;
-
-        let mut i = 0;
-        let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
-                    break;
-                }
-                i += 1;
-            };
-        return Result::Ok(ret_bool);
+        return Result::Ok(utils::byte_array_to_bool(@bytes));
     }
 
     fn peek_byte_array(ref self: ScriptStack, idx: usize) -> Result<ByteArray, felt252> {
@@ -88,23 +72,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn peek_bool(ref self: ScriptStack, idx: usize) -> Result<bool, felt252> {
         let bytes = self.peek_byte_array(idx)?;
-
-        let mut i = 0;
-        let mut ret_bool = false;
-        while i < bytes
-            .len() {
-                if bytes.at(i).unwrap() != 0 {
-                    // Can be negative zero
-                    if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
-                        ret_bool = false;
-                        break;
-                    }
-                    ret_bool = true;
-                    break;
-                }
-                i += 1;
-            };
-        return Result::Ok(ret_bool);
+        return Result::Ok(utils::byte_array_to_bool(@bytes));
     }
 
     fn len(ref self: ScriptStack) -> usize {
@@ -134,22 +102,44 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
     }
 
+    fn rot_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        if n < 1 {
+            return Result::Err('rot_n: invalid n value');
+        }
+        let mut err = '';
+        let entry_index = 3 * n - 1;
+        let mut i = n;
+        while i > 0 {
+            let res = self.nip_n(entry_index);
+            if res.is_err() {
+                err = res.unwrap_err();
+                break;
+            }
+            self.push_byte_array(res.unwrap());
+            i -= 1;
+        };
+        if err != '' {
+            return Result::Err(err);
+        }
+        return Result::Ok(());
+    }
+
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = 0;
-        while i < self
-            .len {
-                let (entry, arr) = self.data.entry(i.into());
-                let arr = arr.deref();
-                result.append(arr.clone());
-                self.data = entry.finalize(NullableTrait::new(arr));
-                i += 1
-            };
+        while i < self.len {
+            let (entry, arr) = self.data.entry(i.into());
+            let arr = arr.deref();
+            result.append(arr.clone());
+            self.data = entry.finalize(NullableTrait::new(arr));
+            i += 1
+        };
 
         return result.span();
     }
 
     fn dup_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        // TODO: STACK_OUT_OF_RANGE?
         if (n < 1) {
             return Result::Err('dup_n: invalid n value');
         }
@@ -169,7 +159,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         return Result::Ok(());
     }
 
-
     fn tuck(ref self: ScriptStack) -> Result<(), felt252> {
         let top_element = self.pop_byte_array()?;
         let next_element = self.pop_byte_array()?;
@@ -177,6 +166,49 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.push_byte_array(top_element.clone());
         self.push_byte_array(next_element);
         self.push_byte_array(top_element);
+        return Result::Ok(());
+    }
+
+    fn nip_n(ref self: ScriptStack, idx: usize) -> Result<ByteArray, felt252> {
+        let value = self.peek_byte_array(idx)?;
+
+        // Shift all elements above idx down by one
+        let mut i = 0;
+        while i < idx {
+            let next_value = self.peek_byte_array(idx - i - 1).unwrap();
+            let (entry, _) = self.data.entry((self.len - idx + i - 1).into());
+            self.data = entry.finalize(NullableTrait::new(next_value));
+            i += 1;
+        };
+        let (last_entry, _) = self.data.entry((self.len - 1).into());
+        self.data = last_entry.finalize(NullableTrait::new(""));
+        self.len -= 1;
+        return Result::Ok(value);
+    }
+
+    fn pick_n(ref self: ScriptStack, idx: i32) -> Result<(), felt252> {
+        let so = self.peek_byte_array(idx.try_into().unwrap())?;
+        self.push_byte_array(so);
+        return Result::Ok(());
+    }
+
+    fn over_n(ref self: ScriptStack, mut n: u32) -> Result<(), felt252> {
+        if n < 1 {
+            return Result::Err('over_n: invalid n value');
+        }
+        let entry: u32 = (2 * n) - 1;
+        let mut err = '';
+        while n > 0 {
+            let res = self.peek_byte_array(entry);
+            if res.is_err() {
+                err = res.unwrap_err();
+                break;
+            }
+
+            self.push_byte_array(res.unwrap());
+            n -= 1;
+        };
+
         return Result::Ok(());
     }
 }

@@ -2,6 +2,8 @@
 pub mod ScriptNum {
     const BYTESHIFT: i64 = 256;
     const MAX_BYTE_LEN: usize = 4;
+    const MAX_INT32: i32 = 2147483647;
+    const MIN_INT32: i32 = -2147483648;
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
@@ -54,12 +56,11 @@ pub mod ScriptNum {
             return 0;
         }
         let snap_input = @input;
-        while i < snap_input.len()
-            - 1 {
-                result += snap_input.at(i).unwrap().into() * multiplier;
-                multiplier *= BYTESHIFT;
-                i += 1;
-            };
+        while i < snap_input.len() - 1 {
+            result += snap_input.at(i).unwrap().into() * multiplier;
+            multiplier *= BYTESHIFT;
+            i += 1;
+        };
         // Recover value and sign from 'sign-magnitude' byte.
         let sign_byte: i64 = input.at(i).unwrap().into();
         if sign_byte >= 128 {
@@ -94,5 +95,17 @@ pub mod ScriptNum {
             value = value / byteshift;
         };
         value.try_into().unwrap()
+    }
+
+    pub fn to_int32(mut n: i64) -> i32 {
+        if n > MAX_INT32.into() {
+            return MAX_INT32;
+        }
+
+        if n < MIN_INT32.into() {
+            return MIN_INT32;
+        }
+
+        return n.try_into().unwrap();
     }
 }

@@ -84,6 +84,33 @@ fn test_op_not() {
 }
 
 #[test]
+fn test_op_0_not_equal_one() {
+    let program = "OP_1 OP_0NOTEQUAL";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_0_not_equal_five() {
+    let program = "OP_5 OP_0NOTEQUAL";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_0_not_equal_zero() {
+    let program = "OP_0 OP_0NOTEQUAL";
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_FAILED);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(0)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
 fn test_op_add() {
     let program = "OP_1 OP_2 OP_ADD";
     let mut engine = utils::test_compile_and_run(program);
@@ -174,6 +201,20 @@ fn test_op_numequal_false() {
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_numequalverify_true() {
+    let program = "OP_2 OP_2 OP_NUMEQUALVERIFY";
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_EMPTY_STACK);
+    utils::check_dstack_size(ref engine, 0);
+}
+
+#[test]
+fn test_op_numequalverify_false() {
+    let program = "OP_2 OP_3 OP_NUMEQUALVERIFY";
+    let mut engine = utils::test_compile_and_run_err(program, Error::VERIFY_FAILED);
+    utils::check_dstack_size(ref engine, 0);
 }
 
 #[test]
