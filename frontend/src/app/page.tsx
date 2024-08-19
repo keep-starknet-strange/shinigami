@@ -4,6 +4,7 @@ import Link from "next/link";
 import Github from "@/components/github";
 import Split from "@/components/split";
 import CodeEditor from "@/components/editor";
+import RefreshIcon from "@/components/refresh-icon";
 
 export default function Home() {
   return (
@@ -43,9 +44,15 @@ export default function Home() {
                   <div className="w-full border-8 border-[#0E0E0E] h-80 bg-black overflow-y-scroll rounded-b-xl rounded-tr-xl">
                     <CodeEditor />
                   </div>
-                  <div className="mt-5 flex flex-row items-center space-x-3.5">
-                    <button className="bg-[#00FF5E] text-black px-7 py-4 rounded-md">RUN SCRIPT</button>
-                    <button className="bg-transparent text-[#00FF5E] border border-[#00FF5E] px-5 py-3.5 rounded-md">DEBUG SCRIPT</button>
+                  <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
+                      <button className="bg-[#00FF5E] text-black px-7 py-4 rounded-md">RUN SCRIPT</button>
+                      <button className="bg-transparent text-[#00FF5E] border border-[#00FF5E] px-5 py-3.5 rounded-md">DEBUG SCRIPT</button>
+                    </div>
+                    <button className="flex flex-row items-center justify-center space-x-1.5">
+                      <RefreshIcon />
+                      <p className="text-white">REFRESH</p>
+                    </button>
                   </div>
                 </div>
               </div>
