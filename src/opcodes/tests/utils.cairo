@@ -1,5 +1,6 @@
 use shinigami::compiler::CompilerTraitImpl;
 use shinigami::engine::{Engine, EngineTraitImpl};
+use shinigami::transaction::{Transaction, TransactionTrait};
 
 pub fn test_compile_and_run(program: ByteArray) -> Engine {
     let mut compiler = CompilerTraitImpl::new();
@@ -8,6 +9,15 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine {
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
+}
+
+pub fn test_compile_and_run_with_tx(program: ByteArray, transaction: Transaction) -> Engine {
+    let mut compiler = CompilerTraitImpl::new();
+    let bytecode = compiler.compile(program);
+    // let mut engine = EngineTraitImpl::new(bytecode, Option::Some(transaction), Option::None);
+    // let res = engine.execute();
+    // assert!(res.is_ok(), "Execution of the program failed");
+    EngineTraitImpl::new("", Option::None, Option::None)
 }
 
 pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> Engine {

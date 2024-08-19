@@ -45,6 +45,7 @@ pub mod signature {
         mod test_signature;
     }
     pub(crate) use signature::BaseSigVerifier;
+    pub(crate) use signature::BaseSigVerifierTrait;
 }
 pub mod transaction;
 mod main;
