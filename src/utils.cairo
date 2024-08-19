@@ -1,3 +1,4 @@
+use core::sha256::{compute_sha256_byte_array};
 // Checks if item starts with 0x
 // TODO: Check validity of hex?
 pub fn is_hex(script_item: @ByteArray) -> bool {
@@ -71,7 +72,7 @@ pub fn int_to_hex(value: u8) -> felt252 {
 
     upper_half.into() * byte_shift.into() + lower_half.into()
 }
-pub fn u256_from_byte_array_with_offset(ref arr: ByteArray, offset: usize, len: usize) -> u256 {
+pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usize) -> u256 {
 	let mut high: u128 = 0;
 	let mut low: u128 = 0;
 	let total_bytes = arr.len();
@@ -107,4 +108,39 @@ pub fn u256_from_byte_array_with_offset(ref arr: ByteArray, offset: usize, len: 
 		i+=1;
 	};
 	u256{high,low}
+}
+pub fn int_size_in_bytes(u_32: u32) -> u32 {
+    let mut value: u32 = u_32;
+    let mut size = 0;
+
+    while value > 0 {
+        size += 1;
+        value /= 256;
+    };
+    if size == 0 { size = 1; }
+    size
+}
+
+pub fn hash256(byte: @ByteArray) -> u256 {
+	let mut msg_hash = compute_sha256_byte_array(byte);
+	let mut transaction_byte: ByteArray = "";
+
+	let mut hash_value: u256 = 0;
+    for word in msg_hash.span() {
+        hash_value *= 0x100000000;
+        hash_value = hash_value + (*word).into();
+    };
+
+	transaction_byte.append_word(hash_value.high.into(), 16);
+	transaction_byte.append_word(hash_value.low.into(), 16);
+	
+	msg_hash = compute_sha256_byte_array(@transaction_byte);		
+
+	hash_value = 0;
+    for word in msg_hash.span() {
+        hash_value *= 0x100000000;
+        hash_value = hash_value + (*word).into();
+    };
+
+	hash_value
 }

@@ -4,6 +4,7 @@ use shinigami::opcodes::opcodes::Opcode;
 use shinigami::opcodes::flow;
 use shinigami::errors::Error;
 use shinigami::scriptflags::ScriptFlags;
+use shinigami::transaction::{Transaction, TransactionImpl};
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -21,7 +22,13 @@ pub struct Engine {
     // Execution behaviour flags
 	flags: u32,
 
+    pub transaction: Transaction,
+    
+    pub index: u32,
 
+    pub last_code_sep: u32,
+
+    pub is_codeseparator: bool,
     
 // TODO
 // ...
@@ -29,7 +36,7 @@ pub struct Engine {
 
 pub trait EngineTrait {
     // Create a new Engine with the given script
-    fn new(script: ByteArray) -> Engine;
+    fn new(script: ByteArray, transaction: Option<Transaction>, index: Option<u32>) -> Engine;
     // Pulls the next len bytes from the script and advances the program counter
     fn pull_data(ref self: Engine, len: usize) -> ByteArray;
     fn get_dstack(ref self: Engine) -> Span<ByteArray>;
@@ -43,11 +50,13 @@ pub trait EngineTrait {
 	// Return true if the script engine instance has the specified flag set.
 	fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool;
 
-	fn is_witness_version_active(ref self: Engine, _value: u32) -> bool;
+    fn subscript(ref self: Engine) -> @ByteArray;
+
+    fn has_codeseparator(script: @ByteArray) -> bool;
 }
 
 pub impl EngineTraitImpl of EngineTrait {
-    fn new(script: ByteArray) -> Engine {
+    fn new(script: ByteArray, transaction: Option<Transaction>, index: Option<u32>) -> Engine {
         Engine {
             script: @script,
             opcode_idx: 0,
@@ -55,6 +64,10 @@ pub impl EngineTraitImpl of EngineTrait {
             astack: ScriptStackImpl::new(),
             cond_stack: ConditionalStackImpl::new(),
             flags: 0,
+            transaction: TransactionImpl::get_transaction(transaction),
+            index: TransactionImpl::get_index(index),
+            last_code_sep: 0,
+            is_codeseparator: Self::has_codeseparator(@script)
         }
     }
 
@@ -154,8 +167,44 @@ pub impl EngineTraitImpl of EngineTrait {
 		self.flags & flag.into() == flag.into()
 	}
 
-	fn is_witness_version_active(ref self: Engine, _value: u32) -> bool{
-		// if self.witness_version < val
-		return true;
-	}
+    fn subscript(ref self: Engine) -> @ByteArray {
+        if self.is_codeseparator == false  || self.last_code_sep == 0 {
+            return self.script;
+        }
+
+        let mut sub_script : ByteArray = "";
+        let mut i : usize = 0;
+        let mut code_sep_index = 0;
+        let script_len = self.script.len();
+
+        while i < script_len {
+            let opcode = self.script[i];
+            if opcode == 171 {
+                code_sep_index += 1;
+                continue;
+            }
+
+            if code_sep_index >= self.last_code_sep {
+                sub_script.append_byte(opcode);
+            } 
+            i+=1;
+        };
+        @sub_script
+    }
+
+    fn has_codeseparator(script: @ByteArray) -> bool {
+        let mut i: usize = 0;
+        let mut found: bool = false;
+        let len: usize = script.len();
+
+        while i < len {
+            if script[i] == 171 {
+                found = true;
+                break;
+            }
+            i+=1;
+        };
+
+        found
+    }
 }

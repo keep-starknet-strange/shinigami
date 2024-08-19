@@ -44,4 +44,5 @@ pub mod signature {
     }
     pub(crate) use signature::BaseSigVerifier;
 }
+pub mod transaction;
 mod main;

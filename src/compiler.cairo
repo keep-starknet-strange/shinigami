@@ -90,6 +90,8 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_VER', Opcode::OP_VER);
         compiler.add_opcode('OP_TUCK', Opcode::OP_TUCK);
         compiler.add_opcode('OP_BOOLOR', Opcode::OP_BOOLOR);
+        compiler.add_opcode('OP_CHECKSIG', Opcode::OP_CHECKSIG);
+        compiler.add_opcode('OP_CODESEPARATOR', Opcode::OP_CODESEPARATOR);
 
         compiler
     }

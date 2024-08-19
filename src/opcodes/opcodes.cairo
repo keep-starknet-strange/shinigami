@@ -67,6 +67,7 @@ pub mod Opcode {
     pub const OP_MIN: u8 = 163;
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
+    pub const OP_CODESEPARATOR: u8 = 171;
     pub const OP_CHECKSIG: u8 = 172;
     pub const OP_CHECKSIGVERIF: u8 = 173;
 
@@ -246,7 +247,7 @@ pub mod Opcode {
             168 => utils::not_implemented(ref engine),
             169 => utils::not_implemented(ref engine),
             170 => utils::not_implemented(ref engine),
-            171 => utils::not_implemented(ref engine),
+            171 => crypto::opcode_codeseparator(ref engine),
 			172 => crypto::opcode_checksig(ref engine),
             _ => utils::not_implemented(ref engine)
         }
