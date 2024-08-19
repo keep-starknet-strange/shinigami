@@ -122,6 +122,7 @@ pub mod Opcode {
     pub const OP_NIP: u8 = 119;
     pub const OP_OVER: u8 = 120;
     pub const OP_PICK: u8 = 121;
+    pub const OP_ROLL: u8 = 122;
     pub const OP_ROT: u8 = 123;
     pub const OP_SWAP: u8 = 124;
     pub const OP_TUCK: u8 = 125;
@@ -166,6 +167,7 @@ pub mod Opcode {
     pub const OP_MAX: u8 = 164;
     pub const OP_WITHIN: u8 = 165;
     pub const OP_RIPEMD160: u8 = 166;
+    pub const OP_SHA1: u8 = 167;
     pub const OP_SHA256: u8 = 168;
     pub const OP_HASH160: u8 = 169;
     pub const OP_HASH256: u8 = 170;
@@ -304,7 +306,7 @@ pub mod Opcode {
             119 => stack::opcode_nip(ref engine),
             120 => stack::opcode_over(ref engine),
             121 => stack::opcode_pick(ref engine),
-            122 => utils::not_implemented(ref engine),
+            122 => stack::opcode_roll(ref engine),
             123 => stack::opcode_rot(ref engine),
             124 => stack::opcode_swap(ref engine),
             125 => stack::opcode_tuck(ref engine),
@@ -349,7 +351,7 @@ pub mod Opcode {
             164 => arithmetic::opcode_max(ref engine),
             165 => arithmetic::opcode_within(ref engine),
             166 => crypto::opcode_ripemd160(ref engine),
-            167 => utils::not_implemented(ref engine),
+            167 => crypto::opcode_sha1(ref engine),
             168 => crypto::opcode_sha256(ref engine),
             169 => crypto::opcode_hash160(ref engine),
             170 => crypto::opcode_hash256(ref engine),

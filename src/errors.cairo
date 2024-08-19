@@ -8,3 +8,15 @@ pub mod Error {
     pub const OPCODE_NOT_IMPLEMENTED: felt252 = 'Opcode not implemented';
     pub const OPCODE_DISABLED: felt252 = 'Opcode is disabled';
 }
+
+pub fn byte_array_err(err: felt252) -> ByteArray {
+    let mut bytes = "";
+    let mut word_len = 0;
+    let mut byte_shift: u256 = 256;
+    while (err.into() / byte_shift) > 0 {
+        word_len += 1;
+        byte_shift *= 256;
+    };
+    bytes.append_word(err, word_len);
+    bytes
+}

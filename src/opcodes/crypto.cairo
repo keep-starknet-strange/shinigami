@@ -55,3 +55,10 @@ pub fn opcode_ripemd160(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.push_byte_array(h);
     return Result::Ok(());
 }
+
+pub fn opcode_sha1(ref engine: Engine) -> Result<(), felt252> {
+    let m = engine.dstack.pop_byte_array()?;
+    let h: ByteArray = sha1::sha1_hash(@m).into();
+    engine.dstack.push_byte_array(h);
+    return Result::Ok(());
+}
