@@ -4,7 +4,7 @@ import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import logo from "../../public/logo.png";
-import Github from "@/components/github";
+import githubImage from "@/images/github.svg";
 
 const jura = Jura({ subsets: ["latin"] });
 
@@ -25,7 +25,7 @@ const Header = () => (
       <h6>ABOUT</h6>
       <Link href="/">
         <div className="flex flex-row items-center space-x-1">
-          <Github />
+          <Image src={githubImage} alt="" unoptimized />
           <h6 className="text-[#00FF5E]">GITHUB</h6>
         </div>
       </Link>

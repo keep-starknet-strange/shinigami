@@ -1,6 +1,8 @@
-import Split from "@/components/split";
 import CodeEditor from "@/components/editor";
 import RefreshIcon from "@/components/refresh-icon";
+import Image from "next/image";
+import splitImage from "@/images/split.svg";
+import refreshImage from "@/images/refresh-icon.svg";
 
 export default function ScriptEditor() {
   return (
@@ -10,7 +12,7 @@ export default function ScriptEditor() {
           <p className="text-[#85FFB2] text-lg">Script Editor</p>
         </div>
         <button className="flex flex-row items-center space-x-1">
-          <Split />
+          <Image src={splitImage} alt="" unoptimized />
           <p className="text-white">SPLIT EDITOR</p>
         </button>
       </div>
@@ -27,7 +29,7 @@ export default function ScriptEditor() {
           </button>
         </div>
         <button className="flex flex-row items-center justify-center space-x-1.5">
-          <RefreshIcon />
+          <Image src={refreshImage} alt="" unoptimized />
           <p className="text-white">REFRESH</p>
         </button>
       </div>

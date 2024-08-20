@@ -1,6 +1,4 @@
-export default function Split() {
-    return (
-        <svg
+<svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
             height="20"
@@ -29,5 +27,3 @@ export default function Split() {
                 opacity="0.4"
             ></path>
         </svg>
-    )
-}
