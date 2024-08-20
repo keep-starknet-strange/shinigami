@@ -19,7 +19,7 @@ export default function ScriptEditor({
   const [scriptSig, setScriptSig] = useState("ScriptSig");
   const [scriptPubKey, setScriptPubKey] = useState("ScriptPubKey");
 
-  const [stackContent, setStackContent] = useState([]);
+  const [stackContent, setStackContent] = useState<{ id: number, value: string }[]>([]);
 
   const handleRunScript = () => {
     const newStackContent = [
@@ -50,7 +50,7 @@ export default function ScriptEditor({
           defaultLanguage="plaintext"
           theme="vs-dark"
           value={scriptSig}
-          onChange={(value: string) => setScriptSig(value || "")}
+          onChange={(value: string | undefined) => setScriptSig(value || "") as any}
           options={{
             fontSize: 16,
             lineHeight: 24,
@@ -64,7 +64,7 @@ export default function ScriptEditor({
             defaultLanguage="plaintext"
             theme="vs-dark"
             value={scriptPubKey}
-            onChange={(value: string) => setScriptPubKey(value || "")}
+            onChange={(value: string | undefined) => setScriptPubKey(value || "")}
             options={{
               fontSize: 16,
               lineHeight: 24,
