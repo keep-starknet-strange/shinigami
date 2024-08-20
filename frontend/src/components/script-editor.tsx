@@ -1,5 +1,4 @@
 import CodeEditor from "@/components/editor";
-import RefreshIcon from "@/components/refresh-icon";
 import Image from "next/image";
 import splitImage from "@/images/split.svg";
 import refreshImage from "@/images/refresh-icon.svg";
