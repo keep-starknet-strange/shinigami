@@ -1,4 +1,15 @@
-export default function StackVisualizer() {
+interface StackItem {
+  id: number;
+  value: string;
+}
+
+interface StackVisualizerProps {
+  stackContent: StackItem[];
+}
+
+export default function StackVisualizer({
+  stackContent,
+}: StackVisualizerProps) {
   return (
     <div className="w-full bg-[#0E0E0E] h-fit rounded-lg rounded-b-xl pt-0.5">
       <div className="w-full flex flex-row items-center justify-between pr-1.5">
@@ -25,6 +36,12 @@ export default function StackVisualizer() {
           <div className="w-full h-[1px] bg-[#2B2B2B]" />
           <div className="w-full px-2.5 pt-1 h-40">
             <p className="text-[#959595] text-sm">Ready to generate...</p>
+            {stackContent.map((item) => (
+              <tr key={item.id} className="border-t border-green-500">
+                <td className="py-2">{item.id}</td>
+                <td className="py-2">{item.value}</td>
+              </tr>
+            ))}
           </div>
         </div>
       </div>

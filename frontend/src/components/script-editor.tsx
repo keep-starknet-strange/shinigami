@@ -1,9 +1,38 @@
-import CodeEditor from "@/components/editor";
+"use client";
+
+import Editor from "@monaco-editor/react";
 import Image from "next/image";
+
+import { useState } from "react";
 import splitImage from "@/images/split.svg";
 import refreshImage from "@/images/refresh-icon.svg";
 
-export default function ScriptEditor() {
+interface ScriptEditorProps {
+  onStackContentChange: (content: Array<{ id: number; value: string }>) => void;
+}
+
+export default function ScriptEditor({
+  onStackContentChange,
+}: ScriptEditorProps) {
+  const [script, setScript] = useState(`OP_ADD
+<3>
+OP_EQUAL`);
+
+  const [stackContent, setStackContent] = useState<
+    Array<{ id: number; value: string }>
+  >([]);
+
+  const handleRunScript = () => {
+    console.log("Running script:", script);
+    const newStackContent = [
+      { id: 1, value: "OP_ADD" },
+      { id: 2, value: "3" },
+      { id: 3, value: "OP_EQUAL" },
+    ];
+    setStackContent(newStackContent);
+    onStackContentChange(newStackContent);
+  };
+
   return (
     <div className="w-full">
       <div className="w-full flex flex-row items-center justify-between">
@@ -16,11 +45,24 @@ export default function ScriptEditor() {
         </button>
       </div>
       <div className="w-full border-8 border-[#0E0E0E] h-80 bg-black overflow-y-scroll rounded-b-xl rounded-tr-xl">
-        <CodeEditor />
+        <Editor
+          height={310}
+          defaultLanguage="plaintext"
+          theme="vs-dark"
+          value={script}
+          onChange={(value) => setScript(value || "")}
+          options={{
+            fontSize: 16,
+            lineHeight: 24,
+          }}
+        />
       </div>
       <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
         <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
-          <button className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]">
+          <button
+            className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]"
+            onClick={handleRunScript}
+          >
             Run Script
           </button>
           <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
