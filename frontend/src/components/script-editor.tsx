@@ -16,15 +16,12 @@ interface ScriptEditorProps {
 export default function ScriptEditor({
   onStackContentChange,
 }: ScriptEditorProps) {
-  const [script, setScript] = useState(`OP_ADD
-<3>
-OP_EQUAL`
-  );
+  const [scriptSig, setScriptSig] = useState("ScriptSig");
+  const [scriptPubKey, setScriptPubKey] = useState("ScriptPubKey");
 
   const [stackContent, setStackContent] = useState([]);
 
   const handleRunScript = () => {
-    console.log("Running script:", script);
     const newStackContent = [
       { id: 1, value: "OP_ADD" },
       { id: 2, value: "3" },
@@ -52,8 +49,8 @@ OP_EQUAL`
           height={310}
           defaultLanguage="plaintext"
           theme="vs-dark"
-          value={script}
-          onChange={(value: string) => setScript(value || "")}
+          value={scriptSig}
+          onChange={(value: string) => setScriptSig(value || "")}
           options={{
             fontSize: 16,
             lineHeight: 24,
@@ -66,8 +63,8 @@ OP_EQUAL`
             height={310}
             defaultLanguage="plaintext"
             theme="vs-dark"
-            value={script}
-            onChange={(value: string) => setScript(value || "")}
+            value={scriptPubKey}
+            onChange={(value: string) => setScriptPubKey(value || "")}
             options={{
               fontSize: 16,
               lineHeight: 24,
