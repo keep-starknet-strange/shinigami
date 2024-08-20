@@ -11,10 +11,7 @@ const commonClasses = "w-full min-h-screen";
 export const metadata: Metadata = {
   title: "Shinigami Script Wizard",
   description: "Shinigami Script Wizard",
-  icons: {
-    icon: "/next.svg"
-  }
-}
+};
 
 export default function RootLayout({
   children,
