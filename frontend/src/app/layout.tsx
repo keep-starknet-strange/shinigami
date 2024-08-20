@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import logo from "../../public/logo.png";
 import githubImage from "@/images/github.svg";
+import menu from "@/images/menu.svg";
+import React from "react";
 
 const jura = Jura({ subsets: ["latin"] });
 
@@ -14,24 +16,29 @@ export const metadata: Metadata = {
 };
 
 const Header = () => (
-  <div className="w-full max-w-4xl flex flex-row items-center justify-between">
-    <Link href="/">
-      <div className="flex flex-row items-center justify-center space-x-0.5">
-        <Image src={logo} width={25} height={25} alt="Shinigami" />
-        <h6 className="uppercase">Shinigami Script Wizard</h6>
-      </div>
-    </Link>
-    <div className="flex flex-row items-center space-x-5">
-      <h6 className="uppercase">About</h6>
-      <Link
-        href="https://github.com/keep-starknet-strange/shinigami"
-        target="_blank"
-      >
-        <div className="flex flex-row items-center space-x-1">
-          <Image src={githubImage} alt="" unoptimized />
-          <h6 className="text-[#00FF5E] uppercase">Github</h6>
+  <div className="w-full h-24 border-y border-white/10 flex flex-col justify-center sm:h-fit sm:border-y-0 sm:flex-row">
+    <div className="w-full max-w-4xl flex flex-row items-center justify-between border border-white/10 px-3.5 rounded-3xl sm:rounded-none sm:border-0">
+      <Link href="/">
+        <div className="flex flex-row items-center justify-center space-x-0.5">
+          <Image src={logo} width={25} height={25} alt="Shinigami" />
+          <h6 className="uppercase text-white">Shinigami Script Wizard</h6>
         </div>
       </Link>
+      <button className="block sm:hidden py-2.5">
+        <Image src={menu} alt="menu" />
+      </button>
+      <div className="sm:flex flex-row items-center space-x-5 hidden">
+        <h6 className="uppercase text-white">About</h6>
+        <Link
+          href="https://github.com/keep-starknet-strange/shinigami"
+          target="_blank"
+        >
+          <div className="flex flex-row items-center space-x-1">
+            <Image src={githubImage} alt="" unoptimized />
+            <h6 className="text-[#00FF5E] uppercase">Github</h6>
+          </div>
+        </Link>
+      </div>
     </div>
   </div>
 );
@@ -78,7 +85,7 @@ export default function RootLayout({
                 className={`
                   ${commonClasses}
                   flex flex-col justify-start items-center
-                  pt-10 px-5 space-y-14
+                  pt-10 px-5 space-y-10
                 `}
               >
                 <Header />
