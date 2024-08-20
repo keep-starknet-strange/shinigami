@@ -66,7 +66,9 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
 
     //TODO add witness context inside engine to check if witness is active
     //if witness is active use BaseSigVerifier
-    let mut sig_verifier: BaseSigVerifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
+    let mut sig_verifier: BaseSigVerifier = BaseSigVerifierTrait::new(
+        ref engine, @full_sig_bytes, @pk_bytes
+    )?;
 
     if sig_verifier.verify(ref engine) {
         is_valid = true;
@@ -74,7 +76,8 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
         is_valid = false;
     }
     // else use BaseSigWitnessVerifier
-    // let mut sig_verifier: BaseSigWitnessVerifier = BaseSigWitnessVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
+    // let mut sig_verifier: BaseSigWitnessVerifier = BaseSigWitnessVerifierTrait::new(ref engine,
+    // @full_sig_bytes, @pk_bytes)?;
 
     // if sig_verifier.verify(ref engine) {
     //     is_valid = true;
@@ -90,14 +93,14 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
 }
 
 pub fn opcode_codeseparator(ref engine: Engine) -> Result<(), felt252> {
-	engine.last_code_sep += 1;
+    engine.last_code_sep += 1;
 
-	// TODO Disable OP_CODESEPARATOR for non-segwit scripts.
-	// if engine.witness_program.len() == 0 &&
-	// 	engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
+    // TODO Disable OP_CODESEPARATOR for non-segwit scripts.
+    // if engine.witness_program.len() == 0 &&
+    // engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
 
-	// 	return Result::Err('opcode_codeseparator:non-segwit');
-	// }
+    // return Result::Err('opcode_codeseparator:non-segwit');
+    // }
 
     Result::Ok(())
 }

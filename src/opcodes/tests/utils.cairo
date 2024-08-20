@@ -32,7 +32,9 @@ pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> En
     engine
 }
 
-pub fn test_compile_and_run_with_tx_err(program: ByteArray, transaction: Transaction, expected_err: felt252) -> Engine {
+pub fn test_compile_and_run_with_tx_err(
+    program: ByteArray, transaction: Transaction, expected_err: felt252
+) -> Engine {
     let mut compiler = CompilerTraitImpl::new();
     let mut bytecode = compiler.compile(program);
     let mut engine = EngineTraitImpl::new(bytecode, Option::Some(transaction), Option::None);

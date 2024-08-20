@@ -255,7 +255,8 @@ fn test_op_ripemd160_14_double_ripemd160() {
 
 #[test]
 fn test_op_checksig_valid() {
-    let program = "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
+    let program =
+        "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = TransactionTrait::mock_transaction();
     let mut engine = utils::test_compile_and_run_with_tx(program, transaction);
     utils::check_dstack_size(ref engine, 1);
@@ -265,9 +266,12 @@ fn test_op_checksig_valid() {
 
 #[test]
 fn test_op_checksig_wrong_signature() {
-    let program = "OP_DATA_71 0x3044022008f4f37e2d8f74f18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
+    let program =
+        "OP_DATA_71 0x3044022008f4f37e2d8f74f18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = TransactionTrait::mock_transaction();
-    let mut engine = utils::test_compile_and_run_with_tx_err(program, transaction, Error::SCRIPT_FAILED);
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        program, transaction, Error::SCRIPT_FAILED
+    );
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
@@ -275,9 +279,12 @@ fn test_op_checksig_wrong_signature() {
 
 #[test]
 fn test_op_checksig_empty_signature() {
-    let program = "OP_0 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
+    let program =
+        "OP_0 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = TransactionTrait::mock_transaction();
-    let mut engine = utils::test_compile_and_run_with_tx_err(program, transaction, 'empty signature');
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        program, transaction, 'empty signature'
+    );
     utils::check_dstack_size(ref engine, 0);
     let expected_stack = array![];
     utils::check_expected_dstack(ref engine, expected_stack.span());
@@ -285,9 +292,12 @@ fn test_op_checksig_empty_signature() {
 
 #[test]
 fn test_op_checksig_too_short_signature() {
-    let program = "OP_1 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
+    let program =
+        "OP_1 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = TransactionTrait::mock_transaction();
-    let mut engine = utils::test_compile_and_run_with_tx_err(program, transaction, 'invalid sig fmt: too short');
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        program, transaction, 'invalid sig fmt: too short'
+    );
     utils::check_dstack_size(ref engine, 0);
     let expected_stack = array![];
     utils::check_expected_dstack(ref engine, expected_stack.span());
@@ -295,9 +305,12 @@ fn test_op_checksig_too_short_signature() {
 
 #[test]
 fn test_op_checksig_invalid_hash_type() {
-    let program = "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5807 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
+    let program =
+        "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5807 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1 OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = TransactionTrait::mock_transaction();
-    let mut engine = utils::test_compile_and_run_with_tx_err(program, transaction, Error::SCRIPT_FAILED);
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        program, transaction, Error::SCRIPT_FAILED
+    );
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![""];
     utils::check_expected_dstack(ref engine, expected_stack.span());

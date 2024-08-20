@@ -356,7 +356,7 @@ pub mod Opcode {
             169 => crypto::opcode_hash160(ref engine),
             170 => crypto::opcode_hash256(ref engine),
             171 => crypto::opcode_codeseparator(ref engine),
-			172 => crypto::opcode_checksig(ref engine),
+            172 => crypto::opcode_checksig(ref engine),
             173 => utils::not_implemented(ref engine),
             174 => utils::not_implemented(ref engine),
             175 => utils::not_implemented(ref engine),

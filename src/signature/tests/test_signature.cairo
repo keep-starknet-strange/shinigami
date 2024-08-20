@@ -2,14 +2,16 @@ use shinigami::compiler::CompilerTraitImpl;
 use shinigami::engine::EngineTraitImpl;
 //use shinigami::signature::signature;
 use shinigami::scriptflags::ScriptFlags;
-use shinigami::signature::signature::{check_pub_key_encoding,check_hash_type_encoding, check_signature_encoding, parse_pub_key, parse_signature, remove_signature, calc_transaction_hash};
+use shinigami::signature::signature::{
+    check_pub_key_encoding, check_hash_type_encoding, check_signature_encoding, parse_pub_key,
+    parse_signature, remove_signature, calc_transaction_hash
+};
 use shinigami::utils::u256_from_byte_array_with_offset;
 use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Secp256PointTrait};
 use starknet::secp256k1::{Secp256k1Point};
 use starknet::secp256_trait::Signature;
 use shinigami::transaction::TransactionTrait;
-
 // #[test]
 // fn test_byte_array_to_u256_conversion() {
 //     let mut signature: ByteArray = "";
@@ -21,7 +23,8 @@ use shinigami::transaction::TransactionTrait;
 //     signature.append_word(r.low.into(), 16);
 
 //     let res: u256 = u256_from_byte_array_with_offset(@signature, 0, 32);
-//     assert!(res == 0x08f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb, "wrong conversion");
+//     assert!(res == 0x08f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb, "wrong
+//     conversion");
 // }
 
 // #[test]
@@ -146,7 +149,6 @@ use shinigami::transaction::TransactionTrait;
 //     let mut bytecode: ByteArray = "";
 //     let mut signature: ByteArray = "0";
 //     let mut engine = EngineTraitImpl::new(bytecode, Option::None, Option::None);
-    
 
 //     check_signature_encoding(ref engine, @signature);
 // }
@@ -155,7 +157,8 @@ use shinigami::transaction::TransactionTrait;
 // #[should_panic(expected: "invalid signature format: too long")]
 // fn test_check_long_signature() {
 //     let mut bytecode: ByteArray = "";
-//     let mut signature: ByteArray = "00000000000000000000000000000000000000000000000000000000000000000000000000";
+//     let mut signature: ByteArray =
+//     "00000000000000000000000000000000000000000000000000000000000000000000000000";
 //     let mut engine = EngineTraitImpl::new(bytecode, Option::None, Option::None);
 
 //     check_signature_encoding(ref engine, @signature);
@@ -174,7 +177,6 @@ use shinigami::transaction::TransactionTrait;
 
 //     check_signature_encoding(ref engine, @signature);
 // }
-
 
 // #[test]
 // #[should_panic(expected: "invalid signature format: bad length")]
@@ -214,10 +216,12 @@ use shinigami::transaction::TransactionTrait;
 //     pub_key.append_word(r.high.into(), 16);
 //     pub_key.append_word(r.low.into(), 16);
 
-
 //     let pub_key_point= parse_pub_key(@pub_key);
-//     let point_from_pub_key = Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(r, false).unwrap_syscall().expect('Secp256k1Point: Invalid point.');
-//     assert!(pub_key_point.get_coordinates() == point_from_pub_key.get_coordinates(), "Wrong pub_key coordinates");
+//     let point_from_pub_key =
+//     Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(r,
+//     false).unwrap_syscall().expect('Secp256k1Point: Invalid point.');
+//     assert!(pub_key_point.get_coordinates() == point_from_pub_key.get_coordinates(), "Wrong
+//     pub_key coordinates");
 // }
 
 // #[test]
@@ -240,8 +244,10 @@ use shinigami::transaction::TransactionTrait;
 //     signature.append_byte(0x01);
 
 //     let sig= parse_signature(@signature);
-//     assert!(sig.r == 0x08f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb, "Wrong signature R");
-//     assert!(sig.s == 0x32b1374d1a0f125eae4f69d1bc0b7f896c964cfdba329f38a952426cf427484c, "Wrong signature S");
+//     assert!(sig.r == 0x08f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb, "Wrong
+//     signature R");
+//     assert!(sig.s == 0x32b1374d1a0f125eae4f69d1bc0b7f896c964cfdba329f38a952426cf427484c, "Wrong
+//     signature S");
 // }
 
 // #[test]
@@ -268,7 +274,6 @@ use shinigami::transaction::TransactionTrait;
 //     let mut v5: u256 = 0x06b2a322310220489a46c37feb33f52c586da25c70113b8eea41216440eb8477;
 //     let mut v6: u256 = 0x1cb67a67fdb68c01;
 
-
 //     byte.append_word(v1.high.into(), 16);
 //     byte.append_word(v1.low.into(), 16);
 //     byte.append_word(v2.high.into(), 16);
@@ -282,12 +287,11 @@ use shinigami::transaction::TransactionTrait;
 //     sig_byte.append_word(v5.high.into(), 16);
 //     sig_byte.append_word(v5.low.into(), 16);
 //     sig_byte.append_word(v6.low.into(), 8);
-    
 
 //     let script_byte = remove_signature(@byte, @sig_byte);
 //     let mut transaction = TransactionTrait::mock_transaction();
-   
-// 	let mut count = 0;
+
+// let mut count = 0;
 
 //     println!("");
 //     println!("");
@@ -296,11 +300,11 @@ use shinigami::transaction::TransactionTrait;
 //     count += 1;
 // };
 //     println!("");
-//     println!(""); 
+//     println!("");
 
 //     let tx_hash = calc_transaction_hash(script_byte, 0x01,ref transaction, 0);
 
-// 	println!("////////////////////////mdr{}", script_byte.len());
+// println!("////////////////////////mdr{}", script_byte.len());
 
 //     assert!(script_byte[0] == 0x76, "error");
 //     assert!(script_byte[24] == 0xac, "error2");
@@ -316,8 +320,8 @@ use shinigami::transaction::TransactionTrait;
 //     byte.append_word(v7.low.into(), 16);
 
 //     let mut transaction = TransactionTrait::mock_witness_transaction();
-   
-// 	let mut count = 0;
+
+// let mut count = 0;
 
 //     println!("");
 //     println!("");
@@ -326,7 +330,8 @@ use shinigami::transaction::TransactionTrait;
 //         count += 1;
 //     };
 //     println!("");
-//     println!(""); 
+//     println!("");
 
 //     //let tx_hash = calc_witness_transaction_hash(byte, 0x01,ref transaction, 0);
 // }
+

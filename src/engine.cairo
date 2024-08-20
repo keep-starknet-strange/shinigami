@@ -20,17 +20,12 @@ pub struct Engine {
     // Tracks conditonal execution state supporting nested conditionals
     pub cond_stack: ConditionalStack,
     // Execution behaviour flags
-	flags: u32,
-
+    flags: u32,
     pub transaction: Transaction,
-    
     pub index: u32,
-
     pub last_code_sep: u32,
-
     pub is_codeseparator: bool,
-    
-// TODO
+    // TODO
 // ...
 }
 
@@ -46,9 +41,9 @@ pub trait EngineTrait {
     // Executes the entire script and returns top of stack or error if script fails
     fn execute(ref self: Engine) -> Result<ByteArray, felt252>;
     // Add the specified flag to the script engine instance.
-	fn add_flag(ref self: Engine, flag: ScriptFlags);
-	// Return true if the script engine instance has the specified flag set.
-	fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool;
+    fn add_flag(ref self: Engine, flag: ScriptFlags);
+    // Return true if the script engine instance has the specified flag set.
+    fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool;
 
     fn subscript(ref self: Engine) -> @ByteArray;
 
@@ -165,21 +160,21 @@ pub impl EngineTraitImpl of EngineTrait {
         }
     }
 
-    fn add_flag(ref self: Engine, flag: ScriptFlags){
-		self.flags = self.flags | flag.into();
-	}
+    fn add_flag(ref self: Engine, flag: ScriptFlags) {
+        self.flags = self.flags | flag.into();
+    }
 
-	fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool {
-		self.flags & flag.into() == flag.into()
-	}
+    fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool {
+        self.flags & flag.into() == flag.into()
+    }
 
     fn subscript(ref self: Engine) -> @ByteArray {
-        if self.is_codeseparator == false  || self.last_code_sep == 0 {
+        if self.is_codeseparator == false || self.last_code_sep == 0 {
             return self.script;
         }
 
-        let mut sub_script : ByteArray = "";
-        let mut i : usize = 0;
+        let mut sub_script: ByteArray = "";
+        let mut i: usize = 0;
         let mut code_sep_index = 0;
         let script_len = self.script.len();
 
@@ -192,8 +187,8 @@ pub impl EngineTraitImpl of EngineTrait {
 
             if code_sep_index >= self.last_code_sep {
                 sub_script.append_byte(opcode);
-            } 
-            i+=1;
+            }
+            i += 1;
         };
         @sub_script
     }
@@ -208,7 +203,7 @@ pub impl EngineTraitImpl of EngineTrait {
                 found = true;
                 break;
             }
-            i+=1;
+            i += 1;
         };
 
         found
