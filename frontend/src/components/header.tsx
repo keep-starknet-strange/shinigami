@@ -58,13 +58,24 @@ export default function Header() {
                         </ul>
                     </div>
                     <div className="flex flex-row items-center space-x-2.5 px-2.5">
+                        <Link
+                            href="https://github.com/keep-starknet-strange/shinigami"
+                            target="_blank"
+                        >
+                            <button className="flex flex-row items-center space-x-1 bg-[#00FF5E]/10 border-[#00FF5E] border-2 py-2.5 px-5">
+                                <Image src={githubImage} alt="" unoptimized />
+                                <h6 className="text-[#00FF5E] uppercase text-base">GITHUB</h6>
+                            </button>
+                        </Link>
                         <button className="flex flex-row items-center space-x-1 bg-[#00FF5E]/10 border-[#00FF5E] border-2 py-2.5 px-5">
-                            <Image src={githubImage} alt="" unoptimized />
-                            <h6 className="text-[#00FF5E] uppercase text-base">GITHUB</h6>
-                        </button>
-                        <button className="flex flex-row items-center space-x-1 bg-[#00FF5E]/10 border-[#00FF5E] border-2 py-2.5 px-5">
-                            <Image src={telegram} alt="" unoptimized />
-                            <h6 className="text-[#00FF5E] uppercase text-base">TELEGRAM</h6>
+                            <Link
+                                href="https://t.me/ShinigamiStarknet"
+                                target="_blank"
+                                className="w-full h-full flex flex-row items-center justify-center space-x-1"
+                            >
+                                <Image src={telegram} alt="" unoptimized />
+                                <h6 className="text-[#00FF5E] uppercase text-base">TELEGRAM</h6>
+                            </Link>
                         </button>
                     </div>
                 </div>
@@ -85,10 +96,16 @@ export default function Header() {
                     <div className="py-2.5 px-2.5 space-y-2.5">
                         <button className="text-white w-full text-center bg-[#111111] py-2.5 rounded-md" onClick={() => setOpenModal(true)}>ABOUT</button>
                         <button className="text-white w-full text-center bg-[#111111] py-2.5 rounded-md flex row items-center justify-center">
-                            <div className="flex flex-row items-center space-x-1">
-                                <Image src={githubImage} alt="" unoptimized />
-                                <h6 className="text-[#00FF5E] uppercase">Github</h6>
-                            </div>
+                            <Link
+                                href="https://github.com/keep-starknet-strange/shinigami"
+                                target="_blank"
+                                className="w-full h-full flex flex-row items-center justify-center"
+                            >
+                                <div className="flex flex-row items-center space-x-1">
+                                    <Image src={githubImage} alt="" unoptimized />
+                                    <h6 className="text-[#00FF5E] uppercase">Github</h6>
+                                </div>
+                            </Link>
                         </button>
                     </div>
                 </div>
