@@ -42,7 +42,7 @@ export default function Header() {
                     </Link>
                 </div>
             </div>
-            <Dialog open={openModal} handler={handleOpen} className="bg-black w-full">
+            <Dialog open={openModal} handler={handleOpen} className="bg-black w-full" nonce={() => { }} onResize={() => { }} onResizeCapture={() => { }}>
                 <button className="p-0.5 border-2 border-[#00FF5E] rounded-md absolute -top-3.5 -right-3 bg-[#00FF5E]/10 z-20" onClick={() => setOpenModal(false)}>
                     <Image src={cancel_circle} alt="close" className="z-20" />
                     <div className="w-2.5 h-2.5 bg-black absolute top-2.5 left-2.5 -z-10" />
