@@ -40,10 +40,6 @@ pub mod scriptnum {
 pub mod scriptflags;
 pub mod signature {
     pub mod signature;
-    mod tests {
-        #[cfg(test)]
-        mod test_signature;
-    }
     pub(crate) use signature::BaseSigVerifier;
     pub(crate) use signature::BaseSigVerifierTrait;
 }
