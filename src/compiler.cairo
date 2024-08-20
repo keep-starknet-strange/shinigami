@@ -123,6 +123,8 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_NOP', Opcode::OP_NOP);
         compiler.add_opcode('OP_IF', Opcode::OP_IF);
         compiler.add_opcode('OP_NOTIF', Opcode::OP_NOTIF);
+        compiler.add_opcode('OP_VERIF', Opcode::OP_VERIF);
+        compiler.add_opcode('OP_VERNOTIF', Opcode::OP_VERNOTIF);
         compiler.add_opcode('OP_ELSE', Opcode::OP_ELSE);
         compiler.add_opcode('OP_ENDIF', Opcode::OP_ENDIF);
         compiler.add_opcode('OP_VERIFY', Opcode::OP_VERIFY);
