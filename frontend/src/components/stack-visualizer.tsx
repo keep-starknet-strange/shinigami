@@ -6,8 +6,8 @@ export default function StackVisualizer() {
           <p className="text-[#85FFB2]">Stack Visualizer</p>
         </div>
         <div className="w-48 h-12 bg-[#0E0E0E] clip-trapezium-left flex flex-col items-start justify-center px-1.5 pt-1.5 rounded-t-xl">
-          <button className="w-full h-full text-right pr-2.5 bg-[#00FF5E] clip-trapezium-inner-left rounded-r-sm rounded-bl-sm text-black">
-            GENERATE PROOF
+          <button className="w-full h-full text-center bg-[#00FF5E] clip-trapezium-inner-left rounded-r-sm rounded-bl-sm text-black uppercase">
+            Generate Proof
           </button>
         </div>
       </div>

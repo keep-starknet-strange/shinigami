@@ -12,7 +12,7 @@ export default function ScriptEditor() {
         </div>
         <button className="flex flex-row items-center space-x-1">
           <Image src={splitImage} alt="" unoptimized />
-          <p className="text-white">SPLIT EDITOR</p>
+          <p className="text-white uppercase">Split Editor</p>
         </button>
       </div>
       <div className="w-full border-8 border-[#0E0E0E] h-80 bg-black overflow-y-scroll rounded-b-xl rounded-tr-xl">
@@ -20,16 +20,16 @@ export default function ScriptEditor() {
       </div>
       <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
         <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
-          <button className="bg-[#00FF5E] text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]">
-            RUN SCRIPT
+          <button className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]">
+            Run Script
           </button>
-          <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50">
-            DEBUG SCRIPT
+          <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
+            Debug Script
           </button>
         </div>
         <button className="flex flex-row items-center justify-center space-x-1.5">
           <Image src={refreshImage} alt="" unoptimized />
-          <p className="text-white">REFRESH</p>
+          <p className="text-white uppercase">Refresh</p>
         </button>
       </div>
     </div>
