@@ -226,6 +226,9 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/manlikeHB"><img src="https://avatars.githubusercontent.com/u/109147010?v=4?s=100" width="100px;" alt="Yusuf Habib"/><br /><sub><b>Yusuf Habib</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=manlikeHB" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Oshioke-Salaki"><img src="https://avatars.githubusercontent.com/u/105825121?v=4?s=100" width="100px;" alt="Oshioke Salaki"/><br /><sub><b>Oshioke Salaki</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Oshioke-Salaki" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://soetandev.netlify.app/"><img src="https://avatars.githubusercontent.com/u/17912134?v=4?s=100" width="100px;" alt="Emmanuel Soetan"/><br /><sub><b>Emmanuel Soetan</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Shoetan" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
