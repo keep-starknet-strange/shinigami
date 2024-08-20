@@ -16,8 +16,8 @@ export default function StackVisualizer({
         <div className="w-44 h-12 bg-[#0E0E0E] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
           <p className="text-[#85FFB2]">Stack Visualizer</p>
         </div>
-        <div className="w-48 h-12 bg-[#0E0E0E] clip-trapezium-left flex flex-col items-start justify-center px-1.5 pt-1.5 rounded-t-xl">
-          <button className="w-full h-full text-center bg-[#00FF5E] clip-trapezium-inner-left rounded-r-sm rounded-bl-sm text-black uppercase">
+        <div className="w-56 h-12 bg-[#0E0E0E] clip-trapezium-left flex flex-col items-start justify-center px-1.5 pt-1.5 rounded-t-xl">
+          <button className="w-full h-full text-center bg-[#00FF5E] clip-trapezium-inner-left rounded-r-sm rounded-bl-sm text-black uppercase ml-3.5 sm:ml-0">
             Generate Proof
           </button>
         </div>

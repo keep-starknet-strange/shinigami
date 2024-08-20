@@ -17,16 +17,16 @@ export const AboutModal: FC<AboutModalProps> = ({ isOpen, onClose }) => (
     open={isOpen}
     handler={onClose}
     className="bg-black w-full"
-    nonce={() => {}}
-    onResize={() => {}}
-    onResizeCapture={() => {}}
+    nonce={() => { }}
+    onResize={() => { }}
+    onResizeCapture={() => { }}
   >
     <button
-      className="p-0.5 border-2 border-[#00FF5E] rounded-md absolute -top-3.5 -right-3 bg-[#00FF5E]/10 z-20"
+      className="p-1.5 border-2 border-[#00FF5E] rounded-md absolute right-0 bg-[#00FF5E]/10 z-20"
       onClick={onClose}
     >
       <Image src={cancelCircle} alt="close" className="z-18" />
-      <div className="w-2.5 h-2.5 bg-black absolute top-2.5 left-2.5 -z-10" />
+      <div className="w-3.5 h-3.5 bg-black absolute top-3.5 left-3.5 -z-10" />
     </button>
     <div className="flex flex-col items-start gap-6 p-4 bg-[#080808] w-full">
       <div className="w-full h-28 bg-[url('/banner.png')] bg-cover bg-no-repeat bg-center" />
