@@ -224,6 +224,7 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/oluwa-peski"><img src="https://avatars.githubusercontent.com/u/53274579?v=4?s=100" width="100px;" alt="oluwapeski"/><br /><sub><b>oluwapeski</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=oluwa-peski" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/adrianvrj"><img src="https://avatars.githubusercontent.com/u/111903096?v=4?s=100" width="100px;" alt="ADR!AN"/><br /><sub><b>ADR!AN</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=adrianvrj" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/manlikeHB"><img src="https://avatars.githubusercontent.com/u/109147010?v=4?s=100" width="100px;" alt="Yusuf Habib"/><br /><sub><b>Yusuf Habib</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=manlikeHB" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Oshioke-Salaki"><img src="https://avatars.githubusercontent.com/u/105825121?v=4?s=100" width="100px;" alt="Oshioke Salaki"/><br /><sub><b>Oshioke Salaki</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Oshioke-Salaki" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
