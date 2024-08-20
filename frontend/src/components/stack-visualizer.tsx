@@ -28,7 +28,14 @@ export default function StackVisualizer({
           <span>Value</span>
         </div>
         <div className="w-full h-[1px] bg-[#2B2B2B]" />
-        <div className="w-full bg-black h-40 rounded-b-lg" />
+        <div className="w-full bg-black h-40 rounded-b-lg pl-5">
+          {stackContent.map((item) => (
+            <tr key={item.id} className="border-t border-green-500">
+              <td className="py-2">{item.id}</td>
+              <td className="py-2">{item.value}</td>
+            </tr>
+          ))}
+        </div>
         <div className="w-full bg-black h-48 rounded-t-lg rounded-b-xl mt-2.5">
           <div className="py-2.5 rounded-t-lg rounded-b-lg flex flex-row space-x-5 px-3.5 w-full bg-black">
             <span>Proof of Status:</span>
@@ -36,12 +43,6 @@ export default function StackVisualizer({
           <div className="w-full h-[1px] bg-[#2B2B2B]" />
           <div className="w-full px-2.5 pt-1 h-40">
             <p className="text-[#959595] text-sm">Ready to generate...</p>
-            {stackContent.map((item) => (
-              <tr key={item.id} className="border-t border-green-500">
-                <td className="py-2">{item.id}</td>
-                <td className="py-2">{item.value}</td>
-              </tr>
-            ))}
           </div>
         </div>
       </div>

@@ -4,8 +4,8 @@ import { useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
-import { FC } from "react";
 import { AboutModal } from "@/components/about-modal";
+import { FC } from "react";
 
 import logo from "../../public/logo.png";
 import githubImage from "@/images/github.svg";
