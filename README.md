@@ -228,6 +228,7 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://soetandev.netlify.app/"><img src="https://avatars.githubusercontent.com/u/17912134?v=4?s=100" width="100px;" alt="Emmanuel Soetan"/><br /><sub><b>Emmanuel Soetan</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Shoetan" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mexes20"><img src="https://avatars.githubusercontent.com/u/127276944?v=4?s=100" width="100px;" alt="Mexes"/><br /><sub><b>Mexes</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=mexes20" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
