@@ -188,21 +188,30 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn pick_n(ref self: ScriptStack, idx: i32) -> Result<(), felt252> {
         if idx < 0 {
-            return Result::Err(Error::INVALID_STACK_OPS);
+            return Result::Err(Error::STACK_OUT_OF_RANGE);
         }
 
-        let so = self.peek_byte_array(idx.try_into().unwrap())?;
+        let idxU32: u32 = idx.try_into().unwrap();
+        if idxU32 >= self.len {
+            return Result::Err(Error::STACK_OUT_OF_RANGE);
+        }
+
+        let so = self.peek_byte_array(idxU32)?;
 
         self.push_byte_array(so);
         return Result::Ok(());
     }
 
     fn roll_n(ref self: ScriptStack, n: i32) -> Result<(), felt252> {
-        if n >= self.len.try_into().unwrap() {
+        if n < 0 {
+            return Result::Err(Error::STACK_OUT_OF_RANGE);
+        }
+        let nU32: u32 = n.try_into().unwrap();
+        if nU32 >= self.len {
             return Result::Err(Error::STACK_OUT_OF_RANGE);
         }
 
-        let value = self.nip_n(n.try_into().unwrap())?;
+        let value = self.nip_n(nU32)?;
         self.push_byte_array(value);
         return Result::Ok(());
     }
