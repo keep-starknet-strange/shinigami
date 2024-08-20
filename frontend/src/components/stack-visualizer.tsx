@@ -22,14 +22,14 @@ export default function StackVisualizer({
           </button>
         </div>
       </div>
-      <div className="w-full border-8 border-[#0E0E0E] h-fit">
+      <div className="w-full border-8 border-[#0E0E0E] h-fit rounded-b-xl">
         <div className="py-2.5 rounded-t-lg flex flex-row space-x-5 px-3.5 w-full bg-black">
           <span>ID</span>
           <span>Value</span>
         </div>
         <div className="w-full h-[1px] bg-[#2B2B2B]" />
         <div className="w-full bg-black h-40 rounded-b-lg" />
-        <div className="w-full bg-black h-48 rounded-t-lg rounded-b-lg mt-2.5">
+        <div className="w-full bg-black h-48 rounded-t-lg rounded-b-xl mt-2.5">
           <div className="py-2.5 rounded-t-lg rounded-b-lg flex flex-row space-x-5 px-3.5 w-full bg-black">
             <span>Proof of Status:</span>
           </div>

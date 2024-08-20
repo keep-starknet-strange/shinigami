@@ -5,9 +5,7 @@ import StackVisualizer from "@/components/stack-visualizer";
 import { useState } from "react";
 
 export default function Home() {
-  const [stackContent, setStackContent] = useState<
-    Array<{ id: number; value: string }>
-  >([]);
+  const [stackContent, setStackContent] = useState([]);
 
   const handleStackContentChange = (
     newContent: Array<{ id: number; value: string }>,
