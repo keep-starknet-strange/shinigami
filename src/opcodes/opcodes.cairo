@@ -285,8 +285,8 @@ pub mod Opcode {
             98 => utils::opcode_reserved("ver", ref engine),
             99 => flow::opcode_if(ref engine),
             100 => flow::opcode_notif(ref engine),
-            101 => stack::opcode_verif(ref engine),
-            102 => stack::opcode_vernotif(ref engine),
+            101 => utils::opcode_reserved("verif", ref engine),
+            102 => utils::opcode_reserved("vernotif", ref engine),
             103 => flow::opcode_else(ref engine),
             104 => flow::opcode_endif(ref engine),
             105 => flow::opcode_verify(ref engine),
@@ -391,6 +391,16 @@ pub mod Opcode {
             || opcode == OP_LSHIFT
             || opcode == OP_RSHIFT {
             return utils::opcode_disabled(ref engine);
+        } else {
+            return Result::Ok(());
+        }
+    }
+
+    pub fn is_opcode_always_illegal(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
+        if opcode == OP_VERIF {
+            return utils::opcode_reserved("verif", ref engine);
+        } else if opcode == OP_VERNOTIF {
+            return utils::opcode_reserved("vernotif", ref engine);
         } else {
             return Result::Ok(());
         }

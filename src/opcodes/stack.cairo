@@ -103,12 +103,6 @@ pub fn opcode_rot(ref engine: Engine) -> Result<(), felt252> {
     return Result::Ok(());
 }
 
-pub fn opcode_verif(ref engine: Engine) -> Result<(), felt252> {
-    return Err(felt252::from_bytes("OP_VERIF is reserved and cannot be executed."));
-}
-
-pub fn opcode_vernotif(ref engine: Engine) -> Result<(), felt252> {
-    return Err(felt252::from_bytes("OP_NOTVERIF is reserved and cannot be executed."));
 pub fn opcode_roll(ref engine: Engine) -> Result<(), felt252> {
     let value = engine.dstack.pop_int()?;
     engine.dstack.roll_n(ScriptNum::to_int32(value))?;

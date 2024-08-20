@@ -77,8 +77,12 @@ pub impl EngineTraitImpl of EngineTrait {
             return Result::Ok(false);
         }
 
+        let opcode = self.script[self.opcode_idx];
+        Opcode::is_opcode_always_illegal(opcode, ref self)?;
+
         if !self.cond_stack.branch_executing()
             && !flow::is_branching_opcode(self.script[self.opcode_idx]) {
+            Opcode::is_opcode_disabled(self.script[self.opcode_idx], ref self)?;
             self.opcode_idx += 1;
             return Result::Ok(true);
         }
@@ -92,10 +96,17 @@ pub impl EngineTraitImpl of EngineTrait {
     fn execute(ref self: Engine) -> Result<ByteArray, felt252> {
         let mut err = '';
         while self.opcode_idx < self.script.len() {
-            if !self.cond_stack.branch_executing()
-                && !flow::is_branching_opcode(self.script[self.opcode_idx]) {
-                let non_ex_opcode = self.script[self.opcode_idx];
-                let res = Opcode::is_opcode_disabled(non_ex_opcode, ref self);
+            let opcode = self.script[self.opcode_idx];
+
+            // Check if the opcode is always illegal (reserved).
+            let illegal_opcode = Opcode::is_opcode_always_illegal(opcode, ref self);
+            if illegal_opcode.is_err() {
+                err = illegal_opcode.unwrap_err();
+                break;
+            }
+
+            if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
+                let res = Opcode::is_opcode_disabled(opcode, ref self);
                 if res.is_err() {
                     err = res.unwrap_err();
                     break;
@@ -103,7 +114,6 @@ pub impl EngineTraitImpl of EngineTrait {
                 self.opcode_idx += 1;
                 continue;
             }
-            let opcode = self.script[self.opcode_idx];
             let res = Opcode::execute(opcode, ref self);
             if res.is_err() {
                 err = res.unwrap_err();
@@ -113,12 +123,6 @@ pub impl EngineTraitImpl of EngineTrait {
         };
         if err != '' {
             return Result::Err(err);
-        }
-
-        // Check if the opcode is always illegal (reserved).
-        if is_opcode_always_illegal(op) {
-            let err_msg = format!("Attempt to execute reserved opcode: {}", op);
-            return Err(Error::OPCODE_RESERVED);
         }
 
         // TODO: CheckErrorCondition
