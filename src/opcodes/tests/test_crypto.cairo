@@ -261,6 +261,7 @@ fn test_op_checksig_valid() {
     let mut engine = utils::test_compile_and_run_with_tx(program, transaction);
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 
 #[test]
@@ -273,6 +274,7 @@ fn test_op_checksig_wrong_signature() {
     );
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 
 #[test]
@@ -285,6 +287,7 @@ fn test_op_checksig_invalid_hash_type() {
     );
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![""];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 
 #[test]
