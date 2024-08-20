@@ -61,7 +61,7 @@ pub trait BaseSigVerifierTrait {
 impl BaseSigVerifierImpl of BaseSigVerifierTrait {
 	fn new(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> Result<BaseSigVerifier, felt252> {
 		let (pk_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
-		let sub_script = vm.subscript();
+		let sub_script = vm.transaction.subscript;
 
 		Result::Ok(BaseSigVerifier {
 			pk_key,
@@ -166,7 +166,7 @@ pub fn check_hash_type_encoding(ref vm: Engine, mut hash_type: u32) -> Result<()
 	}
 
 	if hash_type < SIG_HASH_ALL || hash_type > SIG_HASH_SINGLE {
-		return Result::Err('Invalid hash type');
+		return Result::Err('invalid hash type');
 	}
 
 	return Result::Ok(());
@@ -400,7 +400,9 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point{
 // If any of these checks fail, the function will return an error.
 // 
 // @param sig_bytes The byte array containing the DER-encoded ECDSA signature.
-// @return A `Signature` struct containing the parsed `r` and `s` values.
+// @return A `Result<Signature, felt252>`:
+//         - `Ok(Signature)` if the signature was successfully parsed from the provided byte array, meaning the `sig_bytes` contained a valid DER-encoded ECDSA signature that adheres to the expected format.
+//         - `Err(felt252)` if the signature could not be parsed.
 pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 	
 	let sig_len: usize = sig_bytes.len() - HASH_TYPE_LEN;
@@ -466,12 +468,19 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 // @param vm A reference to the `Engine` that manages the execution context and provides the necessary script verification flags.
 // @param pk_bytes The byte array representing the public key to be parsed and validated.
 // @param sig_bytes The byte array containing the signature to be parsed and validated.
-// @return A tuple containing the parsed public key (`Secp256k1Point`), signature (`Signature`), and hash type (`u32`).
+// @return A `Result<(Secp256k1Point, Signature, u32), felt252>`:
+//          - `Ok((Secp256k1Point, Signature, u32))` if the public key and signature were successfully parsed from the provided byte arrays. The tuple contains:
+//            - `Secp256k1Point`: The parsed public key as a point on the secp256k1 elliptic curve.
+//            - `Signature`: The parsed ECDSA signature.
+//            - `u32`: The signature hash type extracted from the signature.
+//         - `Err(felt252)` if the signature could not be parsed.
 pub fn parse_base_sig_and_pk(ref vm: Engine, 
 	pk_bytes: @ByteArray, 
 	sig_bytes: @ByteArray) -> Result<(Secp256k1Point, Signature, u32), felt252>{
 
-
+	if sig_bytes.len() == 0 {
+		return Result::Err('empty signature');
+	}
 	let hash_type_offset: usize = sig_bytes.len() - 1;
 	let hash_type: u32 = sig_bytes[hash_type_offset].into();
 

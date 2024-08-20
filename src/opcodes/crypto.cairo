@@ -60,31 +60,31 @@ pub fn opcode_ripemd160(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     let mut is_valid: bool = false;
-    // let mut pk_bytes = engine.dstack.pop_byte_array().unwrap();
+    let mut pk_bytes = engine.dstack.pop_byte_array()?;
 
-    // let mut full_sig_bytes = engine.dstack.pop_byte_array().unwrap();
+    let mut full_sig_bytes = engine.dstack.pop_byte_array()?;
 
-    // //TODO add witness context inside engine to check if witness is active
-    // //if witness is active use BaseSigVerifier
-    // let mut sig_verifier: BaseSigVerifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
+    //TODO add witness context inside engine to check if witness is active
+    //if witness is active use BaseSigVerifier
+    let mut sig_verifier: BaseSigVerifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
+
+    if sig_verifier.verify(ref engine) {
+        is_valid = true;
+    } else {
+        is_valid = false;
+    }
+    // else use BaseSigWitnessVerifier
+    // let mut sig_verifier: BaseSigWitnessVerifier = BaseSigWitnessVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
 
     // if sig_verifier.verify(ref engine) {
     //     is_valid = true;
     // } else {
     //     is_valid = false;
     // }
-    // // else use BaseSigWitnessVerifier
-    // // let mut sig_verifier: BaseSigWitnessVerifier = BaseSigWitnessVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
 
-    // // if sig_verifier.verify(ref engine) {
-    // //     is_valid = true;
-    // // } else {
-    // //     is_valid = false;
-    // // }
-
-    // if full_sig_bytes.len() < 1 {
-    //     is_valid = false
-    // }
+    if full_sig_bytes.len() < 1 {
+        is_valid = false
+    }
     engine.dstack.push_bool(is_valid);
     return Result::Ok(());
 }
