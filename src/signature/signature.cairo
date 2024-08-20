@@ -37,6 +37,7 @@ const MAX_U128: u128 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 // in a blockchain transaction using the legacy algorithm (pre-SegWit), including the 
 // public key, ECDSA signature, and relevant scripts. This verifier is specifically for 
 // transactions that do not use the Segregated Witness (SegWit) format
+#[derive(Drop)]
 pub struct BaseSigVerifier {
 	// pk_key is the public key as a point on the secp256k1 curve, used to verify the signature
 	pk_key: Secp256k1Point, 
@@ -53,23 +54,23 @@ pub struct BaseSigVerifier {
 }
 
 pub trait BaseSigVerifierTrait {
-	fn new(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> BaseSigVerifier;
+	fn new(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> Result<BaseSigVerifier, felt252>;
 	fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool;
 }
 
 impl BaseSigVerifierImpl of BaseSigVerifierTrait {
-	fn new(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> BaseSigVerifier {
-		let (pk_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes);
-		let sub_script = vm.subscript();
+	fn new(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> Result<BaseSigVerifier, felt252> {
+		let (pk_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
+		let sub_script = vm.transaction.subscript;
 
-		BaseSigVerifier {
+		Result::Ok(BaseSigVerifier {
 			pk_key,
 			sig,
 			sig_bytes,
 			pk_bytes,
 			sub_script,
 			hash_type,
-		}
+		})
 	}
 	//TODO add signature cache mecanism for optimization
 	fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool {
@@ -165,7 +166,7 @@ pub fn check_hash_type_encoding(ref vm: Engine, mut hash_type: u32) -> Result<()
 	}
 
 	if hash_type < SIG_HASH_ALL || hash_type > SIG_HASH_SINGLE {
-		return Result::Err('Invalid hash type');
+		return Result::Err('invalid hash type');
 	}
 
 	return Result::Ok(());
@@ -200,25 +201,25 @@ pub fn check_signature_encoding(ref vm: Engine, sig_bytes: @ByteArray) -> Result
 	let sig_bytes_len: usize = sig_bytes.len();
     // Check if the signature is empty.
 	if sig_bytes_len == 0 {
-		return Result::Err('invalid signature format: empty signature');
+		return Result::Err('invalid sig fmt: empty sig');
 	}
     // Calculate the actual length of the signature, excluding the hash type.
 	let sig_len = sig_bytes_len - HASH_TYPE_LEN;
     // Check if the signature is too short.
 	if sig_len < MIN_SIG_LEN {
-		return Result::Err('invalid signature format: too short');
+		return Result::Err('invalid sig fmt: too short');
 	}
     // Check if the signature is too long.
 	if sig_len > MAX_SIG_LEN {
-		return Result::Err('invalid signature format: too long');
+		return Result::Err('invalid sig fmt: too long');
 	}
     // Ensure the signature starts with the correct ASN.1 sequence identifier.
 	if sig_bytes[sequence_offset] != asn1_sequence_id {
-		return Result::Err('invalid signature format: wrong type');
+		return Result::Err('invalid sig fmt: wrong type');
 	}
     // Verify that the length field matches the expected length.
 	if  sig_bytes[data_len_offset] != (sig_len - data_offset).try_into().unwrap() {
-		return Result::Err('invalid signature format: bad length');
+		return Result::Err('invalid sig fmt: bad length');
 	}
     // Determine the length of the `R` value in the signature.
 	let r_len: usize = sig_bytes[r_len_offset].into();
@@ -226,49 +227,49 @@ pub fn check_signature_encoding(ref vm: Engine, sig_bytes: @ByteArray) -> Result
 	let s_len_offset = s_type_offset + 1;
     // Check if the `S` type offset exceeds the length of the signature.
 	if s_type_offset > sig_len {
-		return Result::Err('invalid signature format: S type indicator missing');
+		return Result::Err('invalid sig fmt: S type missing');
 	}
     // Check if the `S` length offset exceeds the length of the signature.
 	if s_len_offset > sig_len {
-		return Result::Err('invalid signature format: S length missing');
+		return Result::Err('invalid sig fmt: miss S length');
 	}
     // Calculate the offset and length of the `S` value.
 	let s_offset = s_len_offset + 1;
 	let s_len: usize = sig_bytes[s_len_offset].into();
     // Ensure the `R` value is correctly identified as an ASN.1 integer.
 	if sig_bytes[r_type_offset] != asn1_integer_id {
-		return Result::Err('invalid signature format: wrong R integer identifier');
+		return Result::Err('invalid sig fmt:R ASN.1');
 	}
     // Validate the length of the `R` value.
 	if r_len <= 0 || r_len > sig_len - r_offset - 3{
-		return Result::Err('invalid signature format: invalid R length');
+		return Result::Err('invalid sig fmt:R length');
 	}
     // If strict encoding is enforced, check for negative or excessively padded `R` values.
     if strict_encoding {
         if sig_bytes[r_offset] & 0x80 != 0 {
-            return Result::Err('invalid signature format: negative R');
+            return Result::Err('invalid sig fmt: negative R');
         }
 
         if r_len > 1 && sig_bytes[r_offset] == 0  && sig_bytes[r_offset + 1] & 0x80 == 0 {
-            return Result::Err('invalid signature format: R value has too much padding');
+            return Result::Err('invalid sig fmt: R padding');
         }
     }
     // Ensure the `S` value is correctly identified as an ASN.1 integer.
 	if sig_bytes[s_type_offset] != asn1_integer_id {
-		return Result::Err('invalid signature format: wrong S integer identifier');
+		return Result::Err('invalid sig fmt:S ASN.1');
 	}
     // Validate the length of the `S` value.
 	if s_len <= 0 || s_len > sig_len - s_offset {
-		return Result::Err('invalid signature format: invalid S length');
+		return Result::Err('invalid sig fmt:S length');
 	}
     // If strict encoding is enforced, check for negative or excessively padded `S` values.
     if strict_encoding {
         if sig_bytes[s_offset] & 0x80 != 0 {
-            return Result::Err('invalid signature format: negative S');
+            return Result::Err('invalid sig fmt: negative S');
         }
 
         if s_len > 1 && sig_bytes[s_offset] == 0  && sig_bytes[s_offset + 1] & 0x80 == 0 {
-            return Result::Err('invalid signature format: S value has too much padding');
+            return Result::Err('invalid sig fmt: S padding');
         }
     }
     // If the "low S" rule is enforced, check that the `S` value is below the threshold.
@@ -281,7 +282,7 @@ pub fn check_signature_encoding(ref vm: Engine, sig_bytes: @ByteArray) -> Result
 		half_order.high /= 2;
 
 		if s_value > half_order {
-			return Result::Err('signature is not canonical due to unnecessarily high S value')
+			return Result::Err('sig not canonical high S value');
 		}
 	}
 
@@ -399,8 +400,10 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point{
 // If any of these checks fail, the function will return an error.
 // 
 // @param sig_bytes The byte array containing the DER-encoded ECDSA signature.
-// @return A `Signature` struct containing the parsed `r` and `s` values.
-pub fn parse_signature(sig_bytes: @ByteArray) -> Result(Signature, felt252) {
+// @return A `Result<Signature, felt252>`:
+//         - `Ok(Signature)` if the signature was successfully parsed from the provided byte array, meaning the `sig_bytes` contained a valid DER-encoded ECDSA signature that adheres to the expected format.
+//         - `Err(felt252)` if the signature could not be parsed.
+pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 	
 	let sig_len: usize = sig_bytes.len() - HASH_TYPE_LEN;
 	let r_len: usize = sig_bytes[3].into();
@@ -410,33 +413,33 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result(Signature, felt252) {
 	let order: u256 = Secp256Trait::<Secp256k1Point>::get_curve_size();
 
 	if r_len > 32 {
-		return Result::Err('invalid signature: R is larger than 256 bits');
+		return Result::Err('invalid sig: R > 256 bits');
 	}
 
 	if r_sig >= order {
 
-		return Result::Err('invalid signature: R >= group order');
+		return Result::Err('invalid sig: R >= group order');
 	}
 
 	if r_sig == 0 {
-		return Result::Err('invalid signature: R is zero');
+		return Result::Err('invalid sig: R is zero');
 	}
 
 	if s_len > 32 {
-		return Result::Err('invalid signature: S is larger than 256 bits');
+		return Result::Err('invalid sig: S > 256 bits');
 	}
 
 	if s_sig >= order {
 
-		return Result::Err('invalid signature: S >= group order');
+		return Result::Err('invalid sig: S >= group order');
 	}
 
 	if s_sig == 0 {
-		return Result::Err('invalid signature: S is zero');
+		return Result::Err('invalid sig: S is zero');
 	}
 
 	if sig_len != r_len + s_len + 6 {
-		return Result::Err('invalid signature: bad final length');
+		return Result::Err('invalid sig: bad final length');
 	}
 	
 	return Result::Ok(Signature {
@@ -465,22 +468,30 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result(Signature, felt252) {
 // @param vm A reference to the `Engine` that manages the execution context and provides the necessary script verification flags.
 // @param pk_bytes The byte array representing the public key to be parsed and validated.
 // @param sig_bytes The byte array containing the signature to be parsed and validated.
-// @return A tuple containing the parsed public key (`Secp256k1Point`), signature (`Signature`), and hash type (`u32`).
+// @return A `Result<(Secp256k1Point, Signature, u32), felt252>`:
+//          - `Ok((Secp256k1Point, Signature, u32))` if the public key and signature were successfully parsed from the provided byte arrays. The tuple contains:
+//            - `Secp256k1Point`: The parsed public key as a point on the secp256k1 elliptic curve.
+//            - `Signature`: The parsed ECDSA signature.
+//            - `u32`: The signature hash type extracted from the signature.
+//         - `Err(felt252)` if the signature could not be parsed.
 pub fn parse_base_sig_and_pk(ref vm: Engine, 
 	pk_bytes: @ByteArray, 
 	sig_bytes: @ByteArray) -> Result<(Secp256k1Point, Signature, u32), felt252>{
 
+	if sig_bytes.len() == 0 {
+		return Result::Err('empty signature');
+	}
 	let hash_type_offset: usize = sig_bytes.len() - 1;
 	let hash_type: u32 = sig_bytes[hash_type_offset].into();
 
-	check_hash_type_encoding(ref vm, hash_type);
-	check_signature_encoding(ref vm, sig_bytes);
-	check_pub_key_encoding(ref vm, pk_bytes);
+	check_hash_type_encoding(ref vm, hash_type)?;
+	check_signature_encoding(ref vm, sig_bytes)?;
+	check_pub_key_encoding(ref vm, pk_bytes)?;
 
 	let pub_key = parse_pub_key(pk_bytes);
-	let sig = parse_signature(sig_bytes);
+	let sig = parse_signature(sig_bytes)?;
 
-	(pub_key, sig, hash_type)
+	Result::Ok((pub_key, sig, hash_type))
 }
 // Removes `OP_CODESEPARATOR` opcodes from the script.
 // 

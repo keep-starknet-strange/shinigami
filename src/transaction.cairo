@@ -1,4 +1,5 @@
 use core::array::ArrayTrait;
+use shinigami::utils::hex_to_bytecode;
 
 #[derive(Drop, Copy)]
 pub struct Outpoint {
@@ -26,6 +27,8 @@ pub struct Transaction {
     pub transaction_inputs: Array<TransactionInput>,
     pub transaction_outputs: Array<TransactionOutput>,
     pub locktime: u32,
+    //temporary until clean transaction handling
+    pub subscript: @ByteArray,
 }
 
 pub trait TransactionTrait {
@@ -66,11 +69,14 @@ pub impl TransactionImpl of TransactionTrait{
         let mut transaction_outputs : Array<TransactionOutput> = ArrayTrait::<TransactionOutput>::new();
         transaction_outputs.append(output_0);
 
+        let mut subscript = hex_to_bytecode(@"0x76a9144299ff317fcd12ef19047df66d72454691797bfc88ac");
+
         Transaction {
             version: 1,
             transaction_inputs: transaction_inputs,
             transaction_outputs: transaction_outputs,
             locktime:0,
+            subscript: @subscript,
         }
     }
 
@@ -95,6 +101,7 @@ pub impl TransactionImpl of TransactionTrait{
             transaction_inputs: transaction_inputs,
             transaction_outputs: transaction_outputs,
             locktime:0,
+            subscript: @"",
         }
     }
 }
@@ -106,6 +113,7 @@ impl TransactionDefault of Default<Transaction> {
             transaction_inputs: ArrayTrait::<TransactionInput>::new(),
             transaction_outputs: ArrayTrait::<TransactionOutput>::new(),
             locktime: 0,
+            subscript: @"",
         };
         transaction
     }
