@@ -123,6 +123,8 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_NOP', Opcode::OP_NOP);
         compiler.add_opcode('OP_IF', Opcode::OP_IF);
         compiler.add_opcode('OP_NOTIF', Opcode::OP_NOTIF);
+        compiler.add_opcode('OP_VERIF', Opcode::OP_VERIF);
+        compiler.add_opcode('OP_VERNOTIF', Opcode::OP_VERNOTIF);
         compiler.add_opcode('OP_ELSE', Opcode::OP_ELSE);
         compiler.add_opcode('OP_ENDIF', Opcode::OP_ENDIF);
         compiler.add_opcode('OP_VERIFY', Opcode::OP_VERIFY);
@@ -165,6 +167,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_MAX', Opcode::OP_MAX);
         compiler.add_opcode('OP_WITHIN', Opcode::OP_WITHIN);
         compiler.add_opcode('OP_RIPEMD160', Opcode::OP_RIPEMD160);
+        compiler.add_opcode('OP_SHA1', Opcode::OP_SHA1);
         compiler.add_opcode('OP_RESERVED', Opcode::OP_RESERVED);
         compiler.add_opcode('OP_RESERVED1', Opcode::OP_RESERVED1);
         compiler.add_opcode('OP_RESERVED2', Opcode::OP_RESERVED2);
@@ -194,6 +197,7 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_NOP8', Opcode::OP_NOP8);
         compiler.add_opcode('OP_NOP9', Opcode::OP_NOP9);
         compiler.add_opcode('OP_NOP10', Opcode::OP_NOP10);
+        compiler.add_opcode('OP_ROLL', Opcode::OP_ROLL);
         compiler.add_opcode('OP_OVER', Opcode::OP_OVER);
         compiler.add_opcode('OP_2OVER', Opcode::OP_2OVER);
         compiler.add_opcode('OP_SHA256', Opcode::OP_SHA256);

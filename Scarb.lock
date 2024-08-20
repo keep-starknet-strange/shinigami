@@ -7,8 +7,14 @@ version = "0.1.0"
 source = "git+https://github.com/j1mbo64/ripemd160_cairo.git#bebe67c235b12e0a3668f49c78423d4eff6d7131"
 
 [[package]]
+name = "sha1"
+version = "0.1.0"
+source = "git+https://github.com/j1mbo64/sha1_cairo.git#a2fbea0d47adeb7c9c60d6fb97580e4084834cf5"
+
+[[package]]
 name = "shinigami"
 version = "0.1.0"
 dependencies = [
  "ripemd160",
+ "sha1",
 ]

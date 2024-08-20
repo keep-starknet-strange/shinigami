@@ -32,10 +32,10 @@ pub fn opcode_dup(ref engine: Engine) -> Result<(), felt252> {
 }
 
 pub fn opcode_swap(ref engine: Engine) -> Result<(), felt252> {
-    let a = engine.dstack.pop_int()?;
-    let b = engine.dstack.pop_int()?;
-    engine.dstack.push_int(a);
-    engine.dstack.push_int(b);
+    let a = engine.dstack.pop_byte_array()?;
+    let b = engine.dstack.pop_byte_array()?;
+    engine.dstack.push_byte_array(a);
+    engine.dstack.push_byte_array(b);
     return Result::Ok(());
 }
 
@@ -82,14 +82,14 @@ pub fn opcode_3dup(ref engine: Engine) -> Result<(), felt252> {
 }
 
 pub fn opcode_2swap(ref engine: Engine) -> Result<(), felt252> {
-    let a = engine.dstack.pop_int()?;
-    let b = engine.dstack.pop_int()?;
-    let c = engine.dstack.pop_int()?;
-    let d = engine.dstack.pop_int()?;
-    engine.dstack.push_int(b);
-    engine.dstack.push_int(a);
-    engine.dstack.push_int(d);
-    engine.dstack.push_int(c);
+    let a = engine.dstack.pop_byte_array()?;
+    let b = engine.dstack.pop_byte_array()?;
+    let c = engine.dstack.pop_byte_array()?;
+    let d = engine.dstack.pop_byte_array()?;
+    engine.dstack.push_byte_array(b);
+    engine.dstack.push_byte_array(a);
+    engine.dstack.push_byte_array(d);
+    engine.dstack.push_byte_array(c);
     return Result::Ok(());
 }
 
@@ -102,6 +102,13 @@ pub fn opcode_rot(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.rot_n(1)?;
     return Result::Ok(());
 }
+
+pub fn opcode_roll(ref engine: Engine) -> Result<(), felt252> {
+    let value = engine.dstack.pop_int()?;
+    engine.dstack.roll_n(ScriptNum::to_int32(value))?;
+    return Result::Ok(());
+}
+
 pub fn opcode_over(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.over_n(1)?;
     return Result::Ok(());
