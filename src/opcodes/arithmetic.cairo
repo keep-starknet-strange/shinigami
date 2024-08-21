@@ -2,9 +2,6 @@ use shinigami::engine::{Engine, EngineTrait};
 use shinigami::stack::ScriptStackTrait;
 use shinigami::opcodes::utils;
 
-const MAX_INT32: i32 = 2147483647;
-const MIN_INT32: i32 = -2147483648;
-
 pub fn opcode_1add(ref engine: Engine) -> Result<(), felt252> {
     let value = engine.dstack.pop_int()?;
     let result = value + 1;
@@ -96,12 +93,6 @@ pub fn opcode_bool_or(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_numequal(ref engine: Engine) -> Result<(), felt252> {
     let a = engine.dstack.pop_int()?;
     let b = engine.dstack.pop_int()?;
-    if a > MAX_INT32.into()
-        || a < MIN_INT32.into()
-        || b > MAX_INT32.into()
-        || b < MIN_INT32.into() {
-        return Result::Err('numequal: out of range');
-    }
     engine.dstack.push_bool(if a == b {
         true
     } else {
