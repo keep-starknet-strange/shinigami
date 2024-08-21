@@ -1,7 +1,7 @@
+import { Dialog } from "@material-tailwind/react";
 import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
-import { Dialog } from "@material-tailwind/react";
 
 import cancelCircle from "@/images/cancel-circle.svg";
 import githubImage from "@/images/github.svg";
@@ -17,9 +17,9 @@ export const AboutModal: FC<AboutModalProps> = ({ isOpen, onClose }) => (
     open={isOpen}
     handler={onClose}
     className="bg-black w-full"
-    nonce={() => { }}
-    onResize={() => { }}
-    onResizeCapture={() => { }}
+    nonce={() => {}}
+    onResize={() => {}}
+    onResizeCapture={() => {}}
   >
     <button
       className="p-1.5 border-2 border-[#00FF5E] rounded-md absolute right-0 bg-[#00FF5E]/10 z-20"

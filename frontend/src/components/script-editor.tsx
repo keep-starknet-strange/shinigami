@@ -1,14 +1,14 @@
 "use client";
 
+import StackVisualizer from "@/components/stack-visualizer";
 import Editor from "@monaco-editor/react";
 import Image from "next/image";
-import StackVisualizer from "@/components/stack-visualizer";
 
-import { useState } from "react";
+import refreshImage from "@/images/refresh-icon.svg";
 import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
-import refreshImage from "@/images/refresh-icon.svg";
 import clsx from "@/utils/lib";
+import { useState } from "react";
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("ScriptSig");

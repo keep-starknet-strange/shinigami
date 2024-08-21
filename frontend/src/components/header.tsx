@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 
+import { AboutModal } from "@/components/about-modal";
 import Image from "next/image";
 import Link from "next/link";
-import { AboutModal } from "@/components/about-modal";
 import { FC } from "react";
 
-import logo from "../../public/logo.png";
 import githubImage from "@/images/github.svg";
 import menu from "@/images/menu.svg";
 import xCircle from "@/images/x-circle.svg";
+import logo from "../../public/logo.png";
 
 interface MobileMenuProps {
   isOpen: boolean;
