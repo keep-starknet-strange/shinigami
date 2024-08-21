@@ -73,6 +73,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     elif echo "$RESULT" | grep -q "$FAILURE_RES"; then
         EVAL_FALSE_RES="Execution failed: Script failed after execute"
         EMPTY_STACK_RES="Execution failed: Stack empty after execute"
+        UNBALANCED_CONDITIONAL="Execution failed: Unbalanced conditional"
         RESERVED_OP_RES="Execution failed: Opcode reserved"
         UNIMPLEMENTED_OP_RES="Execution failed: Opcode not implemented"
         INVALID_ELSE_RES="Execution failed: opcode_else: no matching if"
@@ -86,6 +87,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
+        elif echo "$RESULT" | grep -q "$UNBALANCED_CONDITIONAL"; then
+            SCRIPT_RESULT="UNBALANCED_CONDITIONAL"
         elif echo "$RESULT" | grep -q "$RESERVED_OP_RES"; then
             SCRIPT_RESULT="BAD_OPCODE"
         elif echo "$RESULT" | grep -q "$UNIMPLEMENTED_OP_RES"; then

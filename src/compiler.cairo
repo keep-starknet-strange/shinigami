@@ -18,7 +18,7 @@ pub trait CompilerTrait {
     fn compile(self: Compiler, script: ByteArray) -> ByteArray;
 }
 
-pub impl CompilerTraitImpl of CompilerTrait {
+pub impl CompilerImpl of CompilerTrait {
     fn new() -> Compiler {
         let mut compiler = Compiler { opcodes: Default::default() };
         // Add the opcodes to the dict
@@ -203,6 +203,9 @@ pub impl CompilerTraitImpl of CompilerTrait {
         compiler.add_opcode('OP_SHA256', Opcode::OP_SHA256);
         compiler.add_opcode('OP_HASH160', Opcode::OP_HASH160);
         compiler.add_opcode('OP_HASH256', Opcode::OP_HASH256);
+        compiler.add_opcode('OP_CHECKSIG', Opcode::OP_CHECKSIG);
+        compiler.add_opcode('OP_CHECKSIGVERIFY', Opcode::OP_CHECKSIGVERIFY);
+        compiler.add_opcode('OP_CODESEPARATOR', Opcode::OP_CODESEPARATOR);
 
         compiler
     }
