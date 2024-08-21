@@ -1,15 +1,15 @@
-use core::array::ArrayTrait;
-use shinigami::utils::hex_to_bytecode;
+use shinigami::utils;
 
+// Tracks previous transaction outputs
 #[derive(Drop, Copy)]
-pub struct Outpoint {
+pub struct OutPoint {
     pub hash: u256,
     pub index: u32,
 }
 
 #[derive(Drop, Clone)]
 pub struct TransactionInput {
-    pub previous_outpoint: Outpoint,
+    pub previous_outpoint: OutPoint,
     pub signature_script: ByteArray,
     pub witness: Array<ByteArray>,
     pub sequence: u32,
@@ -23,110 +23,107 @@ pub struct TransactionOutput {
 
 #[derive(Drop, Clone)]
 pub struct Transaction {
-    pub version: u32,
-    pub transaction_inputs: Array<TransactionInput>,
-    pub transaction_outputs: Array<TransactionOutput>,
+    pub version: i32,
+    pub transaction_inputs: Span<TransactionInput>,
+    pub transaction_outputs: Span<TransactionOutput>,
     pub locktime: u32,
-    //temporary until clean transaction handling
-    pub subscript: @ByteArray,
 }
 
 pub trait TransactionTrait {
-    fn get_transaction(transaction: Option<Transaction>) -> Transaction;
-    fn get_index(index: Option<u32>) -> u32;
-
-    fn mock_transaction() -> Transaction;
-    fn mock_witness_transaction() -> Transaction;
+    fn new(version: i32, transaction_inputs: Span<TransactionInput>, transaction_outputs: Span<TransactionOutput>, locktime: u32) -> Transaction;
+    fn new_signed(script_sig: ByteArray) -> Transaction;
+    fn btc_encode(self: Transaction, encoding: u32) -> ByteArray;
+    fn serialize(self: Transaction) -> ByteArray;
+    fn serialize_no_witness(self: Transaction) -> ByteArray;
 }
+
+pub const BASE_ENCODING: u32 = 0x01;
+pub const WITNESS_ENCODING: u32 = 0x02;
+
 pub impl TransactionImpl of TransactionTrait {
-    fn get_transaction(transaction: Option<Transaction>) -> Transaction {
-        match transaction {
-            Option::None => { Default::default() },
-            Option::Some(x) => { x },
-        }
-    }
-
-    fn get_index(index: Option<u32>) -> u32 {
-        match index {
-            Option::None => { Default::default() },
-            Option::Some(x) => { x },
-        }
-    }
-
-    fn mock_transaction() -> Transaction {
-        let outpoint_0: Outpoint = Outpoint {
-            hash: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, index: 0
-        };
-        let transaction_input_0: TransactionInput = TransactionInput {
-            previous_outpoint: outpoint_0,
-            signature_script: "",
-            witness: ArrayTrait::<ByteArray>::new(),
-            sequence: 0xffffffff
-        };
-        let mut transaction_inputs: Array<TransactionInput> = ArrayTrait::<TransactionInput>::new();
-        transaction_inputs.append(transaction_input_0);
-        let oscript_u256: u256 = 0x76a914b3e2819b6262e0b1f19fc7229d75677f347c91ac88ac;
-        let mut oscript_byte: ByteArray = "";
-
-        oscript_byte.append_word(oscript_u256.high.into(), 9);
-        oscript_byte.append_word(oscript_u256.low.into(), 16);
-
-        //little endian to i64 handle
-        let output_0: TransactionOutput = TransactionOutput {
-            value: 15000, publickey_script: oscript_byte
-        };
-        let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<
-            TransactionOutput
-        >::new();
-        transaction_outputs.append(output_0);
-
-        let mut subscript = hex_to_bytecode(
-            @"0x76a9144299ff317fcd12ef19047df66d72454691797bfc88ac"
-        );
-
+    fn new(version: i32, transaction_inputs: Span<TransactionInput>, transaction_outputs: Span<TransactionOutput>, locktime: u32) -> Transaction {
         Transaction {
+            version: version,
+            transaction_inputs: transaction_inputs,
+            transaction_outputs: transaction_outputs,
+            locktime: locktime,
+        }
+    }
+
+    fn new_signed(script_sig: ByteArray) -> Transaction {
+        // TODO
+        let transaction = Transaction {
             version: 1,
-            transaction_inputs: transaction_inputs,
-            transaction_outputs: transaction_outputs,
+            transaction_inputs: array![TransactionInput {
+                previous_outpoint: OutPoint {
+                    hash: 0x0,
+                    index: 0,
+                },
+                signature_script: script_sig,
+                witness: array![],
+                sequence: 0,
+            }].span(),
+            transaction_outputs: array![].span(),
             locktime: 0,
-            subscript: @subscript,
-        }
+        };
+        transaction
     }
 
-    fn mock_witness_transaction() -> Transaction {
-        let outpoint_0: Outpoint = Outpoint {
-            hash: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, index: 1
-        };
-        let transaction_input_0: TransactionInput = TransactionInput {
-            previous_outpoint: outpoint_0,
-            signature_script: "",
-            witness: ArrayTrait::<ByteArray>::new(),
-            sequence: 0xffffffff
-        };
-        let mut transaction_inputs: Array<TransactionInput> = ArrayTrait::<TransactionInput>::new();
-        transaction_inputs.append(transaction_input_0);
-        let script_u256: u256 = 0x76a914ce72abfd0e6d9354a660c18f2825eb392f060fdc88ac;
-        let mut script_byte: ByteArray = "";
+    // Serialize the transaction data for hashing based on encoding used.
+    fn btc_encode(self: Transaction, encoding: u32) -> ByteArray {
+        let mut bytes = "";
+        bytes.append_word_rev(self.version.into(), 4);
+        // TODO: Witness encoding
 
-        script_byte.append_word(script_u256.high.into(), 9);
-        script_byte.append_word(script_u256.low.into(), 16);
+        // Serialize each input in the transaction.
+        let input_len: usize = self.transaction_inputs.len();
+        bytes.append_word_rev(input_len.into(), utils::int_size_in_bytes(input_len));
+        let mut i: usize = 0;
+        while i < input_len {
+            let input: @TransactionInput = self.transaction_inputs.at(i);
+            let input_hash: u256 = *input.previous_outpoint.hash;
+            let vout: u32 = *input.previous_outpoint.index;
+            let script: @ByteArray = input.signature_script;
+            let script_len: usize = script.len();
+            let sequence: u32 = *input.sequence;
 
-        //little endian to i64 handle
-        let output_0: TransactionOutput = TransactionOutput {
-            value: 15000, publickey_script: script_byte
+            bytes.append_word(input_hash.high.into(), 16);
+            bytes.append_word(input_hash.low.into(), 16);
+            bytes.append_word_rev(vout.into(), 4);
+            bytes.append_word_rev(script_len.into(), utils::int_size_in_bytes(script_len));
+            bytes.append(script);
+            bytes.append_word_rev(sequence.into(), 4);
+
+            i += 1;
         };
-        let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<
-            TransactionOutput
-        >::new();
-        transaction_outputs.append(output_0);
 
-        Transaction {
-            version: 2,
-            transaction_inputs: transaction_inputs,
-            transaction_outputs: transaction_outputs,
-            locktime: 0,
-            subscript: @"",
-        }
+        // Serialize each output in the transaction.
+        let output_len: usize = self.transaction_outputs.len();
+        bytes.append_word_rev(output_len.into(), utils::int_size_in_bytes(output_len));
+        i = 0;
+        while i < output_len {
+            let output: @TransactionOutput = self.transaction_outputs.at(i);
+            let value: i64 = *output.value;
+            let script: @ByteArray = output.publickey_script;
+            let script_len: usize = script.len();
+
+            bytes.append_word_rev(value.into(), 8);
+            bytes.append_word_rev(script_len.into(), utils::int_size_in_bytes(script_len));
+            bytes.append(script);
+
+            i += 1;
+        };
+
+        bytes.append_word_rev(self.locktime.into(), 4);
+        bytes
+    }
+
+    fn serialize(self: Transaction) -> ByteArray {
+        self.btc_encode(WITNESS_ENCODING)
+    }
+
+    fn serialize_no_witness(self: Transaction) -> ByteArray {
+        self.btc_encode(BASE_ENCODING)
     }
 }
 
@@ -134,10 +131,9 @@ impl TransactionDefault of Default<Transaction> {
     fn default() -> Transaction {
         let transaction = Transaction {
             version: 0,
-            transaction_inputs: ArrayTrait::<TransactionInput>::new(),
-            transaction_outputs: ArrayTrait::<TransactionOutput>::new(),
+            transaction_inputs: array![].span(),
+            transaction_outputs: array![].span(),
             locktime: 0,
-            subscript: @"",
         };
         transaction
     }

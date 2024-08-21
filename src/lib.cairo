@@ -40,8 +40,10 @@ pub mod scriptnum {
 pub mod scriptflags;
 pub mod signature {
     pub mod signature;
-    pub(crate) use signature::BaseSigVerifier;
-    pub(crate) use signature::BaseSigVerifierTrait;
+    pub mod sighash;
+    pub mod constants;
+    pub mod utils;
+    pub(crate) use signature::{BaseSigVerifier, BaseSigVerifierTrait};
 }
 pub mod transaction;
 mod main;

@@ -1,5 +1,7 @@
 #[derive(Copy, Drop)]
 pub enum ScriptFlags {
+    // ScriptBip16, allows P2SH transactions.
+    ScriptBip16,
     // ScriptStrictMultiSig, CHECKMULTISIG stack item must be zero length.
     ScriptStrictMultiSig,
     // ScriptDiscourageUpgradableNops, reserves NOP1-NOP10.
@@ -45,26 +47,27 @@ pub enum ScriptFlags {
 impl ScriptFlagsIntoU32 of Into<ScriptFlags, u32> {
     fn into(self: ScriptFlags) -> u32 {
         match self {
-            ScriptFlags::ScriptStrictMultiSig => 0x1,
-            ScriptFlags::ScriptDiscourageUpgradableNops => 0x2,
-            ScriptFlags::ScriptVerifyCheckLockTimeVerify => 0x4,
-            ScriptFlags::ScriptVerifyCheckSequenceVerify => 0x8,
-            ScriptFlags::ScriptVerifyCleanStack => 0x10,
-            ScriptFlags::ScriptVerifyDERSignatures => 0x20,
-            ScriptFlags::ScriptVerifyLowS => 0x40,
-            ScriptFlags::ScriptVerifyMinimalData => 0x80,
-            ScriptFlags::ScriptVerifyNullFail => 0x100,
-            ScriptFlags::ScriptVerifySigPushOnly => 0x200,
-            ScriptFlags::ScriptVerifyStrictEncoding => 0x400,
-            ScriptFlags::ScriptVerifyWitness => 0x800,
-            ScriptFlags::ScriptVerifyDiscourageUpgradeableWitnessProgram => 0x1000,
-            ScriptFlags::ScriptVerifyMinimalIf => 0x2000,
-            ScriptFlags::ScriptVerifyWitnessPubKeyType => 0x4000,
-            ScriptFlags::ScriptVerifyTaproot => 0x8000,
-            ScriptFlags::ScriptVerifyDiscourageUpgradeableTaprootVersion => 0x10000,
-            ScriptFlags::ScriptVerifyDiscourageOpSuccess => 0x20000,
-            ScriptFlags::ScriptVerifyDiscourageUpgradeablePubkeyType => 0x40000,
-            ScriptFlags::ScriptVerifyConstScriptCode => 0x40000,
+            ScriptFlags::ScriptBip16 => 0x1,
+            ScriptFlags::ScriptStrictMultiSig => 0x2,
+            ScriptFlags::ScriptDiscourageUpgradableNops => 0x4,
+            ScriptFlags::ScriptVerifyCheckLockTimeVerify => 0x8,
+            ScriptFlags::ScriptVerifyCheckSequenceVerify => 0x10,
+            ScriptFlags::ScriptVerifyCleanStack => 0x20,
+            ScriptFlags::ScriptVerifyDERSignatures => 0x40,
+            ScriptFlags::ScriptVerifyLowS => 0x80,
+            ScriptFlags::ScriptVerifyMinimalData => 0x100,
+            ScriptFlags::ScriptVerifyNullFail => 0x200,
+            ScriptFlags::ScriptVerifySigPushOnly => 0x400,
+            ScriptFlags::ScriptVerifyStrictEncoding => 0x800,
+            ScriptFlags::ScriptVerifyWitness => 0x1000,
+            ScriptFlags::ScriptVerifyDiscourageUpgradeableWitnessProgram => 0x2000,
+            ScriptFlags::ScriptVerifyMinimalIf => 0x4000,
+            ScriptFlags::ScriptVerifyWitnessPubKeyType => 0x8000,
+            ScriptFlags::ScriptVerifyTaproot => 0x10000,
+            ScriptFlags::ScriptVerifyDiscourageUpgradeableTaprootVersion => 0x20000,
+            ScriptFlags::ScriptVerifyDiscourageOpSuccess => 0x40000,
+            ScriptFlags::ScriptVerifyDiscourageUpgradeablePubkeyType => 0x80000,
+            ScriptFlags::ScriptVerifyConstScriptCode => 0x100000,
         }
     }
 }

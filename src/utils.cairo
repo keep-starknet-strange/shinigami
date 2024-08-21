@@ -1,6 +1,7 @@
 use shinigami::opcodes::Opcode;
 use shinigami::scriptnum::ScriptNum;
 use core::sha256::{compute_sha256_byte_array};
+
 // Checks if item starts with 0x
 // TODO: Check validity of hex?
 pub fn is_hex(script_item: @ByteArray) -> bool {
@@ -221,20 +222,18 @@ pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     };
     ret_bool
 }
-pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usize) -> u256 {
-    let mut high: u128 = 0;
-    let mut low: u128 = 0;
-    let total_bytes = arr.len();
-    let mut i: usize = 0;
-    let mut high_bytes: usize = 0;
-    let mut low_bytes: usize = 16;
-    let mut arr_high = arr.clone();
-    let mut arr_low = arr.clone();
 
+pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usize) -> u256 {
+    let total_bytes = arr.len();
     // Return 0 if offset out of bound or len greater than 32 bytes
     if offset >= total_bytes || len > 32 {
         return u256 { high: 0, low: 0 };
     }
+
+    let mut high: u128 = 0;
+    let mut low: u128 = 0;
+    let mut i: usize = 0;
+    let mut high_bytes: usize = 0;
 
     let available_bytes = total_bytes - offset;
     let read_bytes = if available_bytes < len {
@@ -245,19 +244,18 @@ pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usi
 
     if read_bytes > 16 {
         high_bytes = read_bytes - 16;
-    } else if read_bytes < 16 {
-        low_bytes = read_bytes;
     }
     while i < high_bytes {
-        high = high * 256 + arr_high[i + offset].into();
+        high = high * 256 + arr[i + offset].into();
         i += 1;
     };
     while i < read_bytes {
-        low = low * 256 + arr_low[i + offset].into();
+        low = low * 256 + arr[i + offset].into();
         i += 1;
     };
     u256 { high, low }
 }
+
 pub fn int_size_in_bytes(u_32: u32) -> u32 {
     let mut value: u32 = u_32;
     let mut size = 0;
@@ -272,28 +270,18 @@ pub fn int_size_in_bytes(u_32: u32) -> u32 {
     size
 }
 
-pub fn hash256(byte: @ByteArray) -> u256 {
-    let mut msg_hash = compute_sha256_byte_array(byte);
-    let mut transaction_byte: ByteArray = "";
-
+pub fn double_sha256(byte: @ByteArray) -> u256 {
+    let msg_hash = compute_sha256_byte_array(byte);
+    let mut res_bytes = "";
+    for word in msg_hash.span() {
+        res_bytes.append_word((*word).into(), 4);
+    };
+    let msg_hash = compute_sha256_byte_array(@res_bytes);
     let mut hash_value: u256 = 0;
-    for word in msg_hash
-        .span() {
-            hash_value *= 0x100000000;
-            hash_value = hash_value + (*word).into();
-        };
-
-    transaction_byte.append_word(hash_value.high.into(), 16);
-    transaction_byte.append_word(hash_value.low.into(), 16);
-
-    msg_hash = compute_sha256_byte_array(@transaction_byte);
-
-    hash_value = 0;
-    for word in msg_hash
-        .span() {
-            hash_value *= 0x100000000;
-            hash_value = hash_value + (*word).into();
-        };
+    for word in msg_hash.span() {
+        hash_value *= 0x100000000;
+        hash_value = hash_value + (*word).into();
+    };
 
     hash_value
 }

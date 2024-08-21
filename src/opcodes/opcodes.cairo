@@ -173,7 +173,7 @@ pub mod Opcode {
     pub const OP_HASH256: u8 = 170;
     pub const OP_CODESEPARATOR: u8 = 171;
     pub const OP_CHECKSIG: u8 = 172;
-    pub const OP_CHECKSIGVERIF: u8 = 173;
+    pub const OP_CHECKSIGVERIFY: u8 = 173;
     pub const OP_NOP1: u8 = 176;
     pub const OP_NOP4: u8 = 179;
     pub const OP_NOP5: u8 = 180;
@@ -182,7 +182,6 @@ pub mod Opcode {
     pub const OP_NOP8: u8 = 183;
     pub const OP_NOP9: u8 = 184;
     pub const OP_NOP10: u8 = 185;
-
 
     use shinigami::engine::{Engine, EngineTrait};
     use shinigami::opcodes::{constants, flow, stack, splice, bitwise, arithmetic, crypto, utils};
@@ -361,7 +360,7 @@ pub mod Opcode {
             170 => crypto::opcode_hash256(ref engine),
             171 => crypto::opcode_codeseparator(ref engine),
             172 => crypto::opcode_checksig(ref engine),
-            173 => utils::not_implemented(ref engine),
+            173 => crypto::opcode_checksigverify(ref engine),
             174 => utils::not_implemented(ref engine),
             175 => utils::not_implemented(ref engine),
             176 => flow::opcode_nop(),
