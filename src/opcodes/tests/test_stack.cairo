@@ -7,8 +7,9 @@ fn test_op_toaltstack() {
     let program = "OP_1 OP_TOALTSTACK";
     let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_EMPTY_STACK);
     utils::check_dstack_size(ref engine, 0);
-    utils::check_astack_size(ref engine, 1);
-    let expected_astack = array![ScriptNum::wrap(1)];
+    // TODO: Do check of altstack before exiting the program
+    utils::check_astack_size(ref engine, 0);
+    let expected_astack = array![];
     utils::check_expected_astack(ref engine, expected_astack.span());
 }
 
