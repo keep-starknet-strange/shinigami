@@ -113,7 +113,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             let res = self.nip_n(entry_index);
             if res.is_err() {
                 err = res.unwrap_err();
-                beak;
+                break;
             }
             self.push_byte_array(res.unwrap());
             i -= 1;
