@@ -3,9 +3,6 @@ use shinigami::scriptnum::ScriptNum;
 use shinigami::errors::Error;
 use shinigami::utils;
 
-const MAX_INT32: i32 = 2147483647;
-const MIN_INT32: i32 = -2147483648;
-
 #[derive(Destruct)]
 pub struct ScriptStack {
     data: Felt252Dict<Nullable<ByteArray>>,
@@ -50,10 +47,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn pop_int(ref self: ScriptStack) -> Result<i64, felt252> {
         let value = self.pop_byte_array()?;
-        if ScriptNum::unwrap(value.clone()) > MAX_INT32.into()
-            || ScriptNum::unwrap(value.clone()) < MIN_INT32.into() {
-            return Result::Err('numequal: out of range');
-        }
         return Result::Ok(ScriptNum::unwrap(value));
     }
 
@@ -74,10 +67,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn peek_int(ref self: ScriptStack, idx: usize) -> Result<i64, felt252> {
         let bytes = self.peek_byte_array(idx)?;
-        if ScriptNum::unwrap(bytes.clone()) > MAX_INT32.into()
-            || ScriptNum::unwrap(bytes.clone()) < MIN_INT32.into() {
-            return Result::Err('peek_int: out of range');
-        }
         return Result::Ok(ScriptNum::unwrap(bytes));
     }
 

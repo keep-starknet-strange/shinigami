@@ -71,6 +71,9 @@ pub mod ScriptNum {
         if integer_bytes_len(result.into()) > MAX_BYTE_LEN {
             panic!("scriptnum(unwrap): number more than {} bytes long", MAX_BYTE_LEN);
         }
+        if result > MAX_INT32.into() || result < MIN_INT32.into() {
+            panic!("Out of range");
+        }
         result
     }
 
