@@ -103,9 +103,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn rot_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
-        if n < 1 {
-            return Result::Err('rot_n: invalid n value');
-        }
         let mut err = '';
         let entry_index = 3 * n - 1;
         let mut i = n;
@@ -113,7 +110,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             let res = self.nip_n(entry_index);
             if res.is_err() {
                 err = res.unwrap_err();
-                break;
+                return Result::Err(err);
             }
             self.push_byte_array(res.unwrap());
             i -= 1;
