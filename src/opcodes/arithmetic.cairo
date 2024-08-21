@@ -96,7 +96,10 @@ pub fn opcode_bool_or(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_numequal(ref engine: Engine) -> Result<(), felt252> {
     let a = engine.dstack.pop_int()?;
     let b = engine.dstack.pop_int()?;
-    if a > MAX_INT32.into() || a < MIN_INT32.into() || b > MAX_INT32.into() || b < MIN_INT32.into() {
+    if a > MAX_INT32.into()
+        || a < MIN_INT32.into()
+        || b > MAX_INT32.into()
+        || b < MIN_INT32.into() {
         return Result::Err('numequal: out of range');
     }
     engine.dstack.push_bool(if a == b {
