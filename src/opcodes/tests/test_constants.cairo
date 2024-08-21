@@ -105,7 +105,7 @@ fn test_op_push_data1() {
 }
 #[test]
 fn test_op_push_data2() {
-    let program = "OP_PUSHDATA2 0x0100 0x42";
+    let program = "OP_PUSHDATA2 0x0001 0x42";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@"0x42")];
@@ -124,11 +124,16 @@ fn test_op_push_data2() {
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@byte_data)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
+
+    let program: ByteArray = "OP_PUSHDATA2 0x01 NOP";
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_FAILED);
+    // fail to pull data so nothing is pushed into the dstack.
+    utils::check_dstack_size(ref engine, 0);
 }
 
 #[test]
 fn test_op_push_data4() {
-    let program = "OP_PUSHDATA4 0x00000100 0x42";
+    let program = "OP_PUSHDATA4 0x00000001 0x42";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@"0x42")];
@@ -147,5 +152,5 @@ fn test_op_push_data4() {
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@byte_data)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
-    // TODO: test with 0x01000000?
+    // TODO: test with ?
 }

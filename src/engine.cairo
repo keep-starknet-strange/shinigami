@@ -39,7 +39,7 @@ pub trait EngineTrait {
         script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
     ) -> Engine;
     // Pulls the next len bytes from the script and advances the program counter
-    fn pull_data(ref self: Engine, len: usize) -> ByteArray;
+    fn pull_data(ref self: Engine, len: usize) -> Result<ByteArray, felt252>;
     fn get_dstack(ref self: Engine) -> Span<ByteArray>;
     fn get_astack(ref self: Engine) -> Span<ByteArray>;
     // Executes the next instruction in the script
@@ -76,21 +76,21 @@ pub impl EngineImpl of EngineTrait {
         }
     }
 
-    fn pull_data(ref self: Engine, len: usize) -> ByteArray {
+    fn pull_data(ref self: Engine, len: usize) -> Result<ByteArray, felt252> {
         // TODO: check bounds with error handling
         let mut data = "";
         let mut i = self.opcode_idx + 1;
         let mut end = i + len;
         let script = *(self.scripts[self.script_idx]);
         if end > script.len() {
-            end = script.len();
+            return Result::Err(Error::SCRIPT_FAILED);
         }
         while i < end {
             data.append_byte(script[i]);
             i += 1;
         };
         self.opcode_idx = end - 1;
-        return data;
+        return Result::Ok(data);
     }
 
     fn get_dstack(ref self: Engine) -> Span<ByteArray> {
