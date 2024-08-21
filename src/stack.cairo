@@ -103,6 +103,9 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn rot_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
+        if n < 1 {
+            return Result::Err('rot_n: invalid n value');
+        }
         let mut err = '';
         let entry_index = 3 * n - 1;
         let mut i = n;
@@ -110,7 +113,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             let res = self.nip_n(entry_index);
             if res.is_err() {
                 err = res.unwrap_err();
-                return Result::Err(err);
+                beak;
             }
             self.push_byte_array(res.unwrap());
             i -= 1;
@@ -137,10 +140,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn dup_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
         // TODO: STACK_OUT_OF_RANGE?
-        if n == 0 || n > self.len() {
-            return Result::Err('dup_n: stack out of range');
-        }
-
         if (n < 1) {
             return Result::Err('dup_n: invalid n value');
         }
@@ -150,7 +149,8 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             i -= 1;
             let value = self.peek_byte_array(n - 1);
             if value.is_err() {
-                break;
+                err = value.unwrap_err();
+                return Result::Err(err);
             }
             self.push_byte_array(value.unwrap());
         };
