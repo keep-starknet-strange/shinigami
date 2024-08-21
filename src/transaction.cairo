@@ -30,7 +30,12 @@ pub struct Transaction {
 }
 
 pub trait TransactionTrait {
-    fn new(version: i32, transaction_inputs: Span<TransactionInput>, transaction_outputs: Span<TransactionOutput>, locktime: u32) -> Transaction;
+    fn new(
+        version: i32,
+        transaction_inputs: Span<TransactionInput>,
+        transaction_outputs: Span<TransactionOutput>,
+        locktime: u32
+    ) -> Transaction;
     fn new_signed(script_sig: ByteArray) -> Transaction;
     fn btc_encode(self: Transaction, encoding: u32) -> ByteArray;
     fn serialize(self: Transaction) -> ByteArray;
@@ -41,7 +46,12 @@ pub const BASE_ENCODING: u32 = 0x01;
 pub const WITNESS_ENCODING: u32 = 0x02;
 
 pub impl TransactionImpl of TransactionTrait {
-    fn new(version: i32, transaction_inputs: Span<TransactionInput>, transaction_outputs: Span<TransactionOutput>, locktime: u32) -> Transaction {
+    fn new(
+        version: i32,
+        transaction_inputs: Span<TransactionInput>,
+        transaction_outputs: Span<TransactionOutput>,
+        locktime: u32
+    ) -> Transaction {
         Transaction {
             version: version,
             transaction_inputs: transaction_inputs,
@@ -54,15 +64,15 @@ pub impl TransactionImpl of TransactionTrait {
         // TODO
         let transaction = Transaction {
             version: 1,
-            transaction_inputs: array![TransactionInput {
-                previous_outpoint: OutPoint {
-                    hash: 0x0,
-                    index: 0,
-                },
-                signature_script: script_sig,
-                witness: array![],
-                sequence: 0,
-            }].span(),
+            transaction_inputs: array![
+                TransactionInput {
+                    previous_outpoint: OutPoint { hash: 0x0, index: 0, },
+                    signature_script: script_sig,
+                    witness: array![],
+                    sequence: 0,
+                }
+            ]
+                .span(),
             transaction_outputs: array![].span(),
             locktime: 0,
         };

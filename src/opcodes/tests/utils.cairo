@@ -34,7 +34,8 @@ pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> En
     engine
 }
 
-// Runs a bitcoin script `program` as script_pubkey with corresponding `transaction` expecting an error
+// Runs a bitcoin script `program` as script_pubkey with corresponding `transaction` expecting an
+// error
 pub fn test_compile_and_run_with_tx_err(
     program: ByteArray, transaction: Transaction, expected_err: felt252
 ) -> Engine {
@@ -92,9 +93,7 @@ pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
     let output_0: TransactionOutput = TransactionOutput {
         value: 15000, publickey_script: oscript_byte
     };
-    let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<
-        TransactionOutput
-    >::new();
+    let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<TransactionOutput>::new();
     transaction_outputs.append(output_0);
 
     //let mut subscript = hex_to_bytecode(
@@ -106,7 +105,8 @@ pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
         transaction_inputs: transaction_inputs.span(),
         transaction_outputs: transaction_outputs.span(),
         locktime: 0,
-    } }
+    }
+}
 
 pub fn mock_witness_transaction() -> Transaction {
     let outpoint_0: OutPoint = OutPoint {
@@ -130,9 +130,7 @@ pub fn mock_witness_transaction() -> Transaction {
     let output_0: TransactionOutput = TransactionOutput {
         value: 15000, publickey_script: script_byte
     };
-    let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<
-        TransactionOutput
-    >::new();
+    let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<TransactionOutput>::new();
     transaction_outputs.append(output_0);
 
     Transaction {

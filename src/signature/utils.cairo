@@ -66,7 +66,8 @@ pub fn transaction_procedure(
                 continue;
             }
             let mut temp_sequence = *temp_transaction_input.sequence;
-            if hash_type_masked == constants::SIG_HASH_NONE || hash_type_masked == constants::SIG_HASH_SINGLE {
+            if hash_type_masked == constants::SIG_HASH_NONE
+                || hash_type_masked == constants::SIG_HASH_SINGLE {
                 temp_sequence = 0;
             }
             processed_transaction_input
@@ -103,7 +104,9 @@ pub fn transaction_procedure(
 // Thus, a Pay-to-Witness-Public-Key-Hash script is of the form:
 // `OP_0 OP_DATA_20 <20-byte public key hash>`
 pub fn is_witness_pub_key_hash(script: @ByteArray) -> bool {
-    if script.len() == constants::WITNESS_V0_PUB_KEY_HASH_LEN && script[0] == Opcode::OP_0 && script[1] == Opcode::OP_DATA_20 {
+    if script.len() == constants::WITNESS_V0_PUB_KEY_HASH_LEN
+        && script[0] == Opcode::OP_0
+        && script[1] == Opcode::OP_DATA_20 {
         return true;
     }
     false

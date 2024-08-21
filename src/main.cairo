@@ -10,7 +10,11 @@ struct InputData {
 }
 
 fn main(input: InputData) -> u8 {
-    println!("Running Bitcoin Script with ScriptSig: '{}' and ScriptPubKey: '{}'", input.ScriptSig, input.ScriptPubKey);
+    println!(
+        "Running Bitcoin Script with ScriptSig: '{}' and ScriptPubKey: '{}'",
+        input.ScriptSig,
+        input.ScriptPubKey
+    );
     let mut compiler = CompilerImpl::new();
     let script_pubkey = compiler.compile(input.ScriptPubKey);
     let compiler = CompilerImpl::new();

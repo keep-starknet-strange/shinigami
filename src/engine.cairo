@@ -23,7 +23,6 @@ pub struct Engine {
     script_idx: usize,
     // Program counter within the current script
     pub opcode_idx: usize,
-
     // Primary data stack
     pub dstack: ScriptStack,
     // Alternate data stack
@@ -36,7 +35,9 @@ pub struct Engine {
 
 pub trait EngineTrait {
     // Create a new Engine with the given script
-    fn new(script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64) -> Engine;
+    fn new(
+        script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
+    ) -> Engine;
     // Pulls the next len bytes from the script and advances the program counter
     fn pull_data(ref self: Engine, len: usize) -> ByteArray;
     fn get_dstack(ref self: Engine) -> Span<ByteArray>;
@@ -52,7 +53,9 @@ pub trait EngineTrait {
 }
 
 pub impl EngineImpl of EngineTrait {
-    fn new(script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64) -> Engine {
+    fn new(
+        script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
+    ) -> Engine {
         // TODO
         let mut script_sig: @ByteArray = @"";
         if tx_idx < transaction.transaction_inputs.len() {
@@ -108,8 +111,7 @@ pub impl EngineImpl of EngineTrait {
         let opcode = script[self.opcode_idx];
         Opcode::is_opcode_always_illegal(opcode, ref self)?;
 
-        if !self.cond_stack.branch_executing()
-            && !flow::is_branching_opcode(opcode) {
+        if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
             Opcode::is_opcode_disabled(opcode, ref self)?;
             self.opcode_idx += 1;
             return Result::Ok(true);
@@ -123,45 +125,45 @@ pub impl EngineImpl of EngineTrait {
     fn execute(ref self: Engine) -> Result<ByteArray, felt252> {
         let mut err = '';
         while self.script_idx < self.scripts.len() {
-          let script: @ByteArray = *self.scripts[self.script_idx];
-          while self.opcode_idx < script.len() {
-              let opcode = script[self.opcode_idx];
+            let script: @ByteArray = *self.scripts[self.script_idx];
+            while self.opcode_idx < script.len() {
+                let opcode = script[self.opcode_idx];
 
-              // Check if the opcode is always illegal (reserved).
-              let illegal_opcode = Opcode::is_opcode_always_illegal(opcode, ref self);
-              if illegal_opcode.is_err() {
-                  err = illegal_opcode.unwrap_err();
-                  break;
-              }
+                // Check if the opcode is always illegal (reserved).
+                let illegal_opcode = Opcode::is_opcode_always_illegal(opcode, ref self);
+                if illegal_opcode.is_err() {
+                    err = illegal_opcode.unwrap_err();
+                    break;
+                }
 
-              if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
-                  let res = Opcode::is_opcode_disabled(opcode, ref self);
-                  if res.is_err() {
-                      err = res.unwrap_err();
-                      break;
-                  }
-                  self.opcode_idx += 1;
-                  continue;
-              }
-              let res = Opcode::execute(opcode, ref self);
-              if res.is_err() {
-                  err = res.unwrap_err();
-                  break;
-              }
-              self.opcode_idx += 1;
-          };
-          if err != '' {
-              break;
-          }
-          if self.cond_stack.len() > 0 {
-              err = Error::SCRIPT_UNBALANCED_CONDITIONAL_STACK;
-              break;
-          }
-          self.astack = ScriptStackImpl::new();
-          self.opcode_idx = 0;
-          self.last_code_sep = 0;
-          self.script_idx += 1;
-          // TODO: other things
+                if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
+                    let res = Opcode::is_opcode_disabled(opcode, ref self);
+                    if res.is_err() {
+                        err = res.unwrap_err();
+                        break;
+                    }
+                    self.opcode_idx += 1;
+                    continue;
+                }
+                let res = Opcode::execute(opcode, ref self);
+                if res.is_err() {
+                    err = res.unwrap_err();
+                    break;
+                }
+                self.opcode_idx += 1;
+            };
+            if err != '' {
+                break;
+            }
+            if self.cond_stack.len() > 0 {
+                err = Error::SCRIPT_UNBALANCED_CONDITIONAL_STACK;
+                break;
+            }
+            self.astack = ScriptStackImpl::new();
+            self.opcode_idx = 0;
+            self.last_code_sep = 0;
+            self.script_idx += 1;
+            // TODO: other things
         };
         if err != '' {
             return Result::Err(err);

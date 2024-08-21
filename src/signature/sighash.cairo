@@ -1,5 +1,7 @@
 use shinigami::utils::{int_size_in_bytes, double_sha256};
-use shinigami::transaction::{Transaction, TransactionTrait, TransactionInput, TransactionOutput, OutPoint};
+use shinigami::transaction::{
+    Transaction, TransactionTrait, TransactionInput, TransactionOutput, OutPoint
+};
 use shinigami::signature::{constants, utils};
 
 // Calculates the signature hash for specified transaction data and hash type.
@@ -15,14 +17,14 @@ pub fn calc_signature_hash(
         && tx_idx >= transaction_outputs_len {
         return 0x01;
     }
-    
+
     // Remove any OP_CODESEPARATOR opcodes from the subscript.
     let mut signature_script: @ByteArray = utils::remove_opcodeseparator(sub_script);
     // Create a modified copy of the transaction according to the hash type.
     let transaction_copy: Transaction = utils::transaction_procedure(
         ref transaction, tx_idx, signature_script.clone(), hash_type
     );
-    
+
     let mut sig_hash_bytes: ByteArray = transaction_copy.serialize_no_witness();
     sig_hash_bytes.append_word_rev(hash_type.into(), 4);
 
