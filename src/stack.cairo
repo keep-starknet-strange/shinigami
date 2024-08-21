@@ -140,6 +140,10 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn dup_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
         // TODO: STACK_OUT_OF_RANGE?
+        if n == 0 || n > self.len() {
+            return Result::Err('dup_n: stack out of range');
+        }
+
         if (n < 1) {
             return Result::Err('dup_n: invalid n value');
         }
