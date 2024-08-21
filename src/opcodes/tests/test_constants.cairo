@@ -152,5 +152,9 @@ fn test_op_push_data4() {
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@byte_data)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
+    
     // TODO: test with ?
+    let program = "OP_PUSHDATA4 0x01 NOP";
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_FAILED);
+    utils::check_dstack_size(ref engine, 0);
 }
