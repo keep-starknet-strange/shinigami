@@ -149,6 +149,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             i -= 1;
             let value = self.peek_byte_array(n - 1);
             if value.is_err() {
+                err = value.unwrap_err();
                 break;
             }
             self.push_byte_array(value.unwrap());
