@@ -26,20 +26,30 @@ export default function StackVisualizer({
         <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl min-h-48">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
-              <th className="py-2.5 pl-3.5 pr-1 text-left w-16 text-white">ID</th>
+              <th className="py-2.5 pl-3.5 pr-1 text-left w-16 text-white">
+                ID
+              </th>
               <th className="py-2.5 pl-1 text-left text-white">Value</th>
             </tr>
           </thead>
           <tbody className="h-fit">
-            {stackContent.length == 0 ? Array.from({ length: 1 }).map((_, i) => (
-              <tr key={i} className="border-t border-[#2B2B2B]">
-                <td className="w-full h-40" />
-              </tr>)) : stackContent.map((item) => (
-                <tr key={item.id} className="border-t border-[#2B2B2B]">
-                  <td className="py-2 pl-3.5 pr-1 w-16 truncate">{item.id}</td>
-                  <td className="py-2 pl-1">{item.value}</td>
-                </tr>
-              ))}
+            {stackContent.length == 0
+              ? Array.from({ length: 1 }).map((_, i) => (
+                  <tr key={i} className="border-t border-[#2B2B2B]">
+                    <td className="w-full h-40" />
+                  </tr>
+                ))
+              : stackContent.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-t border-[#2B2B2B] text-white"
+                  >
+                    <td className="py-2 pl-3.5 pr-1 w-16 truncate">
+                      {item.id}
+                    </td>
+                    <td className="py-2 pl-1">{item.value}</td>
+                  </tr>
+                ))}
           </tbody>
         </table>
 
