@@ -47,7 +47,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn pop_int(ref self: ScriptStack) -> Result<i64, felt252> {
         let value = self.pop_byte_array()?;
-        return Result::Ok(ScriptNum::unwrap(value));
+        return Result::Ok(ScriptNum::try_into_num(value)?);
     }
 
     fn pop_bool(ref self: ScriptStack) -> Result<bool, felt252> {
@@ -67,7 +67,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn peek_int(ref self: ScriptStack, idx: usize) -> Result<i64, felt252> {
         let bytes = self.peek_byte_array(idx)?;
-        return Result::Ok(ScriptNum::unwrap(bytes));
+        return Result::Ok(ScriptNum::try_into_num(bytes)?);
     }
 
     fn peek_bool(ref self: ScriptStack, idx: usize) -> Result<bool, felt252> {
