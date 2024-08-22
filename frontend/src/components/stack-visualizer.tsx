@@ -22,7 +22,7 @@ export default function StackVisualizer({
           </button>
         </div>
       </div>
-      <div className="w-full border-8 border-[#232523AE]/10 rounded-b-xl space-y-2.5 bg-[#232523AE] h-48">
+      <div className="w-full border-8 border-[#232523AE]/10 rounded-b-xl space-y-2.5 bg-[#232523AE] h-96">
         <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl h-full">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
