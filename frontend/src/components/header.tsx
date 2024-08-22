@@ -11,6 +11,7 @@ import githubImage from "@/images/github.svg";
 import menu from "@/images/menu.svg";
 import xCircle from "@/images/x-circle.svg";
 import logo from "../../public/logo.png";
+import clsx from "@/utils/lib";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -66,7 +67,7 @@ export default function Header() {
 
   return (
     <div className="w-full h-24 border-y border-white/10 flex flex-col justify-center sm:h-fit sm:border-y-0 sm:flex-row">
-      <div className="w-full max-w-4xl flex flex-row items-center justify-between border border-white/10 px-3.5 rounded-3xl py-2.5">
+      <div className={clsx(isMobileMenuOpen ? "hidden" : "", "w-full max-w-4xl flex flex-row items-center justify-between border border-white/10 px-3.5 rounded-3xl py-2.5")}>
         <Link href="/">
           <div className="flex flex-row items-center justify-center space-x-0.5">
             <Image src={logo} width={25} height={25} alt="Shinigami" />
