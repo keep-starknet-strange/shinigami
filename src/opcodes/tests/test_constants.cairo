@@ -126,7 +126,7 @@ fn test_op_push_data2() {
     utils::check_expected_dstack(ref engine, expected_stack.span());
 
     let program: ByteArray = "OP_PUSHDATA2 0x01 NOP";
-    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_FAILED);
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_INVALID);
     // fail to pull data so nothing is pushed into the dstack.
     utils::check_dstack_size(ref engine, 0);
 }
@@ -155,6 +155,6 @@ fn test_op_push_data4() {
     
     // TODO: test with ?
     let program = "OP_PUSHDATA4 0x01 NOP";
-    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_FAILED);
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_INVALID);
     utils::check_dstack_size(ref engine, 0);
 }

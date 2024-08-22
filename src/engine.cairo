@@ -83,7 +83,7 @@ pub impl EngineImpl of EngineTrait {
         let mut end = i + len;
         let script = *(self.scripts[self.script_idx]);
         if end > script.len() {
-            return Result::Err(Error::SCRIPT_FAILED);
+            return Result::Err(Error::SCRIPT_INVALID);
         }
         while i < end {
             data.append_byte(script[i]);
