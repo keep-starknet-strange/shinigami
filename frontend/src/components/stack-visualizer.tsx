@@ -22,7 +22,7 @@ export default function StackVisualizer({
           </button>
         </div>
       </div>
-      <div className="w-full border-8 border-[#232523AE]/10 rounded-b-xl space-y-2.5 bg-[#232523AE] h-96">
+      <div className="w-full border-8 border-[#232523AE]/10 rounded-b-xl space-y-2.5 bg-[#232523AE] h-fit">
         <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl min-h-48">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
@@ -30,11 +30,10 @@ export default function StackVisualizer({
               <th className="py-2.5 pl-1 text-left text-white">Value</th>
             </tr>
           </thead>
-          <tbody className="min-h-40 max-h-40">
-            {stackContent.length == 0 ? Array.from({ length: 6 }).map((_, i) => (
+          <tbody className="h-fit">
+            {stackContent.length == 0 ? Array.from({ length: 1 }).map((_, i) => (
               <tr key={i} className="border-t border-[#2B2B2B]">
-                <td className="py-2 pl-3.5 pr-1 w-16 truncate text- black">{i + 1}</td>
-                <td className="py-2 pl-1 text-black">{i + 1}</td>
+                <td className="w-full h-40" />
               </tr>)) : stackContent.map((item) => (
                 <tr key={item.id} className="border-t border-[#2B2B2B]">
                   <td className="py-2 pl-3.5 pr-1 w-16 truncate">{item.id}</td>
