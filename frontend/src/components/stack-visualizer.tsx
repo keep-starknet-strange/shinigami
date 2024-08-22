@@ -40,14 +40,11 @@ export default function StackVisualizer({
                   </tr>
                 ))
               : stackContent.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-t border-[#2B2B2B] text-white"
-                  >
-                    <td className="py-2 pl-3.5 pr-1 w-16 truncate">
+                  <tr key={item.id} className="border-t border-[#2B2B2B]">
+                    <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white">
                       {item.id}
                     </td>
-                    <td className="py-2 pl-1">{item.value}</td>
+                    <td className="py-2 pl-1 text-white">{item.value}</td>
                   </tr>
                 ))}
           </tbody>
