@@ -23,7 +23,7 @@ export default function StackVisualizer({
         </div>
       </div>
       <div className="w-full border-8 border-[#232523AE]/10 h-fit rounded-b-xl space-y-2.5 bg-[#232523AE]">
-        <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl">
+        <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl h-48">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
               <th className="py-2.5 pl-3.5 pr-1 text-left w-16">ID</th>
