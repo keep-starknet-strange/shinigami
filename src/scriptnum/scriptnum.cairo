@@ -74,6 +74,33 @@ pub mod ScriptNum {
         result
     }
 
+    // Unwrap 'n' byte of sign-magnitude encoded ByteArray.
+    pub fn unwrap_n(input: ByteArray, n: usize) -> i64 {
+        let mut result: i64 = 0;
+        let mut i: u32 = 0;
+        let mut multiplier: i64 = 1;
+        if input.len() == 0 {
+            return 0;
+        }
+        let snap_input = @input;
+        while i < snap_input.len() - 1 {
+            result += snap_input.at(i).unwrap().into() * multiplier;
+            multiplier *= BYTESHIFT;
+            i += 1;
+        };
+        // Recover value and sign from 'sign-magnitude' byte.
+        let sign_byte: i64 = input.at(i).unwrap().into();
+        if sign_byte >= 128 {
+            result = (multiplier * (sign_byte - 128) * -1) - result;
+        } else {
+            result += sign_byte * multiplier;
+        }
+        if integer_bytes_len(result.into()) > n {
+            panic!("scriptnum(unwrap): number more than {} bytes long", n);
+        }
+        result
+    }
+
     // Return the minimal number of byte to represent 'value'.
     fn integer_bytes_len(mut value: i128) -> usize {
         if value < 0 {
@@ -97,6 +124,7 @@ pub mod ScriptNum {
         value.try_into().unwrap()
     }
 
+    // Return i64 as an i32 with a maximum size of 2^31 - 1
     pub fn to_int32(mut n: i64) -> i32 {
         if n > MAX_INT32.into() {
             return MAX_INT32;

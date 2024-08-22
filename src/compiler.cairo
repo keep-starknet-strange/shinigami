@@ -206,6 +206,7 @@ pub impl CompilerImpl of CompilerTrait {
         compiler.add_opcode('OP_CHECKSIG', Opcode::OP_CHECKSIG);
         compiler.add_opcode('OP_CHECKSIGVERIFY', Opcode::OP_CHECKSIGVERIFY);
         compiler.add_opcode('OP_CODESEPARATOR', Opcode::OP_CODESEPARATOR);
+        compiler.add_opcode('OP_CHECKLOCKTIMEVERIFY', Opcode::OP_CHECKLOCKTIMEVERIFY);
 
         compiler
     }

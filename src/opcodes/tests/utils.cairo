@@ -22,6 +22,18 @@ pub fn test_compile_and_run_with_tx(program: ByteArray, transaction: Transaction
     engine
 }
 
+// Runs a bitcoin script `program` as script_pubkey with corresponding `transaction` and 'flags'
+pub fn test_compile_and_run_with_tx_flags(
+    program: ByteArray, transaction: Transaction, flags: u32
+) -> Engine {
+    let mut compiler = CompilerImpl::new();
+    let mut bytecode = compiler.compile(program);
+    let mut engine = EngineImpl::new(@bytecode, transaction, 0, flags, 0);
+    let res = engine.execute();
+    assert!(res.is_ok(), "Execution of the program failed");
+    engine
+}
+
 // Runs a bitcoin script `program` as script_pubkey with empty script_sig expecting an error
 pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> Engine {
     let mut compiler = CompilerImpl::new();
@@ -42,6 +54,21 @@ pub fn test_compile_and_run_with_tx_err(
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program);
     let mut engine = EngineImpl::new(@bytecode, transaction, 0, 0, 0);
+    let res = engine.execute();
+    assert!(res.is_err(), "Execution of the program did not fail as expected");
+    let err = res.unwrap_err();
+    assert_eq!(err, expected_err, "Program did not return the expected error");
+    engine
+}
+
+// Runs a bitcoin script `program` as script_pubkey with corresponding `transaction` and 'flags'
+// expecting an error
+pub fn test_compile_and_run_with_tx_flags_err(
+    program: ByteArray, transaction: Transaction, flags: u32, expected_err: felt252
+) -> Engine {
+    let mut compiler = CompilerImpl::new();
+    let mut bytecode = compiler.compile(program);
+    let mut engine = EngineImpl::new(@bytecode, transaction, 0, flags, 0);
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();
@@ -89,7 +116,7 @@ pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
     oscript_byte.append_word(oscript_u256.high.into(), 9);
     oscript_byte.append_word(oscript_u256.low.into(), 16);
 
-    //little endian to i64 handle
+    // Little endian to i64 handle
     let output_0: TransactionOutput = TransactionOutput {
         value: 15000, publickey_script: oscript_byte
     };
@@ -126,7 +153,7 @@ pub fn mock_witness_transaction() -> Transaction {
     script_byte.append_word(script_u256.high.into(), 9);
     script_byte.append_word(script_u256.low.into(), 16);
 
-    //little endian to i64 handle
+    // Little endian to i64 handle
     let output_0: TransactionOutput = TransactionOutput {
         value: 15000, publickey_script: script_byte
     };
@@ -135,6 +162,45 @@ pub fn mock_witness_transaction() -> Transaction {
 
     Transaction {
         version: 2,
+        transaction_inputs: transaction_inputs.span(),
+        transaction_outputs: transaction_outputs.span(),
+        locktime: 0,
+    }
+}
+
+pub fn mock_transaction_locktime(script_sig: ByteArray) -> Transaction {
+    let outpoint_0: OutPoint = OutPoint {
+        hash: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, index: 0
+    };
+    let mut compiler = CompilerImpl::new();
+    let mut script_sig = compiler.compile(script_sig);
+    let transaction_input_0: TransactionInput = TransactionInput {
+        previous_outpoint: outpoint_0,
+        signature_script: script_sig,
+        witness: ArrayTrait::<ByteArray>::new(),
+        sequence: 0xfffffffe
+    };
+    let mut transaction_inputs: Array<TransactionInput> = ArrayTrait::<TransactionInput>::new();
+    transaction_inputs.append(transaction_input_0);
+    let oscript_u256: u256 = 0x76a914b3e2819b6262e0b1f19fc7229d75677f347c91ac88ac;
+    let mut oscript_byte: ByteArray = "";
+
+    oscript_byte.append_word(oscript_u256.high.into(), 9);
+    oscript_byte.append_word(oscript_u256.low.into(), 16);
+
+    // Little endian to i64 handle
+    let output_0: TransactionOutput = TransactionOutput {
+        value: 15000, publickey_script: oscript_byte
+    };
+    let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<TransactionOutput>::new();
+    transaction_outputs.append(output_0);
+
+    //let mut subscript = hex_to_bytecode(
+    //    @"0x76a9144299ff317fcd12ef19047df66d72454691797bfc88ac"
+    //);
+
+    Transaction {
+        version: 1,
         transaction_inputs: transaction_inputs.span(),
         transaction_outputs: transaction_outputs.span(),
         locktime: 0,
