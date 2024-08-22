@@ -67,7 +67,7 @@ export default function ScriptEditor() {
       </div>
       <div
         className={clsx(
-          split ? "border-b-4 h-2/5" : "rounded-b-xl h-full",
+          split ? "border-b-4" : "rounded-b-xl h-44",
           "w-full border-8 border-[#232523AE] bg-black overflow-y rounded-tr-xl",
         )}
       >
@@ -89,8 +89,8 @@ export default function ScriptEditor() {
       {split && (
         <div
           className={clsx(
-            split && "border-t-4",
-            "w-full border-8 border-[#232523AE] h-3/5 bg-black rounded-b-xl",
+            split && "border-t-4 h-44",
+            "w-full border-8 border-[#232523AE] bg-black rounded-b-xl",
           )}
         >
           <Editor
