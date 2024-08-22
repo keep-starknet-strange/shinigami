@@ -30,8 +30,8 @@ const MobileMenu: FC<MobileMenuProps> = ({ isOpen, onClose, onOpenModal }) => {
 
   return (
     <div className="w-full h-fit absolute top-8 z-20 inset-x-0 flex flex-row items-center rounded-xl sm:hidden">
-      <div className="w-full mx-5 h-52 backdrop-blur-md rounded-xl border-2 border-white/10">
-        <div className="w-full max-w-4xl flex flex-row items-center justify-between border-b border-white/10 px-3.5 sm:border-0">
+      <div className="w-full mx-5 h-40 backdrop-blur-md rounded-xl border-2 border-white/10">
+        <div className="w-full max-w-4xl flex flex-row items-center justify-between border-b border-white/10 px-3.5 sm:border-0 py-2.5 sm:py-0">
           <Link href="/">
             <div className="flex flex-row items-center justify-center space-x-0.5">
               <Image src={logo} width={25} height={25} alt="Shinigami" />
