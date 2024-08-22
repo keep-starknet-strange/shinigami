@@ -24,7 +24,7 @@ export default function RootLayout({
         <main
           className={`
             ${commonClasses}
-            bg-black bg-contain bg-top bg-no-repeat
+            bg-black bg-contain bg-top bg-no-repeat min-h-screen
             bg-[url('/stars.png')]
           `}
         >
