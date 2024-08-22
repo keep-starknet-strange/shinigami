@@ -34,13 +34,12 @@ export default function ScriptEditor() {
     monaco.editor.defineTheme("darker", {
       base: "hc-black",
       inherit: true,
-      rules: [
-      ],
+      rules: [],
       colors: {
         "editor.selectionBackground": "#A5FFC240",
         "editorLineNumber.foreground": "#258F42",
         "editorLineNumber.activeForeground": "#A5FFC2",
-        "focusBorder": "#00000000",
+        focusBorder: "#00000000",
         "scrollbar.shadow": "#00000000",
         "scrollbarSlider.background": "#258F4240",
         "scrollbarSlider.activeBackground": "#258F4260",
@@ -67,7 +66,7 @@ export default function ScriptEditor() {
       </div>
       <div
         className={clsx(
-          split ? "border-b-4" : "rounded-b-xl h-44",
+          split ? "border-b-4" : "rounded-b-xl h-[150px]",
           "w-full border-8 border-[#232523AE] bg-black overflow-y rounded-tr-xl",
         )}
       >
@@ -89,7 +88,7 @@ export default function ScriptEditor() {
       {split && (
         <div
           className={clsx(
-            split && "border-t-4 h-44",
+            split && "border-t-4 h-[225px]",
             "w-full border-8 border-[#232523AE] bg-black rounded-b-xl",
           )}
         >
