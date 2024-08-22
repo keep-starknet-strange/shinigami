@@ -12,12 +12,12 @@ export default function StackVisualizer({
 }: StackVisualizerProps) {
   return (
     <div className="w-full bg-[#000000] h-fit rounded-lg rounded-b-xl pt-0.5">
-      <div className="w-full flex flex-row items-center justify-between pr-1.5">
+      <div className="w-full flex flex-row items-center justify-between">
         <div className="w-44 h-12 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
           <p className="text-[#85FFB2]">Stack Visualizer</p>
         </div>
         <div className="w-56 h-12 bg-[#232523AE] clip-trapezium-left flex flex-col items-start justify-center px-1.5 pt-1.5 rounded-t-xl">
-          <button className="w-full h-full text-center bg-[#00FF5E] clip-trapezium-inner-left rounded-r-sm rounded-bl-sm text-black uppercase ml-3.5 sm:ml-0">
+          <button className="w-full h-full text-center bg-[#00FF5E] clip-trapezium-inner-left rounded-r-sm rounded-bl-sm text-black uppercase">
             Generate Proof
           </button>
         </div>

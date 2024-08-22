@@ -28,7 +28,7 @@ const MobileMenu: FC<MobileMenuProps> = ({ isOpen, onClose, onOpenModal }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="w-full h-fit absolute top-16 z-20 inset-x-0 flex flex-row items-center rounded-xl sm:hidden">
+    <div className="w-full h-fit absolute top-8 z-20 inset-x-0 flex flex-row items-center rounded-xl sm:hidden">
       <div className="w-full mx-5 h-full backdrop-blur-md rounded-xl border-2 border-white/10">
         <div className="w-full max-w-4xl flex flex-row items-center justify-between border-b border-white/10 px-3.5 sm:border-0">
           <Link href="/">
