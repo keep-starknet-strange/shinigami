@@ -1,4 +1,4 @@
-use shinigami::engine::{Engine, EngineTrait};
+use shinigami::engine::Engine;
 use shinigami::scriptnum::ScriptNum;
 use shinigami::stack::ScriptStackTrait;
 use shinigami::utils;
