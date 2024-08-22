@@ -1,7 +1,7 @@
 "use client";
 
 import StackVisualizer from "@/components/stack-visualizer";
-import {Editor} from "@monaco-editor/react";
+import { Editor } from "@monaco-editor/react";
 import Image from "next/image";
 import Footer from "./footer";
 
@@ -50,7 +50,7 @@ export default function ScriptEditor() {
   };
 
   return (
-    <div className="w-full h-96">
+    <div className="w-full min-h-screen h-full">
       <div className="w-full flex flex-row items-center justify-between">
         <div className="w-36 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
           <p className="text-[#85FFB2] text-lg">Script Editor</p>
