@@ -11,7 +11,7 @@ export default function StackVisualizer({
   stackContent,
 }: StackVisualizerProps) {
   return (
-    <div className="w-full bg-[#000000] h-fit rounded-lg rounded-b-xl pt-0.5">
+    <div className="w-full h-fit rounded-lg rounded-b-xl pt-0.5">
       <div className="w-full flex flex-row items-center justify-between">
         <div className="w-44 h-12 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
           <p className="text-[#85FFB2]">Stack Visualizer</p>
@@ -22,8 +22,8 @@ export default function StackVisualizer({
           </button>
         </div>
       </div>
-      <div className="w-full border-8 border-[#232523AE] h-fit rounded-b-xl">
-        <table className="w-full bg-black table-fixed">
+      <div className="w-full border-8 border-[#232523AE]/10 h-fit rounded-b-xl space-y-2.5 bg-[#232523AE]">
+        <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
               <th className="py-2.5 pl-3.5 pr-1 text-left w-16">ID</th>
@@ -42,7 +42,7 @@ export default function StackVisualizer({
 
         <div className="w-full bg-black h-48 rounded-t-lg rounded-b-xl mt-2.5">
           <div className="py-2.5 rounded-t-lg rounded-b-lg flex flex-row space-x-5 px-3.5 w-full bg-black">
-            <span>Proof of Status:</span>
+            <span className="text-white">Proof of Status:</span>
           </div>
           <div className="w-full h-[1px] bg-[#2B2B2B]" />
           <div className="w-full px-2.5 pt-1 h-40">
