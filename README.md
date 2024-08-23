@@ -233,6 +233,7 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/mexes20"><img src="https://avatars.githubusercontent.com/u/127276944?v=4?s=100" width="100px;" alt="Mexes"/><br /><sub><b>Mexes</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=mexes20" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Iwueseiter"><img src="https://avatars.githubusercontent.com/u/156322726?v=4?s=100" width="100px;" alt="Iwueseiter"/><br /><sub><b>Iwueseiter</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Iwueseiter" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ShantelPeters"><img src="https://avatars.githubusercontent.com/u/174444978?v=4?s=100" width="100px;" alt="Shantel peters. "/><br /><sub><b>Shantel peters. </b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=ShantelPeters" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bloomingpeach"><img src="https://avatars.githubusercontent.com/u/177087057?v=4?s=100" width="100px;" alt="Nguyen Dao"/><br /><sub><b>Nguyen Dao</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=bloomingpeach" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
