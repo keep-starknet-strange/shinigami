@@ -176,6 +176,7 @@ pub mod Opcode {
     pub const OP_CHECKSIGVERIFY: u8 = 173;
     pub const OP_NOP1: u8 = 176;
     pub const OP_CHECKLOCKTIMEVERIFY: u8 = 177;
+    pub const OP_CHECKSEQUENCEVERIFY: u8 = 178;
     pub const OP_NOP4: u8 = 179;
     pub const OP_NOP5: u8 = 180;
     pub const OP_NOP6: u8 = 181;
@@ -368,7 +369,7 @@ pub mod Opcode {
             175 => utils::not_implemented(ref engine),
             176 => flow::opcode_nop(),
             177 => locktime::opcode_checklocktimeverify(ref engine),
-            178 => utils::not_implemented(ref engine),
+            178 => locktime::opcode_checksequenceverify(ref engine),
             179 => flow::opcode_nop(),
             180 => flow::opcode_nop(),
             181 => flow::opcode_nop(),

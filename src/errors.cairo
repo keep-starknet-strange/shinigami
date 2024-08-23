@@ -9,7 +9,8 @@ pub mod Error {
     pub const OPCODE_NOT_IMPLEMENTED: felt252 = 'Opcode not implemented';
     pub const OPCODE_DISABLED: felt252 = 'Opcode is disabled';
     pub const UNSATISFIED_LOCKTIME: felt252 = 'Unsatisfied locktime';
-    pub const FINALIZED_TX: felt252 = 'Transaction is finalized';
+    pub const FINALIZED_TX_CLTV: felt252 = 'Finalized tx in OP_CLTV';
+    pub const TX_VER_LOW: felt252 = 'Transaction version too low';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {

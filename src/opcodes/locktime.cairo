@@ -4,38 +4,103 @@ use shinigami::errors::Error;
 use shinigami::scriptflags::ScriptFlags;
 use shinigami::scriptnum::ScriptNum;
 
-const LOCKTIME_THRESHOLD: i64 = 500000000; // Nov 5 00:53:20 1985 UTC
-pub const MAX_SEQUENCE: u32 = 0xFFFFFFFF;
+const LOCKTIME_THRESHOLD: u32 = 500000000; // Nov 5 00:53:20 1985 UTC
+const SEQUENCE_LOCKTIME_DISABLED: u32 = 0x80000000;
+const SEQUENCE_LOCKTIME_IS_SECOND: u32 = 0x00400000;
+const SEQUENCE_LOCKTIME_MASK: u32 = 0x0000FFFF;
+const SEQUENCE_MAX: u32 = 0xFFFFFFFF;
+
+fn verify_locktime(tx_locktime: i64, threshold: i64, stack_locktime: i64) -> Result<(), felt252> {
+    // Check if 'tx_locktime' and 'locktime' are same type (locktime or height)
+    if !((tx_locktime < threshold && stack_locktime < threshold)
+        || (tx_locktime >= threshold && stack_locktime >= threshold)) {
+        return Result::Err(Error::UNSATISFIED_LOCKTIME);
+    }
+
+    // Check validity
+    if stack_locktime > tx_locktime {
+        return Result::Err(Error::UNSATISFIED_LOCKTIME);
+    }
+
+    Result::Ok(())
+}
 
 pub fn opcode_checklocktimeverify(ref engine: Engine) -> Result<(), felt252> {
     if !engine.has_flag(ScriptFlags::ScriptVerifyCheckLockTimeVerify) {
         if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
             return Result::Err(Error::SCRIPT_FAILED);
         }
-        // Return as OP_NOP2
+        // Behave as OP_NOP
         return Result::Ok(());
     }
 
     let tx_locktime: i64 = engine.transaction.locktime.into();
-    // Get locktime as 5 byte integer because tx_locktime is u32
-    let locktime: i64 = ScriptNum::unwrap_n(
+    // Get locktime as 5 byte integer because 'tx_locktime' is u32
+    let stack_locktime: i64 = ScriptNum::unwrap_n(
         engine.dstack.peek_byte_array(engine.dstack.len() - 1)?, 5
     );
 
-    // Check if 'tx_locktime' and 'locktime' are same type (locktime or height)
-    if !((tx_locktime < LOCKTIME_THRESHOLD && locktime < LOCKTIME_THRESHOLD)
-        || (tx_locktime >= LOCKTIME_THRESHOLD && locktime >= LOCKTIME_THRESHOLD)) {
+    if stack_locktime < 0 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
     }
 
-	// Check validity
-    if locktime > tx_locktime || locktime < 0 {
+    // Check if tx sequence in not 'SEQUENCE_MAX' else if tx may be considered as finalized and the
+    // behavior of OP_CHECKLOCKTIMEVERIFY can be bypassed
+    if engine.transaction.transaction_inputs.at(engine.tx_idx).sequence == @SEQUENCE_MAX {
+        return Result::Err(Error::FINALIZED_TX_CLTV);
+    }
+
+    verify_locktime(tx_locktime, LOCKTIME_THRESHOLD.into(), stack_locktime)
+}
+
+pub fn opcode_checksequenceverify(ref engine: Engine) -> Result<(), felt252> {
+    if !engine.has_flag(ScriptFlags::ScriptVerifyCheckSequenceVerify) {
+        if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
+            return Result::Err(Error::SCRIPT_FAILED);
+        }
+        // Behave as OP_NOP
+        return Result::Ok(());
+    }
+
+    // Get sequence as 5 byte integer because 'sequence' is u32
+    let stack_sequence: i64 = ScriptNum::unwrap_n(
+        engine.dstack.peek_byte_array(engine.dstack.len() - 1)?, 5
+    );
+
+    if stack_sequence < 0 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
     }
 
-    if engine.transaction.transaction_inputs.at(engine.tx_idx).sequence == @MAX_SEQUENCE {
-        return Result::Err(Error::FINALIZED_TX);
+    // Redefine 'stack_sequence' to perform bitwise operation easily
+    let stack_sequence_u32: u32 = if stack_sequence < 0 {
+        (-stack_sequence).try_into().unwrap()
+    } else {
+        stack_sequence.try_into().unwrap()
+    };
+
+    // Disabled bit set in 'stack_sequence' result as OP_NOP behavior
+    if stack_sequence_u32 & SEQUENCE_LOCKTIME_DISABLED != 0 {
+        return Result::Ok(());
     }
 
-    Result::Ok(())
+    // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
+    if engine.transaction.version < 2 {
+        return Result::Err(Error::TX_VER_LOW);
+    }
+
+    let tx_sequence: u32 = (*engine.transaction.transaction_inputs.at(engine.tx_idx).sequence)
+        .into();
+
+    // Disabled bit set in 'tx_sequence' restult as an error
+    if tx_sequence & SEQUENCE_LOCKTIME_DISABLED != 0 {
+        return Result::Err(Error::UNSATISFIED_LOCKTIME);
+    }
+
+    // Mask off non-consensus bits before comparisons
+    let locktime_mask = SEQUENCE_LOCKTIME_IS_SECOND | SEQUENCE_LOCKTIME_MASK;
+    verify_locktime(
+        (tx_sequence & locktime_mask).into(),
+        SEQUENCE_LOCKTIME_IS_SECOND.into(),
+        (stack_sequence_u32 & locktime_mask).into()
+    )
 }
