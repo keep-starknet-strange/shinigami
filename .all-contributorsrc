@@ -297,33 +297,6 @@
       "contributions": [
         "code"
       ]
-    },
-    {
-      "login": "bloomingpeach",
-      "name": "Nguyen Dao",
-      "avatar_url": "https://avatars.githubusercontent.com/u/177087057?v=4",
-      "profile": "https://github.com/bloomingpeach",
-      "contributions": [
-        "code"
-      ]
-    },
-    {
-      "login": "od-hunter",
-      "name": "Hunter001",
-      "avatar_url": "https://avatars.githubusercontent.com/u/146340502?v=4",
-      "profile": "https://github.com/od-hunter",
-      "contributions": [
-        "code"
-      ]
-    },
-    {
-      "login": "Israelrex9",
-      "name": "IsraelRex",
-      "avatar_url": "https://avatars.githubusercontent.com/u/46507005?v=4",
-      "profile": "https://www.xelmar.co/",
-      "contributions": [
-        "design"
-      ]
     }
   ],
   "contributorsPerLine": 7,
