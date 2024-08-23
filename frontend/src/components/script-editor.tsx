@@ -1,7 +1,7 @@
 "use client";
 
 import StackVisualizer from "@/components/stack-visualizer";
-import {Editor} from "@monaco-editor/react";
+import { Editor } from "@monaco-editor/react";
 import Image from "next/image";
 import Footer from "./footer";
 
@@ -34,13 +34,12 @@ export default function ScriptEditor() {
     monaco.editor.defineTheme("darker", {
       base: "hc-black",
       inherit: true,
-      rules: [
-      ],
+      rules: [],
       colors: {
         "editor.selectionBackground": "#A5FFC240",
         "editorLineNumber.foreground": "#258F42",
         "editorLineNumber.activeForeground": "#A5FFC2",
-        "focusBorder": "#00000000",
+        focusBorder: "#00000000",
         "scrollbar.shadow": "#00000000",
         "scrollbarSlider.background": "#258F4240",
         "scrollbarSlider.activeBackground": "#258F4260",
@@ -50,7 +49,7 @@ export default function ScriptEditor() {
   };
 
   return (
-    <div className="w-full h-96">
+    <div className="w-full min-h-screen h-full">
       <div className="w-full flex flex-row items-center justify-between">
         <div className="w-36 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
           <p className="text-[#85FFB2] text-lg">Script Editor</p>
@@ -67,7 +66,7 @@ export default function ScriptEditor() {
       </div>
       <div
         className={clsx(
-          split ? "border-b-4 h-2/5" : "rounded-b-xl h-full",
+          split ? "border-b-4 h-[160px]" : "rounded-b-xl h-[400px]",
           "w-full border-8 border-[#232523AE] bg-black overflow-y rounded-tr-xl",
         )}
       >
@@ -89,8 +88,8 @@ export default function ScriptEditor() {
       {split && (
         <div
           className={clsx(
-            split && "border-t-4",
-            "w-full border-8 border-[#232523AE] h-3/5 bg-black rounded-b-xl",
+            split && "border-t-4 h-[240px]",
+            "w-full border-8 border-[#232523AE] bg-black rounded-b-xl",
           )}
         >
           <Editor
