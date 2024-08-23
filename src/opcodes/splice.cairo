@@ -1,4 +1,4 @@
-use shinigami::engine::{Engine, EngineTrait};
+use shinigami::engine::Engine;
 use shinigami::stack::ScriptStackTrait;
 
 pub fn opcode_size(ref engine: Engine) -> Result<(), felt252> {

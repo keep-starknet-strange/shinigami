@@ -1,5 +1,5 @@
 use shinigami::signature::constants;
-use shinigami::transaction::{Transaction, TransactionInput, TransactionOutput, OutPoint};
+use shinigami::transaction::{Transaction, TransactionInput, TransactionOutput};
 use shinigami::opcodes::Opcode;
 
 // Removes `OP_CODESEPARATOR` opcodes from the `script`.

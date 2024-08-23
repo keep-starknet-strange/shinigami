@@ -13,11 +13,13 @@
 
 ## Overview
 
-`shinigami` is a library enabling Bitcoin Script VM execution in Cairo, thus allowing the generation of STARK proofs of generic Bitcoin Script computation.
+`shinigami` is a Bitcoin Script library for generic Script VM execution in Cairo, enabling the generation of STARK proofs for Bitcoin Script computation and Bitcoin transaction execution.
 
-Key features :
+Key features ( will include ) :
 
-- Bitcoin script interpretation and execution
+- Bitcoin Script interpretation and execution
+- Frontend Script IDE with STARK prover integration
+- Transaction execution and proving
 - Easily configurable VM ( enable different opcodes )
 - In cairo, Bitcoin Script compiler
 
@@ -49,15 +51,15 @@ This will run the test-suite for all opcodes, integration, and testing Scripts.
 
 ## Supported Opcodes
 
-99/107 opcodes supported (92.52%).
+102/107 opcodes supported (95.33%).
 
 ```mermaid
 %%{init: {"pie": {"textPosition": 0.75}, "themeVariables": {"pieOuterStrokeWidth": "5px"}} }%%
 pie showData
     title Opcode Implementation Status
-    "Implemented" : 84
+    "Implemented" : 87
     "Disabled" : 15
-    "Not Implemented" : 8
+    "Not Implemented" : 5
 ```
 
 | Opcode                 | Hex       | Supported | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
@@ -159,9 +161,9 @@ pie showData
 | OP_SHA256              | 0xa8      |     ✅     | The input is hashed using SHA-256.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | OP_HASH160             | 0xa9      |     ✅     | The input is hashed twice: first with SHA-256 and then with RIPEMD-160.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | OP_HASH256             | 0xaa      |     ✅     | The input is hashed two times with SHA-256.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| OP_CODESEPARATOR       | 0xab      |           | All of the signature checking words will only match signatures to the data after the most recently-executed OP_CODESEPARATOR.                                                                                                                                                                                                                                                                                                                                                                                                      |
-| OP_CHECKSIG            | 0xac      |           | The entire transaction's outputs, inputs, and script are hashed. The signature used by OP_CHECKSIG must be a valid signature for this hash and public key. If it is, 1 is returned, 0 otherwise.                                                                                                                                                                                                                                                                                                                                   |
-| OP_CHECKSIGVERIFY      | 0xad      |           | Same as OP_CHECKSIG, but OP_VERIFY is executed afterward.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| OP_CODESEPARATOR       | 0xab      |     ✅     | All of the signature checking words will only match signatures to the data after the most recently-executed OP_CODESEPARATOR.                                                                                                                                                                                                                                                                                                                                                                                                      |
+| OP_CHECKSIG            | 0xac      |     ✅     | The entire transaction's outputs, inputs, and script are hashed. The signature used by OP_CHECKSIG must be a valid signature for this hash and public key. If it is, 1 is returned, 0 otherwise.                                                                                                                                                                                                                                                                                                                                   |
+| OP_CHECKSIGVERIFY      | 0xad      |     ✅     | Same as OP_CHECKSIG, but OP_VERIFY is executed afterward.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | OP_CHECKMULTISIG       | 0xae      |           | Compares the first signature against each public key until it finds an ECDSA match. Starting with the subsequent public key, it compares the second signature against each remaining public key until it finds an ECDSA match. The process is repeated until all signatures have been checked or not enough public keys remain to produce a successful result. All signatures need to match a public key. If all signatures are valid, 1 is returned, 0 otherwise. Due to a bug, one extra unused value is removed from the stack. |
 | OP_CHECKMULTISIGVERIFY | 0xaf      |           | Same as OP_CHECKMULTISIG, but OP_VERIFY is executed afterward.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | OP_NOP1                | 0xb0      |     ✅     | The word is ignored. Does not mark transaction as invalid.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -230,6 +232,10 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://soetandev.netlify.app/"><img src="https://avatars.githubusercontent.com/u/17912134?v=4?s=100" width="100px;" alt="Emmanuel Soetan"/><br /><sub><b>Emmanuel Soetan</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Shoetan" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/mexes20"><img src="https://avatars.githubusercontent.com/u/127276944?v=4?s=100" width="100px;" alt="Mexes"/><br /><sub><b>Mexes</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=mexes20" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Iwueseiter"><img src="https://avatars.githubusercontent.com/u/156322726?v=4?s=100" width="100px;" alt="Iwueseiter"/><br /><sub><b>Iwueseiter</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Iwueseiter" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ShantelPeters"><img src="https://avatars.githubusercontent.com/u/174444978?v=4?s=100" width="100px;" alt="Shantel peters. "/><br /><sub><b>Shantel peters. </b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=ShantelPeters" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bloomingpeach"><img src="https://avatars.githubusercontent.com/u/177087057?v=4?s=100" width="100px;" alt="Nguyen Dao"/><br /><sub><b>Nguyen Dao</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=bloomingpeach" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/od-hunter"><img src="https://avatars.githubusercontent.com/u/146340502?v=4?s=100" width="100px;" alt="Hunter001"/><br /><sub><b>Hunter001</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=od-hunter" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.xelmar.co/"><img src="https://avatars.githubusercontent.com/u/46507005?v=4?s=100" width="100px;" alt="IsraelRex"/><br /><sub><b>IsraelRex</b></sub></a><br /><a href="#design-Israelrex9" title="Design">🎨</a></td>
     </tr>
   </tbody>
 </table>

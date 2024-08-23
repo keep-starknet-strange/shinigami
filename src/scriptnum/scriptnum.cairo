@@ -1,7 +1,7 @@
 // Wrapper around Bitcoin Script 'sign-magnitude' 4 byte integer.
 pub mod ScriptNum {
+    use shinigami::errors::Error;
     const BYTESHIFT: i64 = 256;
-    const MAX_BYTE_LEN: usize = 4;
     const MAX_INT32: i32 = 2147483647;
     const MIN_INT32: i32 = -2147483648;
 
@@ -10,6 +10,11 @@ pub mod ScriptNum {
         if input == 0 {
             return "";
         }
+
+        // TODO
+        // if input > MAX_INT32.into() || input < MIN_INT32.into() {
+        //     return Result::Err(Error::SCRIPTNUM_OUT_OF_RANGE);
+        // }
 
         let mut result: ByteArray = Default::default();
         let is_negative = {
@@ -20,12 +25,8 @@ pub mod ScriptNum {
                 false
             }
         };
-        // Unwrap cannot fail because input is set to positive above.
         let unsigned: u64 = input.try_into().unwrap();
-        let bytes_len: usize = integer_bytes_len(unsigned.into());
-        if bytes_len > MAX_BYTE_LEN {
-            panic!("scriptnum(wrap): number more than {} bytes long", MAX_BYTE_LEN);
-        }
+        let bytes_len: usize = integer_bytes_len(input.into() + 1);
         result.append_word_rev(unsigned.into(), bytes_len - 1);
         // Compute 'sign-magnitude' byte.
         let sign_byte: u8 = get_last_byte_of_uint(unsigned);
@@ -48,12 +49,12 @@ pub mod ScriptNum {
     }
 
     // Unwrap sign-magnitude encoded ByteArray into a 4 byte int maximum.
-    pub fn unwrap(input: ByteArray) -> i64 {
+    pub fn try_into_num(input: ByteArray) -> Result<i64, felt252> {
         let mut result: i64 = 0;
         let mut i: u32 = 0;
         let mut multiplier: i64 = 1;
         if input.len() == 0 {
-            return 0;
+            return Result::Ok(0);
         }
         let snap_input = @input;
         while i < snap_input.len() - 1 {
@@ -68,10 +69,18 @@ pub mod ScriptNum {
         } else {
             result += sign_byte * multiplier;
         }
-        if integer_bytes_len(result.into()) > MAX_BYTE_LEN {
-            panic!("scriptnum(unwrap): number more than {} bytes long", MAX_BYTE_LEN);
+        if result > MAX_INT32.into() || result < MIN_INT32.into() {
+            return Result::Err(Error::SCRIPTNUM_OUT_OF_RANGE);
         }
-        result
+        Result::Ok(result)
+    }
+
+    pub fn into_num(input: ByteArray) -> i64 {
+        try_into_num(input).unwrap()
+    }
+
+    pub fn unwrap(input: ByteArray) -> i64 {
+        try_into_num(input).unwrap()
     }
 
     // Unwrap 'n' byte of sign-magnitude encoded ByteArray.

@@ -1,11 +1,10 @@
 use shinigami::engine::{Engine, EngineImpl};
 use starknet::SyscallResultTrait;
-use starknet::secp256_trait::{Secp256Trait, Secp256PointTrait, Signature, is_valid_signature};
+use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
 use shinigami::scriptflags::ScriptFlags;
 use shinigami::utils::{u256_from_byte_array_with_offset};
-use shinigami::transaction::{Transaction, TransactionInput, TransactionOutput, OutPoint};
-use shinigami::signature::{sighash, constants, utils};
+use shinigami::signature::{sighash, constants};
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]

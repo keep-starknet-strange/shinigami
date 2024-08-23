@@ -1,7 +1,6 @@
-use shinigami::engine::{Engine, EngineTrait};
+use shinigami::engine::Engine;
 use shinigami::stack::ScriptStackTrait;
-use shinigami::scriptflags::ScriptFlags;
-use shinigami::signature::{BaseSigVerifier, BaseSigVerifierTrait};
+use shinigami::signature::BaseSigVerifierTrait;
 use core::sha256::compute_sha256_byte_array;
 use shinigami::opcodes::utils;
 
