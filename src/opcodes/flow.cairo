@@ -14,12 +14,22 @@ pub fn is_branching_opcode(opcode: u8) -> bool {
     return false;
 }
 
-pub fn is_pushing_opcode(opcode: u8) -> bool {
+pub fn is_data_opcode(opcode: u8) -> bool {
     if opcode == Opcode::OP_DATA_1 || opcode == Opcode::OP_DATA_75 {
         return true;
     }
     return false;
 }
+
+pub fn is_pushing_opcode(opcode: u8) -> bool {
+    if opcode == Opcode::OP_PUSHDATA1 
+        || opcode == Opcode::OP_PUSHDATA2 
+        || opcode == Opcode::OP_PUSHDATA4 {
+        return true;
+    }
+    return false;
+}
+
 
 pub fn opcode_nop() -> Result<(), felt252> {
     return Result::Ok(());
