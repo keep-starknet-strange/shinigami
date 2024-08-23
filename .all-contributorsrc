@@ -306,6 +306,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "od-hunter",
+      "name": "Hunter001",
+      "avatar_url": "https://avatars.githubusercontent.com/u/146340502?v=4",
+      "profile": "https://github.com/od-hunter",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
