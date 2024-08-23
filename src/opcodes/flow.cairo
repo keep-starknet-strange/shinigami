@@ -22,8 +22,8 @@ pub fn is_data_opcode(opcode: u8) -> bool {
 }
 
 pub fn is_pushing_opcode(opcode: u8) -> bool {
-    if opcode == Opcode::OP_PUSHDATA1 
-        || opcode == Opcode::OP_PUSHDATA2 
+    if opcode == Opcode::OP_PUSHDATA1
+        || opcode == Opcode::OP_PUSHDATA2
         || opcode == Opcode::OP_PUSHDATA4 {
         return true;
     }
