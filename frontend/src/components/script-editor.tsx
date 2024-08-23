@@ -1,8 +1,9 @@
 "use client";
 
 import StackVisualizer from "@/components/stack-visualizer";
-import Editor from "@monaco-editor/react";
+import {Editor} from "@monaco-editor/react";
 import Image from "next/image";
+import Footer from "./footer";
 
 import refreshImage from "@/images/refresh-icon.svg";
 import splitImage from "@/images/split.svg";
@@ -20,19 +21,38 @@ export default function ScriptEditor() {
 
   const handleRunScript = () => {
     const newStackContent = [
-      { id: 1, value: "OP_ADD" },
-      { id: 2, value: "3" },
-      { id: 3, value: "OP_EQUAL" },
+      { id: 1, value: "0x42" },
+      { id: 2, value: "0x01" },
+      { id: 3, value: "0x03" },
     ];
     setStackContent(newStackContent);
   };
 
   const [split, setSplit] = useState(false);
 
+  const setEditorTheme = (monaco: any) => {
+    monaco.editor.defineTheme("darker", {
+      base: "hc-black",
+      inherit: true,
+      rules: [
+      ],
+      colors: {
+        "editor.selectionBackground": "#A5FFC240",
+        "editorLineNumber.foreground": "#258F42",
+        "editorLineNumber.activeForeground": "#A5FFC2",
+        "focusBorder": "#00000000",
+        "scrollbar.shadow": "#00000000",
+        "scrollbarSlider.background": "#258F4240",
+        "scrollbarSlider.activeBackground": "#258F4260",
+        "scrollbarSlider.hoverBackground": "#258F4245",
+      },
+    });
+  };
+
   return (
-    <div className="w-full">
+    <div className="w-full h-96">
       <div className="w-full flex flex-row items-center justify-between">
-        <div className="w-36 h-10 bg-[#0E0E0E] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
+        <div className="w-36 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
           <p className="text-[#85FFB2] text-lg">Script Editor</p>
         </div>
         <button
@@ -47,14 +67,14 @@ export default function ScriptEditor() {
       </div>
       <div
         className={clsx(
-          split ? "border-b-4" : "rounded-b-xl",
-          "w-full border-8 border-[#0E0E0E] h-40 bg-black overflow-y-scroll rounded-tr-xl",
+          split ? "border-b-4 h-2/5" : "rounded-b-xl h-full",
+          "w-full border-8 border-[#232523AE] bg-black overflow-y rounded-tr-xl",
         )}
       >
         <Editor
-          height={310}
+          beforeMount={setEditorTheme}
+          theme="darker"
           defaultLanguage="plaintext"
-          theme="vs-dark"
           value={scriptSig}
           onChange={(value: string | undefined) =>
             setScriptSig(value || "") as any
@@ -62,6 +82,7 @@ export default function ScriptEditor() {
           options={{
             fontSize: 16,
             lineHeight: 24,
+            renderLineHighlight: "none",
           }}
         />
       </div>
@@ -69,13 +90,12 @@ export default function ScriptEditor() {
         <div
           className={clsx(
             split && "border-t-4",
-            "w-full border-8 border-[#0E0E0E] h-40 bg-black overflow-y-scroll rounded-b-xl",
+            "w-full border-8 border-[#232523AE] h-3/5 bg-black rounded-b-xl",
           )}
         >
           <Editor
-            height={310}
+            theme="darker"
             defaultLanguage="plaintext"
-            theme="vs-dark"
             value={scriptPubKey}
             onChange={(value: string | undefined) =>
               setScriptPubKey(value || "")
@@ -83,6 +103,7 @@ export default function ScriptEditor() {
             options={{
               fontSize: 16,
               lineHeight: 24,
+              renderLineHighlight: "none",
             }}
           />
         </div>
@@ -105,6 +126,7 @@ export default function ScriptEditor() {
         </button>
       </div>
       <StackVisualizer stackContent={stackContent} />
+      <Footer />
     </div>
   );
 }

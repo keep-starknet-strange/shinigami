@@ -32,14 +32,16 @@ export const AboutModal: FC<AboutModalProps> = ({ isOpen, onClose }) => (
       <div className="w-full h-28 bg-[url('/banner.png')] bg-cover bg-no-repeat bg-center" />
       <div className="font-medium">
         <p className="text-white mb-4">
-          Shinigami is a library enabling Bitcoin Script VM execution in Cairo,
-          thus allowing the generation of STARK proofs of generic Bitcoin Script
-          computation.
+          Shinigami is a Bitcoin Script library for generic Script VM execution in Cairo,
+          enabling the generation of STARK proofs for Bitcoin Script computation and
+          Bitcoin transaction execution.
         </p>
         <ul className="list-disc text-white ml-4">
-          <li>Bitcoin script interpretation and execution</li>
+          <li>Bitcoin Script interpretation and execution</li>
+          <li>Frontend Script IDE with STARK prover integration</li>
+          <li>Transaction execution and proving</li>
           <li>Easily configurable VM (enable different opcodes)</li>
-          <li>In Cairo, Bitcoin Script compiler</li>
+          <li>In cairo, Bitcoin Script compiler</li>
         </ul>
       </div>
       <div className="flex flex-row items-center space-x-2.5">

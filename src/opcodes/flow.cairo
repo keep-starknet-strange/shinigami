@@ -1,4 +1,4 @@
-use shinigami::engine::{Engine, EngineTrait};
+use shinigami::engine::Engine;
 use shinigami::stack::ScriptStackTrait;
 use shinigami::cond_stack::ConditionalStackTrait;
 use shinigami::opcodes::Opcode;

@@ -45,12 +45,11 @@ export default function RootLayout({
                 className={`
                   ${commonClasses}
                   flex flex-col justify-start items-center
-                  pt-10 px-5 space-y-10
+                  pt-5 px-5 space-y-8
                 `}
               >
                 <Header />
                 {children}
-                <Footer />
               </div>
             </div>
           </div>

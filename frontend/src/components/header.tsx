@@ -70,7 +70,7 @@ export default function Header() {
         <Link href="/">
           <div className="flex flex-row items-center justify-center space-x-0.5">
             <Image src={logo} width={25} height={25} alt="Shinigami" />
-            <h6 className="uppercase text-white">Shinigami Script Wizard</h6>
+            <h6 className="uppercase text-white pl-3">Shinigami Script Wizard</h6>
           </div>
         </Link>
         <button

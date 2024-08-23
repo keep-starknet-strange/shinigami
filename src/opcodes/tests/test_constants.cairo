@@ -103,9 +103,10 @@ fn test_op_push_data1() {
     let expected_stack = array![hex_to_bytecode(@"0x42434445464748494A4B4C4D4E4F5051")];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
+
 #[test]
 fn test_op_push_data2() {
-    let program = "OP_PUSHDATA2 0x0100 0x42";
+    let program = "OP_PUSHDATA2 0x0001 0x42";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@"0x42")];
@@ -124,11 +125,17 @@ fn test_op_push_data2() {
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@byte_data)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
+
+    // Test error case: data bytes fewer than specified in length field
+    let program: ByteArray = "OP_PUSHDATA2 0x01 0x4243";
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_INVALID);
+    // fail to pull data so nothing is pushed into the dstack.
+    utils::check_dstack_size(ref engine, 0);
 }
 
 #[test]
 fn test_op_push_data4() {
-    let program = "OP_PUSHDATA4 0x00000100 0x42";
+    let program = "OP_PUSHDATA4 0x00000001 0x42";
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@"0x42")];
@@ -147,5 +154,9 @@ fn test_op_push_data4() {
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![hex_to_bytecode(@byte_data)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
-    // TODO: test with 0x01000000?
+
+    // Test error case: data bytes fewer than specified in length field
+    let program = "OP_PUSHDATA4 0x01 0x4243";
+    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_INVALID);
+    utils::check_dstack_size(ref engine, 0);
 }

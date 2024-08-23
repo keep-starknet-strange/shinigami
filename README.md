@@ -13,11 +13,13 @@
 
 ## Overview
 
-`shinigami` is a library enabling Bitcoin Script VM execution in Cairo, thus allowing the generation of STARK proofs of generic Bitcoin Script computation.
+`shinigami` is a Bitcoin Script library for generic Script VM execution in Cairo, enabling the generation of STARK proofs for Bitcoin Script computation and Bitcoin transaction execution.
 
-Key features :
+Key features ( will include ) :
 
-- Bitcoin script interpretation and execution
+- Bitcoin Script interpretation and execution
+- Frontend Script IDE with STARK prover integration
+- Transaction execution and proving
 - Easily configurable VM ( enable different opcodes )
 - In cairo, Bitcoin Script compiler
 
