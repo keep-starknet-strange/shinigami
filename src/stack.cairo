@@ -237,7 +237,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         if err != '' {
             return Result::Err(err);
         }
-        
+
         return Result::Ok(());
     }
 }
