@@ -137,9 +137,8 @@ pub impl EngineImpl of EngineTrait {
                 }
 
                 if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
-                    
-                    if Opcode::is_data_opcode(opcode){
-                        let opcode_32 : u32 = opcode.into();
+                    if Opcode::is_data_opcode(opcode) {
+                        let opcode_32: u32 = opcode.into();
                         self.opcode_idx += opcode_32 + 1;
                         continue;
                     } else {
