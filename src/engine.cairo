@@ -137,13 +137,20 @@ pub impl EngineImpl of EngineTrait {
                 }
 
                 if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
-                    let res = Opcode::is_opcode_disabled(opcode, ref self);
-                    if res.is_err() {
-                        err = res.unwrap_err();
-                        break;
+                    
+                    if Opcode::is_data_opcode(opcode){
+                        let opcode_32 : u32 = opcode.into();
+                        self.opcode_idx += opcode_32 + 1;
+                        continue;
+                    } else {
+                        let res = Opcode::is_opcode_disabled(opcode, ref self);
+                        if res.is_err() {
+                            err = res.unwrap_err();
+                            break;
+                        }
+                        self.opcode_idx += 1;
+                        continue;
                     }
-                    self.opcode_idx += 1;
-                    continue;
                 }
                 let res = Opcode::execute(opcode, ref self);
                 if res.is_err() {
