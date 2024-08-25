@@ -49,7 +49,7 @@ pub mod ScriptNum {
     }
 
     // Unwrap sign-magnitude encoded ByteArray into a 4 byte int maximum.
-    pub fn try_into_num(input: ByteArray) -> Result<i64, felt252> {
+    pub fn try_into_num(input: ByteArray, numeric_op: bool) -> Result<i64, felt252> {
         let mut result: i64 = 0;
         let mut i: u32 = 0;
         let mut multiplier: i64 = 1;
@@ -72,15 +72,18 @@ pub mod ScriptNum {
         if result > MAX_INT32.into() || result < MIN_INT32.into() {
             return Result::Err(Error::SCRIPTNUM_OUT_OF_RANGE);
         }
+        if numeric_op && result == MIN_INT32.into() {
+            return Result::Err(Error::SCRIPTNUM_NUMERIC_OPCODE_OUT_OF_RANGE);
+        }
         Result::Ok(result)
     }
 
     pub fn into_num(input: ByteArray) -> i64 {
-        try_into_num(input).unwrap()
+        try_into_num(input, true).unwrap()
     }
 
     pub fn unwrap(input: ByteArray) -> i64 {
-        try_into_num(input).unwrap()
+        try_into_num(input, false).unwrap()
     }
 
     // Return the minimal number of byte to represent 'value'.
