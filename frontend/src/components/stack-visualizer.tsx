@@ -25,21 +25,21 @@ export default function StackVisualizer({
               <th className="py-2.5 pl-1 text-left text-white">Value</th>
             </tr>
           </thead>
-          <tbody className={stackContent.length < 2 ? "flex flex-col" : ""}>
-            {stackContent.length == 0
-              ? Array.from({ length: 1 }).map((_, i) => (
-                <tr key={i}>
-                  <td className="w-full h-40" />
-                </tr>
-              ))
-              : stackContent.map((item) => (
-                <tr key={item.id} className={stackContent.length > 1 ? "border-t border-[#2B2B2B]" : ""}>
+          <tbody>
+            {stackContent.length === 0 ? (
+              <tr>
+                <td className="w-full h-40" colSpan={2} />
+              </tr>
+            ) : (
+              stackContent.map((item) => (
+                <tr key={item.id} className="border-t border-[#2B2B2B] w-full">
                   <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white">
                     {item.id}
                   </td>
                   <td className="py-2 pl-1 text-white">{item.value}</td>
                 </tr>
-              ))}
+              ))
+            )}
           </tbody>
         </table>
 

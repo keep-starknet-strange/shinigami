@@ -10,37 +10,37 @@ import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
 import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useState } from "react";
-import useSWR from "swr";
 import { StackItem } from "../../types";
-
-// const fetcher = (url: string) => fetch(url).then((res) => res.json());
-// const fetcher = (url: string) => fetch(url).then((_) => JSON.parse(data.message));
-let data = {
-  "message": "[\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\"]"
-}
-const fetcher = (url: string) => fetch(url, {
-  method: "POST",
-  headers: { 'Content-Type': 'application/json' },
-  mode: 'cors',
-  body: JSON.stringify({ pub_key: "OP_SHA1 OP_DATA_20 0x845AD2AB31A509E064B49D2360EB2A5C39BE4856 EQUAL", sig: "OP_DATA_9 0x5368696E6967616D69" })
-}).then((res) => res.json());
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("ScriptSig");
   const [scriptPubKey, setScriptPubKey] = useState("ScriptPubKey");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState(null);
 
-  const { data, error, isLoading } = useSWR(
-    "http://18.208.232.81:3000/run-script",
-    fetcher
-  );
-
-  const handleRunScript = () => {
-    // const newStackContent: StackItem[] = [];
-    // data?.map((item: string, index: number) => newStackContent.push({ id: index + 1, value: item }));
-    // setStackContent(newStackContent);
-    console.log(data);
+  const handleRunScript = async () => {
+    const stack: StackItem[] = [];
+    setIsFetching(true);
+    setError(null);
+    try {
+      const response = await fetch("http://localhost:3000/run-script", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
+      });
+      const result = await response.json();
+      JSON.parse(result.message).map((item: string, index: number) => {
+        stack.push({ id: index + 1, value: item });
+      })
+      setStackContent(stack);
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setIsFetching(false);
+    }
   };
 
   const [split, setSplit] = useState(false);
@@ -113,9 +113,9 @@ export default function ScriptEditor() {
           <button
             className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]"
             onClick={handleRunScript}
-            disabled={isLoading}
+            disabled={isFetching}
           >
-            {error ? "Error running script" : isLoading ? "Running..." : "Run Script"}
+            {error ? "Error running script" : isFetching ? "Running..." : "Run Script"}
           </button>
           <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
             Debug Script
