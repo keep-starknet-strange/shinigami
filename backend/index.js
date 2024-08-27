@@ -28,8 +28,8 @@ app.get('/run-script', (req, res) => {
         return res.status(400).send('Missing public key parameter');
     }
     const scriptPath = '../tests/text_to_byte_array.sh';
-    const sigCommand = `bash ${scriptPath} ${sig}`;
-    const pubCommand = `bash ${scriptPath} ${pub_key}`;
+    const sigCommand = `bash ${scriptPath} "${sig}"`;
+    const pubCommand = `bash ${scriptPath} "${pub_key}"`;
     runShellCommand(sigCommand, (sigOutput) => {
         runShellCommand(pubCommand, (pubOutput) => {
             const modifiedSigOutput = sigOutput.trim().slice(1, -1);
