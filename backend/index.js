@@ -22,14 +22,15 @@ function extractStack(output) {
 }
 
 app.get('/run-script', (req, res) => {
-    const args = req.query.args;
-    if (!args) {
-        return res.status(400).send('Missing "args" parameter');
+    const pub_key = req.query.pub_key;
+    const sig = req.query.sig;
+    if (!pub_key) {
+        return res.status(400).send('Missing public key parameter');
     }
     const scriptPath = '../tests/text_to_byte_array.sh';
-    const initialCommand = `bash ${scriptPath} ${args}`;
+    const initialCommand = `bash ${scriptPath} ${pub_key}`;
     runShellCommand(initialCommand, (firstOutput) => {
-        const modifiedOutput = `[[],0,0,${firstOutput.trim().slice(1)}`;
+        const modifiedOutput = `${sig != '' ? sig : '[[],0,0,'}${firstOutput.trim().slice(1)}`;
         const cairoCommand = `scarb cairo-run ${modifiedOutput}`;
         runShellCommand(cairoCommand, (finalOutput) => {
             const message = extractStack(finalOutput);
