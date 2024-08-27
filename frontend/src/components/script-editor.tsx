@@ -121,8 +121,9 @@ export default function ScriptEditor() {
           <button
             className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]"
             onClick={handleRunScript}
+            disabled={isLoading}
           >
-            Run Script
+            {error ? "Error running script" : isLoading ? "Running..." : "Run Script"}
           </button>
           <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
             Debug Script
@@ -133,7 +134,7 @@ export default function ScriptEditor() {
           <p className="text-white uppercase">Refresh</p>
         </button>
       </div>
-      <StackVisualizer stackContent={stackContent} status={isLoading ? "Generating..." : "Ready to generate"} />
+      <StackVisualizer stackContent={stackContent} />
       <Footer />
     </div>
   );

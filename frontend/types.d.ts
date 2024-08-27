@@ -5,5 +5,4 @@ export interface StackItem {
   
 export interface StackVisualizerProps {
     stackContent: StackItem[];
-    status?: string;
 }

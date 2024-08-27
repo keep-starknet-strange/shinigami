@@ -2,7 +2,6 @@ import { StackVisualizerProps } from "../../types";
 
 export default function StackVisualizer({
   stackContent,
-  status
 }: StackVisualizerProps) {
   return (
     <div className="w-full h-fit rounded-lg rounded-b-xl pt-0.5">
@@ -50,8 +49,7 @@ export default function StackVisualizer({
           </div>
           <div className="w-full h-[1px] bg-[#2B2B2B]" />
           <div className="w-full px-2.5 pt-1 h-40">
-            {/* <p className="text-[#959595] text-sm">Ready to generate...</p> */}
-            <p className="text-[#959595] text-sm">{status}</p>
+            <p className="text-[#959595] text-sm">Ready to generate...</p>
           </div>
         </div>
       </div>
