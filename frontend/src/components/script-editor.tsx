@@ -23,7 +23,7 @@ const fetcher = (url: string) => fetch(url, {
   headers: { 'Content-Type': 'application/json' },
   mode: 'cors',
   body: JSON.stringify({ pub_key: "OP_SHA1 OP_DATA_20 0x845AD2AB31A509E064B49D2360EB2A5C39BE4856 EQUAL", sig: "OP_DATA_9 0x5368696E6967616D69" })
-}).then((res) => res);
+}).then((res) => res.json());
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("ScriptSig");
