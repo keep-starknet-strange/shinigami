@@ -26,7 +26,7 @@ export default function StackVisualizer({
               <th className="py-2.5 pl-1 text-left text-white">Value</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className={stackContent.length < 2 ? "flex flex-col" : ""}>
             {stackContent.length == 0
               ? Array.from({ length: 1 }).map((_, i) => (
                 <tr key={i} className="border-t border-[#2B2B2B]">
