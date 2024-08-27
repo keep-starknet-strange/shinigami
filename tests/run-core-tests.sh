@@ -83,6 +83,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         STACK_OUT_OF_RANGE_RES="Execution failed: Stack out of range"
         DISABLED_OP_RES="Execution failed: Opcode is disabled"
         VERIFY_FAILED_RES="Execution failed: Verify failed"
+        SCRIPTNUM_OVERFLOW_RES="Execution failed: Scriptnum out of range"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -107,6 +108,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="DISABLED_OPCODE"
         elif echo "$RESULT" | grep -q "$VERIFY_FAILED_RES"; then
             SCRIPT_RESULT="VERIFY"
+        elif echo "$RESULT" | grep -q "$SCRIPTNUM_OVERFLOW_RES"; then
+            SCRIPT_RESULT="UNKNOWN_ERROR"
         else
             SCRIPT_RESULT="FAIL"
         fi

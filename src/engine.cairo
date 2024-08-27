@@ -56,7 +56,6 @@ pub impl EngineImpl of EngineTrait {
     fn new(
         script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
     ) -> Engine {
-        // TODO
         let mut script_sig: @ByteArray = @"";
         if tx_idx < transaction.transaction_inputs.len() {
             script_sig = transaction.transaction_inputs[tx_idx].signature_script;
@@ -77,7 +76,6 @@ pub impl EngineImpl of EngineTrait {
     }
 
     fn pull_data(ref self: Engine, len: usize) -> Result<ByteArray, felt252> {
-        // TODO: check bounds with error handling
         let mut data = "";
         let mut i = self.opcode_idx + 1;
         let mut end = i + len;
@@ -165,6 +163,9 @@ pub impl EngineImpl of EngineTrait {
             self.script_idx += 1;
             // TODO: other things
         };
+        // TODO: Remove
+        self.dstack.json();
+
         if err != '' {
             return Result::Err(err);
         }
