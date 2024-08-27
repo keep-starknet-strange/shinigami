@@ -28,14 +28,25 @@ app.get('/run-script', (req, res) => {
         return res.status(400).send('Missing public key parameter');
     }
     const scriptPath = '../tests/text_to_byte_array.sh';
-    const initialCommand = `bash ${scriptPath} ${pub_key}`;
-    runShellCommand(initialCommand, (firstOutput) => {
-        const modifiedOutput = `${sig != '' ? sig : '[[],0,0,'}${firstOutput.trim().slice(1)}`;
-        const cairoCommand = `scarb cairo-run ${modifiedOutput}`;
-        runShellCommand(cairoCommand, (finalOutput) => {
-            const message = extractStack(finalOutput);
-            res.json({ message });
+    const sigCommand = `bash ${scriptPath} ${sig}`;
+    const pubCommand = `bash ${scriptPath} ${pub_key}`;
+    runShellCommand(sigCommand, (sigOutput) => {
+        runShellCommand(pubCommand, (pubOutput) => {
+            const modifiedSigOutput = sigOutput.trim().slice(1, -1);
+            const modifiedPubOutput = pubOutput.trim().slice(1, -1);
+            const combinedOutput = `[${modifiedSigOutput},${modifiedPubOutput}]`;
+            const cairoCommand = `scarb cairo-run ${combinedOutput}`;
+            runShellCommand(cairoCommand, (finalOutput) => {
+                const message = extractStack(finalOutput);
+                res.json({ message });
+            });
         });
+        // const modifiedOutput = `${sig != '' ? sig : '[[],0,0,'}${firstOutput.trim().slice(1)}`;
+        // const cairoCommand = `scarb cairo-run ${modifiedOutput}`;
+        // runShellCommand(cairoCommand, (finalOutput) => {
+        //     const message = extractStack(finalOutput);
+        //     res.json({ message });
+        // });
     });
 });
 
