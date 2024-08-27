@@ -17,7 +17,7 @@ export default function StackVisualizer({
         </div>
       </div>
       <div className="w-full border-8 border-[#232523AE]/10 rounded-b-xl space-y-2.5 bg-[#232523AE] h-fit">
-        <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl min-h-48">
+        <table className="w-full bg-black table-auto rounded-b-xl rounded-t-xl min-h-48">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
               <th className="py-2.5 pl-3.5 pr-1 text-left w-16 text-white">
@@ -26,7 +26,7 @@ export default function StackVisualizer({
               <th className="py-2.5 pl-1 text-left text-white">Value</th>
             </tr>
           </thead>
-          <tbody className="block">
+          <tbody>
             {stackContent.length == 0
               ? Array.from({ length: 1 }).map((_, i) => (
                 <tr key={i} className="border-t border-[#2B2B2B]">
