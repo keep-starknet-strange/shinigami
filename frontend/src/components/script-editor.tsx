@@ -16,7 +16,7 @@ import { StackItem } from "../../types";
 // const fetcher = (url: string) => fetch(url).then((res) => res.json());
 // const fetcher = (url: string) => fetch(url).then((_) => JSON.parse(data.message));
 let data = {
-  "message": "[\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\"]"
+  "message": "[\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\"]"
 }
 const fetcher = (url: string) => fetch(url).then((_) => JSON.parse(data.message));
 
