@@ -27,7 +27,6 @@ app.get('/run-script', (req, res) => {
         const modifiedOutput = `[[],0,0,${firstOutput.trim().slice(1)}`;
         const cairoCommand = `scarb cairo-run ${modifiedOutput}`;
         runShellCommand(cairoCommand, (finalOutput) => {
-            console.log("final output: ", finalOutput)
             res.send(finalOutput);
         });
     });
