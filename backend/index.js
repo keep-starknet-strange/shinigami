@@ -21,7 +21,7 @@ function extractStack(output) {
     return match ? match[0] : 'No message found';
 }
 
-app.get('/run-script', (req, res) => {
+app.post('/run-script', (req, res) => {
     const pub_key = req.query.pub_key;
     const sig = req.query.sig;
     if (!pub_key) {
