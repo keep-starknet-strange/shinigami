@@ -412,4 +412,8 @@ pub mod Opcode {
             return Result::Ok(());
         }
     }
+
+    pub fn is_data_opcode(opcode: u8) -> bool {
+        return (opcode >= OP_DATA_1 && opcode <= OP_DATA_75);
+    }
 }
