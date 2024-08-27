@@ -48,8 +48,6 @@ pub fn is_number(script_item: @ByteArray) -> bool {
 
 // TODO: little-endian?
 // TODO: if odd number of bytes, prepend 0?
-// TODO: Utils functions?
-// TODO: Lowercase and letters?
 pub fn hex_to_bytecode(script_item: @ByteArray) -> ByteArray {
     let half_byte_shift = 16;
     let zero_string = '0';
@@ -80,6 +78,36 @@ pub fn hex_to_bytecode(script_item: @ByteArray) -> ByteArray {
         i += 2;
     };
     bytecode
+}
+
+pub fn bytecode_to_hex(bytecode: @ByteArray) -> ByteArray {
+    let half_byte_shift = 16;
+    let zero = '0';
+    let a = 'a';
+    let mut hex = "0x";
+    let mut i = 0;
+    let bytecode_len = bytecode.len();
+    if bytecode_len == 0 {
+        return "0x00";
+    }
+    while i < bytecode_len {
+        let upper_half_byte = bytecode[i] / half_byte_shift;
+        let lower_half_byte = bytecode[i] % half_byte_shift;
+        let upper_half: u8 = if upper_half_byte < 10 {
+            upper_half_byte + zero
+        } else {
+            upper_half_byte - 10 + a
+        };
+        let lower_half: u8 = if lower_half_byte < 10 {
+            lower_half_byte + zero
+        } else {
+            lower_half_byte - 10 + a
+        };
+        hex.append_byte(upper_half);
+        hex.append_byte(lower_half);
+        i += 1;
+    };
+    hex
 }
 
 // Remove the surrounding quotes and add the corrent append opcodes to the front

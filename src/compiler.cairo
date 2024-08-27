@@ -224,7 +224,6 @@ pub impl CompilerImpl of CompilerTrait {
         self.opcodes.insert((nameu256 % name_mask).try_into().unwrap(), opcode);
     }
 
-    // TODO: Why self is mutable?
     fn compile(mut self: Compiler, script: ByteArray) -> ByteArray {
         let mut bytecode = "";
         let seperator = ' ';

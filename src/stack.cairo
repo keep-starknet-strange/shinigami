@@ -89,7 +89,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         if arr.len() == 0 {
             println!("stack[{}]: null", idx);
         } else {
-            println!("stack[{}]: {}", idx, arr);
+            println!("stack[{}]: {}", idx, utils::bytecode_to_hex(@arr.clone()));
         }
         self.data = entry.finalize(NullableTrait::new(arr));
     }
@@ -100,6 +100,22 @@ pub impl ScriptStackImpl of ScriptStackTrait {
             i -= 1;
             self.print_element(i.into());
         }
+    }
+
+    fn json(ref self: ScriptStack) {
+        let mut i = 0;
+        print!("[");
+        while i < self.len {
+            let (entry, arr) = self.data.entry(i.into());
+            let arr = arr.deref();
+            print!("\"{}\"", utils::bytecode_to_hex(@arr.clone()));
+            self.data = entry.finalize(NullableTrait::new(arr));
+            if i < self.len - 1 {
+                print!(",");
+            }
+            i += 1;
+        };
+        println!("]");
     }
 
     fn rot_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
@@ -139,7 +155,6 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     }
 
     fn dup_n(ref self: ScriptStack, n: u32) -> Result<(), felt252> {
-        // TODO: STACK_OUT_OF_RANGE?
         if (n < 1) {
             return Result::Err('dup_n: invalid n value');
         }

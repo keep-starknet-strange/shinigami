@@ -74,6 +74,7 @@ fn test_op_data(value: u8) {
 }
 
 #[test]
+#[available_gas(1000000000000)]
 fn test_op_data_all() {
     let mut n = 1;
 
