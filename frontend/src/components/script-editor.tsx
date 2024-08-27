@@ -10,21 +10,28 @@ import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
 import clsx from "@/utils/lib";
 import { useState } from "react";
+import useSWR from "swr";
+import { StackItem } from "../../types";
+
+// const fetcher = (url: string) => fetch(url).then((res) => res.json());
+// const fetcher = (url: string) => fetch(url).then((_) => JSON.parse(data.message));
+let data = { "message": "[\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\"]" }
+const fetcher = (url: string) => fetch(url).then((_) => JSON.parse(data.message));
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("ScriptSig");
   const [scriptPubKey, setScriptPubKey] = useState("ScriptPubKey");
 
-  const [stackContent, setStackContent] = useState<
-    { id: number; value: string }[]
-  >([]);
+  const [stackContent, setStackContent] = useState<StackItem[]>([]);
+
+  const { data, error, isLoading } = useSWR(
+    "/",
+    fetcher
+  );
 
   const handleRunScript = () => {
-    const newStackContent = [
-      { id: 1, value: "0x42" },
-      { id: 2, value: "0x01" },
-      { id: 3, value: "0x03" },
-    ];
+    const newStackContent: StackItem[] = [];
+    data?.map((item: string, index: number) => newStackContent.push({ id: index + 1, value: item }));
     setStackContent(newStackContent);
   };
 
@@ -124,7 +131,7 @@ export default function ScriptEditor() {
           <p className="text-white uppercase">Refresh</p>
         </button>
       </div>
-      <StackVisualizer stackContent={stackContent} />
+      <StackVisualizer stackContent={stackContent} status={isLoading ? "Generating..." : "Ready to generate"} />
       <Footer />
     </div>
   );

@@ -1,14 +1,8 @@
-interface StackItem {
-  id: number;
-  value: string;
-}
-
-interface StackVisualizerProps {
-  stackContent: StackItem[];
-}
+import { StackVisualizerProps } from "../../types";
 
 export default function StackVisualizer({
   stackContent,
+  status
 }: StackVisualizerProps) {
   return (
     <div className="w-full h-fit rounded-lg rounded-b-xl pt-0.5">
@@ -32,21 +26,21 @@ export default function StackVisualizer({
               <th className="py-2.5 pl-1 text-left text-white">Value</th>
             </tr>
           </thead>
-          <tbody className="h-fit">
+          <tbody className="h-fit flex flex-col">
             {stackContent.length == 0
               ? Array.from({ length: 1 }).map((_, i) => (
-                  <tr key={i} className="border-t border-[#2B2B2B]">
-                    <td className="w-full h-40" />
-                  </tr>
-                ))
+                <tr key={i} className="border-t border-[#2B2B2B]">
+                  <td className="w-full h-40" />
+                </tr>
+              ))
               : stackContent.map((item) => (
-                  <tr key={item.id} className="border-t border-[#2B2B2B]">
-                    <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white">
-                      {item.id}
-                    </td>
-                    <td className="py-2 pl-1 text-white">{item.value}</td>
-                  </tr>
-                ))}
+                <tr key={item.id} className="border-t border-[#2B2B2B]">
+                  <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white">
+                    {item.id}
+                  </td>
+                  <td className="py-2 pl-1 text-white">{item.value}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
 
@@ -56,7 +50,8 @@ export default function StackVisualizer({
           </div>
           <div className="w-full h-[1px] bg-[#2B2B2B]" />
           <div className="w-full px-2.5 pt-1 h-40">
-            <p className="text-[#959595] text-sm">Ready to generate...</p>
+            {/* <p className="text-[#959595] text-sm">Ready to generate...</p> */}
+            <p className="text-[#959595] text-sm">{status}</p>
           </div>
         </div>
       </div>
