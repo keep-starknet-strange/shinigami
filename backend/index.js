@@ -16,6 +16,11 @@ function runShellCommand(command, callback) {
     });
 }
 
+function extractStack(output) {
+    const match = output.match(/\[.*\]/);
+    return match ? match[0] : 'No message found';
+}
+
 app.get('/run-script', (req, res) => {
     const args = req.query.args;
     if (!args) {
@@ -27,7 +32,8 @@ app.get('/run-script', (req, res) => {
         const modifiedOutput = `[[],0,0,${firstOutput.trim().slice(1)}`;
         const cairoCommand = `scarb cairo-run ${modifiedOutput}`;
         runShellCommand(cairoCommand, (finalOutput) => {
-            res.send(finalOutput);
+            const message = extractStack(finalOutput);
+            res.json({ message });
         });
     });
 });
