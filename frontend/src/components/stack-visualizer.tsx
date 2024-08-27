@@ -30,6 +30,15 @@ export default function StackVisualizer({
               <tr>
                 <td className="w-full h-40" colSpan={2} />
               </tr>
+            ) : stackContent.length === 1 ? (
+              <tr className="border-t border-[#2B2B2B] w-full h-40 align-top">
+                <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white align-top">
+                  {stackContent[0].id}
+                </td>
+                <td className="py-2 pl-1 text-white align-top">
+                  {stackContent[0].value}
+                </td>
+              </tr>
             ) : (
               stackContent.map((item) => (
                 <tr key={item.id} className="border-t border-[#2B2B2B] w-full">
