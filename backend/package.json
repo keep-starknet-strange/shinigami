@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "rm -rf /opt/render/.asdf && git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.1 && . '$HOME/.asdf/asdf.sh' && asdf plugin add scarb && asdf install scarb latest && asdf global scarb latest && scarb --version && curl https://get.starkli.sh | sh && . /opt/render/.starkli/env && starkliup && starkli --version && node index.js"
   },
   "keywords": [],
   "author": "",
