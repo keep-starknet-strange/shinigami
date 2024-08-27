@@ -51,15 +51,15 @@ This will run the test-suite for all opcodes, integration, and testing Scripts.
 
 ## Supported Opcodes
 
-102/107 opcodes supported (95.33%).
+104/107 opcodes supported (97.20%).
 
 ```mermaid
 %%{init: {"pie": {"textPosition": 0.75}, "themeVariables": {"pieOuterStrokeWidth": "5px"}} }%%
 pie showData
     title Opcode Implementation Status
-    "Implemented" : 87
+    "Implemented" : 89
     "Disabled" : 15
-    "Not Implemented" : 5
+    "Not Implemented" : 3
 ```
 
 | Opcode                 | Hex       | Supported | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |

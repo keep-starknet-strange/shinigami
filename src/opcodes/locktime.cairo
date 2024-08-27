@@ -28,7 +28,7 @@ fn verify_locktime(tx_locktime: i64, threshold: i64, stack_locktime: i64) -> Res
 pub fn opcode_checklocktimeverify(ref engine: Engine) -> Result<(), felt252> {
     if !engine.has_flag(ScriptFlags::ScriptVerifyCheckLockTimeVerify) {
         if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
-            return Result::Err(Error::SCRIPT_FAILED);
+            return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
         }
         // Behave as OP_NOP
         return Result::Ok(());
@@ -36,15 +36,15 @@ pub fn opcode_checklocktimeverify(ref engine: Engine) -> Result<(), felt252> {
 
     let tx_locktime: i64 = engine.transaction.locktime.into();
     // Get locktime as 5 byte integer because 'tx_locktime' is u32
-    let stack_locktime: i64 = ScriptNum::unwrap_n(
-        engine.dstack.peek_byte_array(engine.dstack.len() - 1)?, 5
-    );
+    let stack_locktime: i64 = ScriptNum::try_into_num_n_bytes(
+        engine.dstack.peek_byte_array(0)?, 5
+    )?;
 
     if stack_locktime < 0 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
     }
 
-    // Check if tx sequence in not 'SEQUENCE_MAX' else if tx may be considered as finalized and the
+    // Check if tx sequence is not 'SEQUENCE_MAX' else if tx may be considered as finalized and the
     // behavior of OP_CHECKLOCKTIMEVERIFY can be bypassed
     if engine.transaction.transaction_inputs.at(engine.tx_idx).sequence == @SEQUENCE_MAX {
         return Result::Err(Error::FINALIZED_TX_CLTV);
@@ -56,27 +56,23 @@ pub fn opcode_checklocktimeverify(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_checksequenceverify(ref engine: Engine) -> Result<(), felt252> {
     if !engine.has_flag(ScriptFlags::ScriptVerifyCheckSequenceVerify) {
         if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
-            return Result::Err(Error::SCRIPT_FAILED);
+            return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
         }
         // Behave as OP_NOP
         return Result::Ok(());
     }
 
     // Get sequence as 5 byte integer because 'sequence' is u32
-    let stack_sequence: i64 = ScriptNum::unwrap_n(
-        engine.dstack.peek_byte_array(engine.dstack.len() - 1)?, 5
-    );
+    let stack_sequence: i64 = ScriptNum::try_into_num_n_bytes(
+        engine.dstack.peek_byte_array(0)?, 5
+    )?;
 
     if stack_sequence < 0 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
     }
 
     // Redefine 'stack_sequence' to perform bitwise operation easily
-    let stack_sequence_u32: u32 = if stack_sequence < 0 {
-        (-stack_sequence).try_into().unwrap()
-    } else {
-        stack_sequence.try_into().unwrap()
-    };
+    let stack_sequence_u32: u32 = stack_sequence.try_into().unwrap();
 
     // Disabled bit set in 'stack_sequence' result as OP_NOP behavior
     if stack_sequence_u32 & SEQUENCE_LOCKTIME_DISABLED != 0 {
@@ -85,13 +81,12 @@ pub fn opcode_checksequenceverify(ref engine: Engine) -> Result<(), felt252> {
 
     // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
     if engine.transaction.version < 2 {
-        return Result::Err(Error::TX_VER_LOW);
+        return Result::Err(Error::INVALID_TX_VERSION);
     }
 
-    let tx_sequence: u32 = (*engine.transaction.transaction_inputs.at(engine.tx_idx).sequence)
-        .into();
+    let tx_sequence: u32 = *engine.transaction.transaction_inputs.at(engine.tx_idx).sequence;
 
-    // Disabled bit set in 'tx_sequence' restult as an error
+    // Disabled bit set in 'tx_sequence' result is an error
     if tx_sequence & SEQUENCE_LOCKTIME_DISABLED != 0 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
     }

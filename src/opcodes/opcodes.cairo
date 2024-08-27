@@ -185,7 +185,7 @@ pub mod Opcode {
     pub const OP_NOP9: u8 = 184;
     pub const OP_NOP10: u8 = 185;
 
-    use shinigami::engine::{Engine, EngineTrait};
+    use shinigami::engine::Engine;
     use shinigami::opcodes::{
         constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils
     };
