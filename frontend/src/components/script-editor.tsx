@@ -95,11 +95,11 @@ export default function ScriptEditor() {
           </p>
         </button>
       </div>{
-        !split && renderEditor(scriptSig, setScriptSig, "rounded-b-xl h-[400px] rounded-tr-xl")}
+        !split && renderEditor(scriptPubKey, setScriptPubKey, "rounded-b-xl h-[400px] rounded-tr-xl")}
       {split && (
         <>
-          {renderEditor(scriptPubKey, setScriptPubKey, "border-b-4 h-[160px] rounded-tr-xl")}
-          {renderEditor(scriptSig, setScriptSig, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
+          {renderEditor(scriptSig, setScriptSig, "border-b-4 h-[160px] rounded-tr-xl")}
+          {renderEditor(scriptPubKey, setScriptPubKey, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
         </>
       )}
       <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-10">
