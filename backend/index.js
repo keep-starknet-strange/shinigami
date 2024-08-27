@@ -41,12 +41,6 @@ app.get('/run-script', (req, res) => {
                 res.json({ message });
             });
         });
-        // const modifiedOutput = `${sig != '' ? sig : '[[],0,0,'}${firstOutput.trim().slice(1)}`;
-        // const cairoCommand = `scarb cairo-run ${modifiedOutput}`;
-        // runShellCommand(cairoCommand, (finalOutput) => {
-        //     const message = extractStack(finalOutput);
-        //     res.json({ message });
-        // });
     });
 });
 
