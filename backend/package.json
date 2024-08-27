@@ -13,6 +13,7 @@
     "@types/node": "^22.5.0"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.19.2"
   }
 }

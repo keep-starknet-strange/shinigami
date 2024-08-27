@@ -18,7 +18,12 @@ import { StackItem } from "../../types";
 let data = {
   "message": "[\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\",\"0x39c02658ed1416713cf4098382e80d07786eed7004fc3fd89b38c7165fdabc80\"]"
 }
-const fetcher = (url: string) => fetch(url).then((_) => JSON.parse(data.message));
+const fetcher = (url: string) => fetch(url, {
+  method: "POST",
+  headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  mode: 'cors',
+  body: JSON.stringify({ pub_key: "OP_SHA1 OP_DATA_20 0x845AD2AB31A509E064B49D2360EB2A5C39BE4856 EQUAL", sig: "OP_DATA_9 0x5368696E6967616D69" })
+}).then((res) => res);
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("ScriptSig");
@@ -27,14 +32,15 @@ export default function ScriptEditor() {
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
 
   const { data, error, isLoading } = useSWR(
-    "/",
+    "http://18.208.232.81:3000/run-script",
     fetcher
   );
 
   const handleRunScript = () => {
-    const newStackContent: StackItem[] = [];
-    data?.map((item: string, index: number) => newStackContent.push({ id: index + 1, value: item }));
-    setStackContent(newStackContent);
+    // const newStackContent: StackItem[] = [];
+    // data?.map((item: string, index: number) => newStackContent.push({ id: index + 1, value: item }));
+    // setStackContent(newStackContent);
+    console.log(data);
   };
 
   const [split, setSplit] = useState(false);

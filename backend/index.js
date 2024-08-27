@@ -1,6 +1,7 @@
 const express = require('express');
 const { exec } = require('child_process');
 const app = express();
+const cors = require('cors')
 
 function runShellCommand(command, callback) {
     exec(command, (error, stdout, stderr) => {
@@ -20,6 +21,8 @@ function extractStack(output) {
     const match = output.match(/\[.*\]/);
     return match ? match[0] : 'No message found';
 }
+
+app.use(cors());
 
 app.post('/run-script', (req, res) => {
     const pub_key = req.query.pub_key;
