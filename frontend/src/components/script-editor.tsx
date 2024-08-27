@@ -9,7 +9,7 @@ import refreshImage from "@/images/refresh-icon.svg";
 import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
 import clsx from "@/utils/lib";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import useSWR from "swr";
 import { StackItem } from "../../types";
 
@@ -57,6 +57,28 @@ export default function ScriptEditor() {
     });
   };
 
+  const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
+    <div
+      className={clsx(
+        height,
+        "w-full border-8 border-[#232523AE] bg-black overflow-y",
+      )}
+    >
+      <Editor
+        beforeMount={setEditorTheme}
+        theme="darker"
+        defaultLanguage="plaintext"
+        value={value || ""}
+        onChange={(newValue) => onChange(newValue || "")}
+        options={{
+          fontSize: 16,
+          lineHeight: 24,
+          renderLineHighlight: "none",
+        }}
+      />
+    </div>
+  );
+
   return (
     <div className="w-full min-h-screen h-full">
       <div className="w-full flex flex-row items-center justify-between">
@@ -72,49 +94,13 @@ export default function ScriptEditor() {
             {split ? "Unsplit" : "Split"} Editor
           </p>
         </button>
-      </div>
-      <div
-        className={clsx(
-          split ? "border-b-4 h-[160px]" : "rounded-b-xl h-[400px]",
-          "w-full border-8 border-[#232523AE] bg-black overflow-y rounded-tr-xl",
-        )}
-      >
-        <Editor
-          beforeMount={setEditorTheme}
-          theme="darker"
-          defaultLanguage="plaintext"
-          value={scriptSig}
-          onChange={(value: string | undefined) =>
-            setScriptSig(value || "") as any
-          }
-          options={{
-            fontSize: 16,
-            lineHeight: 24,
-            renderLineHighlight: "none",
-          }}
-        />
-      </div>
+      </div>{
+        !split && renderEditor(scriptSig, setScriptSig, "rounded-b-xl h-[400px] rounded-tr-xl")}
       {split && (
-        <div
-          className={clsx(
-            split && "border-t-4 h-[240px]",
-            "w-full border-8 border-[#232523AE] bg-black rounded-b-xl",
-          )}
-        >
-          <Editor
-            theme="darker"
-            defaultLanguage="plaintext"
-            value={scriptPubKey}
-            onChange={(value: string | undefined) =>
-              setScriptPubKey(value || "")
-            }
-            options={{
-              fontSize: 16,
-              lineHeight: 24,
-              renderLineHighlight: "none",
-            }}
-          />
-        </div>
+        <>
+          {renderEditor(scriptPubKey, setScriptPubKey, "border-b-4 h-[160px] rounded-tr-xl")}
+          {renderEditor(scriptSig, setScriptSig, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
+        </>
       )}
       <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-10">
         <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
