@@ -23,10 +23,10 @@ function extractStack(output) {
 }
 
 app.use(cors());
+app.use(express.json()); 
 
 app.post('/run-script', (req, res) => {
-    const pub_key = req.query.pub_key;
-    const sig = req.query.sig;
+    const { pub_key, sig } = req.body;
     if (!pub_key) {
         return res.status(400).send('Missing public key parameter');
     }
