@@ -1,5 +1,6 @@
 "use client";
 
+import { Jura } from "next/font/google";
 import StackVisualizer from "@/components/stack-visualizer";
 import { Editor } from "@monaco-editor/react";
 import Image from "next/image";
@@ -10,6 +11,8 @@ import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
 import clsx from "@/utils/lib";
 import { useState } from "react";
+
+const jura = Jura({subsets: ["latin"]});
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("ScriptSig");
@@ -71,7 +74,10 @@ export default function ScriptEditor() {
         )}
       >
         <Editor
-          beforeMount={setEditorTheme}
+          beforeMount={(monaco) => {
+            setEditorTheme(monaco);
+            monaco.editor.remeasureFonts();
+          }}
           theme="darker"
           defaultLanguage="plaintext"
           value={scriptSig}
@@ -79,6 +85,7 @@ export default function ScriptEditor() {
             setScriptSig(value || "") as any
           }
           options={{
+            fontFamily: `${jura.style.fontFamily}, sans-serif`,
             fontSize: 16,
             lineHeight: 24,
             renderLineHighlight: "none",
@@ -100,6 +107,7 @@ export default function ScriptEditor() {
               setScriptPubKey(value || "")
             }
             options={{
+              fontFamily: `${jura.style.fontFamily}, sans-serif`,
               fontSize: 16,
               lineHeight: 24,
               renderLineHighlight: "none",
