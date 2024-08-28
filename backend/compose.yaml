@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /backend
