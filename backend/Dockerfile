@@ -3,7 +3,6 @@ FROM node:20.5.0
 SHELL ["bash", "-c"]
 RUN curl https://get.starkli.sh | sh && \
     source $HOME/.starkli/env && \
-    source $HOME/.starkli/env && \
     starkliup && \
     git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.1 && \
     . "$HOME/.asdf/asdf.sh" && \
