@@ -18,8 +18,6 @@ COPY ./index.js ./package.json ./pnpm-lock.yaml ./
 
 RUN npm i
 
-RUN npm run start
-
 EXPOSE 3000
 
 CMD ["node", "index.js"]
