@@ -37,7 +37,10 @@ pub trait TransactionTrait {
         locktime: u32
     ) -> Transaction;
     fn new_coinbase(
-        block_height: Option<u32>, coinbase_data: ByteArray, fees: i64, outputs: Span<TransactionOutput>
+        block_height: Option<u32>,
+        coinbase_data: ByteArray,
+        fees: i64,
+        outputs: Span<TransactionOutput>
     ) -> Transaction;
     fn new_signed(script_sig: ByteArray) -> Transaction;
     fn btc_encode(self: Transaction, encoding: u32) -> ByteArray;
@@ -68,9 +71,15 @@ pub impl TransactionImpl of TransactionTrait {
     /// - They have no inputs
     /// - The first output pays the block reward to the miner
     /// - They can include up to 100 bytes of arbitrary data in the coinbase field
-    /// - As per BIP34, they must include the block height in the first few bytes of the coinbase field
-    fn new_coinbase(block_height: Option<u32>, coinbase_data: ByteArray, fees: i64, outputs: Span<TransactionOutput>) -> Transaction {
-        let mut coinbase_script: ByteArray = ""; 
+    /// - As per BIP34, they must include the block height in the first few bytes of the coinbase
+    /// field
+    fn new_coinbase(
+        block_height: Option<u32>,
+        coinbase_data: ByteArray,
+        fees: i64,
+        outputs: Span<TransactionOutput>
+    ) -> Transaction {
+        let mut coinbase_script: ByteArray = "";
         // Append block height if provided, using CompactSize encoding
         if let Option::Some(height) = block_height {
             ByteArrayTrait::append(ref coinbase_script, @utils::encode_compact_size(height));
@@ -90,7 +99,10 @@ pub impl TransactionImpl of TransactionTrait {
         // Create a new output for the miner's reward
         let miner_output = TransactionOutput {
             value: total_reward,
-            publickey_script: outputs.at(0).publickey_script.clone(), // or specify the miner's script here
+            publickey_script: outputs
+                .at(0)
+                .publickey_script
+                .clone(), // or specify the miner's script here
         };
 
         // Prepend the miner's output to the outputs array

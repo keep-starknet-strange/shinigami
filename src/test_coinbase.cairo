@@ -62,8 +62,7 @@ fn test_block_subsidy_calculation() {
         'Incorrect 2nd halving subsidy'
     );
     assert(
-        TransactionTrait::calculate_block_subsidy(13440000) == 0,
-        'Should be 0 after 64 halvings'
+        TransactionTrait::calculate_block_subsidy(13440000) == 0, 'Should be 0 after 64 halvings'
     );
 }
 
