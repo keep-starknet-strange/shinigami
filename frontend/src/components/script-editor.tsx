@@ -18,12 +18,23 @@ export default function ScriptEditor() {
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
   const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string>();
+
+  const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
   const handleRunScript = async () => {
+    if (scriptPubKey.length > MAX_SIZE) {
+      setError("Script Public Key exceeds maximum allowed size");
+      return;
+    }
+    if (scriptSig.length > MAX_SIZE) {
+      setError("Script Signature exceeds maximum allowed size");
+      return;
+    }
+
     const stack: StackItem[] = [];
     setIsFetching(true);
-    setError(null);
+    setError(undefined);
     try {
       const response = await fetch("http://localhost:3000/run-script", {
         method: "POST",
@@ -115,7 +126,7 @@ export default function ScriptEditor() {
             onClick={handleRunScript}
             disabled={isFetching}
           >
-            {error ? "Error running script" : isFetching ? "Running..." : "Run Script"}
+            {error ? error : isFetching ? "Running..." : "Run Script"}
           </button>
           <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
             Debug Script
