@@ -115,3 +115,12 @@ fn test_op_nop_x_all() {
     test_op_nop_x(9);
     test_op_nop_x(10);
 }
+
+#[test]
+fn test_data_op_in_if() {
+    let program = "OP_0 OP_IF OP_DATA_1 0x81 OP_ENDIF OP_1";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
