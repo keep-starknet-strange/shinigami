@@ -13,7 +13,7 @@ RUN curl https://get.starkli.sh | sh && \
 
 WORKDIR /backend
 
-COPY ./index.js ./package.json ./pnpm-lock.yaml ./
+COPY ./index.js ./package.json ./
 
 RUN npm i
 
