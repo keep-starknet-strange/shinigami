@@ -18,7 +18,7 @@ export default function ScriptEditor() {
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
   const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | undefined>();
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
@@ -48,7 +48,7 @@ export default function ScriptEditor() {
       })
       setStackContent(stack);
     } catch (err: any) {
-      setError(err);
+      setError(err.message || "An error occurred");
     } finally {
       setIsFetching(false);
     }
