@@ -46,4 +46,6 @@ pub mod signature {
     pub(crate) use signature::{BaseSigVerifier, BaseSigVerifierTrait};
 }
 pub mod transaction;
+#[cfg(test)]
+mod test_coinbase;
 mod main;

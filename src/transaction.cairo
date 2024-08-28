@@ -36,10 +36,14 @@ pub trait TransactionTrait {
         transaction_outputs: Span<TransactionOutput>,
         locktime: u32
     ) -> Transaction;
+    fn new_coinbase(
+        block_height: Option<u32>, coinbase_data: ByteArray, fees: i64, outputs: Span<TransactionOutput>
+    ) -> Transaction;
     fn new_signed(script_sig: ByteArray) -> Transaction;
     fn btc_encode(self: Transaction, encoding: u32) -> ByteArray;
     fn serialize(self: Transaction) -> ByteArray;
     fn serialize_no_witness(self: Transaction) -> ByteArray;
+    fn calculate_block_subsidy(block_height: u32) -> i64;
 }
 
 pub const BASE_ENCODING: u32 = 0x01;
@@ -57,6 +61,54 @@ pub impl TransactionImpl of TransactionTrait {
             transaction_inputs: transaction_inputs,
             transaction_outputs: transaction_outputs,
             locktime: locktime,
+        }
+    }
+
+    /// Coinbase transactions are special:
+    /// - They have no inputs
+    /// - The first output pays the block reward to the miner
+    /// - They can include up to 100 bytes of arbitrary data in the coinbase field
+    /// - As per BIP34, they must include the block height in the first few bytes of the coinbase field
+    fn new_coinbase(block_height: Option<u32>, coinbase_data: ByteArray, fees: i64, outputs: Span<TransactionOutput>) -> Transaction {
+        let mut coinbase_script: ByteArray = ""; 
+        // Append block height if provided, using CompactSize encoding
+        if let Option::Some(height) = block_height {
+            ByteArrayTrait::append(ref coinbase_script, @utils::encode_compact_size(height));
+        }
+        ByteArrayTrait::append(ref coinbase_script, @coinbase_data);
+
+        let coinbase_input = TransactionInput {
+            previous_outpoint: OutPoint { hash: 0x0, index: 0xFFFFFFFF },
+            signature_script: coinbase_script,
+            witness: array![],
+            sequence: 0xFFFFFFFF,
+        };
+
+        let block_subsidy = Self::calculate_block_subsidy(0);
+        let total_reward = block_subsidy + fees;
+
+        // Create a new output for the miner's reward
+        let miner_output = TransactionOutput {
+            value: total_reward,
+            publickey_script: outputs.at(0).publickey_script.clone(), // or specify the miner's script here
+        };
+
+        // Prepend the miner's output to the outputs array
+        let mut final_outputs = array![miner_output];
+        let mut i: usize = 0;
+        loop {
+            if i >= outputs.len() {
+                break;
+            }
+            final_outputs.append(outputs.at(i).clone());
+            i += 1;
+        };
+
+        Transaction {
+            version: 1,
+            transaction_inputs: array![coinbase_input].span(),
+            transaction_outputs: final_outputs.span(),
+            locktime: 0,
         }
     }
 
@@ -134,6 +186,14 @@ pub impl TransactionImpl of TransactionTrait {
 
     fn serialize_no_witness(self: Transaction) -> ByteArray {
         self.btc_encode(BASE_ENCODING)
+    }
+
+    fn calculate_block_subsidy(block_height: u32) -> i64 {
+        let halvings = block_height / 210000;
+        if halvings >= 64 {
+            return 0;
+        }
+        utils::shr::<i64, u32>(50 * 100000000, halvings)
     }
 }
 

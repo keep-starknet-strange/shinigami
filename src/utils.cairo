@@ -1,6 +1,7 @@
 use shinigami::opcodes::Opcode;
 use shinigami::scriptnum::ScriptNum;
 use core::sha256::{compute_sha256_byte_array};
+use core::num::traits::{Zero, One, BitSize};
 
 // Checks if item starts with 0x
 // TODO: Check validity of hex?
@@ -314,3 +315,126 @@ pub fn double_sha256(byte: @ByteArray) -> u256 {
 
     hash_value
 }
+
+pub fn encode_compact_size(n: u32) -> ByteArray {
+    let mut encoded = "";
+    if n < 253 {
+        encoded.append_byte(n.try_into().unwrap());
+    } else if n <= 0xFFFF {
+        encoded.append_byte(253);
+        encoded.append_word_rev(n.into(), 2);
+    } else {
+        encoded.append_byte(254);
+        encoded.append_word_rev(n.into(), 4);
+    }
+    encoded
+}
+
+// Fast exponentiation using the square-and-multiply algorithm
+pub fn fast_power<
+    T,
+    U,
+    +Zero<T>,
+    +Zero<U>,
+    +One<T>,
+    +One<U>,
+    +Add<U>,
+    +Mul<T>,
+    +Rem<U>,
+    +Div<U>,
+    +Copy<T>,
+    +Copy<U>,
+    +Drop<T>,
+    +Drop<U>,
+    +PartialEq<U>,
+>(
+    base: T, exp: U
+) -> T {
+    if exp == Zero::zero() {
+        return One::one();
+    }
+
+    let mut res: T = One::one();
+    let mut base: T = base;
+    let mut exp: U = exp;
+
+    let two: U = One::one() + One::one();
+
+    loop {
+        if exp % two == One::one() {
+            res = res * base;
+        }
+        exp = exp / two;
+        if exp == Zero::zero() {
+            break res;
+        }
+        base = base * base;
+    }
+}
+
+/// Performs a bitwise right shift on the given value by a specified number of bits.
+pub fn shr<
+    T,
+    U,
+    +Zero<T>,
+    +Zero<U>,
+    +One<T>,
+    +One<U>,
+    +Add<T>,
+    +Add<U>,
+    +Sub<U>,
+    +Div<T>,
+    +Mul<T>,
+    +Div<U>,
+    +Rem<U>,
+    +Copy<T>,
+    +Copy<U>,
+    +Drop<T>,
+    +Drop<U>,
+    +PartialOrd<U>,
+    +PartialEq<U>,
+    +BitSize<T>,
+    +Into<usize, U>
+>(
+    self: T, shift: U
+) -> T {
+    if shift > BitSize::<T>::bits().try_into().unwrap() - One::one() {
+        return Zero::zero();
+    }
+
+    let two = One::one() + One::one();
+    self / fast_power(two, shift)
+}
+
+/// Performs a bitwise left shift on the given value by a specified number of bits.
+pub fn shl<
+    T,
+    U,
+    +Zero<T>,
+    +Zero<U>,
+    +One<T>,
+    +One<U>,
+    +Add<T>,
+    +Add<U>,
+    +Sub<U>,
+    +Mul<T>,
+    +Div<U>,
+    +Rem<U>,
+    +Copy<T>,
+    +Copy<U>,
+    +Drop<T>,
+    +Drop<U>,
+    +PartialOrd<U>,
+    +PartialEq<U>,
+    +BitSize<T>,
+    +Into<usize, U>
+>(
+    self: T, shift: U,
+) -> T {
+    if shift > BitSize::<T>::bits().into() - One::one() {
+        return Zero::zero();
+    }
+    let two = One::one() + One::one();
+    self * fast_power(two, shift)
+}
+
