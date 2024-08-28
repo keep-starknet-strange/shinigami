@@ -52,15 +52,16 @@ pub trait EngineTrait {
     fn sub_script(ref self: Engine) -> ByteArray;
 
     // check the stack size before pushing data
-    fn check_stack_size(ref self: Engine) -> Result<bool, felt252>;
+    fn check_stack_size(ref self: Engine) -> Result<(), felt252>;
 }
+pub const MAX_STACK_SIZE: u32 = 1000;
 
 pub impl EngineImpl of EngineTrait {
-    fn check_stack_size(ref self: Engine) -> Result<bool, felt252> {
-        if self.dstack.len() >= 1000 {
+    fn check_stack_size(ref self: Engine) -> Result<(), felt252> {
+        if self.dstack.len() >= MAX_STACK_SIZE {
             return Result::Err(Error::SCRIPT_STACK_SIZE_EXCEEDED);
         }
-        return Result::Ok(true);
+        return Result::Ok(());
     }
     fn new(
         script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
