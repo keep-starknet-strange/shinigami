@@ -50,9 +50,18 @@ pub trait EngineTrait {
     fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool;
     // Return the script since last OP_CODESEPARATOR
     fn sub_script(ref self: Engine) -> ByteArray;
+
+    // check the stack size before pushing data
+    fn check_stack_size(ref self: Engine) -> Result<bool, felt252>;
 }
 
 pub impl EngineImpl of EngineTrait {
+    fn check_stack_size(ref self: Engine) -> Result<bool, felt252> {
+        if self.dstack.len() >= 1000 {
+            return Result::Err(Error::SCRIPT_STACK_SIZE_EXCEEDED);
+        }
+        return Result::Ok(true);
+    }
     fn new(
         script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
     ) -> Engine {
@@ -110,10 +119,15 @@ pub impl EngineImpl of EngineTrait {
         Opcode::is_opcode_always_illegal(opcode, ref self)?;
 
         if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
+            // check stack size
+            self.check_stack_size()?;
             Opcode::is_opcode_disabled(opcode, ref self)?;
             self.opcode_idx += 1;
             return Result::Ok(true);
         }
+
+        // check stack size
+        self.check_stack_size()?;
 
         Opcode::execute(opcode, ref self)?;
         self.opcode_idx += 1;
