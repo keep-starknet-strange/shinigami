@@ -13,8 +13,8 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { StackItem } from "../../types";
 
 export default function ScriptEditor() {
-  const [scriptSig, setScriptSig] = useState("ScriptSig");
-  const [scriptPubKey, setScriptPubKey] = useState("ScriptPubKey");
+  const [scriptSig, setScriptSig] = useState("");
+  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL OP_HASH160");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -44,8 +44,8 @@ export default function ScriptEditor() {
         body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
       });
       const result = await response.json();
-      JSON.parse(result.message).map((item: string, index: number) => {
-        stack.push({ id: index + 1, value: item });
+      JSON.parse(result.message).reverse().map((item: string, _: number) => {
+        stack.push({ value: item });
       })
       setStackContent(stack);
     } catch (err: any) {

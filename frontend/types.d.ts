@@ -1,5 +1,4 @@
 export interface StackItem {
-    id: number;
     value: string;
 }
   

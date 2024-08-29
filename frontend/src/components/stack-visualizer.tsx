@@ -19,10 +19,7 @@ export default function StackVisualizer({
         <table className="w-full bg-black table-auto rounded-b-xl rounded-t-xl min-h-48">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
-              <th className="py-2.5 pl-3.5 pr-1 text-left w-16 text-white">
-                ID
-              </th>
-              <th className="py-2.5 pl-1 text-left text-white">Value</th>
+              <th className="py-2.5 pl-3 text-left text-white">Value</th>
             </tr>
           </thead>
           <tbody>
@@ -32,20 +29,14 @@ export default function StackVisualizer({
               </tr>
             ) : stackContent.length === 1 ? (
               <tr className="border-t border-[#2B2B2B] w-full h-40 align-top">
-                <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white align-top">
-                  {stackContent[0].id}
-                </td>
-                <td className="py-2 pl-1 text-white align-top">
+                <td className="py-2 pl-4 text-white align-top">
                   {stackContent[0].value}
                 </td>
               </tr>
             ) : (
-              stackContent.map((item) => (
-                <tr key={item.id} className="border-t border-[#2B2B2B] w-full">
-                  <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white">
-                    {item.id}
-                  </td>
-                  <td className="py-2 pl-1 text-white">{item.value}</td>
+              stackContent.map((item, idx) => (
+                <tr key={idx} className="border-t border-[#2B2B2B] w-full">
+                  <td className="py-2 pl-4 text-white">{item.value}</td>
                 </tr>
               ))
             )}
