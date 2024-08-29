@@ -9,23 +9,49 @@ import refreshImage from "@/images/refresh-icon.svg";
 import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
 import clsx from "@/utils/lib";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { StackItem } from "../../types";
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("ScriptSig");
   const [scriptPubKey, setScriptPubKey] = useState("ScriptPubKey");
 
-  const [stackContent, setStackContent] = useState<
-    { id: number; value: string }[]
-  >([]);
+  const [stackContent, setStackContent] = useState<StackItem[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
-  const handleRunScript = () => {
-    const newStackContent = [
-      { id: 1, value: "0x42" },
-      { id: 2, value: "0x01" },
-      { id: 3, value: "0x03" },
-    ];
-    setStackContent(newStackContent);
+  const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
+
+  const handleRunScript = async () => {
+    if (scriptPubKey.length > MAX_SIZE) {
+      setError("Script Public Key exceeds maximum allowed size");
+      return;
+    }
+    if (scriptSig.length > MAX_SIZE) {
+      setError("Script Signature exceeds maximum allowed size");
+      return;
+    }
+
+    const stack: StackItem[] = [];
+    setIsFetching(true);
+    setError(undefined);
+    try {
+      const response = await fetch("http://localhost:3000/run-script", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
+      });
+      const result = await response.json();
+      JSON.parse(result.message).map((item: string, index: number) => {
+        stack.push({ id: index + 1, value: item });
+      })
+      setStackContent(stack);
+    } catch (err: any) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setIsFetching(false);
+    }
   };
 
   const [split, setSplit] = useState(false);
@@ -48,6 +74,28 @@ export default function ScriptEditor() {
     });
   };
 
+  const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
+    <div
+      className={clsx(
+        height,
+        "w-full border-8 border-[#232523AE] bg-black overflow-y",
+      )}
+    >
+      <Editor
+        beforeMount={setEditorTheme}
+        theme="darker"
+        defaultLanguage="plaintext"
+        value={value || ""}
+        onChange={(newValue) => onChange(newValue || "")}
+        options={{
+          fontSize: 16,
+          lineHeight: 24,
+          renderLineHighlight: "none",
+        }}
+      />
+    </div>
+  );
+
   return (
     <div className="w-full min-h-screen h-full">
       <div className="w-full flex flex-row items-center justify-between">
@@ -63,57 +111,22 @@ export default function ScriptEditor() {
             {split ? "Unsplit" : "Split"} Editor
           </p>
         </button>
-      </div>
-      <div
-        className={clsx(
-          split ? "border-b-4 h-[160px]" : "rounded-b-xl h-[400px]",
-          "w-full border-8 border-[#232523AE] bg-black overflow-y rounded-tr-xl",
-        )}
-      >
-        <Editor
-          beforeMount={setEditorTheme}
-          theme="darker"
-          defaultLanguage="plaintext"
-          value={scriptSig}
-          onChange={(value: string | undefined) =>
-            setScriptSig(value || "") as any
-          }
-          options={{
-            fontSize: 16,
-            lineHeight: 24,
-            renderLineHighlight: "none",
-          }}
-        />
-      </div>
+      </div>{
+        !split && renderEditor(scriptPubKey, setScriptPubKey, "rounded-b-xl h-[400px] rounded-tr-xl")}
       {split && (
-        <div
-          className={clsx(
-            split && "border-t-4 h-[240px]",
-            "w-full border-8 border-[#232523AE] bg-black rounded-b-xl",
-          )}
-        >
-          <Editor
-            theme="darker"
-            defaultLanguage="plaintext"
-            value={scriptPubKey}
-            onChange={(value: string | undefined) =>
-              setScriptPubKey(value || "")
-            }
-            options={{
-              fontSize: 16,
-              lineHeight: 24,
-              renderLineHighlight: "none",
-            }}
-          />
-        </div>
+        <>
+          {renderEditor(scriptSig, setScriptSig, "border-b-4 h-[160px] rounded-tr-xl")}
+          {renderEditor(scriptPubKey, setScriptPubKey, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
+        </>
       )}
       <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-10">
         <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
           <button
             className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]"
             onClick={handleRunScript}
+            disabled={isFetching}
           >
-            Run Script
+            {error ? error : isFetching ? "Running..." : "Run Script"}
           </button>
           <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
             Debug Script
