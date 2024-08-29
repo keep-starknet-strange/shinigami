@@ -36,7 +36,8 @@ export default function ScriptEditor() {
     setIsFetching(true);
     setError(undefined);
     try {
-      const response = await fetch("http://localhost:3000/run-script", {
+      let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/run-script`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         mode: 'cors',

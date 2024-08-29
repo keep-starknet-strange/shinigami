@@ -27,6 +27,11 @@ function extractStack(output) {
 app.use(cors());
 app.use(express.json()); 
 
+// Default route
+app.get('/', (_, res) => {
+  res.sendStatus(200);
+});
+
 app.post('/run-script', (req, res) => {
     const { pub_key, sig } = req.body;
     if (!pub_key) {
@@ -58,7 +63,7 @@ app.post('/run-script', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
