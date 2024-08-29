@@ -8,6 +8,7 @@ pub mod opcodes {
     pub mod opcodes;
     pub mod constants;
     pub mod flow;
+    pub mod locktime;
     pub mod stack;
     pub mod splice;
     pub mod bitwise;
@@ -18,6 +19,7 @@ pub mod opcodes {
     mod tests {
         mod test_constants;
         mod test_flow;
+        mod test_locktime;
         mod test_stack;
         mod test_splice;
         mod test_bitwise;
