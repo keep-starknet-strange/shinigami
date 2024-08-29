@@ -196,7 +196,7 @@ pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
     let mut i = 0;
     let byte_array_len = byte_array.len().into();
     while i < byte_array_len {
-        value+= byte_array[i].into() * power(byte_shift, i.into()).into();
+        value += byte_array[i].into() * power(byte_shift, i.into()).into();
         i += 1;
     };
     value
