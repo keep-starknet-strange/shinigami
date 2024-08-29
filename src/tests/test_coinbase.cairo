@@ -39,7 +39,9 @@ fn test_coinbase_transaction_multiple_outputs() {
     ]
         .span();
 
-    let tx = TransactionTrait::new_coinbase(version, block_height, coinbase_data.clone(), fees, outputs);
+    let tx = TransactionTrait::new_coinbase(
+        version, block_height, coinbase_data.clone(), fees, outputs
+    );
 
     assert(tx.transaction_outputs.len() == 3, 'Should have 3 outputs');
     assert(tx.transaction_outputs.at(1).value == @100, 'Incorrect output1 value');
@@ -80,10 +82,14 @@ fn test_coinbase_transaction_block_height_encoding() {
     let tx253 = TransactionTrait::new_coinbase(version, Option::Some(253), "test", fees, outputs);
     assert(tx253.transaction_inputs.at(0).signature_script.len() == 7, 'Incorrect script length');
 
-    let tx65535 = TransactionTrait::new_coinbase(version, Option::Some(65535), "test", fees, outputs);
+    let tx65535 = TransactionTrait::new_coinbase(
+        version, Option::Some(65535), "test", fees, outputs
+    );
     assert(tx65535.transaction_inputs.at(0).signature_script.len() == 7, 'Incorrect script length');
 
-    let tx65536 = TransactionTrait::new_coinbase(version, Option::Some(65536), "test", fees, outputs);
+    let tx65536 = TransactionTrait::new_coinbase(
+        version, Option::Some(65536), "test", fees, outputs
+    );
     assert(tx65536.transaction_inputs.at(0).signature_script.len() == 9, 'Incorrect script length');
 }
 
