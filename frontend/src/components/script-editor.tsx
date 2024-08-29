@@ -17,8 +17,12 @@ export default function ScriptEditor() {
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL OP_HASH160");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
+
   const [isFetching, setIsFetching] = useState(false);
+  const [isDebugging, setIsDebugging] = useState(false);
+
   const [error, setError] = useState<string | undefined>();
+  const [debugError, setDebugError] = useState<string | undefined>();
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
@@ -52,6 +56,39 @@ export default function ScriptEditor() {
       setError(err.message || "An error occurred");
     } finally {
       setIsFetching(false);
+    }
+  };
+
+  const handleDebugScript = async () => {
+    if (scriptPubKey.length > MAX_SIZE) {
+      setDebugError("Script Public Key exceeds maximum allowed size");
+      return;
+    }
+    if (scriptSig.length > MAX_SIZE) {
+      setDebugError("Script Signature exceeds maximum allowed size");
+      return;
+    }
+
+    const stack: StackItem[] = [];
+    setIsDebugging(true);
+    setDebugError(undefined);
+    try {
+      let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/debug-script`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
+      });
+      const result = await response.json();
+      JSON.parse(result.message).reverse().map((item: string, _: number) => {
+        stack.push({ value: item });
+      })
+      setStackContent(stack);
+    } catch (err: any) {
+      setDebugError(err.message || "An error occurred");
+    } finally {
+      setIsDebugging(false);
     }
   };
 
@@ -129,8 +166,10 @@ export default function ScriptEditor() {
           >
             {error ? error : isFetching ? "Running..." : "Run Script"}
           </button>
-          <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
-            Debug Script
+          <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase"
+            onClick={handleDebugScript}
+            disabled={isDebugging}>
+            {debugError ? debugError : isDebugging ? "Debugging..." : "Debug Script"}
           </button>
         </div>
         <button className="flex flex-row items-center justify-center space-x-1.5">
