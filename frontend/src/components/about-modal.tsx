@@ -17,10 +17,9 @@ export const AboutModal: FC<AboutModalProps> = ({ isOpen, onClose }) => (
     open={isOpen}
     handler={onClose}
     className="bg-black w-full"
-    nonce={() => {}}
-    onResize={() => {}}
-    onResizeCapture={() => {}}
-  >
+    nonce={undefined}
+    onResize={() => { }}
+    onResizeCapture={() => { }} placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
     <button
       className="p-1.5 border-2 border-[#00FF5E] rounded-md absolute right-0 bg-[#00FF5E]/10 z-20"
       onClick={onClose}

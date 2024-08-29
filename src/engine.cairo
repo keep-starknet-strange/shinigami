@@ -50,19 +50,15 @@ pub trait EngineTrait {
     fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool;
     // Return the script since last OP_CODESEPARATOR
     fn sub_script(ref self: Engine) -> ByteArray;
-
-    // check the stack size before pushing data
+    // Ensure the stack size is within limits
     fn check_stack_size(ref self: Engine) -> Result<(), felt252>;
+    // Print engine data as a JSON object
+    fn json(ref self: Engine);
 }
+
 pub const MAX_STACK_SIZE: u32 = 1000;
 
 pub impl EngineImpl of EngineTrait {
-    fn check_stack_size(ref self: Engine) -> Result<(), felt252> {
-        if self.dstack.len() + self.astack.len() >= MAX_STACK_SIZE {
-            return Result::Err(Error::SCRIPT_STACK_SIZE_EXCEEDED);
-        }
-        return Result::Ok(());
-    }
     fn new(
         script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
     ) -> Engine {
@@ -110,25 +106,50 @@ pub impl EngineImpl of EngineTrait {
     }
 
     fn step(ref self: Engine) -> Result<bool, felt252> {
-        // TODO: Script idx
+        if self.script_idx >= self.scripts.len() {
+            return Result::Ok(false);
+        }
         let script = *(self.scripts[self.script_idx]);
         if self.opcode_idx >= script.len() {
             return Result::Ok(false);
         }
-
         let opcode = script[self.opcode_idx];
-        Opcode::is_opcode_always_illegal(opcode, ref self)?;
 
-        if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
-            Opcode::is_opcode_disabled(opcode, ref self)?;
-            self.opcode_idx += 1;
-            return Result::Ok(true);
+        let illegal_opcode = Opcode::is_opcode_always_illegal(opcode, ref self);
+        if illegal_opcode.is_err() {
+            return Result::Err(illegal_opcode.unwrap_err());
         }
 
-        Opcode::execute(opcode, ref self)?;
-        self.opcode_idx += 1;
-        // check stack size
+        if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
+            if Opcode::is_data_opcode(opcode) {
+                let opcode_32: u32 = opcode.into();
+                self.opcode_idx += opcode_32 + 1;
+                return Result::Ok(true);
+            } else {
+                let res = Opcode::is_opcode_disabled(opcode, ref self);
+                if res.is_err() {
+                    return Result::Err(res.unwrap_err());
+                }
+                self.opcode_idx += 1;
+                return Result::Ok(true);
+            }
+        }
+
+        let res = Opcode::execute(opcode, ref self);
+        if res.is_err() {
+            return Result::Err(res.unwrap_err());
+        }
         self.check_stack_size()?;
+        self.opcode_idx += 1;
+        if self.opcode_idx >= script.len() {
+            if self.cond_stack.len() > 0 {
+                return Result::Err(Error::SCRIPT_UNBALANCED_CONDITIONAL_STACK);
+            }
+            self.astack = ScriptStackImpl::new();
+            self.opcode_idx = 0;
+            self.last_code_sep = 0;
+            self.script_idx += 1;
+        }
         return Result::Ok(true);
     }
 
@@ -166,6 +187,11 @@ pub impl EngineImpl of EngineTrait {
                     err = res.unwrap_err();
                     break;
                 }
+                let res = self.check_stack_size();
+                if res.is_err() {
+                    err = res.unwrap_err();
+                    break;
+                }
                 self.opcode_idx += 1;
             };
             if err != '' {
@@ -181,9 +207,6 @@ pub impl EngineImpl of EngineTrait {
             self.script_idx += 1;
             // TODO: other things
         };
-        // TODO: Remove
-        self.dstack.json();
-
         if err != '' {
             return Result::Err(err);
         }
@@ -229,5 +252,16 @@ pub impl EngineImpl of EngineTrait {
             i += 1;
         };
         return sub_script;
+    }
+
+    fn check_stack_size(ref self: Engine) -> Result<(), felt252> {
+        if self.dstack.len() + self.astack.len() > MAX_STACK_SIZE {
+            return Result::Err(Error::SCRIPT_STACK_SIZE_EXCEEDED);
+        }
+        return Result::Ok(());
+    }
+
+    fn json(ref self: Engine) {
+        self.dstack.json();
     }
 }

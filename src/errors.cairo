@@ -14,7 +14,7 @@ pub mod Error {
     pub const FINALIZED_TX_CLTV: felt252 = 'Finalized tx in OP_CLTV';
     pub const INVALID_TX_VERSION: felt252 = 'Invalid transaction version';
     pub const SCRIPT_INVALID: felt252 = 'Invalid script data';
-    pub const SCRIPT_STACK_SIZE_EXCEEDED: felt252 = 'max script stack size exceeded';
+    pub const SCRIPT_STACK_SIZE_EXCEEDED: felt252 = 'Script stack size exceeded';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
