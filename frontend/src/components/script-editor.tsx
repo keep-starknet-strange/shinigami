@@ -49,6 +49,7 @@ export default function ScriptEditor() {
         "scrollbarSlider.hoverBackground": "#258F4245",
       },
     });
+    monaco.editor.remeasureFonts();
   };
 
   return (
@@ -74,10 +75,7 @@ export default function ScriptEditor() {
         )}
       >
         <Editor
-          beforeMount={(monaco) => {
-            setEditorTheme(monaco);
-            monaco.editor.remeasureFonts();
-          }}
+          beforeMount={setEditorTheme}
           theme="darker"
           defaultLanguage="plaintext"
           value={scriptSig}

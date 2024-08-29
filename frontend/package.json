@@ -11,7 +11,6 @@
   "dependencies": {
     "@material-tailwind/react": "^2.1.9",
     "@monaco-editor/react": "^4.6.0",
-    "@next/font": "^14.2.7",
     "autoprefixer": "^10.4.20",
     "next": "14.2.5",
     "react": "^18",
