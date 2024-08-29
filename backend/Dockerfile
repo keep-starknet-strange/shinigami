@@ -1,4 +1,4 @@
-FROM node:21.7.1-alpine
+FROM --platform=linux/amd64 node:21.7.1-alpine
 
 RUN apk add --no-cache bash curl git jq ncurses
 

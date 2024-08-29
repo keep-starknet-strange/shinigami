@@ -27,6 +27,11 @@ function extractStack(output) {
 app.use(cors());
 app.use(express.json()); 
 
+// Default route
+app.get('/', (_, res) => {
+  res.sendStatus(200);
+});
+
 app.post('/run-script', (req, res) => {
     const { pub_key, sig } = req.body;
     if (!pub_key) {
