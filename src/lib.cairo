@@ -47,5 +47,7 @@ pub mod signature {
 }
 pub mod transaction;
 #[cfg(test)]
-mod test_coinbase;
+mod tests {
+    mod test_coinbase;
+}
 mod main;

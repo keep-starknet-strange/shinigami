@@ -1,17 +1,15 @@
-use shinigami::transaction::TransactionTrait;
-use shinigami::transaction::Transaction;
-use shinigami::transaction::TransactionOutput;
-use shinigami::transaction::TransactionInput;
+use shinigami::transaction::{Transaction, TransactionTrait, TransactionInput, TransactionOutput};
 use shinigami::utils;
 
 #[test]
 fn test_basic_coinbase_transaction() {
+    let version = 1;
     let block_height = Option::None;
     let coinbase_data = "test";
     let fees = 1000;
     let outputs = array![TransactionOutput { value: 0, publickey_script: "miner" }].span();
 
-    let tx = TransactionTrait::new_coinbase(block_height, coinbase_data, fees, outputs);
+    let tx = TransactionTrait::new_coinbase(version, block_height, coinbase_data, fees, outputs);
 
     assert(tx.transaction_inputs.len() == 1, 'Should have one input');
     assert(tx.transaction_inputs.at(0).previous_outpoint.hash == @0, 'Input hash should be 0');
@@ -31,6 +29,7 @@ fn test_basic_coinbase_transaction() {
 
 #[test]
 fn test_coinbase_transaction_multiple_outputs() {
+    let version = 2;
     let block_height = Option::Some(21000);
     let coinbase_data = "test";
     let fees = 2000;
@@ -40,7 +39,7 @@ fn test_coinbase_transaction_multiple_outputs() {
     ]
         .span();
 
-    let tx = TransactionTrait::new_coinbase(block_height, coinbase_data.clone(), fees, outputs);
+    let tx = TransactionTrait::new_coinbase(version, block_height, coinbase_data.clone(), fees, outputs);
 
     assert(tx.transaction_outputs.len() == 3, 'Should have 3 outputs');
     assert(tx.transaction_outputs.at(1).value == @100, 'Incorrect output1 value');
@@ -68,22 +67,23 @@ fn test_block_subsidy_calculation() {
 
 #[test]
 fn test_coinbase_transaction_block_height_encoding() {
+    let version = 2;
     let fees = 1000;
     let outputs = array![TransactionOutput { value: 0, publickey_script: "miner" }].span();
 
-    let tx0 = TransactionTrait::new_coinbase(Option::Some(0), "test", fees, outputs);
+    let tx0 = TransactionTrait::new_coinbase(version, Option::Some(0), "test", fees, outputs);
     assert(tx0.transaction_inputs.at(0).signature_script.len() == 5, 'Incorrect script length');
 
-    let tx252 = TransactionTrait::new_coinbase(Option::Some(252), "test", fees, outputs);
+    let tx252 = TransactionTrait::new_coinbase(version, Option::Some(252), "test", fees, outputs);
     assert(tx252.transaction_inputs.at(0).signature_script.len() == 5, 'Incorrect script length');
 
-    let tx253 = TransactionTrait::new_coinbase(Option::Some(253), "test", fees, outputs);
+    let tx253 = TransactionTrait::new_coinbase(version, Option::Some(253), "test", fees, outputs);
     assert(tx253.transaction_inputs.at(0).signature_script.len() == 7, 'Incorrect script length');
 
-    let tx65535 = TransactionTrait::new_coinbase(Option::Some(65535), "test", fees, outputs);
+    let tx65535 = TransactionTrait::new_coinbase(version, Option::Some(65535), "test", fees, outputs);
     assert(tx65535.transaction_inputs.at(0).signature_script.len() == 7, 'Incorrect script length');
 
-    let tx65536 = TransactionTrait::new_coinbase(Option::Some(65536), "test", fees, outputs);
+    let tx65536 = TransactionTrait::new_coinbase(version, Option::Some(65536), "test", fees, outputs);
     assert(tx65536.transaction_inputs.at(0).signature_script.len() == 9, 'Incorrect script length');
 }
 

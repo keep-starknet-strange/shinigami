@@ -37,16 +37,18 @@ pub trait TransactionTrait {
         locktime: u32
     ) -> Transaction;
     fn new_coinbase(
+        version: i32,
         block_height: Option<u32>,
         coinbase_data: ByteArray,
         fees: i64,
-        outputs: Span<TransactionOutput>
+        outputs: Span<TransactionOutput>,
     ) -> Transaction;
     fn new_signed(script_sig: ByteArray) -> Transaction;
     fn btc_encode(self: Transaction, encoding: u32) -> ByteArray;
     fn serialize(self: Transaction) -> ByteArray;
     fn serialize_no_witness(self: Transaction) -> ByteArray;
     fn calculate_block_subsidy(block_height: u32) -> i64;
+    fn validate_coinbase(tx: Transaction) -> bool;
 }
 
 pub const BASE_ENCODING: u32 = 0x01;
@@ -74,10 +76,11 @@ pub impl TransactionImpl of TransactionTrait {
     /// - As per BIP34, they must include the block height in the first few bytes of the coinbase
     /// field
     fn new_coinbase(
+        version: i32,
         block_height: Option<u32>,
         coinbase_data: ByteArray,
         fees: i64,
-        outputs: Span<TransactionOutput>
+        outputs: Span<TransactionOutput>,
     ) -> Transaction {
         let mut coinbase_script: ByteArray = "";
         // Append block height if provided, using CompactSize encoding
@@ -117,7 +120,7 @@ pub impl TransactionImpl of TransactionTrait {
         };
 
         Transaction {
-            version: 1,
+            version: version,
             transaction_inputs: array![coinbase_input].span(),
             transaction_outputs: final_outputs.span(),
             locktime: 0,
@@ -206,6 +209,23 @@ pub impl TransactionImpl of TransactionTrait {
             return 0;
         }
         utils::shr::<i64, u32>(50 * 100000000, halvings)
+    }
+
+    fn validate_coinbase(tx: Transaction) -> bool {
+        if tx.transaction_inputs.len() != 1 {
+            return false;
+        }
+
+        let input = tx.transaction_inputs.at(0);
+        if input.previous_outpoint.hash != @0 || input.previous_outpoint.index != @0xFFFFFFFF {
+            return false;
+        }
+
+        let script_len = input.signature_script.len();
+        if script_len < 2 || script_len > 100 {
+            return false;
+        }
+        true
     }
 }
 
