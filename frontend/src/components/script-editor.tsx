@@ -1,5 +1,6 @@
 "use client";
 
+import { Jura } from "next/font/google";
 import StackVisualizer from "@/components/stack-visualizer";
 import { Editor } from "@monaco-editor/react";
 import Image from "next/image";
@@ -11,6 +12,8 @@ import unsplitImage from "@/images/unsplit.svg";
 import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useState } from "react";
 import { StackItem } from "../../types";
+
+const jura = Jura({subsets: ["latin"]});
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
@@ -73,6 +76,7 @@ export default function ScriptEditor() {
         "scrollbarSlider.hoverBackground": "#258F4245",
       },
     });
+    monaco.editor.remeasureFonts();
   };
 
   const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
@@ -89,6 +93,7 @@ export default function ScriptEditor() {
         value={value || ""}
         onChange={(newValue) => onChange(newValue || "")}
         options={{
+          fontFamily: `${jura.style.fontFamily}, sans-serif`,
           fontSize: 16,
           lineHeight: 24,
           renderLineHighlight: "none",
