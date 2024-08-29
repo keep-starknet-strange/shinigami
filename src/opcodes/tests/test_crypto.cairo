@@ -1,5 +1,3 @@
-use shinigami::engine::{Engine, EngineTrait};
-use shinigami::stack::ScriptStackTrait;
 use shinigami::opcodes::tests::utils;
 use shinigami::utils::hex_to_bytecode;
 use shinigami::errors::Error;
