@@ -1,7 +1,7 @@
-use shinigami::compiler::CompilerImpl;
-use shinigami::engine::{EngineImpl, Engine, EngineTrait};
-use shinigami::transaction::TransactionImpl;
-use shinigami::utils;
+use crate::compiler::CompilerImpl;
+use crate::engine::{EngineImpl, Engine, EngineTrait};
+use crate::transaction::TransactionImpl;
+use crate::utils;
 
 #[derive(Clone, Drop)]
 struct InputData {

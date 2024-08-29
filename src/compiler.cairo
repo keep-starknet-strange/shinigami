@@ -1,6 +1,6 @@
 use core::dict::Felt252Dict;
-use shinigami::opcodes::Opcode;
-use shinigami::utils;
+use crate::opcodes::Opcode;
+use crate::utils;
 
 // Compiler that takes a Bitcoin Script program and compiles it into a bytecode
 #[derive(Destruct)]

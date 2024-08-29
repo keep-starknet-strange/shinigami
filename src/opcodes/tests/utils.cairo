@@ -1,6 +1,6 @@
-use shinigami::compiler::CompilerImpl;
-use shinigami::engine::{Engine, EngineImpl};
-use shinigami::transaction::{Transaction, TransactionInput, TransactionOutput, OutPoint};
+use crate::compiler::CompilerImpl;
+use crate::engine::{Engine, EngineImpl};
+use crate::transaction::{Transaction, TransactionInput, TransactionOutput, OutPoint};
 
 // Runs a basic bitcoin script as the script_pubkey with empty script_sig
 pub fn test_compile_and_run(program: ByteArray) -> Engine {

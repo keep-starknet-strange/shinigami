@@ -1,10 +1,9 @@
-use shinigami::stack::{ScriptStack, ScriptStackImpl};
-use shinigami::cond_stack::{ConditionalStack, ConditionalStackImpl};
-use shinigami::opcodes::opcodes::Opcode;
-use shinigami::opcodes::flow;
-use shinigami::errors::Error;
-use shinigami::scriptflags::ScriptFlags;
-use shinigami::transaction::Transaction;
+use crate::cond_stack::{ConditionalStack, ConditionalStackImpl};
+use crate::errors::Error;
+use crate::opcodes::{flow, opcodes::Opcode};
+use crate::scriptflags::ScriptFlags;
+use crate::stack::{ScriptStack, ScriptStackImpl};
+use crate::transaction::Transaction;
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]

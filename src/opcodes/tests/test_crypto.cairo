@@ -1,7 +1,7 @@
-use shinigami::opcodes::tests::utils;
-use shinigami::utils::hex_to_bytecode;
-use shinigami::errors::Error;
-use shinigami::scriptnum::ScriptNum;
+use crate::errors::Error;
+use crate::opcodes::tests::utils;
+use crate::scriptnum::ScriptNum;
+use crate::utils::hex_to_bytecode;
 
 fn test_opcode_sha256_1() {
     let program = "OP_1 OP_SHA256";

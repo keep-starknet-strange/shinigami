@@ -1,8 +1,8 @@
-use shinigami::engine::{Engine, EngineTrait};
-use shinigami::stack::ScriptStackTrait;
-use shinigami::errors::Error;
-use shinigami::scriptflags::ScriptFlags;
-use shinigami::scriptnum::ScriptNum;
+use crate::engine::{Engine, EngineTrait};
+use crate::errors::Error;
+use crate::scriptflags::ScriptFlags;
+use crate::scriptnum::ScriptNum;
+use crate::stack::ScriptStackTrait;
 
 const LOCKTIME_THRESHOLD: u32 = 500000000; // Nov 5 00:53:20 1985 UTC
 const SEQUENCE_LOCKTIME_DISABLED: u32 = 0x80000000;

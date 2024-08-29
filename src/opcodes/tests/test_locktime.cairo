@@ -1,6 +1,6 @@
-use shinigami::opcodes::tests::utils;
-use shinigami::errors::Error;
-use shinigami::scriptflags::ScriptFlags;
+use crate::errors::Error;
+use crate::opcodes::tests::utils;
+use crate::scriptflags::ScriptFlags;
 
 #[test]
 fn test_opcode_checklocktime() {
