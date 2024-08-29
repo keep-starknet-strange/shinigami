@@ -21,12 +21,12 @@ export default function ScriptEditor() {
   const [isFetching, setIsFetching] = useState(false);
   const [isDebugging, setIsDebugging] = useState(false);
 
-  const [error, setError] = useState<string | undefined>();
+  const [runError, setRunError] = useState<string | undefined>();
   const [debugError, setDebugError] = useState<string | undefined>();
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
-  const handleRunScript = async () => {
+  const runScript = async (url: string, setIsLoading: Dispatch<SetStateAction<boolean>>, setError: Dispatch<SetStateAction<string | undefined>>) => {
     if (scriptPubKey.length > MAX_SIZE) {
       setError("Script Public Key exceeds maximum allowed size");
       return;
@@ -37,11 +37,11 @@ export default function ScriptEditor() {
     }
 
     const stack: StackItem[] = [];
-    setIsFetching(true);
+    setIsLoading(true);
     setError(undefined);
     try {
       let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const response = await fetch(`${backendUrl}/run-script`, {
+      const response = await fetch(`${backendUrl}/${url}`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         mode: 'cors',
@@ -55,42 +55,12 @@ export default function ScriptEditor() {
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
-      setIsFetching(false);
+      setIsLoading(false);
     }
   };
 
-  const handleDebugScript = async () => {
-    if (scriptPubKey.length > MAX_SIZE) {
-      setDebugError("Script Public Key exceeds maximum allowed size");
-      return;
-    }
-    if (scriptSig.length > MAX_SIZE) {
-      setDebugError("Script Signature exceeds maximum allowed size");
-      return;
-    }
-
-    const stack: StackItem[] = [];
-    setIsDebugging(true);
-    setDebugError(undefined);
-    try {
-      let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const response = await fetch(`${backendUrl}/debug-script`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        mode: 'cors',
-        body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
-      });
-      const result = await response.json();
-      JSON.parse(result.message).reverse().map((item: string, _: number) => {
-        stack.push({ value: item });
-      })
-      setStackContent(stack);
-    } catch (err: any) {
-      setDebugError(err.message || "An error occurred");
-    } finally {
-      setIsDebugging(false);
-    }
-  };
+  const handleRunScript = () => runScript("run-script", setIsFetching, setRunError);
+  const handleDebugScript = () => runScript("debug-script", setIsDebugging, setDebugError);
 
   const [split, setSplit] = useState(false);
 
@@ -164,7 +134,7 @@ export default function ScriptEditor() {
             onClick={handleRunScript}
             disabled={isFetching}
           >
-            {error ? error : isFetching ? "Running..." : "Run Script"}
+            {runError ? runError : isFetching ? "Running..." : "Run Script"}
           </button>
           <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase"
             onClick={handleDebugScript}
