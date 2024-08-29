@@ -58,7 +58,7 @@ pub const MAX_STACK_SIZE: u32 = 1000;
 
 pub impl EngineImpl of EngineTrait {
     fn check_stack_size(ref self: Engine) -> Result<(), felt252> {
-        if self.dstack.len() >= MAX_STACK_SIZE {
+        if self.dstack.len() + self.astack.len() >= MAX_STACK_SIZE {
             return Result::Err(Error::SCRIPT_STACK_SIZE_EXCEEDED);
         }
         return Result::Ok(());
@@ -120,18 +120,15 @@ pub impl EngineImpl of EngineTrait {
         Opcode::is_opcode_always_illegal(opcode, ref self)?;
 
         if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
-            // check stack size
-            self.check_stack_size()?;
             Opcode::is_opcode_disabled(opcode, ref self)?;
             self.opcode_idx += 1;
             return Result::Ok(true);
         }
 
-        // check stack size
-        self.check_stack_size()?;
-
         Opcode::execute(opcode, ref self)?;
         self.opcode_idx += 1;
+        // check stack size
+        self.check_stack_size()?;
         return Result::Ok(true);
     }
 
