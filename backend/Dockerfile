@@ -1,22 +1,33 @@
-FROM node:20.5.0
+FROM node:21.7.1-alpine
 
-SHELL ["bash", "-c"]
+RUN apk add --no-cache bash curl git jq ncurses
+
+SHELL ["/bin/bash", "-c"]
+RUN curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 2.7.1
 RUN curl https://get.starkli.sh | sh && \
-    source $HOME/.starkli/env && \
-    starkliup && \
-    git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.1 && \
-    . "$HOME/.asdf/asdf.sh" && \
-    . "$HOME/.asdf/completions/asdf.bash" && \
-    asdf plugin add scarb && \
-    asdf install scarb latest && \
-    asdf global scarb latest
+    source /root/.starkli/env && \
+    starkliup
+ENV PATH="$PATH:/root/.local/bin:/root/.starkli/bin"
+
+WORKDIR /tests
+
+COPY ./tests/text_to_byte_array.sh ./
 
 WORKDIR /backend
 
-COPY ./index.js ./package.json ./
-
+COPY ./backend/package.json ./backend/package-lock.json ./
 RUN npm i
 
-EXPOSE 3000
+COPY ./backend ./
+
+WORKDIR /
+
+COPY Scarb.toml Scarb.lock .tool-versions ./
+COPY ./src ./src
+RUN scarb build
+
+WORKDIR /backend
+
+EXPOSE 8080
 
 CMD ["node", "index.js"]
