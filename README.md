@@ -237,6 +237,10 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/od-hunter"><img src="https://avatars.githubusercontent.com/u/146340502?v=4?s=100" width="100px;" alt="Hunter001"/><br /><sub><b>Hunter001</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=od-hunter" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.xelmar.co/"><img src="https://avatars.githubusercontent.com/u/46507005?v=4?s=100" width="100px;" alt="IsraelRex"/><br /><sub><b>IsraelRex</b></sub></a><br /><a href="#design-Israelrex9" title="Design">🎨</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jsandinoDev"><img src="https://avatars.githubusercontent.com/u/49879640?v=4?s=100" width="100px;" alt="Josue Sandino"/><br /><sub><b>Josue Sandino</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=jsandinoDev" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/martinvibes"><img src="https://avatars.githubusercontent.com/u/127976766?v=4?s=100" width="100px;" alt="martin machiebe"/><br /><sub><b>martin machiebe</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=martinvibes" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 

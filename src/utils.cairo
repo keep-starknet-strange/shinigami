@@ -1,6 +1,6 @@
-use shinigami::opcodes::Opcode;
-use shinigami::scriptnum::ScriptNum;
 use core::sha256::{compute_sha256_byte_array};
+use crate::opcodes::Opcode;
+use crate::scriptnum::ScriptNum;
 
 // Checks if item starts with 0x
 // TODO: Check validity of hex?

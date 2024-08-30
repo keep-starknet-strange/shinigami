@@ -1,8 +1,7 @@
-use shinigami::engine::Engine;
-use shinigami::stack::ScriptStackTrait;
-use shinigami::cond_stack::ConditionalStackTrait;
-use shinigami::opcodes::Opcode;
-use shinigami::opcodes::utils;
+use crate::cond_stack::ConditionalStackTrait;
+use crate::engine::Engine;
+use crate::opcodes::{utils, Opcode};
+use crate::stack::ScriptStackTrait;
 
 pub fn is_branching_opcode(opcode: u8) -> bool {
     if opcode == Opcode::OP_IF

@@ -3,7 +3,7 @@ FROM --platform=linux/amd64 node:21.7.1-alpine
 RUN apk add --no-cache bash curl git jq ncurses
 
 SHELL ["/bin/bash", "-c"]
-RUN curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 2.7.1
+RUN curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 2.8.0
 RUN curl https://get.starkli.sh | sh && \
     source /root/.starkli/env && \
     starkliup

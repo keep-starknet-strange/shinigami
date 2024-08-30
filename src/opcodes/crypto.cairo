@@ -1,8 +1,8 @@
-use shinigami::engine::Engine;
-use shinigami::stack::ScriptStackTrait;
-use shinigami::signature::BaseSigVerifierTrait;
 use core::sha256::compute_sha256_byte_array;
-use shinigami::opcodes::utils;
+use crate::engine::Engine;
+use crate::opcodes::utils;
+use crate::signature::BaseSigVerifierTrait;
+use crate::stack::ScriptStackTrait;
 
 pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;

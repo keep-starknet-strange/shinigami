@@ -1,7 +1,7 @@
-use shinigami::compiler::CompilerImpl;
-use shinigami::engine::{EngineImpl, Engine, EngineTrait};
-use shinigami::transaction::TransactionImpl;
-use shinigami::utils;
+use crate::compiler::CompilerImpl;
+use crate::engine::{EngineImpl, Engine, EngineTrait};
+use crate::transaction::TransactionImpl;
+use crate::utils;
 
 #[derive(Clone, Drop)]
 struct InputData {
@@ -63,10 +63,10 @@ fn backend_debug(input: InputData) -> u8 {
         if res.is_err() {
             break;
         }
-        engine.json();
         if res.unwrap() == false {
             break;
         }
+        engine.json();
     };
     match res {
         Result::Ok(_) => {

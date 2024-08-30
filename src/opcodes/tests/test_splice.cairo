@@ -1,6 +1,6 @@
-use shinigami::scriptnum::ScriptNum;
-use shinigami::opcodes::tests::utils;
-use shinigami::errors::Error;
+use crate::errors::Error;
+use crate::opcodes::tests::utils;
+use crate::scriptnum::ScriptNum;
 
 #[test]
 fn test_op_size_zero_item() {

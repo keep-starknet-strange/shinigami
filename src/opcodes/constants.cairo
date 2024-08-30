@@ -1,6 +1,6 @@
-use shinigami::engine::{Engine, EngineTrait};
-use shinigami::stack::ScriptStackTrait;
-use shinigami::utils;
+use crate::engine::{Engine, EngineTrait};
+use crate::stack::ScriptStackTrait;
+use crate::utils;
 
 pub fn opcode_false(ref engine: Engine) -> Result<(), felt252> {
     engine.dstack.push_byte_array("");
