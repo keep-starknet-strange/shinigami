@@ -324,6 +324,15 @@
       "contributions": [
         "design"
       ]
+    },
+    {
+      "login": "jsandinoDev",
+      "name": "Josue Sandino",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49879640?v=4",
+      "profile": "https://github.com/jsandinoDev",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
