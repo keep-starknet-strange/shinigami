@@ -51,15 +51,15 @@ This will run the test-suite for all opcodes, integration, and testing Scripts.
 
 ## Supported Opcodes
 
-102/107 opcodes supported (95.33%).
+104/107 opcodes supported (97.20%).
 
 ```mermaid
 %%{init: {"pie": {"textPosition": 0.75}, "themeVariables": {"pieOuterStrokeWidth": "5px"}} }%%
 pie showData
     title Opcode Implementation Status
-    "Implemented" : 87
+    "Implemented" : 89
     "Disabled" : 15
-    "Not Implemented" : 5
+    "Not Implemented" : 3
 ```
 
 | Opcode                 | Hex       | Supported | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
@@ -167,8 +167,8 @@ pie showData
 | OP_CHECKMULTISIG       | 0xae      |           | Compares the first signature against each public key until it finds an ECDSA match. Starting with the subsequent public key, it compares the second signature against each remaining public key until it finds an ECDSA match. The process is repeated until all signatures have been checked or not enough public keys remain to produce a successful result. All signatures need to match a public key. If all signatures are valid, 1 is returned, 0 otherwise. Due to a bug, one extra unused value is removed from the stack. |
 | OP_CHECKMULTISIGVERIFY | 0xaf      |           | Same as OP_CHECKMULTISIG, but OP_VERIFY is executed afterward.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | OP_NOP1                | 0xb0      |     ✅     | The word is ignored. Does not mark transaction as invalid.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| OP_CHECKLOCKTIMEVERIFY | 0xb1      |           | Marks transaction as invalid if the top stack item is greater than the transaction's nLockTime field, otherwise script evaluation continues as though an OP_NOP was executed.                                                                                                                                                                                                                                                                                                                                                      |
-| OP_CHECKSEQUENCEVERIFY | 0xb2      |           | Marks transaction as invalid if the relative lock time of the input is not equal to or longer than the value of the top stack item.                                                                                                                                                                                                                                                                                                                                                                                                |
+| OP_CHECKLOCKTIMEVERIFY | 0xb1      |     ✅     | Marks transaction as invalid if the top stack item is greater than the transaction's nLockTime field, otherwise script evaluation continues as though an OP_NOP was executed.                                                                                                                                                                                                                                                                                                                                                      |
+| OP_CHECKSEQUENCEVERIFY | 0xb2      |     ✅     | Marks transaction as invalid if the relative lock time of the input is not equal to or longer than the value of the top stack item.                                                                                                                                                                                                                                                                                                                                                                                                |
 | OP_NOP4-OP_NOP10       | 0xb3-0xb9 |     ✅     | The word is ignored. Does not mark transaction as invalid.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | OP_CHECKSIGADD         | 0xba      |           | Increments n by one and returns to the stack if the signature is valid for the public key and transaction. Only available in tapscript.                                                                                                                                                                                                                                                                                                                                                                                            |
 
@@ -236,6 +236,10 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/bloomingpeach"><img src="https://avatars.githubusercontent.com/u/177087057?v=4?s=100" width="100px;" alt="Nguyen Dao"/><br /><sub><b>Nguyen Dao</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=bloomingpeach" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/od-hunter"><img src="https://avatars.githubusercontent.com/u/146340502?v=4?s=100" width="100px;" alt="Hunter001"/><br /><sub><b>Hunter001</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=od-hunter" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.xelmar.co/"><img src="https://avatars.githubusercontent.com/u/46507005?v=4?s=100" width="100px;" alt="IsraelRex"/><br /><sub><b>IsraelRex</b></sub></a><br /><a href="#design-Israelrex9" title="Design">🎨</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jsandinoDev"><img src="https://avatars.githubusercontent.com/u/49879640?v=4?s=100" width="100px;" alt="Josue Sandino"/><br /><sub><b>Josue Sandino</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=jsandinoDev" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/martinvibes"><img src="https://avatars.githubusercontent.com/u/127976766?v=4?s=100" width="100px;" alt="martin machiebe"/><br /><sub><b>martin machiebe</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=martinvibes" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

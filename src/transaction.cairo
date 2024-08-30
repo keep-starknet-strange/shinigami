@@ -1,4 +1,4 @@
-use shinigami::utils;
+use crate::utils;
 
 // Tracks previous transaction outputs
 #[derive(Drop, Copy)]
@@ -136,7 +136,7 @@ pub impl TransactionImpl of TransactionTrait {
                     previous_outpoint: OutPoint { hash: 0x0, index: 0, },
                     signature_script: script_sig,
                     witness: array![],
-                    sequence: 0,
+                    sequence: 0xffffffff,
                 }
             ]
                 .span(),

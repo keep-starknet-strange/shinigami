@@ -1,7 +1,7 @@
-use shinigami::engine::Engine;
-use shinigami::scriptnum::ScriptNum;
-use shinigami::stack::ScriptStackTrait;
-use shinigami::utils;
+use crate::engine::Engine;
+use crate::scriptnum::ScriptNum;
+use crate::stack::ScriptStackTrait;
+use crate::utils;
 
 pub fn opcode_toaltstack(ref engine: Engine) -> Result<(), felt252> {
     let value = engine.dstack.pop_byte_array()?;

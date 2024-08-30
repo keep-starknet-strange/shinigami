@@ -1,7 +1,7 @@
 use core::dict::{Felt252Dict, Felt252DictEntryTrait};
-use shinigami::scriptnum::ScriptNum;
-use shinigami::errors::Error;
-use shinigami::utils;
+use crate::errors::Error;
+use crate::scriptnum::ScriptNum;
+use crate::utils;
 
 #[derive(Destruct)]
 pub struct ScriptStack {

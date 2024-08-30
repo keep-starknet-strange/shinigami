@@ -1,5 +1,5 @@
-use shinigami::compiler::CompilerTraitImpl;
-use shinigami::engine::EngineTraitImpl;
+use crate::compiler::CompilerTraitImpl;
+use crate::engine::EngineTraitImpl;
 
 #[test]
 fn execution_test() {

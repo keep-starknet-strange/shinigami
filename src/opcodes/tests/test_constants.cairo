@@ -1,7 +1,7 @@
-use shinigami::utils::{int_to_hex, hex_to_bytecode};
-use shinigami::scriptnum::ScriptNum;
-use shinigami::opcodes::tests::utils;
-use shinigami::errors::Error;
+use crate::errors::Error;
+use crate::opcodes::tests::utils;
+use crate::scriptnum::ScriptNum;
+use crate::utils::{int_to_hex, hex_to_bytecode};
 
 fn test_op_n(value: u8) {
     let program = format!("OP_{}", value);

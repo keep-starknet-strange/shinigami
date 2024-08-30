@@ -1,6 +1,7 @@
 // Wrapper around Bitcoin Script 'sign-magnitude' 4 byte integer.
 pub mod ScriptNum {
-    use shinigami::errors::Error;
+    use crate::errors::Error;
+
     const BYTESHIFT: i64 = 256;
     const MAX_INT32: i32 = 2147483647;
     const MIN_INT32: i32 = -2147483648;
@@ -83,6 +84,41 @@ pub mod ScriptNum {
         try_into_num(input).unwrap()
     }
 
+    // Unwrap 'n' byte of sign-magnitude encoded ByteArray.
+    pub fn try_into_num_n_bytes(input: ByteArray, n: usize) -> Result<i64, felt252> {
+        let mut result: i64 = 0;
+        let mut i: u32 = 0;
+        let mut multiplier: i64 = 1;
+        if input.len() == 0 {
+            return Result::Ok(0);
+        }
+        let snap_input = @input;
+        while i < snap_input.len() - 1 {
+            result += snap_input.at(i).unwrap().into() * multiplier;
+            multiplier *= BYTESHIFT;
+            i += 1;
+        };
+        // Recover value and sign from 'sign-magnitude' byte.
+        let sign_byte: i64 = input.at(i).unwrap().into();
+        if sign_byte >= 128 {
+            result = (multiplier * (sign_byte - 128) * -1) - result;
+        } else {
+            result += sign_byte * multiplier;
+        }
+        if integer_bytes_len(result.into()) > n {
+            return Result::Err(Error::SCRIPTNUM_OUT_OF_RANGE);
+        }
+        return Result::Ok(result);
+    }
+
+    pub fn into_num_n_bytes(input: ByteArray, n: usize) -> i64 {
+        try_into_num_n_bytes(input, n).unwrap()
+    }
+
+    pub fn unwrap_n(input: ByteArray, n: usize) -> i64 {
+        try_into_num_n_bytes(input, n).unwrap()
+    }
+
     // Return the minimal number of byte to represent 'value'.
     fn integer_bytes_len(mut value: i128) -> usize {
         if value < 0 {
@@ -106,6 +142,7 @@ pub mod ScriptNum {
         value.try_into().unwrap()
     }
 
+    // Return i64 as an i32 within range [-2^31, 2^31 - 1].
     pub fn to_int32(mut n: i64) -> i32 {
         if n > MAX_INT32.into() {
             return MAX_INT32;

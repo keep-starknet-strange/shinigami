@@ -1,11 +1,4 @@
-interface StackItem {
-  id: number;
-  value: string;
-}
-
-interface StackVisualizerProps {
-  stackContent: StackItem[];
-}
+import { StackVisualizerProps } from "../../types";
 
 export default function StackVisualizer({
   stackContent,
@@ -23,30 +16,30 @@ export default function StackVisualizer({
         </div>
       </div>
       <div className="w-full border-8 border-[#232523AE]/10 rounded-b-xl space-y-2.5 bg-[#232523AE] h-fit">
-        <table className="w-full bg-black table-fixed rounded-b-xl rounded-t-xl min-h-48">
+        <table className="w-full bg-black table-auto rounded-b-xl rounded-t-xl min-h-48">
           <thead>
             <tr className="border-b border-[#2B2B2B]">
-              <th className="py-2.5 pl-3.5 pr-1 text-left w-16 text-white">
-                ID
-              </th>
-              <th className="py-2.5 pl-1 text-left text-white">Value</th>
+              <th className="py-2.5 pl-3 text-left text-white">Value</th>
             </tr>
           </thead>
-          <tbody className="h-fit">
-            {stackContent.length == 0
-              ? Array.from({ length: 1 }).map((_, i) => (
-                  <tr key={i} className="border-t border-[#2B2B2B]">
-                    <td className="w-full h-40" />
-                  </tr>
-                ))
-              : stackContent.map((item) => (
-                  <tr key={item.id} className="border-t border-[#2B2B2B]">
-                    <td className="py-2 pl-3.5 pr-1 w-16 truncate text-white">
-                      {item.id}
-                    </td>
-                    <td className="py-2 pl-1 text-white">{item.value}</td>
-                  </tr>
-                ))}
+          <tbody>
+            {stackContent.length === 0 ? (
+              <tr>
+                <td className="w-full h-40" colSpan={2} />
+              </tr>
+            ) : stackContent.length === 1 ? (
+              <tr className="border-t border-[#2B2B2B] w-full h-40 align-top">
+                <td className="py-2 pl-4 text-white align-top">
+                  {stackContent[0].value}
+                </td>
+              </tr>
+            ) : (
+              stackContent.map((item, idx) => (
+                <tr key={idx} className="border-t border-[#2B2B2B] w-full">
+                  <td className="py-2 pl-4 text-white">{item.value}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
 

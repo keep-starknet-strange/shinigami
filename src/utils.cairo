@@ -1,7 +1,7 @@
-use shinigami::opcodes::Opcode;
-use shinigami::scriptnum::ScriptNum;
 use core::sha256::{compute_sha256_byte_array};
 use core::num::traits::{Zero, One, BitSize};
+use crate::opcodes::Opcode;
+use crate::scriptnum::ScriptNum;
 
 // Checks if item starts with 0x
 // TODO: Check validity of hex?
@@ -190,6 +190,7 @@ pub fn number_to_bytecode(script_item: @ByteArray) -> ByteArray {
     bytecode
 }
 
+// TODO: Endian
 pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
     let byte_shift = 256;
     let mut value = 0;
