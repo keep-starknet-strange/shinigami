@@ -205,29 +205,16 @@ pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
 pub fn byte_array_to_felt252_little_endian(byte_array: @ByteArray) -> felt252 {
     let byte_shift = 256;
     let mut value = 0;
-    let mut i = 0;
     let byte_array_len = byte_array.len().into();
-    while i < byte_array_len {
-        value += byte_array[i].into() * power(byte_shift, i.into()).into();
-        i += 1;
+    let mut i = byte_array_len - 1;
+    while i >= 0 {
+        value = value * byte_shift + byte_array[i].into();
+        if i == 0 {
+            break;
+        }
+        i -= 1;
     };
     value
-}
-
-pub fn power(base: u128, exponent: u128) -> u128 {
-    let mut result = 1_u128;
-    let mut exp = exponent;
-    let mut b = base;
-
-    while exp > 0 {
-        if exp % 2 == 1 {
-            result *= b;
-        }
-        exp /= 2;
-        b *= b;
-    };
-
-    result
 }
 
 // TODO: More efficient way to do this
