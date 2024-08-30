@@ -1,6 +1,7 @@
 // Wrapper around Bitcoin Script 'sign-magnitude' 4 byte integer.
 pub mod ScriptNum {
-    use shinigami::errors::Error;
+    use crate::errors::Error;
+
     const BYTESHIFT: i64 = 256;
     const MAX_INT32: i32 = 2147483647;
     const MIN_INT32: i32 = -2147483648;

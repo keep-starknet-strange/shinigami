@@ -1,6 +1,6 @@
-use shinigami::engine::Engine;
-use shinigami::stack::ScriptStackTrait;
-use shinigami::opcodes::utils;
+use crate::engine::Engine;
+use crate::opcodes::utils;
+use crate::stack::ScriptStackTrait;
 
 pub fn opcode_1add(ref engine: Engine) -> Result<(), felt252> {
     let value = engine.dstack.pop_int()?;

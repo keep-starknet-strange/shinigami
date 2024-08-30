@@ -1,6 +1,6 @@
-use shinigami::engine::Engine;
-use shinigami::stack::ScriptStackTrait;
-use shinigami::errors::Error;
+use crate::engine::Engine;
+use crate::errors::Error;
+use crate::stack::ScriptStackTrait;
 
 pub fn abstract_verify(ref engine: Engine) -> Result<(), felt252> {
     let verified = engine.dstack.pop_bool()?;
