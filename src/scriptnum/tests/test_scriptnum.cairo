@@ -1,5 +1,4 @@
-use core::byte_array::ByteArray;
-use shinigami::scriptnum::ScriptNum;
+use crate::scriptnum::ScriptNum;
 
 #[test]
 fn test_scriptnum_wrap_unwrap() {

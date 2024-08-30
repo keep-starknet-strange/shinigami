@@ -1,4 +1,4 @@
-use shinigami::utils;
+use crate::utils;
 
 // Tracks previous transaction outputs
 #[derive(Drop, Copy)]

@@ -185,10 +185,11 @@ pub mod Opcode {
     pub const OP_NOP9: u8 = 184;
     pub const OP_NOP10: u8 = 185;
 
-    use shinigami::engine::Engine;
-    use shinigami::opcodes::{
+    use crate::engine::Engine;
+    use crate::opcodes::{
         constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils
     };
+
     pub fn execute(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
         match opcode {
             0 => constants::opcode_false(ref engine),
