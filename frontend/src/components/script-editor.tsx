@@ -52,8 +52,13 @@ export default function ScriptEditor() {
         body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
       });
       const result = await response.json();
-      if (result.message && result.message.length > 0) {
+      if (url === "run-script" && result.message && result.message.length > 0) {
         JSON.parse(result.message).reverse().map((item: string, _: number) => {
+          stack.push({ value: item });
+        });
+      }
+      else if (url === "debug-script" && result.message && result.message.length > 0) {
+        result.message.reverse().map((item: string, _: number) => {
           stack.push({ value: item });
         });
       }
