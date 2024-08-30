@@ -54,7 +54,7 @@ app.post('/run-script', (req, res) => {
             const modifiedSigOutput = sigOutput.trim().slice(1, -1);
             const modifiedPubOutput = pubOutput.trim().slice(1, -1);
             const combinedOutput = `[${modifiedSigOutput},${modifiedPubOutput}]`;
-            const cairoCommand = `scarb cairo-run ${combinedOutput} --no-build`;
+            const cairoCommand = `scarb cairo-run --function backend_run ${combinedOutput} --no-build`;
             runShellCommand(cairoCommand, (finalOutput) => {
                 const message = extractStack(finalOutput);
                 res.json({ message });
