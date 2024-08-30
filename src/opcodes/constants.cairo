@@ -14,7 +14,9 @@ pub fn opcode_push_data(n: usize, ref engine: Engine) -> Result<(), felt252> {
 }
 
 pub fn opcode_push_data_x(n: usize, ref engine: Engine) -> Result<(), felt252> {
-    let data_len: usize = utils::byte_array_to_felt252_endian(@engine.pull_data(n)?).try_into().unwrap();
+    let data_len: usize = utils::byte_array_to_felt252_endian(@engine.pull_data(n)?)
+        .try_into()
+        .unwrap();
     let data = engine.pull_data(data_len)?;
     engine.dstack.push_byte_array(data);
     return Result::Ok(());
