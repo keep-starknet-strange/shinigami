@@ -202,6 +202,19 @@ pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
     value
 }
 
+pub fn byte_array_to_felt252_endian(byte_array: @ByteArray) -> felt252 {
+    let mut byte_shift = 1;
+    let mut value = 0;
+    let mut i = 0;
+    let byte_array_len = byte_array.len();
+    while i < byte_array_len {
+        value += byte_shift * byte_array[i].into();
+        byte_shift *= 256;
+        i += 1;
+    };
+    value
+}
+
 // TODO: More efficient way to do this
 pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
     let byte_shift = 256;
