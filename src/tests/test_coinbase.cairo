@@ -121,11 +121,11 @@ fn test_block_227836_coinbase() {
     assert(tx.version == 2, 'Incorrect version');
     assert(tx.transaction_inputs.len() == 1, 'Should have one input');
     assert(tx.transaction_outputs.at(0).value == @total_reward, 'Incorrect output value');
+    assert(tx.transaction_outputs.at(1).value == @2506260000, 'Incorrect output value');
 
     // Check coinbase script
     let script = tx.transaction_inputs.at(0).signature_script;
-    assert(script.len() >= 4, 'Script too short');
-    // TODO: Verify the exact script content if possible
+    assert(script.len() >= 7, 'Script too short');
 }
 
 #[test]
@@ -148,11 +148,11 @@ fn test_block_481823_coinbase() {
     assert(tx.version == 1, 'Incorrect version');
     assert(tx.transaction_inputs.len() == 1, 'Should have one input');
     assert(tx.transaction_outputs.at(0).value == @total_reward, 'Incorrect output value');
+    assert(tx.transaction_outputs.at(1).value == @1561039505, 'Incorrect output value');
 
     // Check coinbase script
     let script = tx.transaction_inputs.at(0).signature_script;
     assert(script.len() >= 7, 'Script too short');
-    // TODO: Verify the exact script content if possible
 }
 
 #[test]
