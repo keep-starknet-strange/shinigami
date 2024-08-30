@@ -1,4 +1,5 @@
 use crate::utils;
+use crate::errors::Error;
 
 // Tracks previous transaction outputs
 #[derive(Drop, Copy)]
@@ -48,7 +49,7 @@ pub trait TransactionTrait {
     fn serialize(self: Transaction) -> ByteArray;
     fn serialize_no_witness(self: Transaction) -> ByteArray;
     fn calculate_block_subsidy(block_height: u32) -> i64;
-    fn validate_coinbase(tx: Transaction) -> bool;
+    fn validate_coinbase(tx: Transaction) -> Result<(), felt252>;
 }
 
 pub const BASE_ENCODING: u32 = 0x01;
@@ -83,10 +84,12 @@ pub impl TransactionImpl of TransactionTrait {
         outputs: Span<TransactionOutput>,
     ) -> Transaction {
         let mut coinbase_script: ByteArray = "";
-        // Append block height if provided, using CompactSize encoding
-        if let Option::Some(height) = block_height {
+        let block_subsidy = if let Option::Some(height) = block_height {
             ByteArrayTrait::append(ref coinbase_script, @utils::encode_compact_size(height));
-        }
+            Self::calculate_block_subsidy(height)
+        } else {
+            Self::calculate_block_subsidy(0)
+        };
         ByteArrayTrait::append(ref coinbase_script, @coinbase_data);
 
         let coinbase_input = TransactionInput {
@@ -96,7 +99,6 @@ pub impl TransactionImpl of TransactionTrait {
             sequence: 0xFFFFFFFF,
         };
 
-        let block_subsidy = Self::calculate_block_subsidy(0);
         let total_reward = block_subsidy + fees;
 
         // Create a new output for the miner's reward
@@ -211,21 +213,21 @@ pub impl TransactionImpl of TransactionTrait {
         utils::shr::<i64, u32>(50 * 100000000, halvings)
     }
 
-    fn validate_coinbase(tx: Transaction) -> bool {
+    fn validate_coinbase(tx: Transaction) -> Result<(), felt252> {
         if tx.transaction_inputs.len() != 1 {
-            return false;
+            return Result::Err(Error::COINBASE_MULTIPLE_INPUTS);
         }
 
         let input = tx.transaction_inputs.at(0);
         if input.previous_outpoint.hash != @0 || input.previous_outpoint.index != @0xFFFFFFFF {
-            return false;
+            return Result::Err(Error::COINBASE_INVALID_OUTPOINT);
         }
 
         let script_len = input.signature_script.len();
         if script_len < 2 || script_len > 100 {
-            return false;
+            return Result::Err(Error::COINBASE_INVALID_SCRIPT_LENGTH);
         }
-        true
+        Result::Ok(())
     }
 }
 
