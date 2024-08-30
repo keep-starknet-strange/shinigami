@@ -43,8 +43,7 @@ export default function ScriptEditor() {
     setIsLoading(true);
     setError(undefined);
     try {
-      // let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      let backendUrl = "http://localhost:8080";
+      let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
       const response = await fetch(`${backendUrl}/${url}`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
