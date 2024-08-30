@@ -194,6 +194,18 @@ pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
     let byte_shift = 256;
     let mut value = 0;
     let mut i = 0;
+    let byte_array_len = byte_array.len();
+    while i < byte_array_len {
+        value = value * byte_shift + byte_array[i].into();
+        i += 1;
+    };
+    value
+}
+
+pub fn byte_array_to_felt252_little_endian(byte_array: @ByteArray) -> felt252 {
+    let byte_shift = 256;
+    let mut value = 0;
+    let mut i = 0;
     let byte_array_len = byte_array.len().into();
     while i < byte_array_len {
         value += byte_array[i].into() * power(byte_shift, i.into()).into();
