@@ -344,7 +344,7 @@ pub impl CompilerImpl of CompilerTrait {
                 ByteArrayTrait::append(ref bytecode, @utils::number_to_bytecode(script_item));
             } else {
                 // TODO: Check opcode exists
-                bytecode.append_byte(self.opcodes.get(utils::byte_array_to_felt252(script_item)));
+                bytecode.append_byte(self.opcodes.get(utils::byte_array_to_felt252_big_endian(script_item)));
             }
             i += 1;
         };
