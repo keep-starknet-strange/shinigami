@@ -21,7 +21,7 @@ function extractRunStack(output) {
 }
 
 function handleScriptRequest(req, res, functionName) {
-    const { pub_key, sig } = req.query;
+    const { pub_key, sig } = req.body;
     if (!pub_key) {
         return res.status(400).send('Missing public key parameter');
     }
@@ -63,11 +63,11 @@ app.get('/', (_, res) => {
     res.sendStatus(200);
 });
 
-app.get('/run-script', (req, res) => {
+app.post('/run-script', (req, res) => {
     handleScriptRequest(req, res, 'backend_run');
 });
 
-app.get('/debug-script', (req, res) => {
+app.post('/debug-script', (req, res) => {
     handleScriptRequest(req, res, 'backend_debug');
 });
 

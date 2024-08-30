@@ -13,7 +13,7 @@ import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useState } from "react";
 import { StackItem } from "../../types";
 
-const jura = Jura({subsets: ["latin"]});
+const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
@@ -43,7 +43,8 @@ export default function ScriptEditor() {
     setIsLoading(true);
     setError(undefined);
     try {
-      let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      // let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      let backendUrl = "http://localhost:8080";
       const response = await fetch(`${backendUrl}/${url}`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
@@ -51,9 +52,11 @@ export default function ScriptEditor() {
         body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
       });
       const result = await response.json();
-      JSON.parse(result.message).reverse().map((item: string, _: number) => {
-        stack.push({ value: item });
-      })
+      if (result.message && result.message.length > 0) {
+        JSON.parse(result.message).reverse().map((item: string, _: number) => {
+          stack.push({ value: item });
+        });
+      }
       setStackContent(stack);
     } catch (err: any) {
       setError(err.message || "An error occurred");
