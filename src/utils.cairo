@@ -189,8 +189,8 @@ pub fn number_to_bytecode(script_item: @ByteArray) -> ByteArray {
     bytecode
 }
 
-// TODO: Endian
-pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
+// Big-endian
+pub fn byte_array_to_felt252_be(byte_array: @ByteArray) -> felt252 {
     let byte_shift = 256;
     let mut value = 0;
     let mut i = 0;
@@ -202,12 +202,13 @@ pub fn byte_array_to_felt252(byte_array: @ByteArray) -> felt252 {
     value
 }
 
-pub fn byte_array_to_felt252_little_endian(byte_array: @ByteArray) -> felt252 {
+// Little-endian
+pub fn byte_array_to_felt252_le(byte_array: @ByteArray) -> felt252 {
     let byte_shift = 256;
     let mut value = 0;
-    let byte_array_len = byte_array.len().into();
+    let byte_array_len = byte_array.len();
     let mut i = byte_array_len - 1;
-    while i >= 0 {
+    while true {
         value = value * byte_shift + byte_array[i].into();
         if i == 0 {
             break;
