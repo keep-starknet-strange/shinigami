@@ -4,6 +4,7 @@ use crate::errors::Error;
 use crate::scriptnum::ScriptNum;
 use crate::scriptflags::ScriptFlags;
 
+#[test]
 fn test_opcode_sha256_1() {
     let program = "OP_1 OP_SHA256";
     let mut engine = utils::test_compile_and_run(program);
