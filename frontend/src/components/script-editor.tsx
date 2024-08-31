@@ -9,23 +9,39 @@ import Footer from "./footer";
 import refreshImage from "@/images/refresh-icon.svg";
 import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
+import next from "@/images/next.svg";
+import previous from "@/images/previous.svg";
+import stop from "@/images/stop.svg";
+import nextIcon from "@/images/next-icon.svg";
+import previousIcon from "@/images/previous-icon.svg";
+import stopIcon from "@/images/stop-icon.svg";
 import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useState } from "react";
 import { StackItem } from "../../types";
 
-const jura = Jura({subsets: ["latin"]});
+const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL OP_HASH160");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
+  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
+
   const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState<string | undefined>();
+  const [isDebugFetch, setDebugFetch] = useState(false);
+  const [isDebugging, setIsDebugging] = useState(false);
+
+  const [runError, setRunError] = useState<string | undefined>();
+  const [debugError, setDebugError] = useState<string | undefined>();
+
+  const [hasFetchedDebugData, setHasFetchedDebugData] = useState(false);
+
+  const [step, setStep] = useState(-1);
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
-  const handleRunScript = async () => {
+  const runScript = async (runType: string, setIsLoading: Dispatch<SetStateAction<boolean>>, setError: Dispatch<SetStateAction<string | undefined>>) => {
     if (scriptPubKey.length > MAX_SIZE) {
       setError("Script Public Key exceeds maximum allowed size");
       return;
@@ -36,27 +52,45 @@ export default function ScriptEditor() {
     }
 
     const stack: StackItem[] = [];
-    setIsFetching(true);
+    setIsLoading(true);
     setError(undefined);
     try {
       let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const response = await fetch(`${backendUrl}/run-script`, {
+      const response = await fetch(`${backendUrl}/${runType}`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         mode: 'cors',
         body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
       });
       const result = await response.json();
-      JSON.parse(result.message).reverse().map((item: string, _: number) => {
-        stack.push({ value: item });
-      })
+      if (runType === "run-script" && result.message && result.message.length > 0) {
+        JSON.parse(result.message[0]).map((item: string, _: number) => {
+          stack.push({ value: item });
+        });
+      }
+      else if (runType === "debug-script" && result.message && result.message.length > 0) {
+        setHasFetchedDebugData(true);
+        setIsDebugging(true);
+        let debuggingContent: StackItem[][] = [];
+        result.message.map((item: string, _: number) => {
+          let innerStack: StackItem[] = []; 
+          JSON.parse(item).map((innerItem: string, _: number) => {
+            innerStack.push({ value: innerItem });
+          });
+          debuggingContent.push(innerStack);
+        });
+        setDebuggingContent(debuggingContent ? debuggingContent.slice(0, debuggingContent.length - 1) : debuggingContent);
+      }
       setStackContent(stack);
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
-      setIsFetching(false);
+      setIsLoading(false);
     }
   };
+
+  const handleRunScript = () => runScript("run-script", setIsFetching, setRunError);
+  const handleDebugScript = () => runScript("debug-script", setDebugFetch, setDebugError);
 
   const [split, setSplit] = useState(false);
 
@@ -132,13 +166,95 @@ export default function ScriptEditor() {
             onClick={handleRunScript}
             disabled={isFetching}
           >
-            {error ? error : isFetching ? "Running..." : "Run Script"}
+            {runError ? runError : isFetching ? "Running..." : "Run Script"}
           </button>
-          <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase">
-            Debug Script
+          <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase"
+            onClick={handleDebugScript}
+            disabled={isDebugging}>
+            {debugError ? debugError : isDebugFetch ? "Loading..." : isDebugging ? "Debugging..." : "Debug Script"}
           </button>
+          {
+            (isDebugging || hasFetchedDebugData) && !isFetching && (
+              <div className="flex flex-row space-x-3.5">
+                {
+                  <button className={`hidden sm:block ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
+                  let newStep = Math.max(step - 1, 0);
+                  setStep(newStep);
+                  setStackContent(debuggingContent[newStep]);
+                }}>
+                    <Image src={previous} alt="" unoptimized />
+                  </button>
+                }
+                <button className={`hidden sm:block ${step >= debuggingContent.length - 1 ? "opacity-50" : ""}`} disabled={step >= debuggingContent.length - 1} onClick={() => {
+                  let newStep = Math.min(step + 1, debuggingContent.length - 1);
+                  setStep(newStep);
+                  setStackContent(debuggingContent[newStep]);
+                }}>
+                  <Image src={next} alt="" unoptimized />
+                </button>
+                <button className="hidden sm:block" onClick={() => {
+                  setStep(-1);
+                  setStackContent([]);
+                  setHasFetchedDebugData(false);
+                  setDebuggingContent([]);
+                  setIsDebugging(false);
+                }}>
+                  <Image src={stop} alt="" unoptimized />
+                </button>
+                {/* Step controls for mobile view */}
+                <div className="flex flex-col items-center justify-center space-y-3.5 sm:hidden">
+                  <div className="flex flex-row items-center space-x-3.5 justify-between">
+                    {
+                      <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5 ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
+                        let newStep = Math.max(step - 1, 0);
+                        setStep(newStep);
+                        setStackContent(debuggingContent[newStep]);
+                      }}>
+                        <Image src={previousIcon} alt="" unoptimized />
+                        <p className="text-sm">PREVIOUS DEBUG LINE</p>
+                      </button>
+                    }
+                    <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px]  uppercase flex flex-row items-center space-x-1.5 ${step >= debuggingContent.length - 1 ? "opacity-50" : ""}`} disabled={step >= debuggingContent.length - 1} onClick={() => {
+                      let newStep = Math.min(step + 1, debuggingContent.length - 1);
+                      setStep(newStep);
+                      setStackContent(debuggingContent[newStep]);
+                    }}>
+                      <Image src={nextIcon} alt="" unoptimized />
+                      <p className="text-sm">DEBUG LINE</p>
+                    </button>
+                    {
+                      step == 0 && <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5" onClick={() => {
+                        setStep(-1)
+                        setStackContent([])
+                        setHasFetchedDebugData(false)
+                        setDebuggingContent([])
+                        setIsDebugging(false)
+                      }}>
+                        <Image src={stopIcon} alt="" unoptimized />
+                        <p className="text-sm">STOP</p>
+                      </button>
+                    }
+                  </div>
+                  {
+                    <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5" onClick={() => {
+                      setStep(-1)
+                      setStackContent([])
+                      setHasFetchedDebugData(false)
+                      setDebuggingContent([])
+                      setIsDebugging(false)
+                    }}
+                      disabled={step <= 0}
+                    >
+                      <Image src={stopIcon} alt="" unoptimized />
+                      <p className="text-sm">STOP</p>
+                    </button>
+                  }
+                </div>
+              </div>
+            )
+          }
         </div>
-        <button className="flex flex-row items-center justify-center space-x-1.5">
+        <button className="flex flex-row items-center justify-center space-x-1.5 sm:pt-5">
           <Image src={refreshImage} alt="" unoptimized />
           <p className="text-white uppercase">Refresh</p>
         </button>

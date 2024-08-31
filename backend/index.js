@@ -1,7 +1,7 @@
 const express = require('express');
 const { exec } = require('child_process');
 const app = express();
-const cors = require('cors')
+const cors = require('cors');
 
 const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
@@ -11,34 +11,16 @@ function runShellCommand(command, callback) {
             callback(`Error: ${error.message}`);
             return;
         }
-        if (stderr) {
-            callback(stderr);
-            return;
-        }
         callback(stdout);
     });
 }
 
-function extractStack(output) {
-    const match = output.match(/\[.*\]/);
-    return match ? match[0] : 'No message found';
-}
-
-app.use(cors());
-app.use(express.json()); 
-
-// Default route
-app.get('/', (_, res) => {
-  res.sendStatus(200);
-});
-
-app.post('/run-script', (req, res) => {
+function handleScriptRequest(req, res, functionName) {
     const { pub_key, sig } = req.body;
     if (!pub_key) {
         return res.status(400).send('Missing public key parameter');
     }
     if (pub_key.length > MAX_SIZE || sig.length > MAX_SIZE) {
-        //for a more detailed error message
         if (pub_key.length > MAX_SIZE) {
             return res.status(400).send('Script Public Key exceeds maximum allowed size');
         }
@@ -54,13 +36,28 @@ app.post('/run-script', (req, res) => {
             const modifiedSigOutput = sigOutput.trim().slice(1, -1);
             const modifiedPubOutput = pubOutput.trim().slice(1, -1);
             const combinedOutput = `[${modifiedSigOutput},${modifiedPubOutput}]`;
-            const cairoCommand = `scarb cairo-run --function backend_run ${combinedOutput} --no-build`;
+            const cairoCommand = `scarb cairo-run --function ${functionName} ${combinedOutput} --no-build`;
             runShellCommand(cairoCommand, (finalOutput) => {
-                const message = extractStack(finalOutput);
-                res.json({ message });
+                const matches = [...finalOutput.matchAll(/\[.*\]/g)].map((m) => m[0]);
+                res.json({ message: matches ? matches : 'No message found' });
             });
         });
     });
+}
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/', (_, res) => {
+    res.sendStatus(200);
+});
+
+app.post('/run-script', (req, res) => {
+    handleScriptRequest(req, res, 'backend_run');
+});
+
+app.post('/debug-script', (req, res) => {
+    handleScriptRequest(req, res, 'backend_debug');
 });
 
 const PORT = process.env.PORT || 8080;
