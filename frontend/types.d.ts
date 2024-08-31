@@ -3,5 +3,5 @@ export interface StackItem {
 }
   
 export interface StackVisualizerProps {
-    stackContent: StackItem;
+    stackContent: StackItem[];
 }

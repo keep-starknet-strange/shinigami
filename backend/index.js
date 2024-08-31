@@ -15,11 +15,6 @@ function runShellCommand(command, callback) {
     });
 }
 
-function extractRunStack(output) {
-    const match = output.match(/\[.*\]/);
-    return match ? match[0] : 'No message found';
-}
-
 function handleScriptRequest(req, res, functionName) {
     const { pub_key, sig } = req.body;
     if (!pub_key) {
@@ -43,14 +38,8 @@ function handleScriptRequest(req, res, functionName) {
             const combinedOutput = `[${modifiedSigOutput},${modifiedPubOutput}]`;
             const cairoCommand = `scarb cairo-run --function ${functionName} ${combinedOutput} --no-build`;
             runShellCommand(cairoCommand, (finalOutput) => {
-                if (functionName === 'backend_run') {
-                    const message = extractRunStack(finalOutput);
-                    res.json({ message });
-                } else if (functionName === 'backend_debug') {
-                    const matches = finalOutput.match(/"0x[0-9a-fA-F]+"/g);
-                    const message = matches ? matches.map(match => match.replace(/"/g, '')) : [];
-                    res.json({ message });
-                }
+                const matches = [...finalOutput.matchAll(/\[.*\]/g)].map((m) => m[0]);
+                res.json({ message: matches ? matches : 'No message found' });
             });
         });
     });
