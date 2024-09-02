@@ -16,7 +16,7 @@ import nextIcon from "@/images/next-icon.svg";
 import previousIcon from "@/images/previous-icon.svg";
 import stopIcon from "@/images/stop-icon.svg";
 import clsx from "@/utils/lib";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { StackItem } from "../../types";
 
 const jura = Jura({ subsets: ["latin"] });
@@ -25,21 +25,19 @@ export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL OP_HASH160");
 
-  const val: any = [{ value: "OP_1" }, { value: "OP_2" }, { value: "OP_ADD" }, { value: "OP_3" }, { value: "OP_EQUAL" }, { value: "OP_HASH160" }] // remove this
-
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
-  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>(val); // change val to []
+  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
 
   const [isFetching, setIsFetching] = useState(false);
-  const [isDebugFetch, setDebugFetch] = useState(true); // change to false
-  const [isDebugging, setIsDebugging] = useState(true); // change to false
+  const [isDebugFetch, setDebugFetch] = useState(false);
+  const [isDebugging, setIsDebugging] = useState(false);
 
   const [runError, setRunError] = useState<string | undefined>();
   const [debugError, setDebugError] = useState<string | undefined>();
 
   const [hasFetchedDebugData, setHasFetchedDebugData] = useState(false);
 
-  const [step, setStep] = useState(3); // change to -1
+  const [step, setStep] = useState(-1);
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
@@ -97,6 +95,7 @@ export default function ScriptEditor() {
   const [split, setSplit] = useState(false);
 
   const setEditorTheme = (monaco: any) => {
+    setMonaco(monaco);
     const words = scriptPubKey.split(" ");
     monaco.languages.register({ id: 'customPlaintext' });
     monaco.languages.setMonarchTokensProvider('customPlaintext', {
@@ -125,6 +124,14 @@ export default function ScriptEditor() {
     });
     monaco.editor.remeasureFonts();
   };
+
+  const [monaco, setMonaco] = useState<any>();
+
+  useEffect(() => {
+    if (monaco) {
+      setEditorTheme(monaco);
+    }
+  }, [step, scriptPubKey]);
 
   const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
     <div
