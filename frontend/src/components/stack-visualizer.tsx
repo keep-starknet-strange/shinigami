@@ -23,7 +23,7 @@ export default function StackVisualizer({
             </tr>
           </thead>
           <tbody>
-            {/* {stackContent.length === 0 ? (
+            {stackContent.length === 0 ? (
               <tr>
                 <td className="w-full h-12" colSpan={2} />
               </tr>
@@ -33,7 +33,7 @@ export default function StackVisualizer({
                   <td className="py-3 pl-4 text-white">{item.value}</td>
                 </tr>
               ))
-            )} */}
+            )}
           </tbody>
         </table>
 
