@@ -16,7 +16,7 @@ import nextIcon from "@/images/next-icon.svg";
 import previousIcon from "@/images/previous-icon.svg";
 import stopIcon from "@/images/stop-icon.svg";
 import clsx from "@/utils/lib";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StackItem } from "../../types";
 
 const jura = Jura({ subsets: ["latin"] });
