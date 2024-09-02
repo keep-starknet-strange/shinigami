@@ -25,19 +25,21 @@ export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL OP_HASH160");
 
+  const val: any = [{ value: "OP_1" }, { value: "OP_2" }, { value: "OP_ADD" }, { value: "OP_3" }, { value: "OP_EQUAL" }, { value: "OP_HASH160" }] // remove this
+
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
-  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
+  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>(val); // change val to []
 
   const [isFetching, setIsFetching] = useState(false);
-  const [isDebugFetch, setDebugFetch] = useState(false);
-  const [isDebugging, setIsDebugging] = useState(false);
+  const [isDebugFetch, setDebugFetch] = useState(true); // change to false
+  const [isDebugging, setIsDebugging] = useState(true); // change to false
 
   const [runError, setRunError] = useState<string | undefined>();
   const [debugError, setDebugError] = useState<string | undefined>();
 
   const [hasFetchedDebugData, setHasFetchedDebugData] = useState(false);
 
-  const [step, setStep] = useState(-1);
+  const [step, setStep] = useState(3); // change to -1
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
@@ -73,7 +75,7 @@ export default function ScriptEditor() {
         setIsDebugging(true);
         let debuggingContent: StackItem[][] = [];
         result.message.map((item: string, _: number) => {
-          let innerStack: StackItem[] = []; 
+          let innerStack: StackItem[] = [];
           JSON.parse(item).map((innerItem: string, _: number) => {
             innerStack.push({ value: innerItem });
           });
@@ -95,10 +97,21 @@ export default function ScriptEditor() {
   const [split, setSplit] = useState(false);
 
   const setEditorTheme = (monaco: any) => {
+    const words = scriptPubKey.split(" ");
+    monaco.languages.register({ id: 'customPlaintext' });
+    monaco.languages.setMonarchTokensProvider('customPlaintext', {
+      tokenizer: {
+        root: [
+          [new RegExp("\\b(" + words[step] + ")\\b"), 'custom-keyword'],
+        ],
+      },
+    });
     monaco.editor.defineTheme("darker", {
       base: "hc-black",
       inherit: true,
-      rules: [],
+      rules: [
+        { token: 'custom-keyword', foreground: '008000' },
+      ],
       colors: {
         "editor.selectionBackground": "#A5FFC240",
         "editorLineNumber.foreground": "#258F42",
@@ -123,7 +136,7 @@ export default function ScriptEditor() {
       <Editor
         beforeMount={setEditorTheme}
         theme="darker"
-        defaultLanguage="plaintext"
+        defaultLanguage="customPlaintext"
         value={value || ""}
         onChange={(newValue) => onChange(newValue || "")}
         options={{
@@ -178,10 +191,10 @@ export default function ScriptEditor() {
               <div className="flex flex-row space-x-3.5">
                 {
                   <button className={`hidden sm:block ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
-                  let newStep = Math.max(step - 1, 0);
-                  setStep(newStep);
-                  setStackContent(debuggingContent[newStep]);
-                }}>
+                    let newStep = Math.max(step - 1, 0);
+                    setStep(newStep);
+                    setStackContent(debuggingContent[newStep]);
+                  }}>
                     <Image src={previous} alt="" unoptimized />
                   </button>
                 }
