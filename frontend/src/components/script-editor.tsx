@@ -97,11 +97,12 @@ export default function ScriptEditor() {
   const setEditorTheme = (monaco: any) => {
     setMonaco(monaco);
     const words = scriptPubKey.split(" ");
+    const wordToHighlight = words[step];
     monaco.languages.register({ id: 'customPlaintext' });
     monaco.languages.setMonarchTokensProvider('customPlaintext', {
       tokenizer: {
         root: [
-          [new RegExp("\\b(" + words[step] + ")\\b"), 'custom-keyword'],
+          [new RegExp("\\b(" + wordToHighlight + ")\\b"), 'custom-keyword'],
         ],
       },
     });
