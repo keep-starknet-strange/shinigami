@@ -132,7 +132,7 @@ pub impl EngineImpl of EngineTrait {
                 let opcode_32: u32 = opcode.into();
                 self.opcode_idx += opcode_32 + 1;
                 return Result::Ok(true);
-            } else if Opcode::is_push_opcode(opcode){
+            } else if Opcode::is_push_opcode(opcode) {
                 self.opcode_idx = flow::opcode_push(opcode, script, self.opcode_idx);
                 return Result::Ok(true);
             } else {
@@ -182,11 +182,10 @@ pub impl EngineImpl of EngineTrait {
                         let opcode_32: u32 = opcode.into();
                         self.opcode_idx += opcode_32 + 1;
                         continue;
-                    } else if Opcode::is_push_opcode(opcode){
+                    } else if Opcode::is_push_opcode(opcode) {
                         self.opcode_idx = flow::opcode_push(opcode, script, self.opcode_idx);
                         continue;
-                    } 
-                    else {
+                    } else {
                         let res = Opcode::is_opcode_disabled(opcode, ref self);
                         if res.is_err() {
                             err = res.unwrap_err();
