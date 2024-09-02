@@ -45,7 +45,7 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
         let sig_hash: u256 = sighash::calc_signature_hash(
             @self.sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
         );
-
+        println!("sig_hash: {}", sig_hash);
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
 }

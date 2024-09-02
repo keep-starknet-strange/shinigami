@@ -175,6 +175,7 @@ pub impl EngineImpl of EngineTrait {
         if res.is_err() {
             return Result::Err(res.unwrap_err());
         }
+
         self.check_stack_size()?;
         self.opcode_idx += 1;
         if self.opcode_idx >= script.len() {
@@ -195,6 +196,7 @@ pub impl EngineImpl of EngineTrait {
             let script: @ByteArray = *self.scripts[self.script_idx];
             while self.opcode_idx < script.len() {
                 let opcode = script[self.opcode_idx];
+                println!("opcode: {}", opcode);
 
                 // Check if the opcode is always illegal (reserved).
                 let illegal_opcode = Opcode::is_opcode_always_illegal(opcode, ref self);
@@ -260,6 +262,7 @@ pub impl EngineImpl of EngineTrait {
         } else {
             // TODO: pop bool?
             let top_stack = self.dstack.peek_byte_array(0)?;
+            println!("top_stack: {}", top_stack);
             let ret_val = top_stack.clone();
             let mut is_ok = false;
             let mut i = 0;
