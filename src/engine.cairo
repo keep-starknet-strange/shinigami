@@ -110,7 +110,15 @@ pub impl EngineImpl of EngineTrait {
         }
         let script = *(self.scripts[self.script_idx]);
         if self.opcode_idx >= script.len() {
-            return Result::Ok(false);
+            // Empty script skip
+            if self.cond_stack.len() > 0 {
+                return Result::Err(Error::SCRIPT_UNBALANCED_CONDITIONAL_STACK);
+            }
+            self.astack = ScriptStackImpl::new();
+            self.opcode_idx = 0;
+            self.last_code_sep = 0;
+            self.script_idx += 1;
+            return self.step();
         }
         let opcode = script[self.opcode_idx];
 

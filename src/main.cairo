@@ -63,10 +63,10 @@ fn backend_debug(input: InputData) -> u8 {
         if res.is_err() {
             break;
         }
-        engine.json();
         if res.unwrap() == false {
             break;
         }
+        engine.json();
     };
     match res {
         Result::Ok(_) => {
