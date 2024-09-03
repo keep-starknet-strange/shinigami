@@ -7,12 +7,14 @@ use crate::utils;
 pub struct ScriptStack {
     data: Felt252Dict<Nullable<ByteArray>>,
     len: usize,
+    pub verifyMinimalData: bool
+
 }
 
 #[generate_trait()]
 pub impl ScriptStackImpl of ScriptStackTrait {
     fn new() -> ScriptStack {
-        ScriptStack { data: Default::default(), len: 0, }
+        ScriptStack { data: Default::default(), len: 0, verifyMinimalData: false }
     }
 
     fn push_byte_array(ref self: ScriptStack, value: ByteArray) {

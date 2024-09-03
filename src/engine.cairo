@@ -65,7 +65,8 @@ pub impl EngineImpl of EngineTrait {
         if tx_idx < transaction.transaction_inputs.len() {
             script_sig = transaction.transaction_inputs[tx_idx].signature_script;
         }
-        Engine {
+
+        let mut vm = Engine {
             flags: flags,
             transaction: transaction,
             tx_idx: tx_idx,
@@ -77,7 +78,14 @@ pub impl EngineImpl of EngineTrait {
             astack: ScriptStackImpl::new(),
             cond_stack: ConditionalStackImpl::new(),
             last_code_sep: 0,
+        };
+
+        if vm.has_flag(ScriptFlags::ScriptVerifyMinimalData) {
+            vm.dstack.verifyMinimalData = true;
+            vm.astack.verifyMinimalData = true;
         }
+
+        vm
     }
 
     fn pull_data(ref self: Engine, len: usize) -> Result<ByteArray, felt252> {
