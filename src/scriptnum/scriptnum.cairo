@@ -4,7 +4,7 @@ pub mod ScriptNum {
 
     const BYTESHIFT: i64 = 256;
     const MAX_INT32: i32 = 2147483647;
-    const MIN_INT32: i32 = -2147483648;
+    const MIN_INT32: i32 = -2147483647;
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
