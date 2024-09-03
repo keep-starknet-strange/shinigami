@@ -27,7 +27,7 @@ fn test_scriptnum_wrap_unwrap() {
     returned_int = ScriptNum::unwrap(ScriptNum::wrap(int));
     assert!(int == returned_int, "Wrap/unwrap 2147483647 not equal");
 
-    int = -2147483648; // 0x80000000
+    int = -2147483647; // 0x80000001
     returned_int = ScriptNum::unwrap(ScriptNum::wrap(int));
     assert!(int == returned_int, "Wrap/unwrap -2147483648 not equal");
 }
@@ -68,5 +68,13 @@ fn test_scriptnum_bytes_wrap() {
 fn test_scriptnum_too_big_unwrap_panic() {
     let mut bytes: ByteArray = Default::default();
     bytes.append_word_rev(2147483647 + 1, 5);
+    ScriptNum::unwrap(bytes);
+}
+
+#[test]
+#[should_panic]
+fn test_scriptnum_too_small_unwrap_panic() {
+    let mut bytes: ByteArray = Default::default();
+    bytes.append_word_rev(-2147483647 - 1, 5);
     ScriptNum::unwrap(bytes);
 }

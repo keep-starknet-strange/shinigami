@@ -3,7 +3,7 @@ pub mod ScriptNum {
     use shinigami::errors::Error;
     const BYTESHIFT: i64 = 256;
     const MAX_INT32: i32 = 2147483647;
-    const MIN_INT32: i32 = -2147483648;
+    const MIN_INT32: i32 = -2147483647;
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
@@ -49,7 +49,7 @@ pub mod ScriptNum {
     }
 
     // Unwrap sign-magnitude encoded ByteArray into a 4 byte int maximum.
-    pub fn try_into_num(input: ByteArray, numeric_op: bool) -> Result<i64, felt252> {
+    pub fn try_into_num(input: ByteArray) -> Result<i64, felt252> {
         let mut result: i64 = 0;
         let mut i: u32 = 0;
         let mut multiplier: i64 = 1;
@@ -72,18 +72,15 @@ pub mod ScriptNum {
         if result > MAX_INT32.into() || result < MIN_INT32.into() {
             return Result::Err(Error::SCRIPTNUM_OUT_OF_RANGE);
         }
-        if numeric_op && result == MIN_INT32.into() {
-            return Result::Err(Error::SCRIPTNUM_NUMERIC_OPCODE_OUT_OF_RANGE);
-        }
         Result::Ok(result)
     }
 
     pub fn into_num(input: ByteArray) -> i64 {
-        try_into_num(input, true).unwrap()
+        try_into_num(input).unwrap()
     }
 
     pub fn unwrap(input: ByteArray) -> i64 {
-        try_into_num(input, false).unwrap()
+        try_into_num(input).unwrap()
     }
 
     // Return the minimal number of byte to represent 'value'.
