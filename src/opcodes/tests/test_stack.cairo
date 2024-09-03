@@ -296,7 +296,7 @@ fn test_max_stack_size_more() {
     let mut program: ByteArray = "";
     let op_1_string = "OP_1 ";
     let mut index: u64 = 0;
-    while index < 1045 {
+    while index < 1001 {
         program.append(@op_1_string);
         index += 1;
     };
