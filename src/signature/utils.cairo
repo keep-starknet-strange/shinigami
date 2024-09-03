@@ -1,6 +1,6 @@
-use crate::opcodes::Opcode;
-use crate::signature::constants;
-use crate::transaction::{Transaction, TransactionInput, TransactionOutput};
+use shinigami::signature::constants;
+use shinigami::transaction::{Transaction, TransactionInput, TransactionOutput};
+use shinigami::opcodes::Opcode;
 
 // Removes `OP_CODESEPARATOR` opcodes from the `script`.
 // By removing this opcode, the script becomes suitable for hashing and signature verification.

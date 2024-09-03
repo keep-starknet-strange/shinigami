@@ -1,8 +1,10 @@
+use shinigami::engine::{Engine, EngineTrait};
+use shinigami::stack::ScriptStackTrait;
+use shinigami::scriptflags::ScriptFlags;
+use shinigami::signature::signature::BaseSigVerifierTrait;
 use core::sha256::compute_sha256_byte_array;
-use crate::engine::Engine;
-use crate::opcodes::utils;
-use crate::signature::BaseSigVerifierTrait;
-use crate::stack::ScriptStackTrait;
+use shinigami::opcodes::utils;
+use shinigami::errors::Error;
 
 pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;
@@ -70,7 +72,9 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
-    let mut sig_verifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
+    let mut sig_verifier = BaseSigVerifierTrait::new(
+        ref engine, @full_sig_bytes, @pk_bytes, array![full_sig_bytes].span()
+    )?;
 
     if sig_verifier.verify(ref engine) {
         is_valid = true;
@@ -91,6 +95,83 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     return Result::Ok(());
 }
 
+pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
+    // TODO Error on taproot exec
+    // TODO Numops && MaxKeysPerMultiSig
+
+    // Get number of public keys and construct array
+    let num_pub_keys = engine.dstack.pop_int()?;
+    if num_pub_keys < 0 {
+        return Result::Err(Error::SCRIPT_FAILED);
+    }
+    let mut pub_keys = ArrayTrait::<ByteArray>::new();
+    let mut i: i64 = 0;
+    let mut err: felt252 = 0;
+    while i < num_pub_keys {
+        match engine.dstack.pop_byte_array() {
+            Result::Ok(pk) => pub_keys.append(pk),
+            Result::Err(e) => err = e
+        };
+        i += 1;
+    };
+    if err != 0 {
+        return Result::Err(err);
+    }
+
+    // Get number of required sigs and construct array
+    let num_sigs = engine.dstack.pop_int()?;
+    if num_sigs < 0 {
+        return Result::Err(Error::SCRIPT_FAILED);
+    }
+    let mut sigs = ArrayTrait::<ByteArray>::new();
+    i = 0;
+    err = 0;
+    while i < num_sigs {
+        match engine.dstack.pop_byte_array() {
+            Result::Ok(s) => sigs.append(s),
+            Result::Err(e) => err = e
+        };
+        i += 1;
+    };
+    if err != 0 {
+        return Result::Err(err);
+    }
+
+    // Historical bug
+    let dummy = engine.dstack.pop_byte_array()?;
+
+    if engine.has_flag(ScriptFlags::ScriptStrictMultiSig) && dummy.len() != 0 {
+        return Result::Err(Error::SCRIPT_STRICT_MULTISIG);
+    }
+
+    // TODO: add witness context inside engine to check if witness is active
+
+    let mut valid_sigs: usize = 0;
+    let mut keys_idx: usize = 0;
+
+    while valid_sigs.into() < num_sigs {
+        match BaseSigVerifierTrait::new_verify(
+            ref engine, sigs.at(valid_sigs), pub_keys.at(keys_idx), sigs.span()
+        ) {
+            true => {
+                valid_sigs += 1;
+                keys_idx += 1;
+            },
+            false => keys_idx += 1
+        }
+        if keys_idx.into() == num_pub_keys {
+            break;
+        }
+    };
+
+    if valid_sigs.into() == num_sigs {
+        engine.dstack.push_int(1);
+    } else {
+        engine.dstack.push_int(0);
+    }
+    Result::Ok(())
+}
+
 pub fn opcode_codeseparator(ref engine: Engine) -> Result<(), felt252> {
     engine.last_code_sep = engine.opcode_idx;
 
@@ -106,6 +187,12 @@ pub fn opcode_codeseparator(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_checksigverify(ref engine: Engine) -> Result<(), felt252> {
     opcode_checksig(ref engine)?;
+    utils::abstract_verify(ref engine)?;
+    return Result::Ok(());
+}
+
+pub fn opcode_checkmultisigverify(ref engine: Engine) -> Result<(), felt252> {
+    opcode_checkmultisig(ref engine)?;
     utils::abstract_verify(ref engine)?;
     return Result::Ok(());
 }

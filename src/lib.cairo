@@ -37,7 +37,7 @@ pub mod scriptnum {
         #[cfg(test)]
         mod test_scriptnum;
     }
-    pub(crate) use scriptnum::ScriptNum;
+    pub use scriptnum::ScriptNum;
 }
 pub mod scriptflags;
 pub mod signature {
@@ -45,7 +45,7 @@ pub mod signature {
     pub mod sighash;
     pub mod constants;
     pub mod utils;
-    pub(crate) use signature::{BaseSigVerifier, BaseSigVerifierTrait};
+    pub use signature::{BaseSigVerifier, BaseSigVerifierTrait};
 }
 pub mod transaction;
 mod main;

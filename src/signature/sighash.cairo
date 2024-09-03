@@ -1,6 +1,6 @@
-use crate::signature::{constants, utils};
-use crate::transaction::{Transaction, TransactionTrait, TransactionInput, TransactionOutput};
-use crate::utils::{int_size_in_bytes, double_sha256};
+use shinigami::utils::{int_size_in_bytes, double_sha256};
+use shinigami::transaction::{Transaction, TransactionTrait, TransactionInput, TransactionOutput};
+use shinigami::signature::{constants, utils};
 
 // Calculates the signature hash for specified transaction data and hash type.
 pub fn calc_signature_hash(
