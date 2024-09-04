@@ -46,7 +46,9 @@ pub trait TransactionTrait {
     fn serialize_no_witness(self: Transaction) -> ByteArray;
     fn calculate_block_subsidy(block_height: u32) -> i64;
     fn is_coinbase(self: @Transaction) -> bool;
-    fn validate_coinbase(self: Transaction, block_height: u32, total_fees: i64) -> Result<(), felt252>;
+    fn validate_coinbase(
+        self: Transaction, block_height: u32, total_fees: i64
+    ) -> Result<(), felt252>;
 }
 
 pub const BASE_ENCODING: u32 = 0x01;
@@ -104,7 +106,9 @@ pub impl TransactionImpl of TransactionTrait {
             let vout: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
             let script_len = utils::byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
             let script = utils::sub_byte_array(@raw, ref offset, script_len);
-            let sequence: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
+            let sequence: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4)
+                .try_into()
+                .unwrap();
             let input = TransactionInput {
                 previous_outpoint: OutPoint { txid: tx_id, vout: vout },
                 signature_script: script,
@@ -123,10 +127,7 @@ pub impl TransactionImpl of TransactionTrait {
             let value: i64 = utils::byte_array_value_at_le(@raw, ref offset, 8).try_into().unwrap();
             let script_len = utils::byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
             let script = utils::sub_byte_array(@raw, ref offset, script_len);
-            let output = TransactionOutput {
-                value: value,
-                publickey_script: script,
-            };
+            let output = TransactionOutput { value: value, publickey_script: script, };
             outputs.append(output);
             i += 1;
         };
@@ -214,7 +215,7 @@ pub impl TransactionImpl of TransactionTrait {
         if self.transaction_inputs.len() != 1 {
             return false;
         }
-        
+
         let input = self.transaction_inputs.at(0);
         if input.previous_outpoint.txid != @0 || input.previous_outpoint.vout != @0xFFFFFFFF {
             return false;
@@ -223,7 +224,9 @@ pub impl TransactionImpl of TransactionTrait {
         true
     }
 
-    fn validate_coinbase(self: Transaction, block_height: u32, total_fees: i64) -> Result<(), felt252> {
+    fn validate_coinbase(
+        self: Transaction, block_height: u32, total_fees: i64
+    ) -> Result<(), felt252> {
         if !self.is_coinbase() {
             return Result::Err(Error::INVALID_COINBASE);
         }
@@ -256,10 +259,7 @@ pub impl TransactionImpl of TransactionTrait {
 impl TransactionDefault of Default<Transaction> {
     fn default() -> Transaction {
         let transaction = Transaction {
-            version: 0,
-            transaction_inputs: array![],
-            transaction_outputs: array![],
-            locktime: 0,
+            version: 0, transaction_inputs: array![], transaction_outputs: array![], locktime: 0,
         };
         transaction
     }
