@@ -64,5 +64,5 @@ fn test_deserialize_transaction() {
 }
 
 #[test]
-fn test_deserialize_coinbase_transaction() {// TODO
+fn test_deserialize_coinbase_transaction() { // TODO
 }
