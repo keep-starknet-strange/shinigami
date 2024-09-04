@@ -128,33 +128,55 @@ export default function ScriptEditor() {
     if (monaco) {
       const editorModel = monaco.editor.getModels()[0];
       editorModel.deltaDecorations(currentDecorations, []);
+
       const words = scriptPubKey.split(" ");
 
       if (step >= 0 && step < words.length) {
         const wordToHighlight = words[step];
-        const matches = editorModel.findMatches(wordToHighlight, false, false, false, null, false);
 
-        if (matches.length > 0) {
-          let matchIndexToUse = 0;
+        // Calculate the start and end positions manually
+        let matchIndexToUse = 0;
 
-          if (matches.length > 1) {
-            const occurrencesSoFar = words.slice(0, step + 1).filter(word => word === wordToHighlight).length;
-            matchIndexToUse = occurrencesSoFar - 1;
+        // If the word repeats, calculate which occurrence to use
+        const occurrencesSoFar = words.slice(0, step + 1).filter(word => word === wordToHighlight).length;
+        matchIndexToUse = occurrencesSoFar - 1;
+
+        let charIndex = 0;
+        let occurrenceCount = 0;
+        let start = 0;
+        let end = 0;
+
+        for (let i = 0; i < scriptPubKey.length; i++) {
+          if (scriptPubKey.slice(i, i + wordToHighlight.length) === wordToHighlight) {
+            if (occurrenceCount === matchIndexToUse) {
+              start = i;
+              end = i + wordToHighlight.length;
+              break;
+            }
+            occurrenceCount++;
           }
-
-          if (matches[matchIndexToUse]) {
-            const newDecorations = editorModel.deltaDecorations(currentDecorations, [
-              {
-                range: matches[matchIndexToUse].range,
-                options: {
-                  isWholeLine: false,
-                  inlineClassName: 'highlight'
-                }
-              }
-            ]);
-            setCurrentDecorations(newDecorations);
-          }
+          charIndex++;
         }
+
+        // Create a range object manually
+        const range = {
+          startLineNumber: 1,
+          startColumn: start + 1,
+          endLineNumber: 1,
+          endColumn: end + 1
+        };
+
+        // Apply the decoration
+        const newDecorations = editorModel.deltaDecorations(currentDecorations, [
+          {
+            range,
+            options: {
+              isWholeLine: false,
+              inlineClassName: 'highlight'
+            }
+          }
+        ]);
+        setCurrentDecorations(newDecorations);
       }
     }
   }, [step, scriptPubKey, monaco]);
