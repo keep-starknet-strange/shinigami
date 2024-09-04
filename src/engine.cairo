@@ -108,23 +108,23 @@ pub impl EngineImpl of EngineTrait {
     }
 
     fn skip_push_data(ref self: Engine, opcode: u8) -> Result<(), felt252> {
-      if opcode == Opcode::OP_PUSHDATA1 {
-          let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(1)?)
-              .try_into()
-              .unwrap();
-          self.opcode_idx += data_len + 1;
-      } else if opcode == Opcode::OP_PUSHDATA2 {
-          let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(2)?)
-              .try_into()
-              .unwrap();
-          self.opcode_idx += data_len + 1;
-      } else if opcode == Opcode::OP_PUSHDATA4 {
-          let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(4)?)
-              .try_into()
-              .unwrap();
-          self.opcode_idx += data_len + 1;
-      }
-      Result::Ok(())
+        if opcode == Opcode::OP_PUSHDATA1 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(1)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        } else if opcode == Opcode::OP_PUSHDATA2 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(2)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        } else if opcode == Opcode::OP_PUSHDATA4 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(4)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        }
+        Result::Ok(())
     }
 
     fn step(ref self: Engine) -> Result<bool, felt252> {
@@ -151,7 +151,6 @@ pub impl EngineImpl of EngineTrait {
         }
 
         if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
-            let mut err = '';
             if Opcode::is_data_opcode(opcode) {
                 let opcode_32: u32 = opcode.into();
                 self.opcode_idx += opcode_32 + 1;
@@ -159,7 +158,6 @@ pub impl EngineImpl of EngineTrait {
             } else if Opcode::is_push_opcode(opcode) {
                 let res = self.skip_push_data(opcode);
                 if res.is_err() {
-                    err = res.unwrap_err();
                     return Result::Err(res.unwrap_err());
                 }
                 return Result::Ok(true);
