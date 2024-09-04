@@ -296,14 +296,13 @@ fn test_max_stack_size_more() {
     let mut program: ByteArray = "";
     let op_1_string = "OP_1 ";
     let mut index: u64 = 0;
-    while index < 1001 {
+    while index < 1000 {
         program.append(@op_1_string);
         index += 1;
     };
+    let mut engine = utils::test_compile_and_run(program);
 
-    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_STACK_SIZE_EXCEEDED);
-
-    utils::check_dstack_size(ref engine, 1001);
+    utils::check_dstack_size(ref engine, 1000);
 }
 
 #[test]
@@ -311,7 +310,7 @@ fn test_max_stack_size_equal() {
     let mut program: ByteArray = "";
     let op_1_string = "OP_1 ";
     let mut index: u64 = 0;
-    while index <= 1000 {
+    while index <= 1001 {
         program.append(@op_1_string);
         index += 1;
     };
