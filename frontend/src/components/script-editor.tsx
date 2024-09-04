@@ -23,7 +23,7 @@ const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
-  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL OP_HASH160");
+  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_1 OP_EQUAL OP_HASH160");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
   const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
@@ -96,22 +96,15 @@ export default function ScriptEditor() {
 
   const setEditorTheme = (monaco: any) => {
     setMonaco(monaco);
-    const words = scriptPubKey.split(" ");
-    const wordToHighlight = words[step];
+
+    // Register the custom language
     monaco.languages.register({ id: 'customPlaintext' });
-    monaco.languages.setMonarchTokensProvider('customPlaintext', {
-      tokenizer: {
-        root: [
-          [new RegExp("\\b(" + wordToHighlight + ")\\b"), 'custom-keyword'],
-        ],
-      },
-    });
+
+    // Define the custom theme
     monaco.editor.defineTheme("darker", {
       base: "hc-black",
       inherit: true,
-      rules: [
-        { token: 'custom-keyword', foreground: '008000' },
-      ],
+      rules: [],
       colors: {
         "editor.selectionBackground": "#A5FFC240",
         "editorLineNumber.foreground": "#258F42",
@@ -123,16 +116,49 @@ export default function ScriptEditor() {
         "scrollbarSlider.hoverBackground": "#258F4245",
       },
     });
+
     monaco.editor.remeasureFonts();
   };
+
+  const [currentDecorations, setCurrentDecorations] = useState<string[]>([]);
 
   const [monaco, setMonaco] = useState<any>();
 
   useEffect(() => {
     if (monaco) {
-      setEditorTheme(monaco);
+      const editorModel = monaco.editor.getModels()[0];
+      editorModel.deltaDecorations(currentDecorations, []);
+      const words = scriptPubKey.split(" ");
+
+      if (step >= 0 && step < words.length) {
+        const wordToHighlight = words[step];
+        const matches = editorModel.findMatches(wordToHighlight, false, false, false, null, false);
+
+        if (matches.length > 0) {
+          let matchIndexToUse = 0;
+
+          if (matches.length > 1) {
+            const occurrencesSoFar = words.slice(0, step + 1).filter(word => word === wordToHighlight).length;
+            matchIndexToUse = occurrencesSoFar - 1;
+          }
+
+          if (matches[matchIndexToUse]) {
+            const newDecorations = editorModel.deltaDecorations(currentDecorations, [
+              {
+                range: matches[matchIndexToUse].range,
+                options: {
+                  isWholeLine: false,
+                  inlineClassName: 'highlight'
+                }
+              }
+            ]);
+            setCurrentDecorations(newDecorations);
+          }
+        }
+      }
     }
-  }, [step, scriptPubKey]);
+  }, [step, scriptPubKey, monaco]);
+
 
   const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
     <div
