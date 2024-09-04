@@ -129,24 +129,30 @@ export default function ScriptEditor() {
       const editorModel = monaco.editor.getModels()[0];
       editorModel.deltaDecorations(currentDecorations, []);
 
-      const words = scriptPubKey.split(" ");
+      const words = scriptPubKey.split(/\s+/);
 
       if (step >= 0 && step < words.length) {
         const wordToHighlight = words[step];
 
-        // Calculate the start and end positions manually
+        // Calculate the start and end positions manually, accounting for new lines
         let matchIndexToUse = 0;
-
-        // If the word repeats, calculate which occurrence to use
         const occurrencesSoFar = words.slice(0, step + 1).filter(word => word === wordToHighlight).length;
         matchIndexToUse = occurrencesSoFar - 1;
 
         let charIndex = 0;
         let occurrenceCount = 0;
+        let startLine = 1;
+        let startColumn = 1;
         let start = 0;
         let end = 0;
 
         for (let i = 0; i < scriptPubKey.length; i++) {
+          if (scriptPubKey[i] === '\n') {
+            startLine++;
+            startColumn = 1;
+            continue;
+          }
+
           if (scriptPubKey.slice(i, i + wordToHighlight.length) === wordToHighlight) {
             if (occurrenceCount === matchIndexToUse) {
               start = i;
@@ -155,15 +161,20 @@ export default function ScriptEditor() {
             }
             occurrenceCount++;
           }
+          startColumn++;
           charIndex++;
         }
 
+        // Calculate line and column for the end position
+        let endLine = startLine;
+        let endColumn = startColumn + (end - start);
+
         // Create a range object manually
         const range = {
-          startLineNumber: 1,
-          startColumn: start + 1,
-          endLineNumber: 1,
-          endColumn: end + 1
+          startLineNumber: startLine,
+          startColumn: startColumn,
+          endLineNumber: endLine,
+          endColumn: endColumn
         };
 
         // Apply the decoration
@@ -180,6 +191,7 @@ export default function ScriptEditor() {
       }
     }
   }, [step, scriptPubKey, monaco]);
+
 
 
   const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
