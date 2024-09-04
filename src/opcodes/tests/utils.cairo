@@ -98,7 +98,7 @@ pub fn check_expected_astack(ref engine: Engine, expected: Span<ByteArray>) {
 
 pub fn mock_transaction_with(script_sig: ByteArray, sequence: u32, version: i32) -> Transaction {
     let outpoint_0: OutPoint = OutPoint {
-        hash: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, index: 0
+        txid: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, vout: 0
     };
     let mut compiler = CompilerImpl::new();
     let mut script_sig = compiler.compile(script_sig);
@@ -125,8 +125,8 @@ pub fn mock_transaction_with(script_sig: ByteArray, sequence: u32, version: i32)
 
     Transaction {
         version: version,
-        transaction_inputs: transaction_inputs.span(),
-        transaction_outputs: transaction_outputs.span(),
+        transaction_inputs: transaction_inputs,
+        transaction_outputs: transaction_outputs,
         locktime: 0,
     }
 }
@@ -137,7 +137,7 @@ pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
 
 pub fn mock_witness_transaction() -> Transaction {
     let outpoint_0: OutPoint = OutPoint {
-        hash: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, index: 1
+        txid: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, vout: 1
     };
     let transaction_input_0: TransactionInput = TransactionInput {
         previous_outpoint: outpoint_0,
@@ -162,8 +162,8 @@ pub fn mock_witness_transaction() -> Transaction {
 
     Transaction {
         version: 2,
-        transaction_inputs: transaction_inputs.span(),
-        transaction_outputs: transaction_outputs.span(),
+        transaction_inputs: transaction_inputs,
+        transaction_outputs: transaction_outputs,
         locktime: 0,
     }
 }

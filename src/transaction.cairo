@@ -4,8 +4,8 @@ use crate::errors::Error;
 // Tracks previous transaction outputs
 #[derive(Drop, Copy)]
 pub struct OutPoint {
-    pub hash: u256,
-    pub index: u32,
+    pub txid: u256,
+    pub vout: u32,
 }
 
 #[derive(Drop, Clone)]
@@ -25,31 +25,28 @@ pub struct TransactionOutput {
 #[derive(Drop, Clone)]
 pub struct Transaction {
     pub version: i32,
-    pub transaction_inputs: Span<TransactionInput>,
-    pub transaction_outputs: Span<TransactionOutput>,
+    pub transaction_inputs: Array<TransactionInput>,
+    pub transaction_outputs: Array<TransactionOutput>,
     pub locktime: u32,
 }
 
 pub trait TransactionTrait {
     fn new(
         version: i32,
-        transaction_inputs: Span<TransactionInput>,
-        transaction_outputs: Span<TransactionOutput>,
+        transaction_inputs: Array<TransactionInput>,
+        transaction_outputs: Array<TransactionOutput>,
         locktime: u32
     ) -> Transaction;
-    fn new_coinbase(
-        version: i32,
-        block_height: Option<u32>,
-        coinbase_data: ByteArray,
-        fees: i64,
-        outputs: Span<TransactionOutput>,
-    ) -> Transaction;
     fn new_signed(script_sig: ByteArray) -> Transaction;
+    fn btc_decode(raw: ByteArray, encoding: u32) -> Transaction;
+    fn deserialize(raw: ByteArray) -> Transaction;
+    fn deserialize_no_witness(raw: ByteArray) -> Transaction;
     fn btc_encode(self: Transaction, encoding: u32) -> ByteArray;
     fn serialize(self: Transaction) -> ByteArray;
     fn serialize_no_witness(self: Transaction) -> ByteArray;
     fn calculate_block_subsidy(block_height: u32) -> i64;
-    fn validate_coinbase(tx: Transaction) -> Result<(), felt252>;
+    fn is_coinbase(self: @Transaction) -> bool;
+    fn validate_coinbase(self: Transaction, block_height: u32, total_fees: i64) -> Result<(), felt252>;
 }
 
 pub const BASE_ENCODING: u32 = 0x01;
@@ -58,8 +55,8 @@ pub const WITNESS_ENCODING: u32 = 0x02;
 pub impl TransactionImpl of TransactionTrait {
     fn new(
         version: i32,
-        transaction_inputs: Span<TransactionInput>,
-        transaction_outputs: Span<TransactionOutput>,
+        transaction_inputs: Array<TransactionInput>,
+        transaction_outputs: Array<TransactionOutput>,
         locktime: u32
     ) -> Transaction {
         Transaction {
@@ -70,82 +67,85 @@ pub impl TransactionImpl of TransactionTrait {
         }
     }
 
-    /// Coinbase transactions are special:
-    /// - They have no inputs
-    /// - The first output pays the block reward to the miner
-    /// - They can include up to 100 bytes of arbitrary data in the coinbase field
-    /// - As per BIP34, they must include the block height in the first few bytes of the coinbase
-    /// field
-    fn new_coinbase(
-        version: i32,
-        block_height: Option<u32>,
-        coinbase_data: ByteArray,
-        fees: i64,
-        outputs: Span<TransactionOutput>,
-    ) -> Transaction {
-        let mut coinbase_script: ByteArray = "";
-        let block_subsidy = if let Option::Some(height) = block_height {
-            ByteArrayTrait::append(ref coinbase_script, @utils::encode_compact_size(height));
-            Self::calculate_block_subsidy(height)
-        } else {
-            Self::calculate_block_subsidy(0)
-        };
-        ByteArrayTrait::append(ref coinbase_script, @coinbase_data);
-
-        let coinbase_input = TransactionInput {
-            previous_outpoint: OutPoint { hash: 0x0, index: 0xFFFFFFFF },
-            signature_script: coinbase_script,
-            witness: array![],
-            sequence: 0xFFFFFFFF,
-        };
-
-        let total_reward = block_subsidy + fees;
-
-        // Create a new output for the miner's reward
-        let miner_output = TransactionOutput {
-            value: total_reward,
-            publickey_script: outputs
-                .at(0)
-                .publickey_script
-                .clone(), // or specify the miner's script here
-        };
-
-        // Prepend the miner's output to the outputs array
-        let mut final_outputs = array![miner_output];
-        let mut i: usize = 0;
-        loop {
-            if i >= outputs.len() {
-                break;
-            }
-            final_outputs.append(outputs.at(i).clone());
-            i += 1;
-        };
-
-        Transaction {
-            version: version,
-            transaction_inputs: array![coinbase_input].span(),
-            transaction_outputs: final_outputs.span(),
-            locktime: 0,
-        }
-    }
-
     fn new_signed(script_sig: ByteArray) -> Transaction {
         // TODO
         let transaction = Transaction {
             version: 1,
             transaction_inputs: array![
                 TransactionInput {
-                    previous_outpoint: OutPoint { hash: 0x0, index: 0, },
+                    previous_outpoint: OutPoint { txid: 0x0, vout: 0, },
                     signature_script: script_sig,
                     witness: array![],
                     sequence: 0xffffffff,
                 }
-            ]
-                .span(),
-            transaction_outputs: array![].span(),
+            ],
+            transaction_outputs: array![],
             locktime: 0,
         };
         transaction
+    }
+
+    // Deserialize a transaction from a byte array.
+    fn btc_decode(raw: ByteArray, encoding: u32) -> Transaction {
+        let mut offset: usize = 0;
+        let version: i32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
+        // TODO: ReadVerIntBuf
+        let input_len: u8 = utils::byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+        // TODO: input_len = 0 -> segwit
+        // TODO: Error handling and bounds checks
+        // TODO: Byte orderings
+        let mut i = 0;
+        let mut inputs: Array<TransactionInput> = array![];
+        while i < input_len {
+            let tx_id = u256 {
+                high: utils::byte_array_value_at_be(@raw, ref offset, 16).try_into().unwrap(),
+                low: utils::byte_array_value_at_be(@raw, ref offset, 16).try_into().unwrap(),
+            };
+            let vout: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
+            let script_len = utils::byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+            let script = utils::sub_byte_array(@raw, ref offset, script_len);
+            let sequence: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
+            let input = TransactionInput {
+                previous_outpoint: OutPoint { txid: tx_id, vout: vout },
+                signature_script: script,
+                witness: array![],
+                sequence: sequence,
+            };
+            inputs.append(input);
+            i += 1;
+        };
+
+        let output_len: u8 = utils::byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+        let mut i = 0;
+        let mut outputs: Array<TransactionOutput> = array![];
+        while i < output_len {
+            // TODO: negative values
+            let value: i64 = utils::byte_array_value_at_le(@raw, ref offset, 8).try_into().unwrap();
+            let script_len = utils::byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+            let script = utils::sub_byte_array(@raw, ref offset, script_len);
+            let output = TransactionOutput {
+                value: value,
+                publickey_script: script,
+            };
+            outputs.append(output);
+            i += 1;
+        };
+        // TODO: Witness
+        let locktime: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
+        Transaction {
+            version: version,
+            transaction_inputs: inputs,
+            transaction_outputs: outputs,
+            locktime: locktime,
+        }
+    }
+
+    fn deserialize(raw: ByteArray) -> Transaction {
+        Self::btc_decode(raw, WITNESS_ENCODING)
+    }
+
+    fn deserialize_no_witness(raw: ByteArray) -> Transaction {
+        Self::btc_decode(raw, BASE_ENCODING)
     }
 
     // Serialize the transaction data for hashing based on encoding used.
@@ -160,14 +160,14 @@ pub impl TransactionImpl of TransactionTrait {
         let mut i: usize = 0;
         while i < input_len {
             let input: @TransactionInput = self.transaction_inputs.at(i);
-            let input_hash: u256 = *input.previous_outpoint.hash;
-            let vout: u32 = *input.previous_outpoint.index;
+            let input_txid: u256 = *input.previous_outpoint.txid;
+            let vout: u32 = *input.previous_outpoint.vout;
             let script: @ByteArray = input.signature_script;
             let script_len: usize = script.len();
             let sequence: u32 = *input.sequence;
 
-            bytes.append_word(input_hash.high.into(), 16);
-            bytes.append_word(input_hash.low.into(), 16);
+            bytes.append_word(input_txid.high.into(), 16);
+            bytes.append_word(input_txid.low.into(), 16);
             bytes.append_word_rev(vout.into(), 4);
             bytes.append_word_rev(script_len.into(), utils::int_size_in_bytes(script_len));
             bytes.append(script);
@@ -207,26 +207,48 @@ pub impl TransactionImpl of TransactionTrait {
 
     fn calculate_block_subsidy(block_height: u32) -> i64 {
         let halvings = block_height / 210000;
-        if halvings >= 64 {
-            return 0;
-        }
-        utils::shr::<i64, u32>(50 * 100000000, halvings)
+        utils::shr::<i64, u32>(5000000000, halvings)
     }
 
-    fn validate_coinbase(tx: Transaction) -> Result<(), felt252> {
-        if tx.transaction_inputs.len() != 1 {
-            return Result::Err(Error::COINBASE_MULTIPLE_INPUTS);
+    fn is_coinbase(self: @Transaction) -> bool {
+        if self.transaction_inputs.len() != 1 {
+            return false;
+        }
+        
+        let input = self.transaction_inputs.at(0);
+        if input.previous_outpoint.txid != @0 || input.previous_outpoint.vout != @0xFFFFFFFF {
+            return false;
         }
 
-        let input = tx.transaction_inputs.at(0);
-        if input.previous_outpoint.hash != @0 || input.previous_outpoint.index != @0xFFFFFFFF {
-            return Result::Err(Error::COINBASE_INVALID_OUTPOINT);
+        true
+    }
+
+    fn validate_coinbase(self: Transaction, block_height: u32, total_fees: i64) -> Result<(), felt252> {
+        if !self.is_coinbase() {
+            return Result::Err(Error::INVALID_COINBASE);
         }
 
+        let input = self.transaction_inputs.at(0);
         let script_len = input.signature_script.len();
         if script_len < 2 || script_len > 100 {
-            return Result::Err(Error::COINBASE_INVALID_SCRIPT_LENGTH);
+            return Result::Err(Error::INVALID_COINBASE);
         }
+
+        let subsidy = Self::calculate_block_subsidy(block_height);
+        let mut total_out: i64 = 0;
+        let output_len = self.transaction_outputs.len();
+        let mut i = 0;
+        while i < output_len {
+            let output = self.transaction_outputs.at(i);
+            total_out += *output.value;
+            i += 1;
+        };
+        if total_out > total_fees + subsidy {
+            return Result::Err(Error::INVALID_COINBASE);
+        }
+
+        // TODO: BIP34 checks for block height?
+
         Result::Ok(())
     }
 }
@@ -235,8 +257,8 @@ impl TransactionDefault of Default<Transaction> {
     fn default() -> Transaction {
         let transaction = Transaction {
             version: 0,
-            transaction_inputs: array![].span(),
-            transaction_outputs: array![].span(),
+            transaction_inputs: array![],
+            transaction_outputs: array![],
             locktime: 0,
         };
         transaction

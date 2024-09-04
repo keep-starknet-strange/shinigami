@@ -219,6 +219,45 @@ pub fn byte_array_to_felt252_le(byte_array: @ByteArray) -> felt252 {
     value
 }
 
+pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: usize) -> felt252 {
+    let byte_shift = 256;
+    let mut value = 0;
+    let mut i = offset;
+    while i < offset + len {
+        value = value * byte_shift + byte_array[i].into();
+        i += 1;
+    };
+    offset += len;
+    value
+}
+
+pub fn byte_array_value_at_le(byte_array: @ByteArray, ref offset: usize, len: usize) -> felt252 {
+    // TODO: Bounds check
+    let byte_shift = 256;
+    let mut value = 0;
+    let mut i = offset + len - 1;
+    while true {
+        value = value * byte_shift + byte_array[i].into();
+        if i == offset {
+            break;
+        }
+        i -= 1;
+    };
+    offset += len;
+    value
+}
+
+pub fn sub_byte_array(byte_array: @ByteArray, ref offset: usize, len: usize) -> ByteArray {
+    let mut sub_byte_array = "";
+    let mut i = offset;
+    while i < offset + len {
+        sub_byte_array.append_byte(byte_array[i]);
+        i += 1;
+    };
+    offset += len;
+    sub_byte_array
+}
+
 // TODO: More efficient way to do this
 pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
     let byte_shift = 256;
@@ -331,20 +370,6 @@ pub fn double_sha256(byte: @ByteArray) -> u256 {
         };
 
     hash_value
-}
-
-pub fn encode_compact_size(n: u32) -> ByteArray {
-    let mut encoded = "";
-    if n < 253 {
-        encoded.append_byte(n.try_into().unwrap());
-    } else if n <= 0xFFFF {
-        encoded.append_byte(253);
-        encoded.append_word_rev(n.into(), 2);
-    } else {
-        encoded.append_byte(254);
-        encoded.append_word_rev(n.into(), 4);
-    }
-    encoded
 }
 
 // Fast exponentiation using the square-and-multiply algorithm

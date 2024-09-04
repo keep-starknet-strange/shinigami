@@ -1,4 +1,4 @@
-use shinigami::transaction::{Transaction, TransactionTrait, TransactionInput, TransactionOutput};
+use shinigami::transaction::TransactionTrait;
 use shinigami::utils;
 
 #[test]
@@ -17,168 +17,86 @@ fn test_block_subsidy_calculation() {
 }
 
 #[test]
-fn test_coinbase_transaction_block_height_encoding() {
-    let version = 2;
-    let fees = 1000;
-    let outputs = array![TransactionOutput { value: 0, publickey_script: "miner" }].span();
-
-    let tx0 = TransactionTrait::new_coinbase(version, Option::Some(0), "test", fees, outputs);
-    assert(tx0.transaction_inputs.at(0).signature_script.len() == 5, 'Incorrect script length');
-
-    let tx252 = TransactionTrait::new_coinbase(version, Option::Some(252), "test", fees, outputs);
-    assert(tx252.transaction_inputs.at(0).signature_script.len() == 5, 'Incorrect script length');
-
-    let tx253 = TransactionTrait::new_coinbase(version, Option::Some(253), "test", fees, outputs);
-    assert(tx253.transaction_inputs.at(0).signature_script.len() == 7, 'Incorrect script length');
-
-    let tx65535 = TransactionTrait::new_coinbase(
-        version, Option::Some(65535), "test", fees, outputs
-    );
-    assert(tx65535.transaction_inputs.at(0).signature_script.len() == 7, 'Incorrect script length');
-
-    let tx65536 = TransactionTrait::new_coinbase(
-        version, Option::Some(65536), "test", fees, outputs
-    );
-    assert(tx65536.transaction_inputs.at(0).signature_script.len() == 9, 'Incorrect script length');
+fn test_validate_coinbase_block_0() {
+    // Test the genesis block coinbase transaction
+    let raw_transaction_hex = "0x01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(0, 5000000000).is_ok(), "Genesis block coinbase transaction invalid");
 }
 
 #[test]
-fn test_encode_compact_size() {
-    assert(utils::encode_compact_size(0).len() == 1, 'Incorrect encoding for 0');
-    assert(utils::encode_compact_size(252).len() == 1, 'Incorrect encoding for 252');
-    assert(utils::encode_compact_size(253).len() == 3, 'Incorrect encoding for 253');
-    assert(utils::encode_compact_size(65535).len() == 3, 'Incorrect encoding for 65535');
-    assert(utils::encode_compact_size(65536).len() == 5, 'Incorrect encoding for 65536');
+fn test_validate_coinbase_block_1() {
+    // Test the second block coinbase transaction
+    let raw_transaction_hex = "0x01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(1, 5000000000).is_ok(), "Block 1 coinbase transaction invalid");
 }
 
 #[test]
-fn test_genesis_block_coinbase() {
-    let version = 1;
-    let block_height = Option::None;
-    let coinbase_data = "test";
-    let fees = 0;
-    let outputs = array![
-        TransactionOutput {
-            value: 5000000000,
-            publickey_script: "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
-        }
-    ]
-        .span();
-
-    let tx = TransactionTrait::new_coinbase(version, block_height, coinbase_data, fees, outputs);
-
-    assert(tx.version == 1, 'Incorrect version');
-    assert(tx.transaction_inputs.len() == 1, 'Should have one input');
-    assert(tx.transaction_outputs.at(0).value == @5000000000, 'Incorrect output value');
-
-    // Check coinbase script
-    let script = tx.transaction_inputs.at(0).signature_script;
-    assert(script.len() == 4, 'Incorrect script length');
+fn test_validate_coinbase_block_150007() {
+    // Test a random block from learnmebitcoin
+    let raw_transaction_hex = "0x01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0804233fa04e028b12ffffffff0130490b2a010000004341047eda6bd04fb27cab6e7c28c99b94977f073e912f25d1ff7165d9c95cd9bbe6da7e7ad7f2acb09e0ced91705f7616af53bee51a238b7dc527f2be0aa60469d140ac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(150007, 350000).is_ok(), "Block 150007 coinbase transaction invalid");
 }
 
 #[test]
-fn test_block_1_coinbase() {
-    let version = 1;
-    let block_height = Option::None;
-    let coinbase_data = "test";
-    let fees = 0;
-    let outputs = array![
-        TransactionOutput {
-            value: 5000000000,
-            publickey_script: "410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac"
-        }
-    ]
-        .span();
-
-    let tx = TransactionTrait::new_coinbase(version, block_height, coinbase_data, fees, outputs);
-
-    assert(tx.version == 1, 'Incorrect version');
-    assert(tx.transaction_inputs.len() == 1, 'Should have one input');
-    assert(tx.transaction_outputs.at(0).value == @5000000000, 'Incorrect output value');
-
-    // Check coinbase script
-    let script = tx.transaction_inputs.at(0).signature_script;
-    assert(script.len() == 4, 'Incorrect script length');
+fn test_validate_coinbase_block_227835() {
+    // Test the last block before BIP34 was activated
+    let raw_transaction_hex = "0x01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0479204f51024f09062f503253482fffffffff01da495f9500000000232103ddcdae35e28aca364daa1397612d2dafd891ee136d2ca5ab83faff6bc12ed67eac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(227835, 6050010).is_ok(), "Block 227835 coinbase transaction invalid");
 }
 
 #[test]
-fn test_block_227836_coinbase() {
-    let version = 2;
-    let block_height = Option::Some(227836);
-    let coinbase_data = "test";
-    let fees = 0;
-    let total_reward = TransactionTrait::calculate_block_subsidy(227836) + fees;
-    let outputs = array![
-        TransactionOutput {
-            value: 2506260000,
-            publickey_script: "76a914338c84849423992471bffb1a54a8d9b1d69dc28a88ac"
-        }
-    ]
-        .span();
-
-    let tx = TransactionTrait::new_coinbase(version, block_height, coinbase_data, fees, outputs);
-
-    assert(tx.version == 2, 'Incorrect version');
-    assert(tx.transaction_inputs.len() == 1, 'Should have one input');
-    assert(tx.transaction_outputs.at(0).value == @total_reward, 'Incorrect output value');
-    assert(tx.transaction_outputs.at(1).value == @2506260000, 'Incorrect output value');
-
-    // Check coinbase script
-    let script = tx.transaction_inputs.at(0).signature_script;
-    assert(script.len() >= 7, 'Script too short');
+fn test_validate_coinbase_block_227836() {
+    // Test the first block after BIP34 was activated
+    let raw_transaction_hex = "0x01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff2703fc7903062f503253482f04ac204f510858029a11000003550d3363646164312f736c7573682f0000000001207e6295000000001976a914e285a29e0704004d4e95dbb7c57a98563d9fb2eb88ac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(227836, 6260000).is_ok(), "Block 227836 coinbase transaction invalid");
 }
 
 #[test]
-fn test_block_481823_coinbase() {
-    let version = 1;
-    let block_height = Option::Some(481823);
-    let coinbase_data = "test";
-    let fees = 79829;
-    let total_reward = TransactionTrait::calculate_block_subsidy(481823) + fees;
-    let outputs = array![
-        TransactionOutput {
-            value: 1561039505,
-            publickey_script: "76a914d3c96dc04a62f488a0f4a7f3ccbe70c24764d0b188ac"
-        }
-    ]
-        .span();
-
-    let tx = TransactionTrait::new_coinbase(version, block_height, coinbase_data, fees, outputs);
-
-    assert(tx.version == 1, 'Incorrect version');
-    assert(tx.transaction_inputs.len() == 1, 'Should have one input');
-    assert(tx.transaction_outputs.at(0).value == @total_reward, 'Incorrect output value');
-    assert(tx.transaction_outputs.at(1).value == @1561039505, 'Incorrect output value');
-
-    // Check coinbase script
-    let script = tx.transaction_inputs.at(0).signature_script;
-    assert(script.len() >= 7, 'Script too short');
+fn test_validate_coinbase_block_400021() {
+    // Test a random block from learnmebitcoin
+    let raw_transaction_hex = "0x01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff1b03951a0604f15ccf5609013803062b9b5a0100072f425443432f200000000001ebc31495000000001976a9142c30a6aaac6d96687291475d7d52f4b469f665a688ac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(400021, 1166059).is_ok(), "Block 400021 coinbase transaction invalid");
 }
 
 #[test]
-fn test_coinbase_transaction_multiple_outputs() {
-    let version = 2;
-    let block_height = Option::Some(21000);
-    let coinbase_data = "test";
-    let fees = 2000;
-    let expected_subsidy = TransactionTrait::calculate_block_subsidy(21000);
-    let total_reward = expected_subsidy + fees;
-    let outputs = array![
-        TransactionOutput { value: 100, publickey_script: "output1" },
-        TransactionOutput { value: 200, publickey_script: "output2" }
-    ]
-        .span();
-
-    let tx = TransactionTrait::new_coinbase(
-        version, block_height, coinbase_data.clone(), fees, outputs
-    );
-
-    assert(tx.transaction_outputs.len() == 3, 'Should have 3 outputs');
-    assert(tx.transaction_outputs.at(0).value == @total_reward, 'Incorrect output1 value');
-    assert(tx.transaction_outputs.at(1).value == @100, 'Incorrect output1 value');
-    assert(tx.transaction_outputs.at(2).value == @200, 'Incorrect output2 value');
-
-    // Check coinbase script format
-    let script = tx.transaction_inputs.at(0).signature_script;
-    assert(script.len() == 7, 'Incorrect script length');
+fn test_validate_coinbase_block_481823() {
+    // Test the last block before BIP141 segwit
+    let raw_transaction_hex = "0x01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4e031f5a070473319e592f4254432e434f4d2f4e59412ffabe6d6dcceb2a9d0444c51cabc4ee97a1a000036ca0cb48d25b94b78c8367d8b868454b0100000000000000c0309b21000008c5f8f80000ffffffff0291920b5d0000000017a914e083685a1097ce1ea9e91987ab9e94eae33d8a13870000000000000000266a24aa21a9ede6c99265a6b9e1d36c962fda0516b35709c49dc3b8176fa7e5d5f1f6197884b400000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(481823, 311039505).is_ok(), "Block 481823 coinbase transaction invalid");
 }
+
+#[test]
+#[ignore]
+fn test_validate_coinbase_block_481824() {
+    // Test the first block after BIP141 segwit
+    let raw_transaction_hex = "0x010000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff6403205a07f4d3f9da09acf878c2c9c96c410d69758f0eae0e479184e0564589052e832c42899c867100010000000000000000db9901006052ce25d80acfde2f425443432f20537570706f7274202f4e59412f00000000000000000000000000000000000000000000025d322c57000000001976a9142c30a6aaac6d96687291475d7d52f4b469f665a688ac0000000000000000266a24aa21a9ed6c3c4dff76b5760d58694147264d208689ee07823e5694c4872f856eacf5a5d80120000000000000000000000000000000000000000000000000000000000000000000000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(481824, 212514269).is_ok(), "Block 481824 coinbase transaction invalid");
+}
+
+#[test]
+#[ignore]
+fn test_validate_coinbase_block_538403() {
+    // Test random block from learnmebitcoin
+    let raw_transaction_hex = "0x010000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff2503233708184d696e656420627920416e74506f6f6c373946205b8160a4256c0000946e0100ffffffff02f595814a000000001976a914edf10a7fac6b32e24daa5305c723f3de58db1bc888ac0000000000000000266a24aa21a9edfaa194df59043645ba0f58aad74bfd5693fa497093174d12a4bb3b0574a878db0120000000000000000000000000000000000000000000000000000000000000000000000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    assert!(transaction.validate_coinbase(538403, 6517).is_ok(), "Block 538403 coinbase transaction invalid");
+}
+
+// TODO: Test invalid coinbase
