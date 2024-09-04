@@ -14,7 +14,7 @@ pub mod opcodes {
     pub mod bitwise;
     pub mod arithmetic;
     pub mod crypto;
-    pub mod utils_opcodes;
+    pub mod utils;
     #[cfg(test)]
     mod tests {
         mod test_constants;

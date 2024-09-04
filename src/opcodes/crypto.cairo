@@ -1,6 +1,6 @@
 use core::sha256::compute_sha256_byte_array;
 use crate::engine::Engine;
-use crate::opcodes::utils_opcodes;
+use crate::opcodes::utils;
 use crate::signature::BaseSigVerifierTrait;
 use crate::stack::ScriptStackTrait;
 
@@ -106,7 +106,7 @@ pub fn opcode_codeseparator(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_checksigverify(ref engine: Engine) -> Result<(), felt252> {
     opcode_checksig(ref engine)?;
-    utils_opcodes::abstract_verify(ref engine)?;
+    utils::abstract_verify(ref engine)?;
     return Result::Ok(());
 }
 

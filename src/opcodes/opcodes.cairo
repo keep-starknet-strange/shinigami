@@ -187,7 +187,7 @@ pub mod Opcode {
 
     use crate::engine::Engine;
     use crate::opcodes::{
-        constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils_opcodes
+        constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils
     };
 
     pub fn execute(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
@@ -272,7 +272,7 @@ pub mod Opcode {
             77 => constants::opcode_push_data_x(2, ref engine),
             78 => constants::opcode_push_data_x(4, ref engine),
             79 => constants::opcode_1negate(ref engine),
-            80 => utils_opcodes::opcode_reserved("reserved", ref engine),
+            80 => utils::opcode_reserved("reserved", ref engine),
             81 => constants::opcode_n(1, ref engine),
             82 => constants::opcode_n(2, ref engine),
             83 => constants::opcode_n(3, ref engine),
@@ -290,11 +290,11 @@ pub mod Opcode {
             95 => constants::opcode_n(15, ref engine),
             96 => constants::opcode_n(16, ref engine),
             97 => flow::opcode_nop(),
-            98 => utils_opcodes::opcode_reserved("ver", ref engine),
+            98 => utils::opcode_reserved("ver", ref engine),
             99 => flow::opcode_if(ref engine),
             100 => flow::opcode_notif(ref engine),
-            101 => utils_opcodes::opcode_reserved("verif", ref engine),
-            102 => utils_opcodes::opcode_reserved("vernotif", ref engine),
+            101 => utils::opcode_reserved("verif", ref engine),
+            102 => utils::opcode_reserved("vernotif", ref engine),
             103 => flow::opcode_else(ref engine),
             104 => flow::opcode_endif(ref engine),
             105 => flow::opcode_verify(ref engine),
@@ -318,34 +318,34 @@ pub mod Opcode {
             123 => stack::opcode_rot(ref engine),
             124 => stack::opcode_swap(ref engine),
             125 => stack::opcode_tuck(ref engine),
-            126 => utils_opcodes::opcode_disabled(ref engine),
-            127 => utils_opcodes::opcode_disabled(ref engine),
-            128 => utils_opcodes::opcode_disabled(ref engine),
-            129 => utils_opcodes::opcode_disabled(ref engine),
+            126 => utils::opcode_disabled(ref engine),
+            127 => utils::opcode_disabled(ref engine),
+            128 => utils::opcode_disabled(ref engine),
+            129 => utils::opcode_disabled(ref engine),
             130 => splice::opcode_size(ref engine),
-            131 => utils_opcodes::opcode_disabled(ref engine),
-            132 => utils_opcodes::opcode_disabled(ref engine),
-            133 => utils_opcodes::opcode_disabled(ref engine),
-            134 => utils_opcodes::opcode_disabled(ref engine),
+            131 => utils::opcode_disabled(ref engine),
+            132 => utils::opcode_disabled(ref engine),
+            133 => utils::opcode_disabled(ref engine),
+            134 => utils::opcode_disabled(ref engine),
             135 => bitwise::opcode_equal(ref engine),
             136 => bitwise::opcode_equal_verify(ref engine),
-            137 => utils_opcodes::opcode_reserved("reserved1", ref engine),
-            138 => utils_opcodes::opcode_reserved("reserved2", ref engine),
+            137 => utils::opcode_reserved("reserved1", ref engine),
+            138 => utils::opcode_reserved("reserved2", ref engine),
             139 => arithmetic::opcode_1add(ref engine),
             140 => arithmetic::opcode_1sub(ref engine),
-            141 => utils_opcodes::opcode_disabled(ref engine),
-            142 => utils_opcodes::opcode_disabled(ref engine),
+            141 => utils::opcode_disabled(ref engine),
+            142 => utils::opcode_disabled(ref engine),
             143 => arithmetic::opcode_negate(ref engine),
             144 => arithmetic::opcode_abs(ref engine),
             145 => arithmetic::opcode_not(ref engine),
             146 => arithmetic::opcode_0_not_equal(ref engine),
             147 => arithmetic::opcode_add(ref engine),
             148 => arithmetic::opcode_sub(ref engine),
-            149 => utils_opcodes::opcode_disabled(ref engine),
-            150 => utils_opcodes::opcode_disabled(ref engine),
-            151 => utils_opcodes::opcode_disabled(ref engine),
-            152 => utils_opcodes::opcode_disabled(ref engine),
-            153 => utils_opcodes::opcode_disabled(ref engine),
+            149 => utils::opcode_disabled(ref engine),
+            150 => utils::opcode_disabled(ref engine),
+            151 => utils::opcode_disabled(ref engine),
+            152 => utils::opcode_disabled(ref engine),
+            153 => utils::opcode_disabled(ref engine),
             154 => arithmetic::opcode_bool_and(ref engine),
             155 => arithmetic::opcode_bool_or(ref engine),
             156 => arithmetic::opcode_numequal(ref engine),
@@ -366,8 +366,8 @@ pub mod Opcode {
             171 => crypto::opcode_codeseparator(ref engine),
             172 => crypto::opcode_checksig(ref engine),
             173 => crypto::opcode_checksigverify(ref engine),
-            174 => utils_opcodes::not_implemented(ref engine),
-            175 => utils_opcodes::not_implemented(ref engine),
+            174 => utils::not_implemented(ref engine),
+            175 => utils::not_implemented(ref engine),
             176 => flow::opcode_nop(),
             177 => locktime::opcode_checklocktimeverify(ref engine),
             178 => locktime::opcode_checksequenceverify(ref engine),
@@ -378,7 +378,7 @@ pub mod Opcode {
             183 => flow::opcode_nop(),
             184 => flow::opcode_nop(),
             185 => flow::opcode_nop(),
-            _ => utils_opcodes::not_implemented(ref engine)
+            _ => utils::not_implemented(ref engine)
         }
     }
 
@@ -398,7 +398,7 @@ pub mod Opcode {
             || opcode == OP_MOD
             || opcode == OP_LSHIFT
             || opcode == OP_RSHIFT {
-            return utils_opcodes::opcode_disabled(ref engine);
+            return utils::opcode_disabled(ref engine);
         } else {
             return Result::Ok(());
         }
@@ -406,9 +406,9 @@ pub mod Opcode {
 
     pub fn is_opcode_always_illegal(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
         if opcode == OP_VERIF {
-            return utils_opcodes::opcode_reserved("verif", ref engine);
+            return utils::opcode_reserved("verif", ref engine);
         } else if opcode == OP_VERNOTIF {
-            return utils_opcodes::opcode_reserved("vernotif", ref engine);
+            return utils::opcode_reserved("vernotif", ref engine);
         } else {
             return Result::Ok(());
         }

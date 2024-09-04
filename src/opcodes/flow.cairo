@@ -1,8 +1,7 @@
-use crate::engine::{Engine, EngineTrait};
+use crate::engine::Engine;
 use crate::cond_stack::ConditionalStackTrait;
-use crate::opcodes::{utils_opcodes, Opcode};
+use crate::opcodes::{utils, Opcode};
 use crate::stack::ScriptStackTrait;
-use crate::utils;
 
 pub fn is_branching_opcode(opcode: u8) -> bool {
     if opcode == Opcode::OP_IF
@@ -70,36 +69,10 @@ pub fn opcode_endif(ref engine: Engine) -> Result<(), felt252> {
 }
 
 pub fn opcode_verify(ref engine: Engine) -> Result<(), felt252> {
-    utils_opcodes::abstract_verify(ref engine)?;
+    utils::abstract_verify(ref engine)?;
     return Result::Ok(());
 }
 
 pub fn opcode_return(ref engine: Engine) -> Result<(), felt252> {
     return Result::Err('opcode_return: returned early');
-}
-
-pub fn opcode_push(
-    opcode: u8, script: @ByteArray, mut opcode_idx: usize, ref engine: Engine
-) -> Result<usize, felt252> {
-    let mut result: usize = 0;
-    if opcode == Opcode::OP_PUSHDATA1 {
-        let data_len: usize = utils::byte_array_to_felt252_le(@engine.pull_data(1)?)
-            .try_into()
-            .unwrap();
-        opcode_idx += data_len + 2;
-        result = opcode_idx;
-    } else if opcode == Opcode::OP_PUSHDATA2 {
-        let data_len: usize = utils::byte_array_to_felt252_le(@engine.pull_data(2)?)
-            .try_into()
-            .unwrap();
-        opcode_idx += data_len + 3;
-        result = opcode_idx;
-    } else if opcode == Opcode::OP_PUSHDATA4 {
-        let data_len: usize = utils::byte_array_to_felt252_le(@engine.pull_data(4)?)
-            .try_into()
-            .unwrap();
-        opcode_idx += data_len + 5;
-        result = opcode_idx;
-    }
-    Result::Ok(result)
 }
