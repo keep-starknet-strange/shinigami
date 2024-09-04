@@ -1,5 +1,5 @@
 use crate::engine::Engine;
-use crate::opcodes::utils;
+use crate::opcodes::utils_opcodes;
 use crate::stack::ScriptStackTrait;
 
 pub fn opcode_equal(ref engine: Engine) -> Result<(), felt252> {
@@ -15,6 +15,6 @@ pub fn opcode_equal(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_equal_verify(ref engine: Engine) -> Result<(), felt252> {
     opcode_equal(ref engine)?;
-    utils::abstract_verify(ref engine)?;
+    utils_opcodes::abstract_verify(ref engine)?;
     return Result::Ok(());
 }

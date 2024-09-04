@@ -128,12 +128,18 @@ pub impl EngineImpl of EngineTrait {
         }
 
         if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
+            let mut err = '';
             if Opcode::is_data_opcode(opcode) {
                 let opcode_32: u32 = opcode.into();
                 self.opcode_idx += opcode_32 + 1;
                 return Result::Ok(true);
             } else if Opcode::is_push_opcode(opcode) {
-                self.opcode_idx = flow::opcode_push(opcode, script, self.opcode_idx);
+                let res = flow::opcode_push(opcode, script, self.opcode_idx, ref self);
+                if res.is_err() {
+                    err = res.unwrap_err();
+                    return Result::Err(res.unwrap_err());
+                }
+                self.opcode_idx = res.unwrap();
                 return Result::Ok(true);
             } else {
                 let res = Opcode::is_opcode_disabled(opcode, ref self);
@@ -183,7 +189,12 @@ pub impl EngineImpl of EngineTrait {
                         self.opcode_idx += opcode_32 + 1;
                         continue;
                     } else if Opcode::is_push_opcode(opcode) {
-                        self.opcode_idx = flow::opcode_push(opcode, script, self.opcode_idx);
+                        let res = flow::opcode_push(opcode, script, self.opcode_idx, ref self);
+                        if res.is_err() {
+                            err = res.unwrap_err();
+                            break;
+                        }
+                        self.opcode_idx = res.unwrap();
                         continue;
                     } else {
                         let res = Opcode::is_opcode_disabled(opcode, ref self);
