@@ -15,6 +15,7 @@ pub mod Error {
     pub const INVALID_TX_VERSION: felt252 = 'Invalid transaction version';
     pub const SCRIPT_INVALID: felt252 = 'Invalid script data';
     pub const SCRIPT_STACK_SIZE_EXCEEDED: felt252 = 'Script stack size exceeded';
+    pub const INVALID_COINBASE: felt252 = 'Invalid coinbase transaction';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
