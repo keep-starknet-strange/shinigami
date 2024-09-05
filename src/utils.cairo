@@ -169,6 +169,7 @@ pub fn number_to_bytecode(script_item: @ByteArray) -> ByteArray {
     if is_negative {
         value = -value;
     }
+    // TODO: Negative info lost before this
     if value == -1 {
         bytecode.append_byte(Opcode::OP_1NEGATE);
     } else if value > 0 && value <= 16 {
