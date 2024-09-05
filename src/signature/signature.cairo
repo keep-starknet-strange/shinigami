@@ -1,10 +1,10 @@
-use shinigami::engine::{Engine, EngineImpl};
+use crate::engine::{Engine, EngineImpl};
 use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
-use shinigami::scriptflags::ScriptFlags;
-use shinigami::utils::{u256_from_byte_array_with_offset};
-use shinigami::signature::{sighash, constants};
+use crate::scriptflags::ScriptFlags;
+use crate::utils::{u256_from_byte_array_with_offset};
+use crate::signature::{sighash, constants};
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -34,16 +34,16 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
     fn new(
         ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252> {
+        let mut sub_script = vm.sub_script();
+        sub_script = remove_signature(sub_script, sig_bytes);
         let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
-        let sub_script = vm.sub_script();
-        Result::Ok(BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type, })
+        Result::Ok(BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type })
     }
 
     // TODO: add signature cache mechanism for optimization
     fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool {
-        let sub_script: @ByteArray = remove_signature(@self.sub_script, self.sig_bytes);
         let sig_hash: u256 = sighash::calc_signature_hash(
-            sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
+            @self.sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
         );
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
@@ -273,7 +273,7 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
     } else {
         // Extract X coordinate and determine parity from last byte.
         let pub_key: u256 = u256_from_byte_array_with_offset(@pk_bytes_uncompressed, 1, 32);
-        let parity = pk_bytes_uncompressed[64] & 1 == 0;
+        let parity = !(pk_bytes_uncompressed[64] & 1 == 0);
 
         return Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
             .unwrap_syscall()
@@ -286,41 +286,57 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
 // The function performs various checks to ensure the integrity and validity of the signature.
 pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
-    let sig_len: usize = sig_bytes.len() - constants::HASH_TYPE_LEN;
-    let r_len: usize = sig_bytes[3].into();
-    let s_len: usize = sig_bytes[r_len + 5].into();
-    let r_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, 4, r_len);
-    let s_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, 6 + r_len, s_len);
+    let mut sig_len: usize = sig_bytes.len() - constants::HASH_TYPE_LEN;
+    let mut r_len: usize = sig_bytes[3].into();
+    let mut s_len: usize = sig_bytes[r_len + 5].into();
+    let mut r_offset = 4;
+    let mut s_offset = 6 + r_len;
     let order: u256 = Secp256Trait::<Secp256k1Point>::get_curve_size();
+
+    let mut i = 0;
+
+    //Strip leading zero
+    while s_len > 0 && sig_bytes[i + r_len + 6] == 0x00 {
+        sig_len -= 1;
+        s_len -= 1;
+        s_offset += 1;
+        i += 1;
+    };
+
+    let s_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, s_offset, s_len);
+
+    i = 0;
+
+    while r_len > 0 && sig_bytes[i + 4] == 0x00 {
+        sig_len -= 1;
+        r_len -= 1;
+        r_offset += 1;
+        i += 1;
+    };
+
+    let r_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, r_offset, r_len);
 
     if r_len > 32 {
         return Result::Err('invalid sig: R > 256 bits');
     }
-
     if r_sig >= order {
         return Result::Err('invalid sig: R >= group order');
     }
-
     if r_sig == 0 {
         return Result::Err('invalid sig: R is zero');
     }
-
     if s_len > 32 {
         return Result::Err('invalid sig: S > 256 bits');
     }
-
     if s_sig >= order {
         return Result::Err('invalid sig: S >= group order');
     }
-
     if s_sig == 0 {
         return Result::Err('invalid sig: S is zero');
     }
-
     if sig_len != r_len + s_len + 6 {
         return Result::Err('invalid sig: bad final length');
     }
-
     return Result::Ok(Signature { r: r_sig, s: s_sig, y_parity: false, });
 }
 
@@ -347,7 +363,7 @@ pub fn parse_base_sig_and_pk(
 }
 
 // Removes the ECDSA signature from a given script.
-pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray {
+pub fn remove_signature(script: ByteArray, sig_bytes: @ByteArray) -> ByteArray {
     if script.len() == 0 || sig_bytes.len() == 0 {
         return script;
     }
@@ -362,7 +378,7 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
             let mut found: bool = false;
 
             if len == sig_bytes.len() {
-                found = compare_data(script, sig_bytes, i, push_data);
+                found = compare_data(@script, sig_bytes, i, push_data);
             }
 
             if i + len <= script.len() {
@@ -385,5 +401,5 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
         i += 1;
     };
 
-    @processed_script
+    processed_script
 }

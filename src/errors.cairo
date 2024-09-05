@@ -3,6 +3,7 @@ pub mod Error {
     pub const SCRIPT_EMPTY_STACK: felt252 = 'Stack empty after execute';
     pub const SCRIPT_UNBALANCED_CONDITIONAL_STACK: felt252 = 'Unbalanced conditional';
     pub const SCRIPTNUM_OUT_OF_RANGE: felt252 = 'Scriptnum out of range';
+    pub const STACK_OVERFLOW: felt252 = 'Stack overflow';
     pub const STACK_UNDERFLOW: felt252 = 'Stack underflow';
     pub const STACK_OUT_OF_RANGE: felt252 = 'Stack out of range';
     pub const VERIFY_FAILED: felt252 = 'Verify failed';
@@ -11,9 +12,11 @@ pub mod Error {
     pub const OPCODE_DISABLED: felt252 = 'Opcode is disabled';
     pub const SCRIPT_DISCOURAGE_UPGRADABLE_NOPS: felt252 = 'Upgradable NOPs are discouraged';
     pub const UNSATISFIED_LOCKTIME: felt252 = 'Unsatisfied locktime';
+    pub const SCRIPT_STRICT_MULTISIG: felt252 = 'OP_CHECKMULTISIG invalid dummy';
     pub const FINALIZED_TX_CLTV: felt252 = 'Finalized tx in OP_CLTV';
     pub const INVALID_TX_VERSION: felt252 = 'Invalid transaction version';
     pub const SCRIPT_INVALID: felt252 = 'Invalid script data';
+    pub const INVALID_COINBASE: felt252 = 'Invalid coinbase transaction';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {

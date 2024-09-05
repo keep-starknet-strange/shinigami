@@ -1,6 +1,6 @@
-use shinigami::scriptnum::ScriptNum;
-use shinigami::opcodes::tests::utils;
-use shinigami::errors::Error;
+use crate::errors::Error;
+use crate::opcodes::tests::utils;
+use crate::scriptnum::ScriptNum;
 
 #[test]
 fn test_op_toaltstack() {
@@ -289,6 +289,35 @@ fn test_op_2rot_insufficient_items() {
     let program = "OP_1 OP_2 OP_3 OP_4 OP_5 OP_2ROT";
     let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OUT_OF_RANGE);
     utils::check_dstack_size(ref engine, 5);
+}
+
+#[test]
+fn test_max_stack() {
+    let mut program: ByteArray = "";
+    let op_1_string = "OP_1 ";
+    let mut index: u64 = 0;
+    while index < 1000 {
+        program.append(@op_1_string);
+        index += 1;
+    };
+    let mut engine = utils::test_compile_and_run(program);
+
+    utils::check_dstack_size(ref engine, 1000);
+}
+
+#[test]
+fn test_exceed_stack() {
+    let mut program: ByteArray = "";
+    let op_1_string = "OP_1 ";
+    let mut index: u64 = 0;
+    while index < 1001 {
+        program.append(@op_1_string);
+        index += 1;
+    };
+
+    let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OVERFLOW);
+
+    utils::check_dstack_size(ref engine, 1001);
 }
 
 #[test]

@@ -1,9 +1,10 @@
 // Wrapper around Bitcoin Script 'sign-magnitude' 4 byte integer.
 pub mod ScriptNum {
-    use shinigami::errors::Error;
+    use crate::errors::Error;
+
     const BYTESHIFT: i64 = 256;
     const MAX_INT32: i32 = 2147483647;
-    const MIN_INT32: i32 = -2147483648;
+    const MIN_INT32: i32 = -2147483647;
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
@@ -26,7 +27,7 @@ pub mod ScriptNum {
             }
         };
         let unsigned: u64 = input.try_into().unwrap();
-        let bytes_len: usize = integer_bytes_len(input.into() + 1);
+        let bytes_len: usize = integer_bytes_len(input.into());
         result.append_word_rev(unsigned.into(), bytes_len - 1);
         // Compute 'sign-magnitude' byte.
         let sign_byte: u8 = get_last_byte_of_uint(unsigned);

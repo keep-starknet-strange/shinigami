@@ -1,10 +1,10 @@
-use shinigami::stack::{ScriptStack, ScriptStackImpl};
-use shinigami::cond_stack::{ConditionalStack, ConditionalStackImpl};
-use shinigami::opcodes::opcodes::Opcode;
-use shinigami::opcodes::flow;
-use shinigami::errors::Error;
-use shinigami::scriptflags::ScriptFlags;
-use shinigami::transaction::Transaction;
+use crate::cond_stack::{ConditionalStack, ConditionalStackImpl};
+use crate::errors::Error;
+use crate::opcodes::{flow, opcodes::Opcode};
+use crate::scriptflags::ScriptFlags;
+use crate::stack::{ScriptStack, ScriptStackImpl};
+use crate::transaction::Transaction;
+use crate::utils;
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -42,6 +42,8 @@ pub trait EngineTrait {
     fn pull_data(ref self: Engine, len: usize) -> Result<ByteArray, felt252>;
     fn get_dstack(ref self: Engine) -> Span<ByteArray>;
     fn get_astack(ref self: Engine) -> Span<ByteArray>;
+    // Skip the next opcode if it is a push opcode in unexecuted conditional branch
+    fn skip_push_data(ref self: Engine, opcode: u8) -> Result<(), felt252>;
     // Executes the next instruction in the script
     fn step(ref self: Engine) -> Result<bool, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
@@ -50,7 +52,13 @@ pub trait EngineTrait {
     fn has_flag(ref self: Engine, flag: ScriptFlags) -> bool;
     // Return the script since last OP_CODESEPARATOR
     fn sub_script(ref self: Engine) -> ByteArray;
+    // Ensure the stack size is within limits
+    fn check_stack_size(ref self: Engine) -> Result<(), felt252>;
+    // Print engine data as a JSON object
+    fn json(ref self: Engine);
 }
+
+pub const MAX_STACK_SIZE: u32 = 1000;
 
 pub impl EngineImpl of EngineTrait {
     fn new(
@@ -99,24 +107,85 @@ pub impl EngineImpl of EngineTrait {
         return self.astack.stack_to_span();
     }
 
+    fn skip_push_data(ref self: Engine, opcode: u8) -> Result<(), felt252> {
+        if opcode == Opcode::OP_PUSHDATA1 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(1)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        } else if opcode == Opcode::OP_PUSHDATA2 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(2)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        } else if opcode == Opcode::OP_PUSHDATA4 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(4)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        }
+        Result::Ok(())
+    }
+
     fn step(ref self: Engine) -> Result<bool, felt252> {
-        // TODO: Script idx
-        let script = *(self.scripts[self.script_idx]);
-        if self.opcode_idx >= script.len() {
+        if self.script_idx >= self.scripts.len() {
             return Result::Ok(false);
         }
-
+        let script = *(self.scripts[self.script_idx]);
+        if self.opcode_idx >= script.len() {
+            // Empty script skip
+            if self.cond_stack.len() > 0 {
+                return Result::Err(Error::SCRIPT_UNBALANCED_CONDITIONAL_STACK);
+            }
+            self.astack = ScriptStackImpl::new();
+            self.opcode_idx = 0;
+            self.last_code_sep = 0;
+            self.script_idx += 1;
+            return self.step();
+        }
         let opcode = script[self.opcode_idx];
-        Opcode::is_opcode_always_illegal(opcode, ref self)?;
 
-        if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
-            Opcode::is_opcode_disabled(opcode, ref self)?;
-            self.opcode_idx += 1;
-            return Result::Ok(true);
+        let illegal_opcode = Opcode::is_opcode_always_illegal(opcode, ref self);
+        if illegal_opcode.is_err() {
+            return Result::Err(illegal_opcode.unwrap_err());
         }
 
-        Opcode::execute(opcode, ref self)?;
+        if !self.cond_stack.branch_executing() && !flow::is_branching_opcode(opcode) {
+            if Opcode::is_data_opcode(opcode) {
+                let opcode_32: u32 = opcode.into();
+                self.opcode_idx += opcode_32 + 1;
+                return Result::Ok(true);
+            } else if Opcode::is_push_opcode(opcode) {
+                let res = self.skip_push_data(opcode);
+                if res.is_err() {
+                    return Result::Err(res.unwrap_err());
+                }
+                return Result::Ok(true);
+            } else {
+                let res = Opcode::is_opcode_disabled(opcode, ref self);
+                if res.is_err() {
+                    return Result::Err(res.unwrap_err());
+                }
+                self.opcode_idx += 1;
+                return Result::Ok(true);
+            }
+        }
+
+        let res = Opcode::execute(opcode, ref self);
+        if res.is_err() {
+            return Result::Err(res.unwrap_err());
+        }
+        self.check_stack_size()?;
         self.opcode_idx += 1;
+        if self.opcode_idx >= script.len() {
+            if self.cond_stack.len() > 0 {
+                return Result::Err(Error::SCRIPT_UNBALANCED_CONDITIONAL_STACK);
+            }
+            self.astack = ScriptStackImpl::new();
+            self.opcode_idx = 0;
+            self.last_code_sep = 0;
+            self.script_idx += 1;
+        }
         return Result::Ok(true);
     }
 
@@ -139,6 +208,13 @@ pub impl EngineImpl of EngineTrait {
                         let opcode_32: u32 = opcode.into();
                         self.opcode_idx += opcode_32 + 1;
                         continue;
+                    } else if Opcode::is_push_opcode(opcode) {
+                        let res = self.skip_push_data(opcode);
+                        if res.is_err() {
+                            err = res.unwrap_err();
+                            break;
+                        }
+                        continue;
                     } else {
                         let res = Opcode::is_opcode_disabled(opcode, ref self);
                         if res.is_err() {
@@ -150,6 +226,11 @@ pub impl EngineImpl of EngineTrait {
                     }
                 }
                 let res = Opcode::execute(opcode, ref self);
+                if res.is_err() {
+                    err = res.unwrap_err();
+                    break;
+                }
+                let res = self.check_stack_size();
                 if res.is_err() {
                     err = res.unwrap_err();
                     break;
@@ -169,9 +250,6 @@ pub impl EngineImpl of EngineTrait {
             self.script_idx += 1;
             // TODO: other things
         };
-        // TODO: Remove
-        self.dstack.json();
-
         if err != '' {
             return Result::Err(err);
         }
@@ -217,5 +295,16 @@ pub impl EngineImpl of EngineTrait {
             i += 1;
         };
         return sub_script;
+    }
+
+    fn check_stack_size(ref self: Engine) -> Result<(), felt252> {
+        if self.dstack.len() + self.astack.len() > MAX_STACK_SIZE {
+            return Result::Err(Error::STACK_OVERFLOW);
+        }
+        return Result::Ok(());
+    }
+
+    fn json(ref self: Engine) {
+        self.dstack.json();
     }
 }

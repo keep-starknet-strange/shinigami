@@ -174,6 +174,8 @@ pub mod Opcode {
     pub const OP_CODESEPARATOR: u8 = 171;
     pub const OP_CHECKSIG: u8 = 172;
     pub const OP_CHECKSIGVERIFY: u8 = 173;
+    pub const OP_CHECKMULTISIG: u8 = 174;
+    pub const OP_CHECKMULTISIGVERIFY: u8 = 175;
     pub const OP_NOP1: u8 = 176;
     pub const OP_CHECKLOCKTIMEVERIFY: u8 = 177;
     pub const OP_CHECKSEQUENCEVERIFY: u8 = 178;
@@ -186,10 +188,11 @@ pub mod Opcode {
     pub const OP_NOP10: u8 = 185;
     pub const OP_CHECKSIGADD: u8 = 186;
 
-    use shinigami::engine::Engine;
-    use shinigami::opcodes::{
+    use crate::engine::Engine;
+    use crate::opcodes::{
         constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils
     };
+
     pub fn execute(opcode: u8, ref engine: Engine) -> Result<(), felt252> {
         match opcode {
             0 => constants::opcode_false(ref engine),
@@ -366,8 +369,8 @@ pub mod Opcode {
             171 => crypto::opcode_codeseparator(ref engine),
             172 => crypto::opcode_checksig(ref engine),
             173 => crypto::opcode_checksigverify(ref engine),
-            174 => utils::not_implemented(ref engine),
-            175 => utils::not_implemented(ref engine),
+            174 => crypto::opcode_checkmultisig(ref engine),
+            175 => crypto::opcode_checkmultisigverify(ref engine),
             176 => flow::opcode_nop(),
             177 => locktime::opcode_checklocktimeverify(ref engine),
             178 => locktime::opcode_checksequenceverify(ref engine),
@@ -417,5 +420,9 @@ pub mod Opcode {
 
     pub fn is_data_opcode(opcode: u8) -> bool {
         return (opcode >= OP_DATA_1 && opcode <= OP_DATA_75);
+    }
+
+    pub fn is_push_opcode(opcode: u8) -> bool {
+        return (opcode == OP_PUSHDATA1 || opcode == OP_PUSHDATA2 || opcode == OP_PUSHDATA4);
     }
 }
