@@ -392,7 +392,7 @@ fn test_op_checksigadd_valid() {
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(2)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
-} 
+}
 
 #[test]
 fn test_op_checkmultisig_valid() {
