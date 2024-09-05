@@ -2,6 +2,7 @@ use shinigami::engine::Engine;
 use shinigami::stack::ScriptStackTrait;
 use shinigami::signature::BaseSigVerifierTrait;
 use core::sha256::compute_sha256_byte_array;
+use core::num::traits::OverflowingAdd;
 use shinigami::opcodes::utils;
 
 pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
@@ -115,4 +116,48 @@ pub fn opcode_sha1(ref engine: Engine) -> Result<(), felt252> {
     let h: ByteArray = sha1::sha1_hash(@m).into();
     engine.dstack.push_byte_array(h);
     return Result::Ok(());
+}
+
+pub fn opcode_checksigadd(ref engine: Engine) -> Result<(), felt252> {
+    let pk_bytes = engine.dstack.pop_byte_array()?;
+    let n = engine.dstack.pop_int()?;
+    let sig_bytes = engine.dstack.pop_byte_array()?;
+
+    if pk_bytes.len() == 0 {
+        return Result::Err('EmptyPublicKey');
+    }
+
+    let mut is_valid = false;
+
+    if n > 0x7FFFFFFF || n < -0x80000000 {
+        return Result::Err('InvalidScriptNum');
+    }
+
+    if pk_bytes.len() == 32 {
+        if sig_bytes.len() > 0 {
+            let mut sig_verifier = BaseSigVerifierTrait::new(ref engine, @sig_bytes, @pk_bytes)?;
+            is_valid = sig_verifier.verify(ref engine);
+            if !is_valid {
+                return Result::Err('InvalidSignature');
+            }
+        }
+    } else {
+        // Unknown public key type
+        if sig_bytes.len() > 0 {
+            is_valid = true;
+        }
+    }
+
+    let result = if sig_bytes.len() == 0 {
+        n
+    } else {
+        let (result, overflow) = n.overflowing_add(1);
+        if overflow {
+            return Result::Err('IntegerOverflow');
+        }
+        result
+    };
+
+    engine.dstack.push_int(result);
+    Result::Ok(())
 }

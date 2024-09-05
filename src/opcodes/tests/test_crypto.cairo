@@ -382,3 +382,81 @@ fn test_op_sha1_14_double_sha1() {
     let expected_stack = array![hex_to_bytecode(@"0xC0BDFDD54F44A37833C74DA7613B87A5BA9A8452")];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
+
+#[test]
+fn test_op_checksigadd_valid() {
+    let script_sig =
+        "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
+    let script_pubkey = "OP_1 OP_SWAP OP_SWAP OP_CHECKSIGADD";
+    let mut transaction = utils::mock_transaction(script_sig);
+    let mut engine = utils::test_compile_and_run_with_tx(script_pubkey, transaction);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(2)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_checksigadd_invalid_script_num() {
+    let script_sig =
+        "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
+    let script_pubkey = "OP_DATA_5 0x0102030405 OP_SWAP OP_SWAP OP_CHECKSIGADD";
+    let mut transaction = utils::mock_transaction(script_sig);
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        script_pubkey, transaction, 'InvalidScriptNum'
+    );
+    utils::check_dstack_size(ref engine, 0);
+}
+
+#[test]
+fn test_op_checksigadd_invalid_signature() {
+    let script_sig =
+        "OP_DATA_71 0x3044022008f4f37e2d8f74f18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
+    let script_pubkey = "OP_1 OP_SWAP OP_SWAP OP_CHECKSIGADD";
+    let mut transaction = utils::mock_transaction(script_sig);
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        script_pubkey, transaction, 'InvalidSignature'
+    );
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_checksigadd_invalid_hash_type() {
+    let script_sig =
+        "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5807 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
+    let script_pubkey = "OP_1 OP_SWAP OP_SWAP OP_CHECKSIGADD";
+    let mut transaction = utils::mock_transaction(script_sig);
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        script_pubkey, transaction, Error::SCRIPT_FAILED
+    );
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_checksigadd_empty_signature() {
+    let script_sig =
+        "OP_0 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
+    let script_pubkey = "OP_1 OP_SWAP OP_SWAP OP_CHECKSIGADD";
+    let mut transaction = utils::mock_transaction(script_sig);
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        script_pubkey, transaction, Error::SCRIPT_FAILED
+    );
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_checksigadd_too_short_signature() {
+    let script_sig =
+        "OP_DATA_1 0x01 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
+    let script_pubkey = "OP_1 OP_SWAP OP_SWAP OP_CHECKSIGADD";
+    let mut transaction = utils::mock_transaction(script_sig);
+    let mut engine = utils::test_compile_and_run_with_tx_err(
+        script_pubkey, transaction, 'invalid sig fmt: too short'
+    );
+    utils::check_dstack_size(ref engine, 0);
+}

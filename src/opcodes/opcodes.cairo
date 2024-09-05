@@ -184,6 +184,7 @@ pub mod Opcode {
     pub const OP_NOP8: u8 = 183;
     pub const OP_NOP9: u8 = 184;
     pub const OP_NOP10: u8 = 185;
+    pub const OP_CHECKSIGADD: u8 = 186;
 
     use shinigami::engine::Engine;
     use shinigami::opcodes::{
@@ -377,6 +378,7 @@ pub mod Opcode {
             183 => flow::opcode_nop(),
             184 => flow::opcode_nop(),
             185 => flow::opcode_nop(),
+            186 => crypto::opcode_checksigadd(ref engine),
             _ => utils::not_implemented(ref engine)
         }
     }

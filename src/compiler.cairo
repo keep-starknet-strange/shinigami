@@ -210,6 +210,7 @@ pub impl CompilerImpl of CompilerTrait {
         compiler.add_opcode('OP_CLTV', Opcode::OP_CHECKLOCKTIMEVERIFY);
         compiler.add_opcode('OP_CHECKSEQUENCEVERIFY', Opcode::OP_CHECKSEQUENCEVERIFY);
         compiler.add_opcode('OP_CSV', Opcode::OP_CHECKSEQUENCEVERIFY);
+        compiler.add_opcode('OP_CHECKSIGADD', Opcode::OP_CHECKSIGADD);
 
         compiler
     }
