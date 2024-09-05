@@ -1,10 +1,16 @@
 use shinigami::engine::{Engine, EngineTrait};
 use shinigami::stack::ScriptStackTrait;
 use shinigami::scriptflags::ScriptFlags;
+use shinigami::signature::signature;
+use shinigami::signature::sighash;
 use shinigami::signature::signature::BaseSigVerifierTrait;
+use starknet::secp256_trait::{is_valid_signature};
 use core::sha256::compute_sha256_byte_array;
 use shinigami::opcodes::utils;
+use shinigami::scriptnum::ScriptNum;
 use shinigami::errors::Error;
+
+const MAX_KEYS_PER_MULTISIG: i64 = 20;
 
 pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;
@@ -97,12 +103,16 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
 
 pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     // TODO Error on taproot exec
-    // TODO Numops && MaxKeysPerMultiSig
+    // TODO Numops
 
     // Get number of public keys and construct array
-    let num_pub_keys = engine.dstack.pop_int()?;
+    let num_keys = engine.dstack.pop_int()?;
+    let mut num_pub_keys: i64 = ScriptNum::to_int32(num_keys).into();
     if num_pub_keys < 0 {
-        return Result::Err(Error::SCRIPT_FAILED);
+        return Result::Err('check multisig: num pk < 0');
+    }
+    if num_pub_keys > MAX_KEYS_PER_MULTISIG {
+        return Result::Err('check multisig: num pk > max');
     }
     let mut pub_keys = ArrayTrait::<ByteArray>::new();
     let mut i: i64 = 0;
@@ -119,9 +129,13 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     }
 
     // Get number of required sigs and construct array
-    let num_sigs = engine.dstack.pop_int()?;
+    let num_sig_base = engine.dstack.pop_int()?;
+    let mut num_sigs: i64 = ScriptNum::to_int32(num_sig_base).into();
     if num_sigs < 0 {
-        return Result::Err(Error::SCRIPT_FAILED);
+        return Result::Err('check multisig: num sigs < 0');
+    }
+    if num_sigs > num_pub_keys {
+        return Result::Err('check multisig: num sigs > pk');
     }
     let mut sigs = ArrayTrait::<ByteArray>::new();
     i = 0;
@@ -144,31 +158,54 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
         return Result::Err(Error::SCRIPT_STRICT_MULTISIG);
     }
 
+    let mut script = engine.sub_script();
+
     // TODO: add witness context inside engine to check if witness is active
-
-    let mut valid_sigs: usize = 0;
-    let mut keys_idx: usize = 0;
-
-    while valid_sigs.into() < num_sigs {
-        match BaseSigVerifierTrait::new_verify(
-            ref engine, sigs.at(valid_sigs), pub_keys.at(keys_idx), sigs.span()
-        ) {
-            true => {
-                valid_sigs += 1;
-                keys_idx += 1;
-            },
-            false => keys_idx += 1
-        }
-        if keys_idx.into() == num_pub_keys {
-            break;
-        }
+    let mut s: u32 = 0;
+    while s < sigs.len() {
+        script = signature::remove_signature(script, sigs.at(s));
+        s += 1;
     };
 
-    if valid_sigs.into() == num_sigs {
-        engine.dstack.push_int(1);
-    } else {
-        engine.dstack.push_int(0);
+    let mut success = true;
+    num_pub_keys += 1; // Offset due to decrementing it in the loop
+    let mut pub_key_idx: i64 = -1;
+    let mut sig_idx: i64 = 0;
+
+    while num_sigs > 0 {
+        pub_key_idx += 1;
+        num_pub_keys -= 1;
+        if num_sigs > num_pub_keys {
+            success = false;
+            break;
+        }
+
+        let sig = sigs.at(sig_idx.try_into().unwrap());
+        let pub_key = pub_keys.at(pub_key_idx.try_into().unwrap());
+        if sig.len() == 0 {
+            continue;
+        }
+
+        let res = signature::parse_base_sig_and_pk(ref engine, pub_key, sig);
+        if res.is_err() {
+            success = false;
+            err = res.unwrap_err();
+            break;
+        }
+        let (parsed_pub_key, parsed_sig, hash_type) = res.unwrap();
+        let sig_hash: u256 = sighash::calc_signature_hash(
+            @script, hash_type, ref engine.transaction, engine.tx_idx
+        );
+        if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
+            sig_idx += 1;
+            num_sigs -= 1;
+        }
+    };
+    if err != 0 {
+        return Result::Err(err);
     }
+
+    engine.dstack.push_bool(success);
     Result::Ok(())
 }
 

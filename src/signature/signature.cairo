@@ -1,10 +1,10 @@
-use shinigami::engine::{Engine, EngineImpl};
+use crate::engine::{Engine, EngineImpl};
 use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
-use shinigami::scriptflags::ScriptFlags;
-use shinigami::utils::{u256_from_byte_array_with_offset};
-use shinigami::signature::{sighash, constants};
+use crate::scriptflags::ScriptFlags;
+use crate::utils::{u256_from_byte_array_with_offset};
+use crate::signature::{sighash, constants};
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -25,22 +25,17 @@ pub struct BaseSigVerifier {
 
 pub trait BaseSigVerifierTrait {
     fn new(
-        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>
+        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252>;
     fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool;
-    fn new_verify(
-        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>
-    ) -> bool;
 }
 
 impl BaseSigVerifierImpl of BaseSigVerifierTrait {
     fn new(
-        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>
+        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252> {
         let mut sub_script = vm.sub_script();
-        for i in sigs_to_remove {
-            sub_script = remove_signature(@sub_script, i);
-        };
+        sub_script = remove_signature(sub_script, sig_bytes);
         let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
         Result::Ok(BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type })
     }
@@ -52,26 +47,6 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
         );
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
-    }
-
-    // Construct BaseSigVerifier and verify. Return 'false' if construction fail
-    fn new_verify(
-        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>
-    ) -> bool {
-        let mut sub_script = vm.sub_script();
-        for i in sigs_to_remove {
-            sub_script = remove_signature(@sub_script, i);
-        };
-        let (pub_key, sig, hash_type) = match parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes) {
-            Result::Ok((pk, s, ht)) => (pk, s, ht),
-            Result::Err(_) => { return false; }
-        };
-        let verifier = BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type };
-        let sig_hash: u256 = sighash::calc_signature_hash(
-            @verifier.sub_script, verifier.hash_type, ref vm.transaction, vm.tx_idx
-        );
-
-        is_valid_signature(sig_hash, verifier.sig.r, verifier.sig.s, verifier.pub_key)
     }
 }
 
@@ -388,9 +363,9 @@ pub fn parse_base_sig_and_pk(
 }
 
 // Removes the ECDSA signature from a given script.
-fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> ByteArray {
+pub fn remove_signature(script: ByteArray, sig_bytes: @ByteArray) -> ByteArray {
     if script.len() == 0 || sig_bytes.len() == 0 {
-        return Default::default();
+        return script;
     }
 
     let mut processed_script: ByteArray = "";
@@ -403,7 +378,7 @@ fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> ByteArray {
             let mut found: bool = false;
 
             if len == sig_bytes.len() {
-                found = compare_data(script, sig_bytes, i, push_data);
+                found = compare_data(@script, sig_bytes, i, push_data);
             }
 
             if i + len <= script.len() {
