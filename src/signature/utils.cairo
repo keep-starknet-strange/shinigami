@@ -35,7 +35,7 @@ pub fn transaction_procedure(
     let hash_type_masked = hash_type & constants::SIG_HASH_MASK;
     let mut transaction_copy = transaction.clone();
     let mut i: usize = 0;
-    let mut transaction_input: Span<TransactionInput> = transaction_copy.transaction_inputs;
+    let mut transaction_input: Array<TransactionInput> = transaction_copy.transaction_inputs;
     let mut processed_transaction_input: Array<TransactionInput> = ArrayTrait::<
         TransactionInput
     >::new();
@@ -44,7 +44,7 @@ pub fn transaction_procedure(
     >::new();
 
     while i < transaction_input.len() {
-        let mut temp_transaction_input: @TransactionInput = transaction_input.pop_front().unwrap();
+        let mut temp_transaction_input: TransactionInput = transaction_input.pop_front().unwrap();
 
         if hash_type_masked == constants::SIG_HASH_SINGLE && i < index {
             processed_transaction_output
@@ -55,17 +55,17 @@ pub fn transaction_procedure(
             processed_transaction_input
                 .append(
                     TransactionInput {
-                        previous_outpoint: *temp_transaction_input.previous_outpoint,
+                        previous_outpoint: temp_transaction_input.previous_outpoint,
                         signature_script: signature_script.clone(),
                         witness: temp_transaction_input.witness.clone(),
-                        sequence: *temp_transaction_input.sequence
+                        sequence: temp_transaction_input.sequence
                     }
                 );
         } else {
             if hash_type & constants::SIG_HASH_ANYONECANPAY != 0 {
                 continue;
             }
-            let mut temp_sequence = *temp_transaction_input.sequence;
+            let mut temp_sequence = temp_transaction_input.sequence;
             if hash_type_masked == constants::SIG_HASH_NONE
                 || hash_type_masked == constants::SIG_HASH_SINGLE {
                 temp_sequence = 0;
@@ -73,7 +73,7 @@ pub fn transaction_procedure(
             processed_transaction_input
                 .append(
                     TransactionInput {
-                        previous_outpoint: *temp_transaction_input.previous_outpoint,
+                        previous_outpoint: temp_transaction_input.previous_outpoint,
                         signature_script: "",
                         witness: temp_transaction_input.witness.clone(),
                         sequence: temp_sequence
@@ -84,14 +84,14 @@ pub fn transaction_procedure(
         i += 1;
     };
 
-    transaction_copy.transaction_inputs = processed_transaction_input.span();
+    transaction_copy.transaction_inputs = processed_transaction_input;
 
     if hash_type_masked == constants::SIG_HASH_NONE {
-        transaction_copy.transaction_outputs = ArrayTrait::<TransactionOutput>::new().span();
+        transaction_copy.transaction_outputs = ArrayTrait::<TransactionOutput>::new();
     }
 
     if hash_type_masked == constants::SIG_HASH_SINGLE {
-        transaction_copy.transaction_outputs = processed_transaction_output.span();
+        transaction_copy.transaction_outputs = processed_transaction_output;
     }
 
     transaction_copy

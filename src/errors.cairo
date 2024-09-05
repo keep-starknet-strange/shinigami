@@ -15,6 +15,7 @@ pub mod Error {
     pub const FINALIZED_TX_CLTV: felt252 = 'Finalized tx in OP_CLTV';
     pub const INVALID_TX_VERSION: felt252 = 'Invalid transaction version';
     pub const SCRIPT_INVALID: felt252 = 'Invalid script data';
+    pub const INVALID_COINBASE: felt252 = 'Invalid coinbase transaction';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {

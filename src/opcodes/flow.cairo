@@ -1,5 +1,5 @@
-use crate::cond_stack::ConditionalStackTrait;
 use crate::engine::Engine;
+use crate::cond_stack::ConditionalStackTrait;
 use crate::opcodes::{utils, Opcode};
 use crate::stack::ScriptStackTrait;
 

@@ -51,12 +51,12 @@ pub fn calc_witness_transaction_hash(
     while i < input_len {
         let input: @TransactionInput = transaction.transaction_inputs.at(i);
 
-        let input_hash: u256 = *input.previous_outpoint.hash;
-        let vout: u32 = *input.previous_outpoint.index;
+        let input_txid: u256 = *input.previous_outpoint.txid;
+        let vout: u32 = *input.previous_outpoint.vout;
         let sequence: u32 = *input.sequence;
 
-        input_byte.append_word(input_hash.high.into(), 16);
-        input_byte.append_word(input_hash.low.into(), 16);
+        input_byte.append_word(input_txid.high.into(), 16);
+        input_byte.append_word(input_txid.low.into(), 16);
         input_byte.append_word_rev(vout.into(), 4);
         sequence_byte.append_word_rev(sequence.into(), 4);
 
@@ -120,11 +120,11 @@ pub fn calc_witness_transaction_hash(
     // Add the input being signed.
 
     let mut input: @TransactionInput = transaction.transaction_inputs.at(i);
-    let input_hash: u256 = *input.previous_outpoint.hash;
-    let vout: u32 = *input.previous_outpoint.index;
+    let input_txid: u256 = *input.previous_outpoint.txid;
+    let vout: u32 = *input.previous_outpoint.vout;
     let sequence: u32 = *input.sequence;
-    sig_hash_bytes.append_word_rev(input_hash.high.into(), 16);
-    sig_hash_bytes.append_word_rev(input_hash.low.into(), 16);
+    sig_hash_bytes.append_word_rev(input_txid.high.into(), 16);
+    sig_hash_bytes.append_word_rev(input_txid.low.into(), 16);
     sig_hash_bytes.append_word_rev(vout.into(), 4);
     // Check if the script is a witness pubkey hash and serialize accordingly.
     if utils::is_witness_pub_key_hash(sub_script) {
