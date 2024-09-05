@@ -280,6 +280,8 @@ pub impl CompilerImpl of CompilerTrait {
         compiler.add_opcode('OP_HASH256', Opcode::OP_HASH256);
         compiler.add_opcode('OP_CHECKSIG', Opcode::OP_CHECKSIG);
         compiler.add_opcode('OP_CHECKSIGVERIFY', Opcode::OP_CHECKSIGVERIFY);
+        compiler.add_opcode('OP_CHECKMULTISIG', Opcode::OP_CHECKMULTISIG);
+        compiler.add_opcode('OP_CHECKMULTISIGVERIFY', Opcode::OP_CHECKMULTISIGVERIFY);
         compiler.add_opcode('OP_CODESEPARATOR', Opcode::OP_CODESEPARATOR);
         compiler.add_opcode('OP_CHECKLOCKTIMEVERIFY', Opcode::OP_CHECKLOCKTIMEVERIFY);
         compiler.add_opcode('OP_CLTV', Opcode::OP_CHECKLOCKTIMEVERIFY);

@@ -1,7 +1,7 @@
-use shinigami::transaction::TransactionTrait;
-use shinigami::utxo::UTXO;
-use shinigami::validate;
-use shinigami::utils;
+use crate::transaction::TransactionTrait;
+use crate::utxo::UTXO;
+use crate::validate;
+use crate::utils;
 
 // TODO: txid byte order reverse
 
@@ -70,7 +70,6 @@ fn test_deserialize_coinbase_transaction() { // TODO
 }
 
 #[test]
-#[ignore]
 fn test_validate_transaction() {
     // First ever transaction from Satoshi -> Hal Finney
     // tx: f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
@@ -87,6 +86,5 @@ fn test_validate_transaction() {
     };
     let utxo_hints = array![prev_out];
     let res = validate::validate_transaction(transaction, 0, utxo_hints);
-    println!("{:?}", res.unwrap_err());
     assert!(res.is_ok(), "Transaction validation failed");
 }
