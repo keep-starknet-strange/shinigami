@@ -299,7 +299,7 @@ pub impl EngineImpl of EngineTrait {
 
     fn check_stack_size(ref self: Engine) -> Result<(), felt252> {
         if self.dstack.len() + self.astack.len() > MAX_STACK_SIZE {
-            return Result::Err(Error::SCRIPT_STACK_SIZE_EXCEEDED);
+            return Result::Err(Error::STACK_OVERFLOW);
         }
         return Result::Ok(());
     }
