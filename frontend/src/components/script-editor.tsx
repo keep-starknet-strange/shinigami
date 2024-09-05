@@ -16,14 +16,14 @@ import nextIcon from "@/images/next-icon.svg";
 import previousIcon from "@/images/previous-icon.svg";
 import stopIcon from "@/images/stop-icon.svg";
 import clsx from "@/utils/lib";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StackItem } from "../../types";
 
 const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
-  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL OP_HASH160");
+  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
   const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
@@ -56,11 +56,13 @@ export default function ScriptEditor() {
     setError(undefined);
     try {
       let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      let pubKey = scriptPubKey.split("\n").join(" ");
+      let sig = scriptSig.split("\n").join(" ");
       const response = await fetch(`${backendUrl}/${runType}`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         mode: 'cors',
-        body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
+        body: JSON.stringify({ pub_key: pubKey, sig: sig })
       });
       const result = await response.json();
       if (runType === "run-script" && result.message && result.message.length > 0) {
@@ -73,7 +75,7 @@ export default function ScriptEditor() {
         setIsDebugging(true);
         let debuggingContent: StackItem[][] = [];
         result.message.map((item: string, _: number) => {
-          let innerStack: StackItem[] = []; 
+          let innerStack: StackItem[] = [];
           JSON.parse(item).map((innerItem: string, _: number) => {
             innerStack.push({ value: innerItem });
           });
@@ -95,6 +97,12 @@ export default function ScriptEditor() {
   const [split, setSplit] = useState(false);
 
   const setEditorTheme = (monaco: any) => {
+    setMonaco(monaco);
+
+    // Register the custom language
+    monaco.languages.register({ id: 'customPlaintext' });
+
+    // Define the custom theme
     monaco.editor.defineTheme("darker", {
       base: "hc-black",
       inherit: true,
@@ -110,8 +118,83 @@ export default function ScriptEditor() {
         "scrollbarSlider.hoverBackground": "#258F4245",
       },
     });
+
     monaco.editor.remeasureFonts();
   };
+
+  const [currentDecorations, setCurrentDecorations] = useState<string[]>([]);
+
+  const [monaco, setMonaco] = useState<any>();
+
+  useEffect(() => {
+    if (monaco) {
+      const editorModel = monaco.editor.getModels()[0];
+      editorModel.deltaDecorations(currentDecorations, []);
+
+      const words = scriptPubKey.split(/\s+/);
+
+      if (step >= 0 && step < words.length) {
+        const wordToHighlight = words[step];
+
+        // Calculate the start and end positions manually, accounting for new lines
+        let matchIndexToUse = 0;
+        const occurrencesSoFar = words.slice(0, step + 1).filter(word => word === wordToHighlight).length;
+        matchIndexToUse = occurrencesSoFar - 1;
+
+        let charIndex = 0;
+        let occurrenceCount = 0;
+        let startLine = 1;
+        let startColumn = 1;
+        let start = 0;
+        let end = 0;
+
+        for (let i = 0; i < scriptPubKey.length; i++) {
+          if (scriptPubKey[i] === '\n') {
+            startLine++;
+            startColumn = 1;
+            continue;
+          }
+
+          if (scriptPubKey.slice(i, i + wordToHighlight.length) === wordToHighlight) {
+            if (occurrenceCount === matchIndexToUse) {
+              start = i;
+              end = i + wordToHighlight.length;
+              break;
+            }
+            occurrenceCount++;
+          }
+          startColumn++;
+          charIndex++;
+        }
+
+        // Calculate line and column for the end position
+        let endLine = startLine;
+        let endColumn = startColumn + (end - start);
+
+        // Create a range object manually
+        const range = {
+          startLineNumber: startLine,
+          startColumn: startColumn,
+          endLineNumber: endLine,
+          endColumn: endColumn
+        };
+
+        // Apply the decoration
+        const newDecorations = editorModel.deltaDecorations(currentDecorations, [
+          {
+            range,
+            options: {
+              isWholeLine: false,
+              inlineClassName: 'highlight'
+            }
+          }
+        ]);
+        setCurrentDecorations(newDecorations);
+      }
+    }
+  }, [step, scriptPubKey, monaco]);
+
+
 
   const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
     <div
@@ -123,7 +206,7 @@ export default function ScriptEditor() {
       <Editor
         beforeMount={setEditorTheme}
         theme="darker"
-        defaultLanguage="plaintext"
+        defaultLanguage="customPlaintext"
         value={value || ""}
         onChange={(newValue) => onChange(newValue || "")}
         options={{
@@ -178,10 +261,10 @@ export default function ScriptEditor() {
               <div className="flex flex-row space-x-3.5">
                 {
                   <button className={`hidden sm:block ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
-                  let newStep = Math.max(step - 1, 0);
-                  setStep(newStep);
-                  setStackContent(debuggingContent[newStep]);
-                }}>
+                    let newStep = Math.max(step - 1, 0);
+                    setStep(newStep);
+                    setStackContent(debuggingContent[newStep]);
+                  }}>
                     <Image src={previous} alt="" unoptimized />
                   </button>
                 }
