@@ -292,7 +292,7 @@ fn test_op_2rot_insufficient_items() {
 }
 
 #[test]
-fn test_max_stack_size_more() {
+fn test_max_stack() {
     let mut program: ByteArray = "";
     let op_1_string = "OP_1 ";
     let mut index: u64 = 0;
@@ -306,16 +306,16 @@ fn test_max_stack_size_more() {
 }
 
 #[test]
-fn test_max_stack_size_equal() {
+fn test_exceed_stack() {
     let mut program: ByteArray = "";
     let op_1_string = "OP_1 ";
     let mut index: u64 = 0;
-    while index <= 1001 {
+    while index < 1001 {
         program.append(@op_1_string);
         index += 1;
     };
 
-    let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_STACK_SIZE_EXCEEDED);
+    let mut engine = utils::test_compile_and_run_err(program, Error::STACK_OVERFLOW);
 
     utils::check_dstack_size(ref engine, 1001);
 }
