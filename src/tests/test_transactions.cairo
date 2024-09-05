@@ -1,7 +1,7 @@
-use shinigami::transaction::TransactionTrait;
-use shinigami::utxo::UTXO;
-use shinigami::validate;
-use shinigami::utils;
+use crate::transaction::TransactionTrait;
+use crate::utxo::UTXO;
+use crate::validate;
+use crate::utils;
 
 // TODO: txid byte order reverse
 

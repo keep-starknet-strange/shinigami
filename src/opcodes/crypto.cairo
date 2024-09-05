@@ -1,14 +1,14 @@
-use shinigami::engine::{Engine, EngineTrait};
-use shinigami::stack::ScriptStackTrait;
-use shinigami::scriptflags::ScriptFlags;
-use shinigami::signature::signature;
-use shinigami::signature::sighash;
-use shinigami::signature::signature::BaseSigVerifierTrait;
+use crate::engine::{Engine, EngineTrait};
+use crate::stack::ScriptStackTrait;
+use crate::scriptflags::ScriptFlags;
+use crate::signature::signature;
+use crate::signature::sighash;
+use crate::signature::signature::BaseSigVerifierTrait;
 use starknet::secp256_trait::{is_valid_signature};
 use core::sha256::compute_sha256_byte_array;
-use shinigami::opcodes::utils;
-use shinigami::scriptnum::ScriptNum;
-use shinigami::errors::Error;
+use crate::opcodes::utils;
+use crate::scriptnum::ScriptNum;
+use crate::errors::Error;
 
 const MAX_KEYS_PER_MULTISIG: i64 = 20;
 
@@ -78,9 +78,7 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
-    let mut sig_verifier = BaseSigVerifierTrait::new(
-        ref engine, @full_sig_bytes, @pk_bytes
-    )?;
+    let mut sig_verifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
 
     if sig_verifier.verify(ref engine) {
         is_valid = true;
