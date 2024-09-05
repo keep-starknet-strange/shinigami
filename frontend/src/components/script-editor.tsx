@@ -23,7 +23,7 @@ const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
   const [scriptSig, setScriptSig] = useState("");
-  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_1 OP_EQUAL OP_HASH160");
+  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
   const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
@@ -56,11 +56,13 @@ export default function ScriptEditor() {
     setError(undefined);
     try {
       let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      let pubKey = scriptPubKey.split("\n").join(" ");
+      let sig = scriptSig.split("\n").join(" ");
       const response = await fetch(`${backendUrl}/${runType}`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         mode: 'cors',
-        body: JSON.stringify({ pub_key: scriptPubKey, sig: scriptSig })
+        body: JSON.stringify({ pub_key: pubKey, sig: sig })
       });
       const result = await response.json();
       if (runType === "run-script" && result.message && result.message.length > 0) {
