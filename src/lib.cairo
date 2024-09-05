@@ -2,6 +2,8 @@ pub mod compiler;
 pub mod engine;
 pub mod stack;
 pub mod cond_stack;
+pub mod validate;
+pub mod utxo;
 pub mod utils;
 pub mod errors;
 pub mod opcodes {
