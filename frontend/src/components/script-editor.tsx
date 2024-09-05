@@ -18,6 +18,7 @@ import stopIcon from "@/images/stop-icon.svg";
 import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StackItem } from "../../types";
+import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-script";
 
 const jura = Jura({ subsets: ["latin"] });
 
@@ -100,18 +101,44 @@ export default function ScriptEditor() {
     setMonaco(monaco);
 
     // Register the custom language
-    monaco.languages.register({ id: 'customPlaintext' });
+    monaco.languages.register({ id: "bitcoin-script" });
+    monaco.languages.setMonarchTokensProvider(
+      "bitcoin-script",
+      bitcoinScriptLanguage,
+    );
+      
+    monaco.languages.registerCompletionItemProvider("bitcoin-script", {
+      provideCompletionItems: (model: any, position: any) => {
+        const suggestions = bitcoinScriptOpcodes.map(opcodes => ({
+          label: opcodes,
+          kind: monaco.languages.CompletionItemKind.Keyword,
+          insertText: opcodes
+        }));
+    
+        return { suggestions };
+      }
+    });
 
     // Define the custom theme
     monaco.editor.defineTheme("darker", {
       base: "hc-black",
       inherit: true,
-      rules: [],
+      rules: [
+        { token: 'keyword', foreground: 'A06EE2' },
+        { token: 'string', foreground: 'F7A95E' },
+        { token: 'number', foreground: '3A998F' },
+        { token: 'special-keyword', foreground: 'CB4D8D' },
+      ],
       colors: {
         "editor.selectionBackground": "#A5FFC240",
         "editorLineNumber.foreground": "#258F42",
         "editorLineNumber.activeForeground": "#A5FFC2",
-        focusBorder: "#00000000",
+        "editorSuggestWidget.background": "#002000D0",
+        "editorSuggestWidget.border": "#005000D0",
+        "editorSuggestWidget.foreground": "#F0F0F0",
+        "editorSuggestWidget.selectedBackground": "#25CF4240",
+        "editorSuggestWidget.highlightForeground": "#F0F0F0",
+        "focusBorder": "#00000000",
         "scrollbar.shadow": "#00000000",
         "scrollbarSlider.background": "#258F4240",
         "scrollbarSlider.activeBackground": "#258F4260",
@@ -206,7 +233,7 @@ export default function ScriptEditor() {
       <Editor
         beforeMount={setEditorTheme}
         theme="darker"
-        defaultLanguage="customPlaintext"
+        defaultLanguage="bitcoin-script"
         value={value || ""}
         onChange={(newValue) => onChange(newValue || "")}
         options={{
