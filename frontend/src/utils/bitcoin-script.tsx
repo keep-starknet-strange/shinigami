@@ -1,6 +1,4 @@
-import { IMonarchLanguage } from "@monaco-editor/react";
-
-export const bitcoinScriptLanguage: IMonarchLanguage = {
+export const bitcoinScriptLanguage = {
   tokenizer: {
     root: [
       [/OP_CAT/, "special-keyword"],
