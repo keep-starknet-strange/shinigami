@@ -174,6 +174,8 @@ pub mod Opcode {
     pub const OP_CODESEPARATOR: u8 = 171;
     pub const OP_CHECKSIG: u8 = 172;
     pub const OP_CHECKSIGVERIFY: u8 = 173;
+    pub const OP_CHECKMULTISIG: u8 = 174;
+    pub const OP_CHECKMULTISIGVERIFY: u8 = 175;
     pub const OP_NOP1: u8 = 176;
     pub const OP_CHECKLOCKTIMEVERIFY: u8 = 177;
     pub const OP_CHECKSEQUENCEVERIFY: u8 = 178;
@@ -366,8 +368,8 @@ pub mod Opcode {
             171 => crypto::opcode_codeseparator(ref engine),
             172 => crypto::opcode_checksig(ref engine),
             173 => crypto::opcode_checksigverify(ref engine),
-            174 => utils::not_implemented(ref engine),
-            175 => utils::not_implemented(ref engine),
+            174 => crypto::opcode_checkmultisig(ref engine),
+            175 => crypto::opcode_checkmultisigverify(ref engine),
             176 => flow::opcode_nop(),
             177 => locktime::opcode_checklocktimeverify(ref engine),
             178 => locktime::opcode_checksequenceverify(ref engine),

@@ -1,6 +1,6 @@
-use shinigami::engine::EngineImpl;
-use shinigami::transaction::Transaction;
-use shinigami::utxo::UTXO;
+use crate::engine::EngineImpl;
+use crate::transaction::Transaction;
+use crate::utxo::UTXO;
 
 // TODO: Move validate coinbase here
 

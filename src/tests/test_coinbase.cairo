@@ -1,5 +1,5 @@
-use shinigami::transaction::TransactionTrait;
-use shinigami::utils;
+use crate::transaction::TransactionTrait;
+use crate::utils;
 
 #[test]
 fn test_block_subsidy_calculation() {
