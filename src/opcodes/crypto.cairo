@@ -79,7 +79,7 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
     let mut sig_verifier = BaseSigVerifierTrait::new(
-        ref engine, @full_sig_bytes, @pk_bytes, array![full_sig_bytes].span()
+        ref engine, @full_sig_bytes, @pk_bytes
     )?;
 
     if sig_verifier.verify(ref engine) {

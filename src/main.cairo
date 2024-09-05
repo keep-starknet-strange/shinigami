@@ -1,6 +1,8 @@
 use crate::compiler::CompilerImpl;
 use crate::engine::{EngineImpl, Engine, EngineTrait};
-use crate::transaction::TransactionImpl;
+use crate::transaction::{TransactionImpl, TransactionTrait};
+use crate::utxo::UTXO;
+use crate::validate;
 use crate::utils;
 
 #[derive(Clone, Drop)]
@@ -68,6 +70,29 @@ fn backend_debug(input: InputData) -> u8 {
         }
         engine.json();
     };
+    match res {
+        Result::Ok(_) => {
+            println!("Execution successful");
+            1
+        },
+        Result::Err(e) => {
+            println!("Execution failed: {}", utils::felt252_to_byte_array(e));
+            0
+        }
+    }
+}
+
+#[derive(Drop)]
+struct ValidateRawInput {
+    raw_transaction: ByteArray,
+    utxo_hints: Array<UTXO>
+}
+
+fn run_raw_transaction(input: ValidateRawInput) -> u8 {
+    println!("Running Bitcoin Script with raw transaction: '{}'", input.raw_transaction);
+    let raw_transaction = utils::hex_to_bytecode(@input.raw_transaction);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    let res = validate::validate_transaction(transaction, 0, input.utxo_hints);
     match res {
         Result::Ok(_) => {
             println!("Execution successful");

@@ -419,4 +419,8 @@ pub mod Opcode {
     pub fn is_data_opcode(opcode: u8) -> bool {
         return (opcode >= OP_DATA_1 && opcode <= OP_DATA_75);
     }
+
+    pub fn is_push_opcode(opcode: u8) -> bool {
+        return (opcode == OP_PUSHDATA1 || opcode == OP_PUSHDATA2 || opcode == OP_PUSHDATA4);
+    }
 }

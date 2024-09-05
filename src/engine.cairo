@@ -4,6 +4,7 @@ use crate::opcodes::{flow, opcodes::Opcode};
 use crate::scriptflags::ScriptFlags;
 use crate::stack::{ScriptStack, ScriptStackImpl};
 use crate::transaction::Transaction;
+use crate::utils;
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -41,6 +42,8 @@ pub trait EngineTrait {
     fn pull_data(ref self: Engine, len: usize) -> Result<ByteArray, felt252>;
     fn get_dstack(ref self: Engine) -> Span<ByteArray>;
     fn get_astack(ref self: Engine) -> Span<ByteArray>;
+    // Skip the next opcode if it is a push opcode in unexecuted conditional branch
+    fn skip_push_data(ref self: Engine, opcode: u8) -> Result<(), felt252>;
     // Executes the next instruction in the script
     fn step(ref self: Engine) -> Result<bool, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
@@ -104,6 +107,26 @@ pub impl EngineImpl of EngineTrait {
         return self.astack.stack_to_span();
     }
 
+    fn skip_push_data(ref self: Engine, opcode: u8) -> Result<(), felt252> {
+        if opcode == Opcode::OP_PUSHDATA1 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(1)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        } else if opcode == Opcode::OP_PUSHDATA2 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(2)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        } else if opcode == Opcode::OP_PUSHDATA4 {
+            let data_len: usize = utils::byte_array_to_felt252_le(@self.pull_data(4)?)
+                .try_into()
+                .unwrap();
+            self.opcode_idx += data_len + 1;
+        }
+        Result::Ok(())
+    }
+
     fn step(ref self: Engine) -> Result<bool, felt252> {
         if self.script_idx >= self.scripts.len() {
             return Result::Ok(false);
@@ -131,6 +154,12 @@ pub impl EngineImpl of EngineTrait {
             if Opcode::is_data_opcode(opcode) {
                 let opcode_32: u32 = opcode.into();
                 self.opcode_idx += opcode_32 + 1;
+                return Result::Ok(true);
+            } else if Opcode::is_push_opcode(opcode) {
+                let res = self.skip_push_data(opcode);
+                if res.is_err() {
+                    return Result::Err(res.unwrap_err());
+                }
                 return Result::Ok(true);
             } else {
                 let res = Opcode::is_opcode_disabled(opcode, ref self);
@@ -178,6 +207,13 @@ pub impl EngineImpl of EngineTrait {
                     if Opcode::is_data_opcode(opcode) {
                         let opcode_32: u32 = opcode.into();
                         self.opcode_idx += opcode_32 + 1;
+                        continue;
+                    } else if Opcode::is_push_opcode(opcode) {
+                        let res = self.skip_push_data(opcode);
+                        if res.is_err() {
+                            err = res.unwrap_err();
+                            break;
+                        }
                         continue;
                     } else {
                         let res = Opcode::is_opcode_disabled(opcode, ref self);
@@ -263,7 +299,7 @@ pub impl EngineImpl of EngineTrait {
 
     fn check_stack_size(ref self: Engine) -> Result<(), felt252> {
         if self.dstack.len() + self.astack.len() > MAX_STACK_SIZE {
-            return Result::Err(Error::SCRIPT_STACK_SIZE_EXCEEDED);
+            return Result::Err(Error::STACK_OVERFLOW);
         }
         return Result::Ok(());
     }

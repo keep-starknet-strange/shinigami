@@ -111,7 +111,7 @@ pub fn mock_transaction_input_with(
 
 pub fn mock_transaction_input(script_sig: ByteArray) -> TransactionInput {
     let outpoint: OutPoint = OutPoint {
-        hash: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, index: 0
+        txid: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, vout: 0
     };
     mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), 0xffffffff)
 }
@@ -130,8 +130,8 @@ pub fn mock_transaction_output() -> TransactionOutput {
 
 pub fn mock_transaction_with(
     version: i32,
-    tx_inputs: Span<TransactionInput>,
-    tx_outputs: Span<TransactionOutput>,
+    tx_inputs: Array<TransactionInput>,
+    tx_outputs: Array<TransactionOutput>,
     locktime: u32
 ) -> Transaction {
     Transaction {
@@ -148,7 +148,7 @@ pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
     inputs.append(mock_transaction_input(script_sig));
     let mut outputs = ArrayTrait::<TransactionOutput>::new();
     outputs.append(mock_transaction_output());
-    return mock_transaction_with(1, inputs.span(), outputs.span(), 0);
+    return mock_transaction_with(1, inputs, outputs, 0);
 }
 
 // Mock transaction '1d5308ff12cb6fdb670c3af673a6a1317e21fa14fc863d5827f9d704cd5e14dc'
@@ -161,7 +161,7 @@ pub fn mock_transaction_legacy_p2pkh(script_sig: ByteArray) -> Transaction {
 // Legacy P2MS
 pub fn mock_transaction_legacy_p2ms(script_sig: ByteArray) -> Transaction {
     let outpoint: OutPoint = OutPoint {
-        hash: 0x10a5fee9786a9d2d72c25525e52dd70cbd9035d5152fac83b62d3aa7e2301d58, index: 0
+        txid: 0x10a5fee9786a9d2d72c25525e52dd70cbd9035d5152fac83b62d3aa7e2301d58, vout: 0
     };
     let mut inputs = ArrayTrait::<TransactionInput>::new();
     inputs.append(mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), 0xffffffff));
@@ -173,12 +173,12 @@ pub fn mock_transaction_legacy_p2ms(script_sig: ByteArray) -> Transaction {
     output_script.append_word(output_script_u256.low.into(), 16);
     outputs.append(mock_transaction_output_with(1680000, output_script));
 
-    return mock_transaction_with(1, inputs.span(), outputs.span(), 0);
+    return mock_transaction_with(1, inputs, outputs, 0);
 }
 
 pub fn mock_witness_transaction() -> Transaction {
     let outpoint_0: OutPoint = OutPoint {
-        hash: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, index: 1
+        txid: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, vout: 1
     };
     let transaction_input_0: TransactionInput = TransactionInput {
         previous_outpoint: outpoint_0,
@@ -202,8 +202,8 @@ pub fn mock_witness_transaction() -> Transaction {
 
     Transaction {
         version: 2,
-        transaction_inputs: transaction_inputs.span(),
-        transaction_outputs: transaction_outputs.span(),
+        transaction_inputs: transaction_inputs,
+        transaction_outputs: transaction_outputs,
         locktime: 0,
     }
 }
@@ -211,19 +211,19 @@ pub fn mock_witness_transaction() -> Transaction {
 // Mock transaction with specified 'locktime' and with the 'sequence' field set to locktime
 pub fn mock_transaction_legacy_locktime(script_sig: ByteArray, locktime: u32) -> Transaction {
     let mut inputs = ArrayTrait::<TransactionInput>::new();
-    let outpoint = OutPoint { hash: 0, index: 0 };
+    let outpoint = OutPoint { txid: 0, vout: 0 };
     let input = mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), 0xfffffffe);
     inputs.append(input);
     let outputs = ArrayTrait::<TransactionOutput>::new();
-    return mock_transaction_with(1, inputs.span(), outputs.span(), locktime);
+    return mock_transaction_with(1, inputs, outputs, locktime);
 }
 
 // Mock transaction version 2 with the specified 'sequence'
 pub fn mock_transaction_legacy_sequence_v2(script_sig: ByteArray, sequence: u32) -> Transaction {
     let mut inputs = ArrayTrait::<TransactionInput>::new();
-    let outpoint = OutPoint { hash: 0, index: 0 };
+    let outpoint = OutPoint { txid: 0, vout: 0 };
     let input = mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), sequence);
     inputs.append(input);
     let outputs = ArrayTrait::<TransactionOutput>::new();
-    return mock_transaction_with(2, inputs.span(), outputs.span(), 0);
+    return mock_transaction_with(2, inputs, outputs, 0);
 }
