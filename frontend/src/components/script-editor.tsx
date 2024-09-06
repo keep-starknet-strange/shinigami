@@ -23,22 +23,22 @@ import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-scr
 const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
-  const [scriptSig, setScriptSig] = useState("");
+  const [scriptSig, setScriptSig] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL");
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
-  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
+  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>(Array.from({ length: scriptPubKey.length + scriptSig.length }, () => []));
 
   const [isFetching, setIsFetching] = useState(false);
-  const [isDebugFetch, setDebugFetch] = useState(false);
-  const [isDebugging, setIsDebugging] = useState(false);
+  const [isDebugFetch, setDebugFetch] = useState(true);
+  const [isDebugging, setIsDebugging] = useState(true);
 
   const [runError, setRunError] = useState<string | undefined>();
   const [debugError, setDebugError] = useState<string | undefined>();
 
   const [hasFetchedDebugData, setHasFetchedDebugData] = useState(false);
 
-  const [step, setStep] = useState(-1);
+  const [step, setStep] = useState(0);
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
@@ -99,8 +99,10 @@ export default function ScriptEditor() {
   const handleDebugScript = () => runScript("debug-script", setDebugFetch, setDebugError);
 
   const [split, setSplit] = useState(false);
+  const [monacoOne, setMonacoOne] = useState<any>();
+  const [monacoTwo, setMonacoTwo] = useState<any>();
 
-  const setEditorTheme = (monaco: any) => {
+  const setEditorTheme = (monaco: any, setMonaco: Dispatch<SetStateAction<string>>) => {
     setMonaco(monaco);
 
     // Register the custom language
@@ -153,81 +155,128 @@ export default function ScriptEditor() {
     monaco.editor.remeasureFonts();
   };
 
-  const [currentDecorations, setCurrentDecorations] = useState<string[]>([]);
-
-  const [monaco, setMonaco] = useState<any>();
+  const [currentDecorationsOne, setCurrentDecorationsOne] = useState<string[]>([]);
+  const [currentDecorationsTwo, setCurrentDecorationsTwo] = useState<string[]>([]);
 
   useEffect(() => {
-    if (monaco) {
-      const editorModel = monaco.editor.getModels()[0];
-      editorModel.deltaDecorations(currentDecorations, []);
+    const sigWords = scriptSig.split(/\s+/);
+    const pubKeyWords = scriptPubKey.split(/\s+/);
+    const totalSigWords = sigWords.length;
+    const totalPubKeyWords = pubKeyWords.length;
 
-      const words = scriptPubKey.split(/\s+/);
+    const combinedLength = totalSigWords + totalPubKeyWords;
 
-      if (step >= 0 && step < words.length) {
-        const wordToHighlight = words[step];
+    if (monacoOne) {
+      const editor_one = monacoOne.editor.getModels()[0];
 
-        // Calculate the start and end positions manually, accounting for new lines
-        let matchIndexToUse = 0;
-        const occurrencesSoFar = words.slice(0, step + 1).filter(word => word === wordToHighlight).length;
-        matchIndexToUse = occurrencesSoFar - 1;
+      if (editor_one) {
+        editor_one.deltaDecorations(currentDecorationsOne, []);
 
-        let charIndex = 0;
-        let occurrenceCount = 0;
-        let startLine = 1;
-        let startColumn = 1;
-        let start = 0;
-        let end = 0;
+        if (step >= 0 && step < totalSigWords) {
+          // Highlight in scriptSig
+          const wordToHighlight = sigWords[step];
+          let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptSig, wordToHighlight, step);
 
-        for (let i = 0; i < scriptPubKey.length; i++) {
-          if (scriptPubKey[i] === '\n') {
-            startLine++;
-            startColumn = 1;
-            continue;
-          }
+          // Apply the decoration
+          const range = {
+            startLineNumber: startLine,
+            startColumn: startColumn,
+            endLineNumber: endLine,
+            endColumn: endColumn
+          };
 
-          if (scriptPubKey.slice(i, i + wordToHighlight.length) === wordToHighlight) {
-            if (occurrenceCount === matchIndexToUse) {
-              start = i;
-              end = i + wordToHighlight.length;
-              break;
+          const newDecorations = editor_one.deltaDecorations(currentDecorationsOne, [
+            {
+              range,
+              options: {
+                isWholeLine: false,
+                inlineClassName: 'custom-highlight'
+              }
             }
-            occurrenceCount++;
-          }
-          startColumn++;
-          charIndex++;
+          ]);
+          setCurrentDecorationsOne(newDecorations);
         }
-
-        // Calculate line and column for the end position
-        let endLine = startLine;
-        let endColumn = startColumn + (end - start);
-
-        // Create a range object manually
-        const range = {
-          startLineNumber: startLine,
-          startColumn: startColumn,
-          endLineNumber: endLine,
-          endColumn: endColumn
-        };
-
-        // Apply the decoration
-        const newDecorations = editorModel.deltaDecorations(currentDecorations, [
-          {
-            range,
-            options: {
-              isWholeLine: false,
-              inlineClassName: 'custom-highlight'
-            }
-          }
-        ]);
-        setCurrentDecorations(newDecorations);
       }
     }
-  }, [step, scriptPubKey, monaco]);
+
+    if (monacoTwo) {
+      const editor_two = monacoTwo.editor.getModels()[1];
+      if (editor_two) {
+        editor_two.deltaDecorations(currentDecorationsTwo, []);
+
+        if (step >= totalSigWords && step < combinedLength) {
+          // Highlight in scriptPubKey
+          const wordToHighlight = pubKeyWords[step - totalSigWords];
+          let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptPubKey, wordToHighlight, step - totalSigWords);
+
+          // Apply the decoration
+          const range = {
+            startLineNumber: startLine,
+            startColumn: startColumn,
+            endLineNumber: endLine,
+            endColumn: endColumn
+          };
+
+          const newDecorations = editor_two.deltaDecorations(currentDecorationsTwo, [
+            {
+              range,
+              options: {
+                isWholeLine: false,
+                inlineClassName: 'custom-highlight'
+              }
+            }
+          ]);
+          setCurrentDecorationsTwo(newDecorations);
+        }
+      }
+    }
+  }, [step, scriptPubKey, scriptSig, monacoOne, monacoTwo]);
+
+  // Helper function to find word position in a script
+  const findWordPosition = (script: string, wordToHighlight: string, step: number) => {
+    // This function calculates the start and end positions manually, accounting for new lines
+    let matchIndexToUse = 0;
+    const words = script.split(/\s+/);
+    const occurrencesSoFar = words.slice(0, step + 1).filter(word => word === wordToHighlight).length;
+    matchIndexToUse = occurrencesSoFar - 1;
+
+    let charIndex = 0;
+    let occurrenceCount = 0;
+    let startLine = 1;
+    let startColumn = 1;
+    let start = 0;
+    let end = 0;
+
+    for (let i = 0; i < script.length; i++) {
+      if (script[i] === '\n') {
+        startLine++;
+        startColumn = 1;
+        continue;
+      }
+
+      if (script.slice(i, i + wordToHighlight.length) === wordToHighlight) {
+        if (occurrenceCount === matchIndexToUse) {
+          start = i;
+          end = i + wordToHighlight.length;
+          break;
+        }
+        occurrenceCount++;
+      }
+      startColumn++;
+      charIndex++;
+    }
+
+    // Calculate line and column for the end position
+    let endLine = startLine;
+    let endColumn = startColumn + (end - start);
+
+    return { startLine, startColumn, endLine, endColumn };
+  };
 
 
 
-  const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, height: string) => (
+
+  const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, setMonaco: Dispatch<any>, height: string) => (
     <div
       className={clsx(
         height,
@@ -235,7 +284,7 @@ export default function ScriptEditor() {
       )}
     >
       <Editor
-        beforeMount={setEditorTheme}
+        beforeMount={(monaco) => setEditorTheme(monaco, setMonaco)}
         theme="darker"
         defaultLanguage="bitcoin-script"
         value={value || ""}
@@ -258,7 +307,10 @@ export default function ScriptEditor() {
         </div>
         <button
           className="flex flex-row items-center space-x-1"
-          onClick={() => setSplit(!split)}
+          onClick={() => {
+            setStep(-1);
+            setSplit(!split);
+          }}
         >
           <Image src={split ? unsplitImage : splitImage} alt="" unoptimized />
           <p className="text-white uppercase">
@@ -266,13 +318,16 @@ export default function ScriptEditor() {
           </p>
         </button>
       </div>{
-        !split && renderEditor(scriptPubKey, setScriptPubKey, "rounded-b-xl h-[400px] rounded-tr-xl")}
-      {split && (
-        <>
-          {renderEditor(scriptSig, setScriptSig, "border-b-4 h-[160px] rounded-tr-xl")}
-          {renderEditor(scriptPubKey, setScriptPubKey, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
-        </>
-      )}
+        !split && renderEditor(scriptPubKey, setScriptPubKey, setMonacoTwo, "rounded-b-xl h-[400px] rounded-tr-xl")
+      }
+      {
+        split && (
+          <>
+            {renderEditor(scriptSig, setScriptSig, setMonacoOne, "border-b-4 h-[160px] rounded-tr-xl")}
+            {renderEditor(scriptPubKey, setScriptPubKey, setMonacoTwo, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
+          </>
+        )
+      }
       <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-10">
         <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
           <button
@@ -375,6 +430,6 @@ export default function ScriptEditor() {
       </div>
       <StackVisualizer stackContent={stackContent} />
       <Footer />
-    </div>
+    </div >
   );
 }
