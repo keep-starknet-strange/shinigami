@@ -4,7 +4,6 @@ import { Jura } from "next/font/google";
 import StackVisualizer from "@/components/stack-visualizer";
 import { Editor } from "@monaco-editor/react";
 import Image from "next/image";
-import Footer from "./footer";
 
 import refreshImage from "@/images/refresh-icon.svg";
 import splitImage from "@/images/split.svg";
@@ -321,34 +320,40 @@ export default function ScriptEditor() {
   );
 
   return (
-    <div className="w-full min-h-screen h-full">
-      <div className="w-full flex flex-row items-center justify-between">
-        <div className="w-36 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
-          <p className="text-[#85FFB2] text-lg">Script Editor</p>
+    <div className="w-full h-full">
+      <div className="flex flex-col space-y-5 xl:space-y-0 xl:flex-row items-start xl:space-x-5">
+        <div className="w-full xl:w-[1000px]">
+          <div className="w-full flex flex-row items-center justify-between">
+            <div className="w-36 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
+              <p className="text-[#85FFB2] text-lg">Script Editor</p>
+            </div>
+            <button
+              className="flex flex-row items-center space-x-1"
+              onClick={() => {
+                setStep(-1);
+                setSplit(!split);
+              }}
+            >
+              <Image src={split ? unsplitImage : splitImage} alt="" unoptimized />
+              <p className="text-white uppercase">
+                {split ? "Unsplit" : "Split"} Editor
+              </p>
+            </button>
+          </div>
+          {
+            !split && renderEditor(scriptPubKey, setScriptPubKey, setMonacoTwo, "rounded-b-xl h-[400px] rounded-tr-xl")
+          }
+          {
+            split && (
+              <>
+                {renderEditor(scriptSig, setScriptSig, setMonacoOne, "border-b-4 h-[160px] rounded-tr-xl")}
+                {renderEditor(scriptPubKey, setScriptPubKey, setMonacoTwo, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
+              </>
+            )
+          }
         </div>
-        <button
-          className="flex flex-row items-center space-x-1"
-          onClick={() => {
-            setStep(-1);
-            setSplit(!split);
-          }}
-        >
-          <Image src={split ? unsplitImage : splitImage} alt="" unoptimized />
-          <p className="text-white uppercase">
-            {split ? "Unsplit" : "Split"} Editor
-          </p>
-        </button>
-      </div>{
-        !split && renderEditor(scriptPubKey, setScriptPubKey, setMonacoTwo, "rounded-b-xl h-[400px] rounded-tr-xl")
-      }
-      {
-        split && (
-          <>
-            {renderEditor(scriptSig, setScriptSig, setMonacoOne, "border-b-4 h-[160px] rounded-tr-xl")}
-            {renderEditor(scriptPubKey, setScriptPubKey, setMonacoTwo, "border-t-4 rounded-t-0 h-[240px] rounded-b-xl")}
-          </>
-        )
-      }
+        <StackVisualizer stackContent={stackContent} />
+      </div>
       <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-10">
         <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
           <button
@@ -449,8 +454,6 @@ export default function ScriptEditor() {
           <p className="text-white uppercase">Refresh</p>
         </button>
       </div>
-      <StackVisualizer stackContent={stackContent} />
-      <Footer />
     </div >
   );
 }
