@@ -370,7 +370,7 @@ export default function ScriptEditor() {
           </button>
           {
             (isDebugging || hasFetchedDebugData) && !isFetching && (
-              <div className="flex flex-row space-x-3.5">
+              <div className="flex flex-col sm:flex-row sm:space-x-3.5">
                 {
                   <button className={`hidden sm:block ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
                     let newStep = Math.max(step - 1, 0);
@@ -399,17 +399,15 @@ export default function ScriptEditor() {
                 {/* Step controls for mobile view */}
                 <div className="flex flex-col items-center justify-center space-y-3.5 sm:hidden">
                   <div className="flex flex-row items-center space-x-3.5 justify-between">
-                    {
-                      <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5 ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
-                        let newStep = Math.max(step - 1, 0);
-                        setStep(newStep);
-                        setStackContent(debuggingContent[newStep]);
-                      }}>
-                        <Image src={previousIcon} alt="" unoptimized />
-                        <p className="text-sm">PREVIOUS DEBUG LINE</p>
-                      </button>
-                    }
-                    <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px]  uppercase flex flex-row items-center space-x-1.5 ${step >= debuggingContent.length - 1 ? "opacity-50" : ""}`} disabled={step >= debuggingContent.length - 1} onClick={() => {
+                    <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5 ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
+                      let newStep = Math.max(step - 1, 0);
+                      setStep(newStep);
+                      setStackContent(debuggingContent[newStep]);
+                    }}>
+                      <Image src={previousIcon} alt="" unoptimized />
+                      <p className="text-sm">PREVIOUS DEBUG LINE</p>
+                    </button>
+                    <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5 ${step >= debuggingContent.length - 1 ? "opacity-50" : ""}`} disabled={step >= debuggingContent.length - 1} onClick={() => {
                       let newStep = Math.min(step + 1, debuggingContent.length - 1);
                       setStep(newStep);
                       setStackContent(debuggingContent[newStep]);
@@ -418,7 +416,7 @@ export default function ScriptEditor() {
                       <p className="text-sm">DEBUG LINE</p>
                     </button>
                     {
-                      step == 0 && <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5" onClick={() => {
+                      step >= 0 && <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase sm:flex flex-row items-center space-x-1.5 hidden" onClick={() => {
                         setStep(-1)
                         setStackContent([])
                         setHasFetchedDebugData(false)
@@ -430,20 +428,23 @@ export default function ScriptEditor() {
                       </button>
                     }
                   </div>
-                  {
-                    <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5" onClick={() => {
-                      setStep(-1)
-                      setStackContent([])
-                      setHasFetchedDebugData(false)
-                      setDebuggingContent([])
-                      setIsDebugging(false)
-                    }}
-                      disabled={step <= 0}
-                    >
-                      <Image src={stopIcon} alt="" unoptimized />
-                      <p className="text-sm">STOP</p>
-                    </button>
-                  }
+                  <div className="w-full flex flex-row items-center justify-between">
+                    {
+                      step >= 0 && <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center justify-center space-x-1.5 w-full" onClick={() => {
+                        setStep(-1)
+                        setStackContent([])
+                        setHasFetchedDebugData(false)
+                        setDebuggingContent([])
+                        setIsDebugging(false)
+                      }}
+                      >
+                        <div className="w-fit flex flex-row items-center justify-center">
+                          <Image src={stopIcon} alt="" unoptimized />
+                          <p className="text-sm">STOP</p>
+                        </div>
+                      </button>
+                    }
+                  </div>
                 </div>
               </div>
             )
