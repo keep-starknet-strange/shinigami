@@ -27,18 +27,18 @@ export default function ScriptEditor() {
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
-  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
+  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>(Array.from({ length: scriptPubKey.length }, () => []));
 
   const [isFetching, setIsFetching] = useState(false);
-  const [isDebugFetch, setDebugFetch] = useState(false);
-  const [isDebugging, setIsDebugging] = useState(false);
+  const [isDebugFetch, setDebugFetch] = useState(true);
+  const [isDebugging, setIsDebugging] = useState(true);
 
   const [runError, setRunError] = useState<string | undefined>();
   const [debugError, setDebugError] = useState<string | undefined>();
 
   const [hasFetchedDebugData, setHasFetchedDebugData] = useState(false);
 
-  const [step, setStep] = useState(-1);
+  const [step, setStep] = useState(0);
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
@@ -56,9 +56,12 @@ export default function ScriptEditor() {
     setIsLoading(true);
     setError(undefined);
     try {
-      let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      let pubKey = scriptPubKey.split("\n").join(" ");
-      let sig = scriptSig.split("\n").join(" ");
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+      // Filter out lines that start with // and Convert double quotes to single quotes
+      const pubKey = scriptPubKey.split("\n").filter(line => !line.trim().startsWith("//")).join(" ").replace(/\"(.*?)\"/g, "'$1'");
+      const sig = scriptSig.split("\n").filter(line => !line.trim().startsWith("//")).join(" ").replace(/\"(.*?)\"/g, "'$1'");
+
       const response = await fetch(`${backendUrl}/${runType}`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
@@ -106,15 +109,16 @@ export default function ScriptEditor() {
       "bitcoin-script",
       bitcoinScriptLanguage,
     );
-      
+
     monaco.languages.registerCompletionItemProvider("bitcoin-script", {
       provideCompletionItems: (model: any, position: any) => {
         const suggestions = bitcoinScriptOpcodes.map(opcodes => ({
           label: opcodes,
           kind: monaco.languages.CompletionItemKind.Keyword,
-          insertText: opcodes
+          insertText: opcodes,
+          documentation: opcodes.description
         }));
-    
+
         return { suggestions };
       }
     });
@@ -138,7 +142,7 @@ export default function ScriptEditor() {
         "editorSuggestWidget.foreground": "#F0F0F0",
         "editorSuggestWidget.selectedBackground": "#25CF4240",
         "editorSuggestWidget.highlightForeground": "#F0F0F0",
-        "focusBorder": "#00000000",
+        "focusBorder": "#002000D0",
         "scrollbar.shadow": "#00000000",
         "scrollbarSlider.background": "#258F4240",
         "scrollbarSlider.activeBackground": "#258F4260",
@@ -212,7 +216,7 @@ export default function ScriptEditor() {
             range,
             options: {
               isWholeLine: false,
-              inlineClassName: 'highlight'
+              inlineClassName: 'custom-highlight'
             }
           }
         ]);

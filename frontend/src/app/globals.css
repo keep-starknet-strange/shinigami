@@ -41,6 +41,6 @@ body {
   }
 }
 
-.highlight {
-  background: #008000;
+.custom-highlight {
+  background-color: #008000;
 }
