@@ -243,6 +243,11 @@ pub fn opcode_sha1(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_checksigadd(ref engine: Engine) -> Result<(), felt252> {
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let n = engine.dstack.pop_int()?;
+
+    if n > 0x7FFFFFFF || n < -0x80000000 {
+        return Result::Err('InvalidScriptNum');
+    }
+
     let sig_bytes = engine.dstack.pop_byte_array()?;
 
     if pk_bytes.len() == 0 {
@@ -250,10 +255,6 @@ pub fn opcode_checksigadd(ref engine: Engine) -> Result<(), felt252> {
     }
 
     let mut is_valid = false;
-
-    if n > 0x7FFFFFFF || n < -0x80000000 {
-        return Result::Err('InvalidScriptNum');
-    }
 
     if pk_bytes.len() == 32 {
         if sig_bytes.len() > 0 {
