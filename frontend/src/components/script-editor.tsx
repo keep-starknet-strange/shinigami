@@ -27,18 +27,18 @@ export default function ScriptEditor() {
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
-  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>(Array.from({ length: scriptPubKey.length }, () => []));
+  const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
 
   const [isFetching, setIsFetching] = useState(false);
-  const [isDebugFetch, setDebugFetch] = useState(true);
-  const [isDebugging, setIsDebugging] = useState(true);
+  const [isDebugFetch, setDebugFetch] = useState(false);
+  const [isDebugging, setIsDebugging] = useState(false);
 
   const [runError, setRunError] = useState<string | undefined>();
   const [debugError, setDebugError] = useState<string | undefined>();
 
   const [hasFetchedDebugData, setHasFetchedDebugData] = useState(false);
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(-1);
 
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
