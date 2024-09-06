@@ -166,71 +166,95 @@ export default function ScriptEditor() {
 
     const combinedLength = totalSigWords + totalPubKeyWords;
 
-    if (monacoOne) {
-      const editor_one = monacoOne.editor.getModels()[0];
-
-      if (editor_one) {
-        editor_one.deltaDecorations(currentDecorationsOne, []);
-
-        if (step >= 0 && step < totalSigWords) {
-          // Highlight in scriptSig
-          const wordToHighlight = sigWords[step];
-          let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptSig, wordToHighlight, step);
-
-          // Apply the decoration
-          const range = {
-            startLineNumber: startLine,
-            startColumn: startColumn,
-            endLineNumber: endLine,
-            endColumn: endColumn
-          };
-
-          const newDecorations = editor_one.deltaDecorations(currentDecorationsOne, [
-            {
-              range,
-              options: {
-                isWholeLine: false,
-                inlineClassName: 'custom-highlight'
+    if (split) {
+      // When the editor is split, handle scriptSig in the first editor and scriptPubKey in the second editor
+      if (monacoOne) {
+        const editor_one = monacoOne.editor.getModels()[0];
+        if (editor_one) {
+          editor_one.deltaDecorations(currentDecorationsOne, []);
+          if (step >= 0 && step < totalSigWords) {
+            const wordToHighlight = sigWords[step];
+            let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptSig, wordToHighlight, step);
+            const range = {
+              startLineNumber: startLine,
+              startColumn: startColumn,
+              endLineNumber: endLine,
+              endColumn: endColumn
+            };
+            const newDecorations = editor_one.deltaDecorations(currentDecorationsOne, [
+              {
+                range,
+                options: {
+                  isWholeLine: false,
+                  inlineClassName: 'custom-highlight'
+                }
               }
-            }
-          ]);
-          setCurrentDecorationsOne(newDecorations);
+            ]);
+            setCurrentDecorationsOne(newDecorations);
+          }
+        }
+      }
+
+      if (monacoTwo) {
+        const editor_two = monacoTwo.editor.getModels()[1];
+        if (editor_two) {
+          editor_two.deltaDecorations(currentDecorationsTwo, []);
+          if (step >= totalSigWords && step < combinedLength) {
+            const wordToHighlight = pubKeyWords[step - totalSigWords];
+            let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptPubKey, wordToHighlight, step - totalSigWords);
+            const range = {
+              startLineNumber: startLine,
+              startColumn: startColumn,
+              endLineNumber: endLine,
+              endColumn: endColumn
+            };
+            const newDecorations = editor_two.deltaDecorations(currentDecorationsTwo, [
+              {
+                range,
+                options: {
+                  isWholeLine: false,
+                  inlineClassName: 'custom-highlight'
+                }
+              }
+            ]);
+            setCurrentDecorationsTwo(newDecorations);
+          }
+        }
+      }
+    } else {
+      // When the editor is not split, treat both scripts as one combined script and highlight accordingly in monacoTwo
+      if (monacoTwo) {
+        const editor_two = monacoTwo.editor.getModels()[0];
+        if (editor_two) {
+          editor_two.deltaDecorations(currentDecorationsTwo, []);
+          if (step >= 0 && step < combinedLength) {
+            // Highlight in the combined script, starting with scriptPubKey first
+            const isInSig = step < totalSigWords;
+            const script = isInSig ? scriptSig : scriptPubKey;
+            const words = script.split(/\s+/);
+            const wordToHighlight = words[isInSig ? step : step - totalSigWords];
+            let { startLine, startColumn, endLine, endColumn } = findWordPosition(script, wordToHighlight, isInSig ? step : step - totalSigWords);
+            const range = {
+              startLineNumber: startLine,
+              startColumn: startColumn,
+              endLineNumber: endLine,
+              endColumn: endColumn
+            };
+            const newDecorations = editor_two.deltaDecorations(currentDecorationsTwo, [
+              {
+                range,
+                options: {
+                  isWholeLine: false,
+                  inlineClassName: 'custom-highlight'
+                }
+              }
+            ]);
+            setCurrentDecorationsTwo(newDecorations);
+          }
         }
       }
     }
-
-    if (monacoTwo) {
-      const editor_two = monacoTwo.editor.getModels()[1];
-      if (editor_two) {
-        editor_two.deltaDecorations(currentDecorationsTwo, []);
-
-        if (step >= totalSigWords && step < combinedLength) {
-          // Highlight in scriptPubKey
-          const wordToHighlight = pubKeyWords[step - totalSigWords];
-          let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptPubKey, wordToHighlight, step - totalSigWords);
-
-          // Apply the decoration
-          const range = {
-            startLineNumber: startLine,
-            startColumn: startColumn,
-            endLineNumber: endLine,
-            endColumn: endColumn
-          };
-
-          const newDecorations = editor_two.deltaDecorations(currentDecorationsTwo, [
-            {
-              range,
-              options: {
-                isWholeLine: false,
-                inlineClassName: 'custom-highlight'
-              }
-            }
-          ]);
-          setCurrentDecorationsTwo(newDecorations);
-        }
-      }
-    }
-  }, [step, scriptPubKey, scriptSig, monacoOne, monacoTwo]);
+  }, [step, scriptPubKey, scriptSig, monacoOne, monacoTwo, split]);
 
   // Helper function to find word position in a script
   const findWordPosition = (script: string, wordToHighlight: string, step: number) => {
@@ -272,9 +296,6 @@ export default function ScriptEditor() {
 
     return { startLine, startColumn, endLine, endColumn };
   };
-
-
-
 
   const renderEditor = (value: string, onChange: Dispatch<SetStateAction<string>>, setMonaco: Dispatch<any>, height: string) => (
     <div
