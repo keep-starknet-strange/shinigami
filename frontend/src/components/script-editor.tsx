@@ -321,8 +321,8 @@ export default function ScriptEditor() {
 
   return (
     <div className="w-full h-full">
-      <div className="flex flex-col space-y-5 xl:space-y-0 xl:flex-row items-start xl:space-x-5">
-        <div className="w-full xl:w-[1000px]">
+      <div className="flex flex-col space-y-5 xl:space-y-0 xl:flex-row items-start xl:space-x-5 w-full">
+        <div className="w-full xl:w-[60%]">
           <div className="w-full flex flex-row items-center justify-between">
             <div className="w-36 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
               <p className="text-[#85FFB2] text-lg">Script Editor</p>
