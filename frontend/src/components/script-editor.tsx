@@ -319,6 +319,15 @@ export default function ScriptEditor() {
     </div>
   );
 
+  const fetchTxData = async (txID: string) => {
+    //the txID is the transaction hash
+    const response = await fetch(`https://blockchain.info/rawtx/${txID}`);
+    const result = await response.json()
+    return result;
+  }
+
+  fetchTxData("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
+
   return (
     <div className="w-full h-full">
       <div className="flex flex-col space-y-5 xl:space-y-0 xl:flex-row items-start xl:space-x-5 w-full">
