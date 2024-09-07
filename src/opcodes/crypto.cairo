@@ -9,7 +9,6 @@ use core::sha256::compute_sha256_byte_array;
 use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
-use crate::signature::BaseSigVerifierTrait;
 use crate::utils as crateutils;
 
 const MAX_KEYS_PER_MULTISIG: i64 = 20;

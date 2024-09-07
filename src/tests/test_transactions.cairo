@@ -92,3 +92,39 @@ fn test_validate_transaction() {
     let res = validate::validate_transaction(transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
+
+#[test]
+fn test_p2pkh_transaction() {
+    // First ever P2PKH transaction 
+    // tx: 6f7cf9580f1c2dfb3c4d5d043cdbb128c640e3f20161245aa7372e9666168516
+    let raw_transaction_hex = "0x0100000002f60b5e96f09422354ab150b0e506c4bffedaf20216d30059cc5a3061b4c83dff000000004a493046022100e26d9ff76a07d68369e5782be3f8532d25ecc8add58ee256da6c550b52e8006b022100b4431f5a9a4dcb51cbdcaae935218c0ae4cfc8aa903fe4e5bac4c208290b7d5d01fffffffff7272ef43189f5553c2baea50f59cde99b3220fd518884d932016d055895b62d000000004a493046022100a2ab7cdc5b67aca032899ea1b262f6e8181060f5a34ee667a82dac9c7b7db4c3022100911bc945c4b435df8227466433e56899fbb65833e4853683ecaa12ee840d16bf01ffffffff0100e40b54020000001976a91412ab8dc588ca9d5787dde7eb29569da63c3a238c88ac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+
+    // Setup UTXO hints ( previous valid ouputs used to execute this transaction )
+    let previous_pk_script_input1 =
+        "0x4104c9560dc538db21476083a5c65a34c7cc219960b1e6f27a87571cd91edfd00dac16dca4b4a7c4ab536f85bc263b3035b762c5576dc6772492b8fb54af23abff6dac";
+
+    let previous_pk_script_input2 = 
+        "0x41043987a76015929873f06823f4e8d93abaaf7bcf55c6a564bed5b7f6e728e6c4cb4e2c420fe14d976f7e641d8b791c652dfeee9da584305ae544eafa4f7be6f777ac";
+
+    //let prevout_pk_script_output1 = "0x76a91412ab8dc588ca9d5787dde7eb29569da63c3a238c88ac";
+
+    let prev_out1 = UTXO {
+        amount: 5000000000,
+        pubkey_script: utils::hex_to_bytecode(@previous_pk_script_input1),
+        block_height: 509
+    };
+
+    let prev_out2 = UTXO {
+        amount: 5000000000,
+        pubkey_script: utils::hex_to_bytecode(@previous_pk_script_input2),
+        block_height: 357
+    };
+
+    let utxo_hints = array![prev_out1, prev_out2];
+
+    // Run Shinigami and validate the transaction execution
+    let res = validate::validate_transaction(transaction, 0, utxo_hints);
+    assert!(res.is_ok(), "Transaction validation failed");
+}
