@@ -22,7 +22,7 @@ import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-scr
 const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
-  const [scriptSig, setScriptSig] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL");
+  const [scriptSig, setScriptSig] = useState("");
   const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
