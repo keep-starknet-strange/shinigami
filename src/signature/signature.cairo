@@ -46,6 +46,9 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
             @self.sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
         );
         println!("sig_hash: {}", sig_hash);
+        println!("r: {:?}", self.sig.r);
+        println!("s: {:?}", self.sig.s);
+        //println!("pub_key: {:?}", self.pub_key);
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
 }

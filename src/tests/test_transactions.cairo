@@ -2,6 +2,7 @@ use crate::transaction::TransactionTrait;
 use crate::utxo::UTXO;
 use crate::validate;
 use crate::utils;
+use crate::transaction::{BASE_ENCODING};
 
 // TODO: txid byte order reverse
 
@@ -65,6 +66,60 @@ fn test_deserialize_transaction() {
     assert_eq!(transaction.locktime, 0, "Lock time is not correct");
 }
 
+
+#[test]
+fn test_deserialize_first_p2pkh_transaction(){
+    // First ever P2PKH transaction 
+    // tx: 6f7cf9580f1c2dfb3c4d5d043cdbb128c640e3f20161245aa7372e9666168516
+    let raw_transaction_hex = "0x0100000002f60b5e96f09422354ab150b0e506c4bffedaf20216d30059cc5a3061b4c83dff000000004a493046022100e26d9ff76a07d68369e5782be3f8532d25ecc8add58ee256da6c550b52e8006b022100b4431f5a9a4dcb51cbdcaae935218c0ae4cfc8aa903fe4e5bac4c208290b7d5d01fffffffff7272ef43189f5553c2baea50f59cde99b3220fd518884d932016d055895b62d000000004a493046022100a2ab7cdc5b67aca032899ea1b262f6e8181060f5a34ee667a82dac9c7b7db4c3022100911bc945c4b435df8227466433e56899fbb65833e4853683ecaa12ee840d16bf01ffffffff0100e40b54020000001976a91412ab8dc588ca9d5787dde7eb29569da63c3a238c88ac00000000";
+    let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+
+    assert_eq!(transaction.version, 1, "Version is not correct");
+    assert_eq!(transaction.transaction_inputs.len(), 2, "Transaction inputs length is not correct");
+    let input0 = transaction.transaction_inputs[0];
+    let expected_txid_hex = "0xf60b5e96f09422354ab150b0e506c4bffedaf20216d30059cc5a3061b4c83dff";
+    let expected_txid = utils::hex_to_bytecode(@expected_txid_hex);
+    let expected_sig_script_hex =
+        "0x493046022100e26d9ff76a07d68369e5782be3f8532d25ecc8add58ee256da6c550b52e8006b022100b4431f5a9a4dcb51cbdcaae935218c0ae4cfc8aa903fe4e5bac4c208290b7d5d01";
+    let expected_sig_script = utils::hex_to_bytecode(@expected_sig_script_hex);
+    assert_eq!(
+        input0.previous_outpoint.txid,
+        @utils::u256_from_byte_array_with_offset(@expected_txid, 0, 32),
+        "Outpoint txid on input 1 is not correct"
+    );
+    assert_eq!(input0.previous_outpoint.vout, @0, "Outpoint vout on input 1 is not correct");
+    assert_eq!(
+        input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct"
+    );
+    assert_eq!(input0.sequence, @0xFFFFFFFF, "Sequence on input 1 is not correct");
+
+    let input1 = transaction.transaction_inputs[1];
+    let expected_txid_hex = "0xf7272ef43189f5553c2baea50f59cde99b3220fd518884d932016d055895b62d";
+    let expected_txid = utils::hex_to_bytecode(@expected_txid_hex);
+    let expected_sig_script_hex =
+        "0x493046022100a2ab7cdc5b67aca032899ea1b262f6e8181060f5a34ee667a82dac9c7b7db4c3022100911bc945c4b435df8227466433e56899fbb65833e4853683ecaa12ee840d16bf01";
+    let expected_sig_script = utils::hex_to_bytecode(@expected_sig_script_hex);
+    assert_eq!(
+        input1.previous_outpoint.txid,
+        @utils::u256_from_byte_array_with_offset(@expected_txid, 0, 32),
+        "Outpoint txid on input 2 is not correct"
+    );
+    assert_eq!(input1.previous_outpoint.vout, @0, "Outpoint vout on input 2 is not correct");
+    assert_eq!(
+        input1.signature_script, @expected_sig_script, "Script sig on input 2 is not correct"
+    );
+    assert_eq!(input1.sequence, @0xFFFFFFFF, "Sequence on input 2 is not correct");
+
+    let output0 = transaction.transaction_outputs[0];
+    assert_eq!(output0.value, @10000000000, "Output 1 value is not correct");
+    let expected_pk_script_hex = "0x76a91412ab8dc588ca9d5787dde7eb29569da63c3a238c88ac";
+    let expected_pk_script = utils::hex_to_bytecode(@expected_pk_script_hex);
+    assert_eq!(output0.publickey_script, @expected_pk_script, "Output 1 pk_script is not correct");
+
+    assert_eq!(transaction.locktime, 0, "Lock time is not correct");
+}
+
 #[test]
 fn test_deserialize_coinbase_transaction() { // TODO
 }
@@ -78,7 +133,7 @@ fn test_validate_transaction() {
     let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
     let transaction = TransactionTrait::deserialize(raw_transaction);
 
-    // Setup UTXO hints ( previous valid ouputs used to execute this transaction )
+    // Setup UTXO hints ( previous valid outputs used to execute this transaction )
     let prevout_pk_script =
         "0x410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
     let prev_out = UTXO {
@@ -99,9 +154,10 @@ fn test_p2pkh_transaction() {
     // tx: 6f7cf9580f1c2dfb3c4d5d043cdbb128c640e3f20161245aa7372e9666168516
     let raw_transaction_hex = "0x0100000002f60b5e96f09422354ab150b0e506c4bffedaf20216d30059cc5a3061b4c83dff000000004a493046022100e26d9ff76a07d68369e5782be3f8532d25ecc8add58ee256da6c550b52e8006b022100b4431f5a9a4dcb51cbdcaae935218c0ae4cfc8aa903fe4e5bac4c208290b7d5d01fffffffff7272ef43189f5553c2baea50f59cde99b3220fd518884d932016d055895b62d000000004a493046022100a2ab7cdc5b67aca032899ea1b262f6e8181060f5a34ee667a82dac9c7b7db4c3022100911bc945c4b435df8227466433e56899fbb65833e4853683ecaa12ee840d16bf01ffffffff0100e40b54020000001976a91412ab8dc588ca9d5787dde7eb29569da63c3a238c88ac00000000";
     let raw_transaction = utils::hex_to_bytecode(@raw_transaction_hex);
-    let transaction = TransactionTrait::deserialize(raw_transaction);
+    // let transaction = TransactionTrait::deserialize(raw_transaction);
+    let transaction = TransactionTrait::btc_decode(raw_transaction, BASE_ENCODING);
 
-    // Setup UTXO hints ( previous valid ouputs used to execute this transaction )
+    // Setup UTXO hints ( previous valid outputs used to execute this transaction )
     let previous_pk_script_input1 =
         "0x4104c9560dc538db21476083a5c65a34c7cc219960b1e6f27a87571cd91edfd00dac16dca4b4a7c4ab536f85bc263b3035b762c5576dc6772492b8fb54af23abff6dac";
 

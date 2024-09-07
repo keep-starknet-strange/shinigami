@@ -22,6 +22,7 @@ pub fn validate_transaction(
         let res = engine.execute();
         if res.is_err() {
             err = res.unwrap_err();
+            println!("Error: {:?}", err);
             break;
         }
 
