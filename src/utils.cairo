@@ -356,6 +356,16 @@ pub fn int_size_in_bytes(u_32: u32) -> u32 {
     size
 }
 
+pub fn sha256_byte_array(byte: @ByteArray) -> ByteArray {
+    let msg_hash = compute_sha256_byte_array(byte);
+    let mut hash_value: ByteArray = "";
+    for word in msg_hash.span() {
+        hash_value.append_word((*word).into(), 4);
+    };
+
+    hash_value
+}
+
 pub fn double_sha256(byte: @ByteArray) -> u256 {
     let msg_hash = compute_sha256_byte_array(byte);
     let mut res_bytes = "";
@@ -480,4 +490,3 @@ pub fn shl<
     let two = One::one() + One::one();
     self * fast_power(two, shift)
 }
-

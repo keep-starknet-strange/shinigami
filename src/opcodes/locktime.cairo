@@ -37,7 +37,7 @@ pub fn opcode_checklocktimeverify(ref engine: Engine) -> Result<(), felt252> {
     let tx_locktime: i64 = engine.transaction.locktime.into();
     // Get locktime as 5 byte integer because 'tx_locktime' is u32
     let stack_locktime: i64 = ScriptNum::try_into_num_n_bytes(
-        engine.dstack.peek_byte_array(0)?, 5
+        engine.dstack.peek_byte_array(0)?, 5, engine.dstack.verify_minimal_data
     )?;
 
     if stack_locktime < 0 {
@@ -64,7 +64,7 @@ pub fn opcode_checksequenceverify(ref engine: Engine) -> Result<(), felt252> {
 
     // Get sequence as 5 byte integer because 'sequence' is u32
     let stack_sequence: i64 = ScriptNum::try_into_num_n_bytes(
-        engine.dstack.peek_byte_array(0)?, 5
+        engine.dstack.peek_byte_array(0)?, 5, engine.dstack.verify_minimal_data
     )?;
 
     if stack_sequence < 0 {
