@@ -1,4 +1,5 @@
 use core::sha256::{compute_sha256_byte_array};
+use core::num::traits::{Zero, One, BitSize};
 use crate::opcodes::Opcode;
 use crate::scriptnum::ScriptNum;
 
@@ -168,6 +169,7 @@ pub fn number_to_bytecode(script_item: @ByteArray) -> ByteArray {
     if is_negative {
         value = -value;
     }
+    // TODO: Negative info lost before this
     if value == -1 {
         bytecode.append_byte(Opcode::OP_1NEGATE);
     } else if value > 0 && value <= 16 {
@@ -216,6 +218,45 @@ pub fn byte_array_to_felt252_le(byte_array: @ByteArray) -> felt252 {
         i -= 1;
     };
     value
+}
+
+pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: usize) -> felt252 {
+    let byte_shift = 256;
+    let mut value = 0;
+    let mut i = offset;
+    while i < offset + len {
+        value = value * byte_shift + byte_array[i].into();
+        i += 1;
+    };
+    offset += len;
+    value
+}
+
+pub fn byte_array_value_at_le(byte_array: @ByteArray, ref offset: usize, len: usize) -> felt252 {
+    // TODO: Bounds check
+    let byte_shift = 256;
+    let mut value = 0;
+    let mut i = offset + len - 1;
+    while true {
+        value = value * byte_shift + byte_array[i].into();
+        if i == offset {
+            break;
+        }
+        i -= 1;
+    };
+    offset += len;
+    value
+}
+
+pub fn sub_byte_array(byte_array: @ByteArray, ref offset: usize, len: usize) -> ByteArray {
+    let mut sub_byte_array = "";
+    let mut i = offset;
+    while i < offset + len {
+        sub_byte_array.append_byte(byte_array[i]);
+        i += 1;
+    };
+    offset += len;
+    sub_byte_array
 }
 
 // TODO: More efficient way to do this
@@ -315,6 +356,16 @@ pub fn int_size_in_bytes(u_32: u32) -> u32 {
     size
 }
 
+pub fn sha256_byte_array(byte: @ByteArray) -> ByteArray {
+    let msg_hash = compute_sha256_byte_array(byte);
+    let mut hash_value: ByteArray = "";
+    for word in msg_hash.span() {
+        hash_value.append_word((*word).into(), 4);
+    };
+
+    hash_value
+}
+
 pub fn double_sha256(byte: @ByteArray) -> u256 {
     let msg_hash = compute_sha256_byte_array(byte);
     let mut res_bytes = "";
@@ -330,4 +381,112 @@ pub fn double_sha256(byte: @ByteArray) -> u256 {
         };
 
     hash_value
+}
+
+// Fast exponentiation using the square-and-multiply algorithm
+pub fn fast_power<
+    T,
+    U,
+    +Zero<T>,
+    +Zero<U>,
+    +One<T>,
+    +One<U>,
+    +Add<U>,
+    +Mul<T>,
+    +Rem<U>,
+    +Div<U>,
+    +Copy<T>,
+    +Copy<U>,
+    +Drop<T>,
+    +Drop<U>,
+    +PartialEq<U>,
+>(
+    base: T, exp: U
+) -> T {
+    if exp == Zero::zero() {
+        return One::one();
+    }
+
+    let mut res: T = One::one();
+    let mut base: T = base;
+    let mut exp: U = exp;
+
+    let two: U = One::one() + One::one();
+
+    loop {
+        if exp % two == One::one() {
+            res = res * base;
+        }
+        exp = exp / two;
+        if exp == Zero::zero() {
+            break res;
+        }
+        base = base * base;
+    }
+}
+
+/// Performs a bitwise right shift on the given value by a specified number of bits.
+pub fn shr<
+    T,
+    U,
+    +Zero<T>,
+    +Zero<U>,
+    +One<T>,
+    +One<U>,
+    +Add<T>,
+    +Add<U>,
+    +Sub<U>,
+    +Div<T>,
+    +Mul<T>,
+    +Div<U>,
+    +Rem<U>,
+    +Copy<T>,
+    +Copy<U>,
+    +Drop<T>,
+    +Drop<U>,
+    +PartialOrd<U>,
+    +PartialEq<U>,
+    +BitSize<T>,
+    +Into<usize, U>
+>(
+    self: T, shift: U
+) -> T {
+    if shift > BitSize::<T>::bits().try_into().unwrap() - One::one() {
+        return Zero::zero();
+    }
+
+    let two = One::one() + One::one();
+    self / fast_power(two, shift)
+}
+
+/// Performs a bitwise left shift on the given value by a specified number of bits.
+pub fn shl<
+    T,
+    U,
+    +Zero<T>,
+    +Zero<U>,
+    +One<T>,
+    +One<U>,
+    +Add<T>,
+    +Add<U>,
+    +Sub<U>,
+    +Mul<T>,
+    +Div<U>,
+    +Rem<U>,
+    +Copy<T>,
+    +Copy<U>,
+    +Drop<T>,
+    +Drop<U>,
+    +PartialOrd<U>,
+    +PartialEq<U>,
+    +BitSize<T>,
+    +Into<usize, U>
+>(
+    self: T, shift: U,
+) -> T {
+    if shift > BitSize::<T>::bits().into() - One::one() {
+        return Zero::zero();
+    }
+    let two = One::one() + One::one();
+    self * fast_power(two, shift)
 }

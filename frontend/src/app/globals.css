@@ -40,3 +40,7 @@ body {
     clip-path: polygon(7% 0, 100% 0, 100% 100%, 0% 100%);
   }
 }
+
+.highlight {
+  background: #008000C0;
+}

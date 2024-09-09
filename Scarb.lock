@@ -4,12 +4,12 @@ version = 1
 [[package]]
 name = "ripemd160"
 version = "0.1.0"
-source = "git+https://github.com/j1mbo64/ripemd160_cairo.git#bebe67c235b12e0a3668f49c78423d4eff6d7131"
+source = "git+https://github.com/j1mbo64/ripemd160_cairo.git#cdc5ab58b0acc64db87e0b03851fb18213977dc8"
 
 [[package]]
 name = "sha1"
 version = "0.1.0"
-source = "git+https://github.com/j1mbo64/sha1_cairo.git#a2fbea0d47adeb7c9c60d6fb97580e4084834cf5"
+source = "git+https://github.com/j1mbo64/sha1_cairo.git#280b4c64ae457fdc4bd7cd807efd17e8dced654e"
 
 [[package]]
 name = "shinigami"

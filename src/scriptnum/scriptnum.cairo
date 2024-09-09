@@ -4,7 +4,22 @@ pub mod ScriptNum {
 
     const BYTESHIFT: i64 = 256;
     const MAX_INT32: i32 = 2147483647;
-    const MIN_INT32: i32 = -2147483648;
+    const MIN_INT32: i32 = -2147483647;
+
+    fn check_minimal_data(input: @ByteArray) -> Result<(), felt252> {
+        if input.len() == 0 {
+            return Result::Ok(());
+        }
+
+        let last_element = input.at(input.len() - 1).unwrap();
+        if last_element & 0x7F == 0 {
+            if input.len() == 1 || input.at(input.len() - 2).unwrap() & 0x80 == 0 {
+                return Result::Err(Error::MINIMAL_DATA);
+            }
+        }
+
+        return Result::Ok(());
+    }
 
     // Wrap i64 with a maximum size of 4 bytes. Can result in 5 byte array.
     pub fn wrap(mut input: i64) -> ByteArray {
@@ -27,7 +42,7 @@ pub mod ScriptNum {
             }
         };
         let unsigned: u64 = input.try_into().unwrap();
-        let bytes_len: usize = integer_bytes_len(input.into() + 1);
+        let bytes_len: usize = integer_bytes_len(input.into());
         result.append_word_rev(unsigned.into(), bytes_len - 1);
         // Compute 'sign-magnitude' byte.
         let sign_byte: u8 = get_last_byte_of_uint(unsigned);
@@ -50,10 +65,14 @@ pub mod ScriptNum {
     }
 
     // Unwrap sign-magnitude encoded ByteArray into a 4 byte int maximum.
-    pub fn try_into_num(input: ByteArray) -> Result<i64, felt252> {
+    pub fn try_into_num(input: ByteArray, minimal_required: bool) -> Result<i64, felt252> {
         let mut result: i64 = 0;
         let mut i: u32 = 0;
         let mut multiplier: i64 = 1;
+        if minimal_required {
+            check_minimal_data(@input)?;
+        }
+
         if input.len() == 0 {
             return Result::Ok(0);
         }
@@ -77,18 +96,23 @@ pub mod ScriptNum {
     }
 
     pub fn into_num(input: ByteArray) -> i64 {
-        try_into_num(input).unwrap()
+        try_into_num(input, false).unwrap()
     }
 
     pub fn unwrap(input: ByteArray) -> i64 {
-        try_into_num(input).unwrap()
+        try_into_num(input, false).unwrap()
     }
 
     // Unwrap 'n' byte of sign-magnitude encoded ByteArray.
-    pub fn try_into_num_n_bytes(input: ByteArray, n: usize) -> Result<i64, felt252> {
+    pub fn try_into_num_n_bytes(
+        input: ByteArray, n: usize, minimal_required: bool
+    ) -> Result<i64, felt252> {
         let mut result: i64 = 0;
         let mut i: u32 = 0;
         let mut multiplier: i64 = 1;
+        if minimal_required {
+            check_minimal_data(@input)?;
+        }
         if input.len() == 0 {
             return Result::Ok(0);
         }
@@ -112,11 +136,11 @@ pub mod ScriptNum {
     }
 
     pub fn into_num_n_bytes(input: ByteArray, n: usize) -> i64 {
-        try_into_num_n_bytes(input, n).unwrap()
+        try_into_num_n_bytes(input, n, false).unwrap()
     }
 
     pub fn unwrap_n(input: ByteArray, n: usize) -> i64 {
-        try_into_num_n_bytes(input, n).unwrap()
+        try_into_num_n_bytes(input, n, false).unwrap()
     }
 
     // Return the minimal number of byte to represent 'value'.

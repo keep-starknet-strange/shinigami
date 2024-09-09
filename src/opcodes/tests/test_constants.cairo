@@ -125,7 +125,7 @@ fn test_op_push_data2() {
     let expected_stack = array![hex_to_bytecode(@byte_data)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
     // Test error case: data bytes fewer than specified in length field
-    let program: ByteArray = "OP_PUSHDATA2 0x01 0x4243";
+    let program: ByteArray = "OP_PUSHDATA2 0x0300 0x4243";
     let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_INVALID);
     // fail to pull data so nothing is pushed into the dstack.
     utils::check_dstack_size(ref engine, 0);
@@ -157,4 +157,42 @@ fn test_op_push_data4() {
     let program = "OP_PUSHDATA4 0x01 0x4243";
     let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_INVALID);
     utils::check_dstack_size(ref engine, 0);
+}
+
+#[test]
+fn test_op_pushdata1_in_if() {
+    let program =
+        "OP_0 OP_IF OP_PUSHDATA1 0x4c 0x81818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181 OP_ENDIF OP_1";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_pushdata1_in_if_with_disabled() {
+    let program =
+        "OP_0 OP_IF OP_PUSHDATA1 0x4c 0x8181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181 OP_ENDIF OP_1";
+    let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
+    utils::check_dstack_size(ref engine, 0);
+}
+
+#[test]
+fn test_op_pushdata2_in_if() {
+    let program =
+        "OP_0 OP_IF OP_PUSHDATA2 0x4c00 0x81818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181 OP_ENDIF OP_1";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_pushdata4_in_if() {
+    let program =
+        "OP_0 OP_IF OP_PUSHDATA4 0x4c000000 0x81818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181 OP_ENDIF OP_1";
+    let mut engine = utils::test_compile_and_run(program);
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    utils::check_expected_dstack(ref engine, expected_stack.span());
 }
