@@ -125,7 +125,7 @@ fn test_op_push_data2() {
     let expected_stack = array![hex_to_bytecode(@byte_data)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
     // Test error case: data bytes fewer than specified in length field
-    let program: ByteArray = "OP_PUSHDATA2 0x01 0x4243";
+    let program: ByteArray = "OP_PUSHDATA2 0x0300 0x4243";
     let mut engine = utils::test_compile_and_run_err(program, Error::SCRIPT_INVALID);
     // fail to pull data so nothing is pushed into the dstack.
     utils::check_dstack_size(ref engine, 0);

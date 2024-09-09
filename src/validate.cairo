@@ -18,7 +18,9 @@ pub fn validate_transaction(
     let mut err = '';
     while i < input_count {
         let utxo = utxo_hints[i];
-        let mut engine = EngineImpl::new(utxo.pubkey_script, tx.clone(), i, flags, *utxo.amount);
+        // TODO: Error handling
+        let mut engine = EngineImpl::new(utxo.pubkey_script, tx.clone(), i, flags, *utxo.amount)
+            .unwrap();
         let res = engine.execute();
         if res.is_err() {
             err = res.unwrap_err();

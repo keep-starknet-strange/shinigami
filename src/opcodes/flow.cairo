@@ -1,7 +1,8 @@
-use crate::engine::Engine;
+use crate::engine::{Engine, EngineTrait};
 use crate::cond_stack::ConditionalStackTrait;
 use crate::opcodes::{utils, Opcode};
-use crate::stack::ScriptStackTrait;
+use crate::scriptflags::ScriptFlags;
+use crate::errors::Error;
 
 pub fn is_branching_opcode(opcode: u8) -> bool {
     if opcode == Opcode::OP_IF
@@ -13,7 +14,10 @@ pub fn is_branching_opcode(opcode: u8) -> bool {
     return false;
 }
 
-pub fn opcode_nop() -> Result<(), felt252> {
+pub fn opcode_nop(ref engine: Engine, opcode: u8) -> Result<(), felt252> {
+    if opcode != Opcode::OP_NOP && engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
+        return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
+    }
     return Result::Ok(());
 }
 
@@ -25,7 +29,7 @@ pub fn opcode_if(ref engine: Engine) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     // TODO: Pop if bool
     if engine.cond_stack.branch_executing() {
-        let ok = engine.dstack.pop_bool()?;
+        let ok = engine.pop_if_bool()?;
         if ok {
             cond = op_cond_true;
         }
@@ -39,7 +43,7 @@ pub fn opcode_if(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_notif(ref engine: Engine) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     if engine.cond_stack.branch_executing() {
-        let ok = engine.dstack.pop_bool()?;
+        let ok = engine.pop_if_bool()?;
         if !ok {
             cond = op_cond_true;
         }
