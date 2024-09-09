@@ -291,7 +291,7 @@ pub mod Opcode {
             94 => constants::opcode_n(14, ref engine),
             95 => constants::opcode_n(15, ref engine),
             96 => constants::opcode_n(16, ref engine),
-            97 => flow::opcode_nop(),
+            97 => flow::opcode_nop(ref engine, 97),
             98 => utils::opcode_reserved("ver", ref engine),
             99 => flow::opcode_if(ref engine),
             100 => flow::opcode_notif(ref engine),
@@ -370,16 +370,16 @@ pub mod Opcode {
             173 => crypto::opcode_checksigverify(ref engine),
             174 => crypto::opcode_checkmultisig(ref engine),
             175 => crypto::opcode_checkmultisigverify(ref engine),
-            176 => flow::opcode_nop(),
+            176 => flow::opcode_nop(ref engine, 176),
             177 => locktime::opcode_checklocktimeverify(ref engine),
             178 => locktime::opcode_checksequenceverify(ref engine),
-            179 => flow::opcode_nop(),
-            180 => flow::opcode_nop(),
-            181 => flow::opcode_nop(),
-            182 => flow::opcode_nop(),
-            183 => flow::opcode_nop(),
-            184 => flow::opcode_nop(),
-            185 => flow::opcode_nop(),
+            179 => flow::opcode_nop(ref engine, 179),
+            180 => flow::opcode_nop(ref engine, 180),
+            181 => flow::opcode_nop(ref engine, 181),
+            182 => flow::opcode_nop(ref engine, 182),
+            183 => flow::opcode_nop(ref engine, 183),
+            184 => flow::opcode_nop(ref engine, 184),
+            185 => flow::opcode_nop(ref engine, 185),
             _ => utils::not_implemented(ref engine)
         }
     }
@@ -422,5 +422,64 @@ pub mod Opcode {
 
     pub fn is_push_opcode(opcode: u8) -> bool {
         return (opcode == OP_PUSHDATA1 || opcode == OP_PUSHDATA2 || opcode == OP_PUSHDATA4);
+    }
+
+    pub fn is_canonical_push(opcode: u8, data: @ByteArray) -> bool {
+        let data_len = data.len();
+        if opcode > OP_16 {
+            return true;
+        }
+
+        if opcode < OP_PUSHDATA1 && opcode > OP_0 && data_len == 1 && data[0] <= 16 {
+            // Could have used OP_N
+            return false;
+        } else if opcode == OP_PUSHDATA1 && data_len < OP_PUSHDATA1.into() {
+            // Could have used OP_DATA_N
+            return false;
+        } else if opcode == OP_PUSHDATA2 && data_len <= 0xFF {
+            // Could have used OP_PUSHDATA1
+            return false;
+        } else if opcode == OP_PUSHDATA4 && data_len <= 0xFFFF {
+            // Could have used OP_PUSHDATA2
+            return false;
+        }
+
+        return true;
+    }
+
+    use crate::utils::byte_array_to_felt252_le;
+    use crate::errors::Error;
+    pub fn data_at(idx: usize, len: usize, script: @ByteArray) -> Result<ByteArray, felt252> {
+        let mut data = "";
+        let mut i = idx;
+        let mut end = i + len;
+        if end > script.len() {
+            return Result::Err(Error::SCRIPT_INVALID);
+        }
+        while i < end {
+            data.append_byte(script[i]);
+            i += 1;
+        };
+        return Result::Ok(data);
+    }
+
+    pub fn data_len(idx: u32, script: @ByteArray) -> Result<usize, felt252> {
+        let opcode: u8 = script[idx];
+        if is_data_opcode(opcode) {
+            return Result::Ok(opcode.into());
+        }
+        let mut push_data_len = 0;
+        if opcode == OP_PUSHDATA1 {
+            push_data_len = 1;
+        } else if opcode == OP_PUSHDATA2 {
+            push_data_len = 2;
+        } else if opcode == OP_PUSHDATA4 {
+            push_data_len = 4;
+        } else {
+            return Result::Ok(0);
+        }
+        return Result::Ok(
+            byte_array_to_felt252_le(@data_at(idx + 1, push_data_len, script)?).try_into().unwrap()
+        );
     }
 }

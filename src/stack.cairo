@@ -7,12 +7,13 @@ use crate::utils;
 pub struct ScriptStack {
     data: Felt252Dict<Nullable<ByteArray>>,
     len: usize,
+    pub verify_minimal_data: bool,
 }
 
 #[generate_trait()]
 pub impl ScriptStackImpl of ScriptStackTrait {
     fn new() -> ScriptStack {
-        ScriptStack { data: Default::default(), len: 0, }
+        ScriptStack { data: Default::default(), len: 0, verify_minimal_data: false }
     }
 
     fn push_byte_array(ref self: ScriptStack, value: ByteArray) {
@@ -47,7 +48,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn pop_int(ref self: ScriptStack) -> Result<i64, felt252> {
         let value = self.pop_byte_array()?;
-        return Result::Ok(ScriptNum::try_into_num(value)?);
+        return Result::Ok(ScriptNum::try_into_num(value, self.verify_minimal_data)?);
     }
 
     fn pop_bool(ref self: ScriptStack) -> Result<bool, felt252> {
@@ -67,7 +68,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn peek_int(ref self: ScriptStack, idx: usize) -> Result<i64, felt252> {
         let bytes = self.peek_byte_array(idx)?;
-        return Result::Ok(ScriptNum::try_into_num(bytes)?);
+        return Result::Ok(ScriptNum::try_into_num(bytes, self.verify_minimal_data)?);
     }
 
     fn peek_bool(ref self: ScriptStack, idx: usize) -> Result<bool, felt252> {
@@ -254,5 +255,17 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
 
         return Result::Ok(());
+    }
+
+    // Set stack to a new array of byte arrays
+    fn set_stack(ref self: ScriptStack, stack: Span<ByteArray>, start: u32, len: u32) {
+        self.data = Default::default();
+        self.len = 0;
+        let mut i = start;
+        let end = start + len;
+        while i < end {
+            self.push_byte_array(stack.at(i).clone());
+            i += 1;
+        };
     }
 }

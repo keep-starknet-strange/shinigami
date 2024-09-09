@@ -5,6 +5,7 @@ pub mod cond_stack;
 pub mod validate;
 pub mod utxo;
 pub mod utils;
+pub mod witness;
 pub mod errors;
 pub mod opcodes {
     pub mod opcodes;
