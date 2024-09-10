@@ -62,7 +62,13 @@ function handleScriptRequest(req, res, functionName) {
     });
 }
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://www.shinigamibtc.dev/',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: '*',  // Allow all headers
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+}));
 app.use(express.json());
 
 app.get('/', (_, res) => {
