@@ -158,7 +158,7 @@ export default function ScriptEditor() {
   const [currentDecorationsTwo, setCurrentDecorationsTwo] = useState<string[]>([]);
 
   useEffect(() => {
-    const sigWords = scriptSig.split(/\s+/);
+    const sigWords = scriptSig.trim() === "" ? [] : scriptSig.split(/\s+/);
     const pubKeyWords = scriptPubKey.split(/\s+/);
     const totalSigWords = sigWords.length;
     const totalPubKeyWords = pubKeyWords.length;
