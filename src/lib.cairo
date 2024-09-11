@@ -30,6 +30,7 @@ pub mod opcodes {
         mod test_crypto;
         mod test_reserved;
         mod test_disabled;
+        mod test_p2pk;
         mod utils;
     }
     pub(crate) use opcodes::Opcode;
