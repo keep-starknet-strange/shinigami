@@ -22,8 +22,8 @@ import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-scr
 const jura = Jura({ subsets: ["latin"] });
 
 export default function ScriptEditor() {
-  const [scriptSig, setScriptSig] = useState("");
-  const [scriptPubKey, setScriptPubKey] = useState("OP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
+  const [scriptSig, setScriptSig] = useState("// Script Sig\nOP_1 OP_3 OP_2 OP_SUB OP_EQUALVERIFY")
+  const [scriptPubKey, setScriptPubKey] = useState("// Script Pub Key\nOP_1 OP_2 OP_ADD OP_3 OP_EQUAL\nOP_HASH160 OP_HASH160\nOP_DATA_20 0xb157bee96d62f6855392b9920385a834c3113d9a\nOP_EQUAL");
 
   const [stackContent, setStackContent] = useState<StackItem[]>([]);
   const [debuggingContent, setDebuggingContent] = useState<StackItem[][]>([]);
@@ -42,11 +42,18 @@ export default function ScriptEditor() {
   const MAX_SIZE = 350000; // Max script size is 10000 bytes, longest named opcode is ~25 chars, so 25 * 10000 = 250000 + extra allowance
 
   const runScript = async (runType: string, setIsLoading: Dispatch<SetStateAction<boolean>>, setError: Dispatch<SetStateAction<string | undefined>>) => {
-    if (scriptPubKey.length > MAX_SIZE) {
+    // Filter out comments staring with // and Convert double quotes to single quotes
+    const pubKey = scriptPubKey.replace(/\/\/.*/g, "").split("\n").join(" ").replace(/\"(.*?)\"/g, "'$1'");
+    let sig = scriptSig.replace(/\/\/.*/g, "").split("\n").join(" ").replace(/\"(.*?)\"/g, "'$1'");
+    if (!split) {
+        sig = "";
+    }
+
+    if (pubKey.length > MAX_SIZE) {
       setError("Script Public Key exceeds maximum allowed size");
       return;
     }
-    if (scriptSig.length > MAX_SIZE) {
+    if (sig.length > MAX_SIZE) {
       setError("Script Signature exceeds maximum allowed size");
       return;
     }
@@ -56,10 +63,6 @@ export default function ScriptEditor() {
     setError(undefined);
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-      // Filter out lines that start with // and Convert double quotes to single quotes
-      const pubKey = scriptPubKey.split("\n").filter(line => !line.trim().startsWith("//")).join(" ").replace(/\"(.*?)\"/g, "'$1'");
-      const sig = scriptSig.split("\n").filter(line => !line.trim().startsWith("//")).join(" ").replace(/\"(.*?)\"/g, "'$1'");
 
       const response = await fetch(`${backendUrl}/${runType}`, {
         method: "POST",
@@ -100,8 +103,11 @@ export default function ScriptEditor() {
   const [split, setSplit] = useState(false);
   const [monacoOne, setMonacoOne] = useState<any>();
   const [monacoTwo, setMonacoTwo] = useState<any>();
+  const [monacoSetup, setMonacoSetup] = useState(false);
 
   const setEditorTheme = (monaco: any, setMonaco: Dispatch<SetStateAction<string>>) => {
+    if (monacoSetup) return;
+    setMonacoSetup(true);
     setMonaco(monaco);
 
     // Register the custom language
@@ -129,10 +135,12 @@ export default function ScriptEditor() {
       base: "hc-black",
       inherit: true,
       rules: [
-        { token: 'keyword', foreground: 'A06EE2' },
+        { token: 'keyword', foreground: 'FAFEFA' },
         { token: 'string', foreground: 'F7A95E' },
         { token: 'number', foreground: '3A998F' },
         { token: 'special-keyword', foreground: 'CB4D8D' },
+        { token: 'comment', foreground: '4F72D0' },
+        { token: 'error', foreground: 'FF2B2B', fontStyle: 'underline' },
       ],
       colors: {
         "editor.selectionBackground": "#A5FFC240",
@@ -330,10 +338,10 @@ export default function ScriptEditor() {
 
   return (
     <div className="w-full h-full">
-      <div className="flex flex-col space-y-5 xl:space-y-0 xl:flex-row items-start xl:space-x-5 w-full">
-        <div className="w-full xl:w-[60%]">
+      <div className="flex flex-col space-y-0 md:space-y-0 md:flex-row items-start md:space-x-5 w-full">
+        <div className="w-full md:w-[65%]">
           <div className="w-full flex flex-row items-center justify-between">
-            <div className="w-36 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
+            <div className="w-40 h-10 bg-[#232523AE] clip-trapezium-right flex flex-col items-start justify-center pl-2.5 pt-1.5 rounded-t-xl">
               <p className="text-[#85FFB2] text-lg">Script Editor</p>
             </div>
             <button
@@ -360,109 +368,55 @@ export default function ScriptEditor() {
               </>
             )
           }
-        </div>
-        <StackVisualizer stackContent={stackContent} />
-      </div>
-      <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-10">
-        <div className="mt-5 flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3.5">
-          <button
-            className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]"
-            onClick={handleRunScript}
-            disabled={isFetching}
-          >
-            {runError ? runError : isFetching ? "Running..." : "Run Script"}
-          </button>
-          <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase"
-            onClick={handleDebugScript}
-            disabled={isDebugging}>
-            {debugError ? debugError : isDebugFetch ? "Loading..." : isDebugging ? "Debugging..." : "Debug Script"}
-          </button>
-          {
-            (isDebugging || hasFetchedDebugData) && !isFetching && (
-              <div className="flex flex-col sm:flex-row sm:space-x-3.5">
-                {
-                  <button className={`hidden sm:block ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
-                    let newStep = Math.max(step - 1, 0);
-                    setStep(newStep);
-                    setStackContent(debuggingContent[newStep]);
-                  }}>
-                    <Image src={previous} alt="" unoptimized />
-                  </button>
-                }
-                <button className={`hidden sm:block ${step >= debuggingContent.length - 1 ? "opacity-50" : ""}`} disabled={step >= debuggingContent.length - 1} onClick={() => {
-                  let newStep = Math.min(step + 1, debuggingContent.length - 1);
-                  setStep(newStep);
-                  setStackContent(debuggingContent[newStep]);
-                }}>
-                  <Image src={next} alt="" unoptimized />
-                </button>
-                <button className="hidden sm:block" onClick={() => {
-                  setStep(-1);
-                  setStackContent([]);
-                  setHasFetchedDebugData(false);
-                  setDebuggingContent([]);
-                  setIsDebugging(false);
-                }}>
-                  <Image src={stop} alt="" unoptimized />
-                </button>
-                {/* Step controls for mobile view */}
-                <div className="flex flex-col items-center justify-center space-y-3.5 sm:hidden">
-                  <div className="flex flex-row items-center space-x-3.5 justify-between">
-                    <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5 ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
-                      let newStep = Math.max(step - 1, 0);
-                      setStep(newStep);
-                      setStackContent(debuggingContent[newStep]);
-                    }}>
-                      <Image src={previousIcon} alt="" unoptimized />
-                      <p className="text-sm">PREVIOUS DEBUG LINE</p>
-                    </button>
-                    <button className={`bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center space-x-1.5 ${step >= debuggingContent.length - 1 ? "opacity-50" : ""}`} disabled={step >= debuggingContent.length - 1} onClick={() => {
+          <div className="w-full flex flex-col space-y-3.5 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-10">
+            <div className="mt-5 space-y-0 flex flex-row items-center space-x-3.5">
+              <button
+                className="bg-[#00FF5E] uppercase text-black px-6 py-3 rounded-[3px] opacity-50 shadow-[0px_4px_8px_2px_rgba(0,255,94,0.20)]"
+                onClick={handleRunScript}
+                disabled={isFetching}
+              >
+                {runError ? runError : isFetching ? "Running..." : "Run Script"}
+              </button>
+              <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] opacity-50  uppercase"
+                onClick={handleDebugScript}
+                disabled={isDebugging}>
+                {debugError ? debugError : isDebugFetch ? "Loading..." : isDebugging ? "Debugging..." : "Debug Script"}
+              </button>
+              {
+                (isDebugging || hasFetchedDebugData) && !isFetching && (
+                  <div className="flex flex-row space-x-3.5">
+                    {
+                      <button className={`block ${step <= 0 ? "opacity-50" : ""}`} disabled={step <= 0} onClick={() => {
+                        let newStep = Math.max(step - 1, 0);
+                        setStep(newStep);
+                        setStackContent(debuggingContent[newStep]);
+                      }}>
+                        <Image src={previous} alt="" unoptimized />
+                      </button>
+                    }
+                    <button className={`block ${step >= debuggingContent.length - 1 ? "opacity-50" : ""}`} disabled={step >= debuggingContent.length - 1} onClick={() => {
                       let newStep = Math.min(step + 1, debuggingContent.length - 1);
                       setStep(newStep);
                       setStackContent(debuggingContent[newStep]);
                     }}>
-                      <Image src={nextIcon} alt="" unoptimized />
-                      <p className="text-sm">DEBUG LINE</p>
+                      <Image src={next} alt="" unoptimized />
                     </button>
-                    {
-                      step >= 0 && <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase sm:flex flex-row items-center space-x-1.5 hidden" onClick={() => {
-                        setStep(-1)
-                        setStackContent([])
-                        setHasFetchedDebugData(false)
-                        setDebuggingContent([])
-                        setIsDebugging(false)
-                      }}>
-                        <Image src={stopIcon} alt="" unoptimized />
-                        <p className="text-sm">STOP</p>
-                      </button>
-                    }
+                    <button className="block" onClick={() => {
+                      setStep(-1);
+                      setStackContent([]);
+                      setHasFetchedDebugData(false);
+                      setDebuggingContent([]);
+                      setIsDebugging(false);
+                    }}>
+                      <Image src={stop} alt="" unoptimized />
+                    </button>
                   </div>
-                  <div className="w-full flex flex-row items-center justify-between">
-                    {
-                      step >= 0 && <button className="bg-[rgba(0,255,94,0.10)] text-[#00FF5E] border border-[#00FF5E] border-opacity-50 px-3 py-3 rounded-[3px] uppercase flex flex-row items-center justify-center space-x-1.5 w-full" onClick={() => {
-                        setStep(-1)
-                        setStackContent([])
-                        setHasFetchedDebugData(false)
-                        setDebuggingContent([])
-                        setIsDebugging(false)
-                      }}
-                      >
-                        <div className="w-fit flex flex-row items-center justify-center">
-                          <Image src={stopIcon} alt="" unoptimized />
-                          <p className="text-sm">STOP</p>
-                        </div>
-                      </button>
-                    }
-                  </div>
-                </div>
-              </div>
-            )
-          }
+                )
+              }
+            </div>
+          </div>
         </div>
-        <button className="flex flex-row items-center justify-center space-x-1.5 sm:pt-5">
-          <Image src={refreshImage} alt="" unoptimized />
-          <p className="text-white uppercase">Refresh</p>
-        </button>
+        <StackVisualizer stackContent={stackContent} />
       </div>
     </div >
   );

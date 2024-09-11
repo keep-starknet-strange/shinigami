@@ -63,7 +63,7 @@ function handleScriptRequest(req, res, functionName) {
 }
 
 app.use(cors({
-    origin: 'https://www.shinigamibtc.dev/',
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: '*',  // Allow all headers
     preflightContinue: false,

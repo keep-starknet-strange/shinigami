@@ -1,15 +1,21 @@
 export const bitcoinScriptLanguage = {
   tokenizer: {
     root: [
+      [/\/\/.*/, "comment"],
       [/OP_CAT/, "special-keyword"],
       [/OP_[A-Z0-9_]+/, "keyword"],
-      [/<[^>]+>/, "string"],
+      // Strings can be like: <'hello'>, <"hello">, 'hello', "hello"
+      [/<'[^']+'>/, "string"],
+      [/<"[^"]+">/, "string"],
       [/"[^"]+"/, "string"],
       [/'[^']+'/, "string"],
+      // Numbers can be like: 0x123, 123, -123, <123>
       [/0x[0-9a-fA-f]+/, "number"],
       [/[0-9]+/, "number"],
       [/-[0-9]+/, "number"],
-      [/[a-zA-Z_]\w*/, "identifier"],
+      [/<[0-9]+>/, "number"],
+      // Anything else is invalid
+      [/[^\s]+/, "error"],
     ],
   },
 };

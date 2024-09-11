@@ -10,6 +10,13 @@ const commonClasses = "w-full min-h-screen";
 export const metadata: Metadata = {
   title: "Shinigami Script Wizard",
   description: "Shinigami Script Wizard",
+  icons: [
+    {
+      url: "/favicon.ico",
+      sizes: "64x64 32x32 24x24 16x16",
+      type: "image/x-icon",
+    },
+  ],
 };
 
 export default function RootLayout({
