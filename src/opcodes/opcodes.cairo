@@ -456,7 +456,7 @@ pub mod Opcode {
         if end > script.len() {
             return Result::Err(Error::SCRIPT_INVALID);
         }
-        while i < end {
+        while i != end {
             data.append_byte(script[i]);
             i += 1;
         };
