@@ -1,7 +1,6 @@
-use crate::utils::{int_size_in_bytes, double_sha256};
+use crate::utils::{int_size_in_bytes, double_sha256, bytecode_to_hex};
 use crate::transaction::{Transaction, TransactionTrait, TransactionInput, TransactionOutput};
 use crate::signature::{constants, utils};
-
 // Calculates the signature hash for specified transaction data and hash type.
 pub fn calc_signature_hash(
     sub_script: @ByteArray, hash_type: u32, ref transaction: Transaction, tx_idx: u32
@@ -25,7 +24,7 @@ pub fn calc_signature_hash(
 
     let mut sig_hash_bytes: ByteArray = transaction_copy.serialize_no_witness();
     sig_hash_bytes.append_word_rev(hash_type.into(), 4);
-
+    println!("sig_hash_bytes: {}", bytecode_to_hex(@sig_hash_bytes));
     // Hash and return the serialized transaction data twice using SHA-256.
     double_sha256(@sig_hash_bytes)
 }

@@ -106,6 +106,7 @@ pub impl TransactionImpl of TransactionTrait {
             let vout: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
             let script_len = utils::byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
             let script = utils::sub_byte_array(@raw, ref offset, script_len);
+            println!("script: {:?}", utils::bytecode_to_hex(@script));
             let sequence: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4)
                 .try_into()
                 .unwrap();

@@ -342,6 +342,33 @@ pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usi
     u256 { high, low }
 }
 
+pub fn u256_to_byte_array(value: u256) -> ByteArray {
+    let mut byte_array = "";
+    let mut remaining = value;
+    let byte_mask: u128 = 0xFF;
+
+    // Process the low part
+    let mut i: usize = 0;
+    while i < 16 {
+        let byte = (remaining.low & byte_mask).try_into().unwrap();
+        byte_array.append_byte(byte);
+        remaining.low = remaining.low / 256;
+        i += 1;
+    };
+
+    // Process the high part
+    let mut i: usize = 0;
+    while i < 16 {
+        let byte = (remaining.high & byte_mask).try_into().unwrap();
+        byte_array.append_byte(byte);
+        remaining.high = remaining.high / 256;
+        i += 1;
+    };
+
+    byte_array.rev()
+}
+
+
 pub fn int_size_in_bytes(u_32: u32) -> u32 {
     let mut value: u32 = u_32;
     let mut size = 0;

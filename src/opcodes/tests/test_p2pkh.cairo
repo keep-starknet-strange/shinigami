@@ -27,7 +27,7 @@ fn test_p2pkh_first_tx() {
 fn test_p2pkh_btcd_copy() {
     // from https://github.com/btcsuite/btcd/blob/2b53ed198955ac40fe5b3ce4a854e9f5bfa68258/txscript/pkscript_test.go#L209
         let script_sig =
-        "OP_DATA_73 0x304402206592d88e1d0a4a3cc59f92aefe625474a94d13a59f849778fce7df4be0c228d802202dea3696191fb700c5a77e22d9fb6b426742a42cacdb74a27c43cd89a0f94454127401 OP_DATA_33 0x027d5612097531c217fdd4d2e17a354b17f27aef309fb27f1f1f7b737d9a244990";
+        "OP_DATA_73 0x304402206592d88e1d0a4a3cc59f92aefe625474a94d13a59f849778fce7df4be0c228d802202dea3696191fb700c5a77e22d9fb6b426742a42cacdb74a27c43cd89a0f94454127401";
     let script_pubkey =
         "OP_DUP OP_HASH160 OP_DATA_20 0xf07ab8ce72da4e760b747d48d665ec96adf024f5 OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = utils::mock_transaction(script_sig);

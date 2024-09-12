@@ -3,8 +3,9 @@ use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::scriptflags::ScriptFlags;
-use crate::utils::{u256_from_byte_array_with_offset};
+use crate::utils::{u256_from_byte_array_with_offset, int_to_hex};
 use crate::signature::{sighash, constants};
+use crate::utils as crateutils;
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -30,6 +31,8 @@ pub trait BaseSigVerifierTrait {
     fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool;
 }
 
+
+
 impl BaseSigVerifierImpl of BaseSigVerifierTrait {
     fn new(
         ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray
@@ -45,10 +48,13 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
         let sig_hash: u256 = sighash::calc_signature_hash(
             @self.sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
         );
-        println!("sig_hash: {}", sig_hash);
+        println!("sub_script: {}", crateutils::bytecode_to_hex(@self.sub_script));
+        println!("hash_type: {}", self.hash_type);
+        println!("sig_hash: {}", crateutils::bytecode_to_hex(@crateutils::u256_to_byte_array(sig_hash)));
         println!("r: {:?}", self.sig.r);
         println!("s: {:?}", self.sig.s);
-        //println!("pub_key: {:?}", self.pub_key);
+        
+        println!("pub_key: {:?}", crateutils::bytecode_to_hex(self.pk_bytes));
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
 }
