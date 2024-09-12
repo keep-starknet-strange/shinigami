@@ -182,12 +182,12 @@ fn backend_debug(input: InputData) -> u8 {
 }
 
 #[derive(Drop)]
-struct ValidateRawInput {
-    raw_transaction: ByteArray,
-    utxo_hints: Array<UTXO>
+pub struct ValidateRawInput {
+    pub raw_transaction: ByteArray,
+    pub utxo_hints: Array<UTXO>
 }
 
-fn run_raw_transaction(input: ValidateRawInput) -> u8 {
+pub fn run_raw_transaction(input: ValidateRawInput) -> u8 {
     println!("Running Bitcoin Script with raw transaction: '{}'", input.raw_transaction);
     let raw_transaction = utils::hex_to_bytecode(@input.raw_transaction);
     let transaction = TransactionTrait::deserialize(raw_transaction);
