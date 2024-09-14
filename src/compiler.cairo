@@ -1,12 +1,13 @@
 use core::dict::Felt252Dict;
 use crate::opcodes::Opcode;
 use crate::utils;
+use core::nullable::{NullableTrait, match_nullable, FromNullableResult};
 
 // Compiler that takes a Bitcoin Script program and compiles it into a bytecode
 #[derive(Destruct)]
 pub struct Compiler {
     // Dict containing opcode names to their bytecode representation
-    opcodes: Felt252Dict<u8>
+    opcodes: Felt252Dict<Nullable<u8>>
 }
 
 pub trait CompilerTrait {
@@ -311,7 +312,7 @@ pub impl CompilerImpl of CompilerTrait {
 
     fn add_opcode(ref self: Compiler, name: felt252, opcode: u8) {
         // Insert opcode formatted like OP_XXX
-        self.opcodes.insert(name, opcode);
+        self.opcodes.insert(name, NullableTrait::new(opcode));
 
         // Remove OP_ prefix and insert opcode XXX
         let nameu256 = name.into();
@@ -320,7 +321,7 @@ pub impl CompilerImpl of CompilerTrait {
             name_mask = name_mask * 256; // Shift left 1 byte
         };
         name_mask = name_mask / 16_777_216; // Shift right 3 bytes
-        self.opcodes.insert((nameu256 % name_mask).try_into().unwrap(), opcode);
+        self.opcodes.insert((nameu256 % name_mask).try_into().unwrap(), NullableTrait::new(opcode));
     }
 
     fn compile(mut self: Compiler, script: ByteArray) -> ByteArray {
@@ -363,13 +364,17 @@ pub impl CompilerImpl of CompilerTrait {
             } else if utils::is_number(script_item) {
                 ByteArrayTrait::append(ref bytecode, @utils::number_to_bytecode(script_item));
             } else {
-                // TODO: Check opcode exists
-                bytecode
-                    .append_byte(self.opcodes.get(utils::byte_array_to_felt252_be(script_item)));
+                let opcode_nullable = self
+                    .opcodes
+                    .get(utils::byte_array_to_felt252_be(script_item));
+                let parsed_opcode: Result<u8, felt252> = match match_nullable(opcode_nullable) {
+                    FromNullableResult::Null => Result::Err('No value found'),
+                    FromNullableResult::NotNull(opcode) => Result::Ok(opcode.unbox()),
+                };
+                bytecode.append_byte(parsed_opcode.unwrap());
             }
             i += 1;
         };
-
         bytecode
     }
 }
