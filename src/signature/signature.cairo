@@ -194,9 +194,10 @@ pub fn check_signature_encoding(ref vm: Engine, sig_bytes: @ByteArray) -> Result
         let s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset, 32);
         let mut half_order = Secp256Trait::<Secp256k1Point>::get_curve_size();
 
-        let carry = half_order.high % 2;
+        let (half_order_high_upper, half_order_high_lower) = DivRem::div_rem(half_order.high, 2);
+        let carry = half_order_high_lower;
         half_order.low = (half_order.low / 2) + (carry * (constants::MAX_U128 / 2 + 1));
-        half_order.high /= 2;
+        half_order.high = half_order_high_upper;
 
         if s_value > half_order {
             return Result::Err('sig not canonical high S value');

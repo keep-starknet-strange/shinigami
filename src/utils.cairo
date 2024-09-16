@@ -92,8 +92,7 @@ pub fn bytecode_to_hex(bytecode: @ByteArray) -> ByteArray {
         return "0x00";
     }
     while i < bytecode_len {
-        let upper_half_byte = bytecode[i] / half_byte_shift;
-        let lower_half_byte = bytecode[i] % half_byte_shift;
+        let (upper_half_byte, lower_half_byte) = DivRem::div_rem(bytecode[i], half_byte_shift);
         let upper_half: u8 = if upper_half_byte < 10 {
             upper_half_byte + zero
         } else {
@@ -265,8 +264,9 @@ pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
     let mut byte_array = "";
     let mut valueU256: u256 = value.into();
     while valueU256 > 0 {
-        byte_array.append_byte((valueU256 % byte_shift).try_into().unwrap());
-        valueU256 /= byte_shift;
+        let (value_upper, value_lower) = DivRem::div_rem(valueU256, byte_shift);
+        byte_array.append_byte(value_lower.try_into().unwrap());
+        valueU256 = value_upper;
     };
     byte_array.rev()
 }
@@ -274,8 +274,7 @@ pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
 pub fn int_to_hex(value: u8) -> felt252 {
     let half_byte_shift = 16;
     let byte_shift = 256;
-    let upper_half_value = value / half_byte_shift;
-    let lower_half_value = value % half_byte_shift;
+    let (upper_half_value, lower_half_value) = DivRem::div_rem(value, half_byte_shift);
 
     let upper_half: u8 = if upper_half_value < 10 {
         upper_half_value + '0'
@@ -412,7 +411,6 @@ pub fn fast_power<
     let mut exp: U = exp;
 
     let two: U = One::one() + One::one();
-
     loop {
         if exp % two == One::one() {
             res = res * base;
