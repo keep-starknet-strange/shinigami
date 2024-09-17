@@ -16,7 +16,7 @@ pub fn validate_transaction(
 
     let mut i = 0;
     let mut err = '';
-    while i < input_count {
+    while i != input_count {
         let utxo = utxo_hints[i];
         // TODO: Error handling
         let mut engine = EngineImpl::new(utxo.pubkey_script, tx.clone(), i, flags, *utxo.amount)

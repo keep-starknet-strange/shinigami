@@ -36,9 +36,9 @@ fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
         input.Flags
     );
     let mut compiler = CompilerImpl::new();
-    let script_pubkey = compiler.compile(input.ScriptPubKey);
+    let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
-    let script_sig = compiler.compile(input.ScriptSig);
+    let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = TransactionImpl::new_signed(script_sig);
     let flags = scriptflags::parse_flags(input.Flags);
     let mut engine = EngineImpl::new(@script_pubkey, tx, 0, flags, 0)?;
@@ -55,9 +55,9 @@ fn run_with_witness(input: InputDataWithWitness) -> Result<(), felt252> {
         input.Witness
     );
     let mut compiler = CompilerImpl::new();
-    let script_pubkey = compiler.compile(input.ScriptPubKey);
+    let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
-    let script_sig = compiler.compile(input.ScriptSig);
+    let script_sig = compiler.compile(input.ScriptSig)?;
     let witness = witness::parse_witness_input(input.Witness);
     let tx = TransactionImpl::new_signed_witness(script_sig, witness);
     let flags = scriptflags::parse_flags(input.Flags);
@@ -73,9 +73,9 @@ fn run(input: InputData) -> Result<(), felt252> {
         input.ScriptPubKey
     );
     let mut compiler = CompilerImpl::new();
-    let script_pubkey = compiler.compile(input.ScriptPubKey);
+    let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
-    let script_sig = compiler.compile(input.ScriptSig);
+    let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = TransactionImpl::new_signed(script_sig);
     let mut engine = EngineImpl::new(@script_pubkey, tx, 0, 0, 0)?;
     let _ = engine.execute()?;
@@ -89,9 +89,9 @@ fn run_with_json(input: InputData) -> Result<(), felt252> {
         input.ScriptPubKey
     );
     let mut compiler = CompilerImpl::new();
-    let script_pubkey = compiler.compile(input.ScriptPubKey);
+    let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
-    let script_sig = compiler.compile(input.ScriptSig);
+    let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = TransactionImpl::new_signed(script_sig);
     let mut engine = EngineImpl::new(@script_pubkey, tx, 0, 0, 0)?;
     let _ = engine.execute()?;
@@ -106,9 +106,9 @@ fn debug(input: InputData) -> Result<bool, felt252> {
         input.ScriptPubKey
     );
     let mut compiler = CompilerImpl::new();
-    let script_pubkey = compiler.compile(input.ScriptPubKey);
+    let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
-    let script_sig = compiler.compile(input.ScriptSig);
+    let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = TransactionImpl::new_signed(script_sig);
     let mut engine = EngineImpl::new(@script_pubkey, tx, 0, 0, 0)?;
     let mut res = Result::Ok(true);

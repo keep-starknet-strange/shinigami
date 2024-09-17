@@ -1,7 +1,6 @@
 use core::dict::Felt252Dict;
 use crate::opcodes::Opcode;
 use crate::utils;
-use core::nullable::{NullableTrait, match_nullable, FromNullableResult};
 
 // Compiler that takes a Bitcoin Script program and compiles it into a bytecode
 #[derive(Destruct)]
@@ -16,7 +15,7 @@ pub trait CompilerTrait {
     // Adds an opcode "OP_XXX" to the opcodes dict under: "OP_XXX" and "XXX"
     fn add_opcode(ref self: Compiler, name: felt252, opcode: u8);
     // Compiles a program like "OP_1 OP_2 OP_ADD" into a bytecode run by the Engine.
-    fn compile(self: Compiler, script: ByteArray) -> ByteArray;
+    fn compile(self: Compiler, script: ByteArray) -> Result<ByteArray, felt252>;
 }
 
 pub impl CompilerImpl of CompilerTrait {
@@ -324,7 +323,7 @@ pub impl CompilerImpl of CompilerTrait {
         self.opcodes.insert((nameu256 % name_mask).try_into().unwrap(), NullableTrait::new(opcode));
     }
 
-    fn compile(mut self: Compiler, script: ByteArray) -> ByteArray {
+    fn compile(mut self: Compiler, script: ByteArray) -> Result<ByteArray, felt252> {
         let mut bytecode = "";
         let seperator = ' ';
 
@@ -333,7 +332,7 @@ pub impl CompilerImpl of CompilerTrait {
         let mut current = "";
         let mut i = 0;
         let script_len = script.len();
-        while i < script_len {
+        while i != script_len {
             let char = script[i].into();
             if char == seperator {
                 if current == "" {
@@ -355,7 +354,8 @@ pub impl CompilerImpl of CompilerTrait {
         // Compile the script into bytecode
         let mut i = 0;
         let script_len = split_script.len();
-        while i < script_len {
+        let mut err = '';
+        while i != script_len {
             let script_item = split_script.at(i);
             if utils::is_hex(script_item) {
                 ByteArrayTrait::append(ref bytecode, @utils::hex_to_bytecode(script_item));
@@ -367,14 +367,17 @@ pub impl CompilerImpl of CompilerTrait {
                 let opcode_nullable = self
                     .opcodes
                     .get(utils::byte_array_to_felt252_be(script_item));
-                let parsed_opcode: Result<u8, felt252> = match match_nullable(opcode_nullable) {
-                    FromNullableResult::Null => Result::Err('No value found'),
-                    FromNullableResult::NotNull(opcode) => Result::Ok(opcode.unbox()),
-                };
-                bytecode.append_byte(parsed_opcode.unwrap());
+                if opcode_nullable.is_null() {
+                    err = 'Compiler error: unknown opcode';
+                    break;
+                }
+                bytecode.append_byte(opcode_nullable.deref());
             }
             i += 1;
         };
-        bytecode
+        if err != '' {
+            return Result::Err(err);
+        }
+        Result::Ok(bytecode)
     }
 }

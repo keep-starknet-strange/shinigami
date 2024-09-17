@@ -296,7 +296,7 @@ fn test_max_stack() {
     let mut program: ByteArray = "";
     let op_1_string = "OP_1 ";
     let mut index: u64 = 0;
-    while index < 1000 {
+    while index != 1000 {
         program.append(@op_1_string);
         index += 1;
     };
@@ -310,7 +310,7 @@ fn test_exceed_stack() {
     let mut program: ByteArray = "";
     let op_1_string = "OP_1 ";
     let mut index: u64 = 0;
-    while index < 1001 {
+    while index != 1001 {
         program.append(@op_1_string);
         index += 1;
     };

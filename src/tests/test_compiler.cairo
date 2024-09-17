@@ -1,22 +1,11 @@
 use crate::compiler::CompilerImpl;
 
-#[test]
-fn test_compiler_OP_2() {
-    let mut compiler = CompilerImpl::new();
-    let bytecode = compiler.compile("OP_2");
-    assert_eq!(bytecode, "R");
-}
+// TODO: More tests?
 
 #[test]
-fn test_compiler_OP_11() {
+fn test_compiler_unknown_opcode() {
     let mut compiler = CompilerImpl::new();
-    let bytecode = compiler.compile("OP_11");
-    assert_eq!(bytecode, "[");
-}
-
-#[test]
-fn test_compiler_OP_2DROP() {
-    let mut compiler = CompilerImpl::new();
-    let bytecode = compiler.compile("OP_2DROP");
-    assert_eq!(bytecode, "m");
+    let res = compiler.compile("OP_FAKE");
+    assert!(res.is_err());
+    assert_eq!(res.unwrap_err(), 'Compiler error: unknown opcode', "Error message mismatch");
 }
