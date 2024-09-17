@@ -415,7 +415,7 @@ pub fn string_to_bytecode(script_item: @ByteArray) -> ByteArray {
         bytecode.append_byte(Opcode::OP_PUSHDATA4);
         bytecode.append(@ScriptNum::wrap(word_len.into()));
     }
-    while i < end {
+    while i != end {
         bytecode.append_byte(script_item[i]);
         i += 1;
     };
@@ -435,7 +435,7 @@ pub fn number_to_bytecode(script_item: @ByteArray) -> ByteArray {
         i += 1;
     }
     let mut value: i64 = 0;
-    while i < script_item_len {
+    while i != script_item_len {
         value = value * 10 + script_item[i].into() - zero;
         i += 1;
     };

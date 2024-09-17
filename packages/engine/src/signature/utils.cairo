@@ -21,7 +21,7 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
         }
         let data_len = Opcode::data_len(i, script).unwrap();
         let end = i + data_len + 1;
-        while i < end {
+        while i != end {
             parsed_script.append_byte(script[i]);
             i += 1;
         }

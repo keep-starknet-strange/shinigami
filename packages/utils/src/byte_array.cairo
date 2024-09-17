@@ -4,7 +4,7 @@ pub fn byte_array_to_felt252_be(byte_array: @ByteArray) -> felt252 {
     let mut value = 0;
     let mut i = 0;
     let byte_array_len = byte_array.len();
-    while i < byte_array_len {
+    while i != byte_array_len {
         value = value * byte_shift + byte_array[i].into();
         i += 1;
     };
@@ -31,7 +31,7 @@ pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: us
     let byte_shift = 256;
     let mut value = 0;
     let mut i = offset;
-    while i < offset + len {
+    while i != offset + len {
         value = value * byte_shift + byte_array[i].into();
         i += 1;
     };
@@ -59,7 +59,7 @@ pub fn byte_array_value_at_le(
 pub fn sub_byte_array(byte_array: @ByteArray, ref offset: usize, len: usize) -> ByteArray {
     let mut sub_byte_array = "";
     let mut i = offset;
-    while i < offset + len {
+    while i != offset + len {
         sub_byte_array.append_byte(byte_array[i]);
         i += 1;
     };
@@ -72,7 +72,7 @@ pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
     let byte_shift = 256;
     let mut byte_array = "";
     let mut valueU256: u256 = value.into();
-    while valueU256 > 0 {
+    while valueU256 != 0 {
         byte_array.append_byte((valueU256 % byte_shift).try_into().unwrap());
         valueU256 /= byte_shift;
     };
@@ -101,11 +101,11 @@ pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usi
     if read_bytes > 16 {
         high_bytes = read_bytes - 16;
     }
-    while i < high_bytes {
+    while i != high_bytes {
         high = high * 256 + arr[i + offset].into();
         i += 1;
     };
-    while i < read_bytes {
+    while i != read_bytes {
         low = low * 256 + arr[i + offset].into();
         i += 1;
     };

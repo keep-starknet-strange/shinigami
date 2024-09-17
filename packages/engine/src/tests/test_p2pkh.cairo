@@ -1,7 +1,7 @@
 use crate::transaction::TransactionTrait;
 use crate::utxo::UTXO;
 use crate::validate;
-use crate::utils::hex_to_bytecode;
+use utils::bytecode::hex_to_bytecode;
 
 #[test]
 fn test_p2pkh_transaction() {

@@ -151,7 +151,7 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
         if end > script.len() {
             return Result::Err(Error::SCRIPT_INVALID);
         }
-        while i < end {
+        while i != end {
             data.append_byte(script[i]);
             i += 1;
         };
@@ -190,7 +190,7 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
 
         let mut sub_script = "";
         let mut i = self.last_code_sep;
-        while i < script.len() {
+        while i != script.len() {
             sub_script.append_byte(script[i]);
             i += 1;
         };

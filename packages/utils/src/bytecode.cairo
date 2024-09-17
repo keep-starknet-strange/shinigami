@@ -8,7 +8,7 @@ pub fn hex_to_bytecode(script_item: @ByteArray) -> ByteArray {
     let mut i = 2;
     let mut bytecode = "";
     let script_item_len = script_item.len();
-    while i < script_item_len {
+    while i != script_item_len {
         let mut upper_half_byte = 0;
         let mut lower_half_byte = 0;
         if script_item[i] >= a_string_lower {
@@ -42,7 +42,7 @@ pub fn bytecode_to_hex(bytecode: @ByteArray) -> ByteArray {
     if bytecode_len == 0 {
         return "0x00";
     }
-    while i < bytecode_len {
+    while i != bytecode_len {
         let upper_half_byte = bytecode[i] / half_byte_shift;
         let lower_half_byte = bytecode[i] % half_byte_shift;
         let upper_half: u8 = if upper_half_byte < 10 {
@@ -66,7 +66,7 @@ pub fn int_size_in_bytes(u_32: u32) -> u32 {
     let mut value: u32 = u_32;
     let mut size = 0;
 
-    while value > 0 {
+    while value != 0 {
         size += 1;
         value /= 256;
     };
