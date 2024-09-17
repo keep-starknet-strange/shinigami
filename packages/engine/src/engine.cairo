@@ -383,17 +383,9 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                 break;
             }
 
-            if Opcode::is_data_opcode(opcode) {
-                i += opcode.into() + 1;
-            } else if Opcode::is_push_opcode(opcode) {
-                let res = self.skip_push_data(opcode);
-                if res.is_err() {
-                    is_push_only = false;
-                    break;
-                }
-            }
-            // TODO: Double check
-            i += 1;
+            // TODO: Error handling
+            let data_len = Opcode::data_len(i, script).unwrap();
+            i += data_len + 1;
         };
         return is_push_only;
     }
