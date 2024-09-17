@@ -43,8 +43,8 @@ pub fn transaction_procedure(
         TransactionOutput
     >::new();
 
-    while i < transaction_input.len() {
-        let mut temp_transaction_input: TransactionInput = transaction_input.pop_front().unwrap();
+    while i != transaction_input.len() {
+        let mut temp_transaction_input: TransactionInput = transaction_input[i].clone();
 
         if hash_type_masked == constants::SIG_HASH_SINGLE && i < index {
             processed_transaction_output

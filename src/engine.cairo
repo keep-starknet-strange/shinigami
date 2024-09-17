@@ -226,6 +226,7 @@ pub impl EngineImpl of EngineTrait {
         let mut i = 0;
         let mut is_push_only = true;
         while i != script.len() {
+            // TODO: Error handling if i outside bounds
             let opcode = script[i];
             if opcode > Opcode::OP_16 {
                 is_push_only = false;
@@ -408,9 +409,10 @@ pub impl EngineImpl of EngineTrait {
 
     fn execute(ref self: Engine) -> Result<ByteArray, felt252> {
         let mut err = '';
-        while self.script_idx != self.scripts.len() {
+        // TODO: Optimize with != instead of < and check for bounds errors within the loop
+        while self.script_idx < self.scripts.len() {
             let script: @ByteArray = *self.scripts[self.script_idx];
-            while self.opcode_idx != script.len() {
+            while self.opcode_idx < script.len() {
                 let opcode = script[self.opcode_idx];
 
                 // Check if the opcode is always illegal (reserved).
