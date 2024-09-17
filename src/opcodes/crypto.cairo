@@ -17,7 +17,7 @@ pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
     let res = compute_sha256_byte_array(arr).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i < res.len() {
+    while i != res.len() {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -30,7 +30,7 @@ pub fn opcode_hash160(ref engine: Engine) -> Result<(), felt252> {
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i < res.len() {
+    while i != res.len() {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -44,14 +44,14 @@ pub fn opcode_hash256(ref engine: Engine) -> Result<(), felt252> {
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i < res.len() {
+    while i != res.len() {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
     let res2 = compute_sha256_byte_array(@res_bytes).span();
     let mut res2_bytes: ByteArray = "";
     let mut j: usize = 0;
-    while j < res2.len() {
+    while j != res2.len() {
         res2_bytes.append_word((*res2[j]).into(), 4);
         j += 1;
     };
@@ -128,7 +128,7 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     let mut pub_keys = ArrayTrait::<ByteArray>::new();
     let mut i: i64 = 0;
     let mut err: felt252 = 0;
-    while i < num_pub_keys {
+    while i != num_pub_keys {
         match engine.dstack.pop_byte_array() {
             Result::Ok(pk) => pub_keys.append(pk),
             Result::Err(e) => err = e
@@ -151,7 +151,7 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     let mut sigs = ArrayTrait::<ByteArray>::new();
     i = 0;
     err = 0;
-    while i < num_sigs {
+    while i != num_sigs {
         match engine.dstack.pop_byte_array() {
             Result::Ok(s) => sigs.append(s),
             Result::Err(e) => err = e
@@ -173,7 +173,7 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
 
     // TODO: add witness context inside engine to check if witness is active
     let mut s: u32 = 0;
-    while s < sigs.len() {
+    while s != sigs.len() {
         script = signature::remove_signature(script, sigs.at(s));
         s += 1;
     };
@@ -183,7 +183,7 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     let mut pub_key_idx: i64 = -1;
     let mut sig_idx: i64 = 0;
 
-    while num_sigs > 0 {
+    while num_sigs != 0 {
         pub_key_idx += 1;
         num_pub_keys -= 1;
         if num_sigs > num_pub_keys {

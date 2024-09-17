@@ -57,7 +57,7 @@ pub fn hex_to_bytecode(script_item: @ByteArray) -> ByteArray {
     let mut i = 2;
     let mut bytecode = "";
     let script_item_len = script_item.len();
-    while i < script_item_len {
+    while i != script_item_len {
         let mut upper_half_byte = 0;
         let mut lower_half_byte = 0;
         if script_item[i] >= a_string_lower {
@@ -91,7 +91,7 @@ pub fn bytecode_to_hex(bytecode: @ByteArray) -> ByteArray {
     if bytecode_len == 0 {
         return "0x00";
     }
-    while i < bytecode_len {
+    while i != bytecode_len {
         let upper_half_byte = bytecode[i] / half_byte_shift;
         let lower_half_byte = bytecode[i] % half_byte_shift;
         let upper_half: u8 = if upper_half_byte < 10 {
@@ -142,7 +142,7 @@ pub fn string_to_bytecode(script_item: @ByteArray) -> ByteArray {
         bytecode.append_byte(Opcode::OP_PUSHDATA4);
         bytecode.append(@ScriptNum::wrap(word_len.into()));
     }
-    while i < end {
+    while i != end {
         bytecode.append_byte(script_item[i]);
         i += 1;
     };
@@ -162,7 +162,7 @@ pub fn number_to_bytecode(script_item: @ByteArray) -> ByteArray {
         i += 1;
     }
     let mut value: i64 = 0;
-    while i < script_item_len {
+    while i != script_item_len {
         value = value * 10 + script_item[i].into() - zero;
         i += 1;
     };
@@ -197,7 +197,7 @@ pub fn byte_array_to_felt252_be(byte_array: @ByteArray) -> felt252 {
     let mut value = 0;
     let mut i = 0;
     let byte_array_len = byte_array.len();
-    while i < byte_array_len {
+    while i != byte_array_len {
         value = value * byte_shift + byte_array[i].into();
         i += 1;
     };
@@ -224,7 +224,7 @@ pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: us
     let byte_shift = 256;
     let mut value = 0;
     let mut i = offset;
-    while i < offset + len {
+    while i != offset + len {
         value = value * byte_shift + byte_array[i].into();
         i += 1;
     };
@@ -251,7 +251,7 @@ pub fn byte_array_value_at_le(byte_array: @ByteArray, ref offset: usize, len: us
 pub fn sub_byte_array(byte_array: @ByteArray, ref offset: usize, len: usize) -> ByteArray {
     let mut sub_byte_array = "";
     let mut i = offset;
-    while i < offset + len {
+    while i != offset + len {
         sub_byte_array.append_byte(byte_array[i]);
         i += 1;
     };
@@ -264,7 +264,7 @@ pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
     let byte_shift = 256;
     let mut byte_array = "";
     let mut valueU256: u256 = value.into();
-    while valueU256 > 0 {
+    while valueU256 != 0 {
         byte_array.append_byte((valueU256 % byte_shift).try_into().unwrap());
         valueU256 /= byte_shift;
     };
@@ -305,7 +305,7 @@ pub fn int_to_hex(value: u8) -> felt252 {
 pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     let mut i = 0;
     let mut ret_bool = false;
-    while i < bytes.len() {
+    while i != bytes.len() {
         if bytes.at(i).unwrap() != 0 {
             // Can be negative zero
             if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
@@ -342,11 +342,11 @@ pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usi
     if read_bytes > 16 {
         high_bytes = read_bytes - 16;
     }
-    while i < high_bytes {
+    while i != high_bytes {
         high = high * 256 + arr[i + offset].into();
         i += 1;
     };
-    while i < read_bytes {
+    while i != read_bytes {
         low = low * 256 + arr[i + offset].into();
         i += 1;
     };
@@ -357,7 +357,7 @@ pub fn int_size_in_bytes(u_32: u32) -> u32 {
     let mut value: u32 = u_32;
     let mut size = 0;
 
-    while value > 0 {
+    while value != 0 {
         size += 1;
         value /= 256;
     };

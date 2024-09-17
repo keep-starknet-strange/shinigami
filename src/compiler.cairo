@@ -332,7 +332,7 @@ pub impl CompilerImpl of CompilerTrait {
         let mut current = "";
         let mut i = 0;
         let script_len = script.len();
-        while i < script_len {
+        while i != script_len {
             let char = script[i].into();
             if char == seperator {
                 if current == "" {
@@ -354,7 +354,7 @@ pub impl CompilerImpl of CompilerTrait {
         // Compile the script into bytecode
         let mut i = 0;
         let script_len = split_script.len();
-        while i < script_len {
+        while i != script_len {
             let script_item = split_script.at(i);
             if utils::is_hex(script_item) {
                 ByteArrayTrait::append(ref bytecode, @utils::hex_to_bytecode(script_item));

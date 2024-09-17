@@ -62,7 +62,7 @@ pub fn compare_data(script: @ByteArray, sig_bytes: @ByteArray, i: u32, push_data
     let mut len: usize = push_data.into();
     let mut found = true;
 
-    while j < len {
+    while j != len {
         if script[i + j + 1] != sig_bytes[j] {
             found = false;
             break;
@@ -296,7 +296,7 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
     let mut i = 0;
 
     //Strip leading zero
-    while s_len > 0 && sig_bytes[i + r_len + 6] == 0x00 {
+    while s_len != 0 && sig_bytes[i + r_len + 6] == 0x00 {
         sig_len -= 1;
         s_len -= 1;
         s_offset += 1;
@@ -307,7 +307,7 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 
     i = 0;
 
-    while r_len > 0 && sig_bytes[i + 4] == 0x00 {
+    while r_len != 0 && sig_bytes[i + 4] == 0x00 {
         sig_len -= 1;
         r_len -= 1;
         r_offset += 1;

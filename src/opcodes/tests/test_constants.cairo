@@ -61,7 +61,7 @@ fn test_op_1negate() {
 fn test_op_data(value: u8) {
     let mut hex_data: ByteArray = "0x";
     let mut i = 0;
-    while i < value {
+    while i != value {
         hex_data.append_word(int_to_hex(i + 1), 2);
         i += 1;
     };
@@ -78,7 +78,7 @@ fn test_op_data(value: u8) {
 fn test_op_data_all() {
     let mut n = 1;
 
-    while n <= 75 {
+    while n != 76 {
         test_op_data(n);
         n += 1;
     }
