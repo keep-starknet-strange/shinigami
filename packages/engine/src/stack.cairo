@@ -98,7 +98,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
     fn print(ref self: ScriptStack) {
         let mut i = self.len;
-        while i > 0 {
+        while i != 0 {
             i -= 1;
             self.print_element(i.into());
         }
@@ -107,7 +107,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn json(ref self: ScriptStack) {
         let mut i = 0;
         print!("[");
-        while i < self.len {
+        while i != self.len {
             let (entry, arr) = self.data.entry(i.into());
             let arr = arr.deref();
             print!("\"{}\"", bytecode_to_hex(@arr.clone()));
@@ -127,7 +127,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         let mut err = '';
         let entry_index = 3 * n - 1;
         let mut i = n;
-        while i > 0 {
+        while i != 0 {
             let res = self.nip_n(entry_index);
             if res.is_err() {
                 err = res.unwrap_err();
@@ -145,7 +145,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = 0;
-        while i < self.len {
+        while i != self.len {
             let (entry, arr) = self.data.entry(i.into());
             let arr = arr.deref();
             result.append(arr.clone());
@@ -162,7 +162,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
         let mut i = n;
         let mut err = '';
-        while i > 0 {
+        while i != 0 {
             i -= 1;
             let value = self.peek_byte_array(n - 1);
             if value.is_err() {
@@ -192,7 +192,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
 
         // Shift all elements above idx down by one
         let mut i = 0;
-        while i < idx {
+        while i != idx {
             let next_value = self.peek_byte_array(idx - i - 1).unwrap();
             let (entry, _) = self.data.entry((self.len - idx + i - 1).into());
             self.data = entry.finalize(NullableTrait::new(next_value));
@@ -240,7 +240,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         }
         let entry: u32 = (2 * n) - 1;
         let mut err = '';
-        while n > 0 {
+        while n != 0 {
             let res = self.peek_byte_array(entry);
             if res.is_err() {
                 err = res.unwrap_err();
@@ -264,7 +264,7 @@ pub impl ScriptStackImpl of ScriptStackTrait {
         self.len = 0;
         let mut i = start;
         let end = start + len;
-        while i < end {
+        while i != end {
             self.push_byte_array(stack.at(i).clone());
             i += 1;
         };

@@ -50,7 +50,7 @@ pub fn calc_witness_transaction_hash(
     // Serialize each input in the transaction.
     let input_len: usize = transaction.transaction_inputs.len();
     let mut i: usize = 0;
-    while i < input_len {
+    while i != input_len {
         let input: @TransactionInput = transaction.transaction_inputs.at(i);
 
         let input_txid: u256 = *input.previous_outpoint.txid;
@@ -71,7 +71,7 @@ pub fn calc_witness_transaction_hash(
         let output_len: usize = transaction.transaction_outputs.len();
 
         i = 0;
-        while i < output_len {
+        while i != output_len {
             let output: @TransactionOutput = transaction.transaction_outputs.at(i);
             let value: i64 = *output.value;
             let script: @ByteArray = output.publickey_script;
@@ -135,7 +135,7 @@ pub fn calc_witness_transaction_hash(
         sig_hash_bytes.append_byte(0xa9);
         sig_hash_bytes.append_byte(0x14);
         i = 2;
-        while i < sub_script.len() {
+        while i != sub_script.len() {
             sig_hash_bytes.append_byte(sub_script[i]);
             i += 1;
         };

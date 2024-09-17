@@ -5,7 +5,7 @@ use crate::transaction::{Transaction, TransactionInput, TransactionOutput, OutPo
 // Runs a basic bitcoin script as the script_pubkey with empty script_sig
 pub fn test_compile_and_run(program: ByteArray) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
-    let bytecode = compiler.compile(program);
+    let bytecode = compiler.compile(program).unwrap();
     // TODO: Nullable
     let mut engine = EngineInternalImpl::new(@bytecode, Default::default(), 0, 0, 0).unwrap();
     let res = EngineInternalTrait::execute(ref engine);
@@ -16,7 +16,7 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine<Transaction> {
 // Runs a bitcoin script `program` as script_pubkey with corresponding `transaction`
 pub fn test_compile_and_run_with_tx(program: ByteArray, transaction: Transaction) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
-    let mut bytecode = compiler.compile(program);
+    let mut bytecode = compiler.compile(program).unwrap();
     let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, 0, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
@@ -28,7 +28,7 @@ pub fn test_compile_and_run_with_tx_flags(
     program: ByteArray, transaction: Transaction, flags: u32
 ) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
-    let mut bytecode = compiler.compile(program);
+    let mut bytecode = compiler.compile(program).unwrap();
     let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, flags, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
@@ -38,7 +38,7 @@ pub fn test_compile_and_run_with_tx_flags(
 // Runs a bitcoin script `program` as script_pubkey with empty script_sig expecting an error
 pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
-    let bytecode = compiler.compile(program);
+    let bytecode = compiler.compile(program).unwrap();
     let mut engine = EngineInternalImpl::new(@bytecode, Default::default(), 0, 0, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
@@ -53,7 +53,7 @@ pub fn test_compile_and_run_with_tx_err(
     program: ByteArray, transaction: Transaction, expected_err: felt252
 ) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
-    let mut bytecode = compiler.compile(program);
+    let mut bytecode = compiler.compile(program).unwrap();
     let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, 0, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
@@ -68,7 +68,7 @@ pub fn test_compile_and_run_with_tx_flags_err(
     program: ByteArray, transaction: Transaction, flags: u32, expected_err: felt252
 ) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
-    let mut bytecode = compiler.compile(program);
+    let mut bytecode = compiler.compile(program).unwrap();
     let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, flags, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
@@ -101,7 +101,7 @@ pub fn mock_transaction_input_with(
     outpoint: OutPoint, script_sig: ByteArray, witness: Array<ByteArray>, sequence: u32
 ) -> TransactionInput {
     let mut compiler = CompilerImpl::new();
-    let script_sig = compiler.compile(script_sig);
+    let script_sig = compiler.compile(script_sig).unwrap();
     TransactionInput {
         previous_outpoint: outpoint,
         signature_script: script_sig,

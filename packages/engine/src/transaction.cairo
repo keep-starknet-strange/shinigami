@@ -119,7 +119,7 @@ pub impl TransactionImpl of TransactionTrait {
         // TODO: Byte orderings
         let mut i = 0;
         let mut inputs: Array<TransactionInput> = array![];
-        while i < input_len {
+        while i != input_len {
             let tx_id = u256 {
                 high: byte_array_value_at_be(@raw, ref offset, 16).try_into().unwrap(),
                 low: byte_array_value_at_be(@raw, ref offset, 16).try_into().unwrap(),
@@ -143,7 +143,7 @@ pub impl TransactionImpl of TransactionTrait {
         let output_len: u8 = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
         let mut i = 0;
         let mut outputs: Array<TransactionOutput> = array![];
-        while i < output_len {
+        while i != output_len {
             // TODO: negative values
             let value: i64 = byte_array_value_at_le(@raw, ref offset, 8).try_into().unwrap();
             let script_len = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
@@ -180,7 +180,7 @@ pub impl TransactionImpl of TransactionTrait {
         let input_len: usize = self.transaction_inputs.len();
         bytes.append_word_rev(input_len.into(), int_size_in_bytes(input_len));
         let mut i: usize = 0;
-        while i < input_len {
+        while i != input_len {
             let input: @TransactionInput = self.transaction_inputs.at(i);
             let input_txid: u256 = *input.previous_outpoint.txid;
             let vout: u32 = *input.previous_outpoint.vout;
@@ -202,7 +202,7 @@ pub impl TransactionImpl of TransactionTrait {
         let output_len: usize = self.transaction_outputs.len();
         bytes.append_word_rev(output_len.into(), int_size_in_bytes(output_len));
         i = 0;
-        while i < output_len {
+        while i != output_len {
             let output: @TransactionOutput = self.transaction_outputs.at(i);
             let value: i64 = *output.value;
             let script: @ByteArray = output.publickey_script;
@@ -262,7 +262,7 @@ pub impl TransactionImpl of TransactionTrait {
         let mut total_out: i64 = 0;
         let output_len = self.transaction_outputs.len();
         let mut i = 0;
-        while i < output_len {
+        while i != output_len {
             let output = self.transaction_outputs.at(i);
             total_out += *output.value;
             i += 1;

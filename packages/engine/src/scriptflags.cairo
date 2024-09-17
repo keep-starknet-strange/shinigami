@@ -121,7 +121,7 @@ pub fn parse_flags(flags: ByteArray) -> u32 {
     let mut current = "";
     let mut i = 0;
     let flags_len = flags.len();
-    while i < flags_len {
+    while i != flags_len {
         let char = flags[i].into();
         if char == seperator {
             if current == "" {
@@ -143,7 +143,7 @@ pub fn parse_flags(flags: ByteArray) -> u32 {
     // Compile the flags into a single integer.
     let mut i = 0;
     let flags_len = split_flags.len();
-    while i < flags_len {
+    while i != flags_len {
         let flag = split_flags.at(i);
         let flag_value = flag_from_string(byte_array_to_felt252_be(flag));
         script_flags += flag_value;

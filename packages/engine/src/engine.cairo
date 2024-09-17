@@ -272,7 +272,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
 
         let mut i = 0;
         let mut valid_sizes = true;
-        while i < engine.scripts.len() {
+        while i != engine.scripts.len() {
             let script = *(engine.scripts[i]);
             if script.len() > MAX_SCRIPT_SIZE {
                 valid_sizes = false;
@@ -312,7 +312,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                     let mut remaining = "";
                     let mut i = 1;
                     // TODO: Optimize
-                    while i < sig_clone.len() {
+                    while i != sig_clone.len() {
                         remaining.append_byte(sig_clone[i]);
                         i += 1;
                     };
@@ -356,7 +356,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         let script: @ByteArray = *(self.scripts[0]);
         let mut i = 0;
         let mut is_push_only = true;
-        while i < script.len() {
+        while i != script.len() {
+            // TODO: Error handling if i outside bounds
             let opcode = script[i];
             if opcode > Opcode::OP_16 {
                 is_push_only = false;
@@ -386,7 +387,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         if end > script.len() {
             return Result::Err(Error::SCRIPT_INVALID);
         }
-        while i < end {
+        while i != end {
             data.append_byte(script[i]);
             i += 1;
         };
@@ -508,6 +509,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
 
     fn execute(ref self: Engine<Transaction>) -> Result<ByteArray, felt252> {
         let mut err = '';
+        // TODO: Optimize with != instead of < and check for bounds errors within the loop
         while self.script_idx < self.scripts.len() {
             let script: @ByteArray = *self.scripts[self.script_idx];
             while self.opcode_idx < script.len() {
@@ -632,7 +634,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
             let ret_val = top_stack.clone();
             let mut is_ok = false;
             let mut i = 0;
-            while i < top_stack.len() {
+            while i != top_stack.len() {
                 if top_stack[i] != 0 {
                     is_ok = true;
                     break;

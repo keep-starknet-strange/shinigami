@@ -35,7 +35,7 @@ pub fn parse_witness_input(input: ByteArray) -> Array<ByteArray> {
     let mut witness_data: Array<ByteArray> = array![];
     let mut i = 0;
     let mut temp_witness: ByteArray = "";
-    while i < input.len() {
+    while i != input.len() {
         if input[i] == ',' {
             let witness_bytes = hex_to_bytecode(@temp_witness);
             witness_data.append(witness_bytes);
