@@ -232,7 +232,7 @@ pub impl EngineImpl of EngineTrait {
                 i += opcode.into() + 1;
                 continue;
             } else if Opcode::is_push_opcode(opcode) {
-                let res = self.skip_push_data(opcode); 
+                let res = self.skip_push_data(opcode);
                 i = self.opcode_idx;
                 if res.is_err() {
                     is_push_only = false;
