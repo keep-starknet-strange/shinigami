@@ -6,7 +6,7 @@ use crate::utils;
 #[derive(Destruct)]
 pub struct Compiler {
     // Dict containing opcode names to their bytecode representation
-    opcodes: Felt252Dict<u8>
+    opcodes: Felt252Dict<Nullable<u8>>
 }
 
 pub trait CompilerTrait {
@@ -15,7 +15,7 @@ pub trait CompilerTrait {
     // Adds an opcode "OP_XXX" to the opcodes dict under: "OP_XXX" and "XXX"
     fn add_opcode(ref self: Compiler, name: felt252, opcode: u8);
     // Compiles a program like "OP_1 OP_2 OP_ADD" into a bytecode run by the Engine.
-    fn compile(self: Compiler, script: ByteArray) -> ByteArray;
+    fn compile(self: Compiler, script: ByteArray) -> Result<ByteArray, felt252>;
 }
 
 pub impl CompilerImpl of CompilerTrait {
@@ -311,7 +311,7 @@ pub impl CompilerImpl of CompilerTrait {
 
     fn add_opcode(ref self: Compiler, name: felt252, opcode: u8) {
         // Insert opcode formatted like OP_XXX
-        self.opcodes.insert(name, opcode);
+        self.opcodes.insert(name, NullableTrait::new(opcode));
 
         // Remove OP_ prefix and insert opcode XXX
         let nameu256 = name.into();
@@ -320,10 +320,10 @@ pub impl CompilerImpl of CompilerTrait {
             name_mask = name_mask * 256; // Shift left 1 byte
         };
         name_mask = name_mask / 16_777_216; // Shift right 3 bytes
-        self.opcodes.insert((nameu256 % name_mask).try_into().unwrap(), opcode);
+        self.opcodes.insert((nameu256 % name_mask).try_into().unwrap(), NullableTrait::new(opcode));
     }
 
-    fn compile(mut self: Compiler, script: ByteArray) -> ByteArray {
+    fn compile(mut self: Compiler, script: ByteArray) -> Result<ByteArray, felt252> {
         let mut bytecode = "";
         let seperator = ' ';
 
@@ -354,6 +354,7 @@ pub impl CompilerImpl of CompilerTrait {
         // Compile the script into bytecode
         let mut i = 0;
         let script_len = split_script.len();
+        let mut err = '';
         while i != script_len {
             let script_item = split_script.at(i);
             if utils::is_hex(script_item) {
@@ -363,13 +364,20 @@ pub impl CompilerImpl of CompilerTrait {
             } else if utils::is_number(script_item) {
                 ByteArrayTrait::append(ref bytecode, @utils::number_to_bytecode(script_item));
             } else {
-                // TODO: Check opcode exists
-                bytecode
-                    .append_byte(self.opcodes.get(utils::byte_array_to_felt252_be(script_item)));
+                let opcode_nullable = self
+                    .opcodes
+                    .get(utils::byte_array_to_felt252_be(script_item));
+                if opcode_nullable.is_null() {
+                    err = 'Compiler error: unknown opcode';
+                    break;
+                }
+                bytecode.append_byte(opcode_nullable.deref());
             }
             i += 1;
         };
-
-        bytecode
+        if err != '' {
+            return Result::Err(err);
+        }
+        Result::Ok(bytecode)
     }
 }
