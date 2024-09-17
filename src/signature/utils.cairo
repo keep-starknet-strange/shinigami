@@ -8,12 +8,20 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
     let mut parsed_script: ByteArray = "";
     let mut i: usize = 0;
 
+    // TODO: tokenizer/standardize script parsing
     while i < script.len() {
-        let value = script[i];
-        if value != Opcode::OP_CODESEPARATOR {
-            parsed_script.append_byte(value);
+        let opcode = script[i];
+        // TODO: Error handling
+        if opcode == Opcode::OP_CODESEPARATOR {
+            i += 1;
+            continue;
         }
-        i += 1;
+        let data_len = Opcode::data_len(i, script).unwrap();
+        let end = i + data_len + 1;
+        while i < end {
+            parsed_script.append_byte(script[i]);
+            i += 1;
+        }
     };
 
     @parsed_script
@@ -44,7 +52,8 @@ pub fn transaction_procedure(
     >::new();
 
     while i < transaction_input.len() {
-        let mut temp_transaction_input: TransactionInput = transaction_input.pop_front().unwrap();
+        // TODO: Optimize this
+        let mut temp_transaction_input: TransactionInput = transaction_input[i].clone();
 
         if hash_type_masked == constants::SIG_HASH_SINGLE && i < index {
             processed_transaction_output

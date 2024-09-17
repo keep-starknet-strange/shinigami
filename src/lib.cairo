@@ -30,7 +30,6 @@ pub mod opcodes {
         mod test_crypto;
         mod test_reserved;
         mod test_disabled;
-        mod test_p2pk;
         mod utils;
     }
     pub(crate) use opcodes::Opcode;
@@ -56,5 +55,6 @@ pub mod transaction;
 mod tests {
     mod test_coinbase;
     mod test_transactions;
+    mod test_p2pk;
 }
 mod main;

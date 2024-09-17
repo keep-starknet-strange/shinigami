@@ -529,7 +529,6 @@ pub impl EngineImpl of EngineTrait {
         } else {
             // TODO: pop bool?
             let top_stack = self.dstack.peek_byte_array(0)?;
-            println!("debug22 {}", top_stack);
             let ret_val = top_stack.clone();
             let mut is_ok = false;
             let mut i = 0;
