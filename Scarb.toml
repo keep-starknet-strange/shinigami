@@ -1,11 +1,17 @@
-[package]
-name = "shinigami"
-version = "0.1.0"
-edition = "2024_07"
+[workspace]
+members = ["packages/*"]
 
-[dependencies]
+[workspace.package]
+name = "shinigami"
+description = "Bitcoin Script Engine"
+version = "0.1.0"
+cairo-version = "2.8.2"
+edition = "2024_07"
+readme = "README.md"
+license-file = "LICENSE"
+repository = "https://github.com/keep-starknet-strange/shinigami.git"
+
+[workspace.dependencies]
 ripemd160 = { git = "https://github.com/j1mbo64/ripemd160_cairo.git" }
 sha1 = { git = "https://github.com/j1mbo64/sha1_cairo.git" }
-
-[dev-dependencies]
-cairo_test = "2.8.0"
+cairo_test = "2.8.2"
