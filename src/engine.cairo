@@ -225,24 +225,28 @@ pub impl EngineImpl of EngineTrait {
         let script: @ByteArray = *(self.scripts[0]);
         let mut i = 0;
         let mut is_push_only = true;
+
         while i < script.len() {
             let opcode = script[i];
-            if opcode > Opcode::OP_16 {
-                is_push_only = false;
-                break;
-            }
-
             if Opcode::is_data_opcode(opcode) {
                 i += opcode.into() + 1;
+                continue;
             } else if Opcode::is_push_opcode(opcode) {
-                let res = self.skip_push_data(opcode);
+                let res = self.skip_push_data(opcode); 
+                i = self.opcode_idx;
                 if res.is_err() {
                     is_push_only = false;
                     break;
                 }
+                continue;
+            } else {
+                if opcode > Opcode::OP_16 {
+                    is_push_only = false;
+                    break;
+                }
+                i += 1;
             }
             // TODO: Double check
-            i += 1;
         };
         return is_push_only;
     }
