@@ -9,7 +9,6 @@ use core::sha256::compute_sha256_byte_array;
 use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
-use crate::utils as crateutils;
 
 const MAX_KEYS_PER_MULTISIG: i64 = 20;
 
@@ -67,19 +66,16 @@ pub fn opcode_ripemd160(ref engine: Engine) -> Result<(), felt252> {
     return Result::Ok(());
 }
 
-
 pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     let pk_bytes = engine.dstack.pop_byte_array()?;
-    println!("pk_bytes: {}", crateutils::bytecode_to_hex(@pk_bytes.clone()));
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
-    println!("full_sig_bytes: {}", crateutils::bytecode_to_hex(@full_sig_bytes.clone())); 
     if full_sig_bytes.len() < 1 {
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
 
     // TODO: add witness context inside engine to check if witness is active
-    //       if witness is active use BaseSigVerifier 
+    //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
     let mut sig_verifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
 

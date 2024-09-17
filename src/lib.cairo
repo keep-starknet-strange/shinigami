@@ -27,7 +27,6 @@ pub mod opcodes {
         mod test_bitwise;
         mod test_arithmetic;
         mod test_crypto;
-        mod test_p2pkh;
         mod test_reserved;
         mod test_disabled;
         mod utils;
@@ -55,5 +54,6 @@ pub mod transaction;
 mod tests {
     mod test_coinbase;
     mod test_transactions;
+    mod test_p2pkh;
 }
 mod main;

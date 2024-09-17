@@ -10,23 +10,18 @@ pub fn validate_transaction(
     tx: Transaction, flags: u32, utxo_hints: Array<UTXO>
 ) -> Result<(), felt252> {
     let input_count = tx.transaction_inputs.len();
-    println!("input_count: {}", input_count);
-    println!("utxo_hints.len(): {}", utxo_hints.len());
     if input_count != utxo_hints.len() {
         return Result::Err('Invalid number of utxo hints');
     }
-    println!("here");
 
     let mut i = 0;
     let mut err = '';
     while i < input_count {
-        println!("here i: {}", i);
         let utxo = utxo_hints[i];
         let mut engine = EngineImpl::new(utxo.pubkey_script, tx.clone(), i, flags, *utxo.amount);
         let res = engine.execute();
         if res.is_err() {
             err = res.unwrap_err();
-            println!("Error: {:?}", err);
             break;
         }
 
