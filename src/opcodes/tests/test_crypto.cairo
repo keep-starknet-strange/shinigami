@@ -318,10 +318,10 @@ fn test_op_checksig_too_short_signature() {
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = utils::mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = utils::test_compile_and_run_with_tx_err(
-        script_pubkey, transaction, 'invalid sig fmt: too short'
+        script_pubkey, transaction, Error::SCRIPT_FAILED
     );
-    utils::check_dstack_size(ref engine, 0);
-    let expected_stack = array![];
+    utils::check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(0)];
     utils::check_expected_dstack(ref engine, expected_stack.span());
 }
 

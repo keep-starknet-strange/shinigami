@@ -31,11 +31,11 @@ const MobileMenu: FC<MobileMenuProps> = ({ isOpen, onClose, onOpenModal }) => {
   return (
     <div className="w-full h-fit absolute top-8 z-20 inset-x-0 flex flex-row items-center rounded-xl sm:hidden">
       <div className="w-full mx-5 h-[182.5px] backdrop-blur-md rounded-xl border border-white/10">
-        <div className="w-full max-w-4xl flex flex-row items-center justify-between border-b border-white/10 px-3.5 sm:border-0 py-2 sm:py-0">
+        <div className="w-full max-w-4xl flex flex-row items-center justify-between border-b border-white/10 pl-2.5 pr-3.5 sm:border-0 py-1.5 sm:py-0">
           <Link href="/">
             <div className="flex flex-row items-center justify-center space-x-0.5">
-              <Image src={logo} width={25} height={25} alt="Shinigami" />
-              <h6 className="uppercase text-white">Shinigami Script Wizard</h6>
+              <Image src={logo} width={35} height={35} alt="Shinigami Logo" />
+              <h6 className="uppercase text-white pl-2 text-lg">Shinigami Script Wizard</h6>
             </div>
           </Link>
           <button className="block sm:hidden py-2.5" onClick={onClose}>
@@ -75,13 +75,13 @@ export default function Header() {
       <div
         className={clsx(
           isMobileMenuOpen ? "hidden" : "",
-          "w-full max-w-4xl flex flex-row items-center justify-between border border-white/10 px-3.5 rounded-3xl py-2.5",
+          "w-full max-w-4xl flex flex-row items-center justify-between border border-white/10 pl-2.5 pr-3.5 rounded-3xl py-1.5",
         )}
       >
         <Link href="/">
           <div className="flex flex-row items-center justify-center space-x-0.5">
-            <Image src={logo} width={25} height={25} alt="Shinigami" />
-            <h6 className="uppercase text-white pl-3">
+            <Image src={logo} width={35} height={35} alt="Shinigami Logo" />
+            <h6 className="uppercase text-white pl-2 text-lg">
               Shinigami Script Wizard
             </h6>
           </div>

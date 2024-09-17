@@ -77,7 +77,13 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
-    let mut sig_verifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
+    let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+    if res.is_err() {
+        // TODO: Some errors can return an error code instead of pushing false?
+        engine.dstack.push_bool(false);
+        return Result::Ok(());
+    }
+    let mut sig_verifier = res.unwrap();
 
     if sig_verifier.verify(ref engine) {
         is_valid = true;
@@ -94,13 +100,16 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     //     is_valid = false;
     // }
 
+    if !is_valid && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) && full_sig_bytes.len() > 0 {
+        return Result::Err(Error::SIG_NULLFAIL);
+    }
+
     engine.dstack.push_bool(is_valid);
     return Result::Ok(());
 }
 
 pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     // TODO Error on taproot exec
-    // TODO Numops
 
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
@@ -110,6 +119,10 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     }
     if num_pub_keys > MAX_KEYS_PER_MULTISIG {
         return Result::Err('check multisig: num pk > max');
+    }
+    engine.num_ops += num_pub_keys.try_into().unwrap();
+    if engine.num_ops > 201 { // TODO: Hardcoded limit
+        return Result::Err(Error::SCRIPT_TOO_MANY_OPERATIONS);
     }
     let mut pub_keys = ArrayTrait::<ByteArray>::new();
     let mut i: i64 = 0;
@@ -200,6 +213,19 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
     };
     if err != 0 {
         return Result::Err(err);
+    }
+
+    if !success && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
+        let mut err = '';
+        for s in sigs {
+            if s.len() > 0 {
+                err = Error::SIG_NULLFAIL;
+                break;
+            }
+        };
+        if err != '' {
+            return Result::Err(err);
+        }
     }
 
     engine.dstack.push_bool(success);

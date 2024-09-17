@@ -271,6 +271,17 @@ pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
     byte_array.rev()
 }
 
+pub fn u256_to_byte_array(value: u256) -> ByteArray {
+    let byte_shift = 256;
+    let mut byte_array = "";
+    let mut valueU256: u256 = value;
+    while valueU256 > 0 {
+        byte_array.append_byte((valueU256 % byte_shift).try_into().unwrap());
+        valueU256 /= byte_shift;
+    };
+    byte_array.rev()
+}
+
 pub fn int_to_hex(value: u8) -> felt252 {
     let half_byte_shift = 16;
     let byte_shift = 256;
@@ -381,6 +392,16 @@ pub fn int_size_in_bytes(u_32: u32) -> u32 {
         size = 1;
     }
     size
+}
+
+pub fn sha256_byte_array(byte: @ByteArray) -> ByteArray {
+    let msg_hash = compute_sha256_byte_array(byte);
+    let mut hash_value: ByteArray = "";
+    for word in msg_hash.span() {
+        hash_value.append_word((*word).into(), 4);
+    };
+
+    hash_value
 }
 
 pub fn double_sha256(byte: @ByteArray) -> u256 {
@@ -507,4 +528,3 @@ pub fn shl<
     let two = One::one() + One::one();
     self * fast_power(two, shift)
 }
-

@@ -38,6 +38,7 @@ pub trait TransactionTrait {
         locktime: u32
     ) -> Transaction;
     fn new_signed(script_sig: ByteArray) -> Transaction;
+    fn new_signed_witness(script_sig: ByteArray, witness: Array<ByteArray>) -> Transaction;
     fn btc_decode(raw: ByteArray, encoding: u32) -> Transaction;
     fn deserialize(raw: ByteArray) -> Transaction;
     fn deserialize_no_witness(raw: ByteArray) -> Transaction;
@@ -78,6 +79,24 @@ pub impl TransactionImpl of TransactionTrait {
                     previous_outpoint: OutPoint { txid: 0x0, vout: 0, },
                     signature_script: script_sig,
                     witness: array![],
+                    sequence: 0xffffffff,
+                }
+            ],
+            transaction_outputs: array![],
+            locktime: 0,
+        };
+        transaction
+    }
+
+    fn new_signed_witness(script_sig: ByteArray, witness: Array<ByteArray>) -> Transaction {
+        // TODO
+        let transaction = Transaction {
+            version: 1,
+            transaction_inputs: array![
+                TransactionInput {
+                    previous_outpoint: OutPoint { txid: 0x0, vout: 0, },
+                    signature_script: script_sig,
+                    witness: witness,
                     sequence: 0xffffffff,
                 }
             ],
@@ -259,8 +278,17 @@ pub impl TransactionImpl of TransactionTrait {
 
 impl TransactionDefault of Default<Transaction> {
     fn default() -> Transaction {
+        let default_txin = TransactionInput {
+            previous_outpoint: OutPoint { txid: 0, vout: 0, },
+            signature_script: "",
+            witness: array![],
+            sequence: 0xffffffff,
+        };
         let transaction = Transaction {
-            version: 0, transaction_inputs: array![], transaction_outputs: array![], locktime: 0,
+            version: 0,
+            transaction_inputs: array![default_txin],
+            transaction_outputs: array![],
+            locktime: 0,
         };
         transaction
     }

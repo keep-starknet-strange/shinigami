@@ -6,7 +6,8 @@ use crate::transaction::{Transaction, TransactionInput, TransactionOutput, OutPo
 pub fn test_compile_and_run(program: ByteArray) -> Engine {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program);
-    let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0);
+    // TODO: Nullable
+    let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
@@ -16,7 +17,7 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine {
 pub fn test_compile_and_run_with_tx(program: ByteArray, transaction: Transaction) -> Engine {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program);
-    let mut engine = EngineImpl::new(@bytecode, transaction, 0, 0, 0);
+    let mut engine = EngineImpl::new(@bytecode, transaction, 0, 0, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
@@ -28,7 +29,7 @@ pub fn test_compile_and_run_with_tx_flags(
 ) -> Engine {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program);
-    let mut engine = EngineImpl::new(@bytecode, transaction, 0, flags, 0);
+    let mut engine = EngineImpl::new(@bytecode, transaction, 0, flags, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
@@ -38,7 +39,7 @@ pub fn test_compile_and_run_with_tx_flags(
 pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> Engine {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program);
-    let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0);
+    let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();
@@ -53,7 +54,7 @@ pub fn test_compile_and_run_with_tx_err(
 ) -> Engine {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program);
-    let mut engine = EngineImpl::new(@bytecode, transaction, 0, 0, 0);
+    let mut engine = EngineImpl::new(@bytecode, transaction, 0, 0, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();
@@ -68,7 +69,7 @@ pub fn test_compile_and_run_with_tx_flags_err(
 ) -> Engine {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program);
-    let mut engine = EngineImpl::new(@bytecode, transaction, 0, flags, 0);
+    let mut engine = EngineImpl::new(@bytecode, transaction, 0, flags, 0).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();
