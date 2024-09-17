@@ -305,10 +305,11 @@ pub fn int_to_hex(value: u8) -> felt252 {
 pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     let mut i = 0;
     let mut ret_bool = false;
-    while i < bytes.len() {
+    let bytes_len = bytes.len(); 
+    while i < bytes_len {
         if bytes.at(i).unwrap() != 0 {
             // Can be negative zero
-            if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {
+            if i == bytes_len - 1 && bytes.at(i).unwrap() == 0x80 {
                 ret_bool = false;
                 break;
             }
@@ -319,6 +320,7 @@ pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     };
     ret_bool
 }
+
 
 pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usize) -> u256 {
     let total_bytes = arr.len();
