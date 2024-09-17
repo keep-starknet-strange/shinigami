@@ -367,9 +367,7 @@ pub impl CompilerImpl of CompilerTrait {
             } else if is_number(script_item) {
                 ByteArrayTrait::append(ref bytecode, @number_to_bytecode(script_item));
             } else {
-                let opcode_nullable = self
-                    .opcodes
-                    .get(byte_array_to_felt252_be(script_item));
+                let opcode_nullable = self.opcodes.get(byte_array_to_felt252_be(script_item));
                 if opcode_nullable.is_null() {
                     err = 'Compiler error: unknown opcode';
                     break;
@@ -386,7 +384,8 @@ pub impl CompilerImpl of CompilerTrait {
 }
 
 // Remove the surrounding quotes and add the corrent append opcodes to the front
-// https://github.com/btcsuite/btcd/blob/b161cd6a199b4e35acec66afc5aad221f05fe1e3/txs  cript/scriptbuilder.go#L159
+// https://github.com/btcsuite/btcd/blob/b161cd6a199b4e35acec66afc5aad221f05fe1e3/txs
+// cript/scriptbuilder.go#L159
 pub fn string_to_bytecode(script_item: @ByteArray) -> ByteArray {
     let mut bytecode = "";
     let mut i = 1;

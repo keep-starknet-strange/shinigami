@@ -127,9 +127,7 @@ pub impl TransactionImpl of TransactionTrait {
             let vout: u32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
             let script_len = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
             let script = sub_byte_array(@raw, ref offset, script_len);
-            let sequence: u32 = byte_array_value_at_le(@raw, ref offset, 4)
-                .try_into()
-                .unwrap();
+            let sequence: u32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
             let input = TransactionInput {
                 previous_outpoint: OutPoint { txid: tx_id, vout: vout },
                 signature_script: script,
@@ -330,7 +328,9 @@ pub trait EngineTransactionOutputTrait<O> {
     fn get_value(self: @O) -> i64;
 }
 
-pub impl EngineTransactionOutputTraitInternalImpl of EngineTransactionOutputTrait<TransactionOutput> {
+pub impl EngineTransactionOutputTraitInternalImpl of EngineTransactionOutputTrait<
+    TransactionOutput
+> {
     fn get_publickey_script(self: @TransactionOutput) -> @ByteArray {
         self.publickey_script
     }
@@ -340,14 +340,22 @@ pub impl EngineTransactionOutputTraitInternalImpl of EngineTransactionOutputTrai
     }
 }
 
-pub trait EngineTransactionTrait<T, I, +EngineTransactionInputTrait<I>, O, +EngineTransactionOutputTrait<O>> {
+pub trait EngineTransactionTrait<
+    T, I, +EngineTransactionInputTrait<I>, O, +EngineTransactionOutputTrait<O>
+> {
     fn get_version(self: @T) -> i32;
     fn get_transaction_inputs(self: @T) -> Span<I>;
     fn get_transaction_outputs(self: @T) -> Span<O>;
     fn get_locktime(self: @T) -> u32;
 }
 
-pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<Transaction, TransactionInput, EngineTransactionInputTraitInternalImpl, TransactionOutput, EngineTransactionOutputTraitInternalImpl> {
+pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
+    Transaction,
+    TransactionInput,
+    EngineTransactionInputTraitInternalImpl,
+    TransactionOutput,
+    EngineTransactionOutputTraitInternalImpl
+> {
     fn get_version(self: @Transaction) -> i32 {
         *self.version
     }

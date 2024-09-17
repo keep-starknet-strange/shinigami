@@ -138,9 +138,7 @@ fn test_validate_transaction() {
     let prevout_pk_script =
         "0x410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
     let prev_out = UTXO {
-        amount: 5000000000,
-        pubkey_script: hex_to_bytecode(@prevout_pk_script),
-        block_height: 9
+        amount: 5000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 9
     };
     let utxo_hints = array![prev_out];
 

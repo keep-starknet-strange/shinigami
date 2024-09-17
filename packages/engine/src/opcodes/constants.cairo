@@ -15,9 +15,7 @@ pub fn opcode_push_data<T, +Drop<T>>(n: usize, ref engine: Engine<T>) -> Result<
 
 pub fn opcode_push_data_x<T, +Drop<T>>(n: usize, ref engine: Engine<T>) -> Result<(), felt252> {
     let data_len_bytes = EngineExtrasTrait::<T>::pull_data(ref engine, n)?;
-    let data_len: usize = byte_array_to_felt252_le(@data_len_bytes)
-        .try_into()
-        .unwrap();
+    let data_len: usize = byte_array_to_felt252_le(@data_len_bytes).try_into().unwrap();
     let data = engine.pull_data(data_len)?;
     engine.dstack.push_byte_array(data);
     return Result::Ok(());

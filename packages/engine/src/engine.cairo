@@ -3,13 +3,16 @@ use crate::errors::Error;
 use crate::opcodes::{flow, opcodes::Opcode};
 use crate::scriptflags::ScriptFlags;
 use crate::stack::{ScriptStack, ScriptStackImpl};
-use crate::transaction::{Transaction, EngineTransactionInputTrait, EngineTransactionOutputTrait,EngineTransactionTrait};
+use crate::transaction::{
+    Transaction, EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
+};
 use utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
 use utils::bytecode::hex_to_bytecode;
 use utils::hash::sha256_byte_array;
 use crate::witness;
 
-// SigCache implements an Schnorr+ECDSA signature verification cache. Only valid signatures will be added to the cache.
+// SigCache implements an Schnorr+ECDSA signature verification cache. Only valid signatures will be
+// added to the cache.
 pub trait SigCacheTrait<S> {
     // Returns true if sig cache contains sig_hash corresponding to signature and public key
     fn exists(sig_hash: u256, signature: ByteArray, pub_key: ByteArray) -> bool;
@@ -76,7 +79,13 @@ pub struct Engine<T> {
 pub trait EngineTrait<I, O, T, S, H> {
     // Create a new Engine with the given script
     fn new(
-        script_pubkey: @ByteArray, transaction: T, tx_idx: u32, flags: u32, amount: i64, ref sig_cache: S, ref hash_cache: H
+        script_pubkey: @ByteArray,
+        transaction: T,
+        tx_idx: u32,
+        flags: u32,
+        amount: i64,
+        ref sig_cache: S,
+        ref hash_cache: H
     ) -> Result<Engine<T>, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
     fn execute(ref self: Engine<T>) -> Result<ByteArray, felt252>;
@@ -101,7 +110,13 @@ pub impl EngineImpl<
 > of EngineTrait<I, O, T, S, H> {
     // Create a new Engine with the given script
     fn new(
-        script_pubkey: @ByteArray, transaction: T, tx_idx: u32, flags: u32, amount: i64, ref sig_cache: S, ref hash_cache: H
+        script_pubkey: @ByteArray,
+        transaction: T,
+        tx_idx: u32,
+        flags: u32,
+        amount: i64,
+        ref sig_cache: S,
+        ref hash_cache: H
     ) -> Result<Engine<T>, felt252> {
         let _ = transaction.get_transaction_inputs();
         return Result::Err('todo');
@@ -193,7 +208,9 @@ pub trait EngineInternalTrait {
     // Returns true if the script sig is push only
     fn is_push_only(ref self: Engine<Transaction>) -> bool;
     // Pulls the next len bytes from the script at the given index
-    fn pull_data_at(ref self: Engine<Transaction>, idx: usize, len: usize) -> Result<ByteArray, felt252>;
+    fn pull_data_at(
+        ref self: Engine<Transaction>, idx: usize, len: usize
+    ) -> Result<ByteArray, felt252>;
     fn get_dstack(ref self: Engine<Transaction>) -> Span<ByteArray>;
     fn get_astack(ref self: Engine<Transaction>) -> Span<ByteArray>;
     // Returns the length of the next push data opcode
@@ -205,7 +222,9 @@ pub trait EngineInternalTrait {
     // Executes the entire script and returns top of stack or error if script fails
     fn execute(ref self: Engine<Transaction>) -> Result<ByteArray, felt252>;
     // Validate witness program using witness input
-    fn verify_witness(ref self: Engine<Transaction>, witness: Span<ByteArray>) -> Result<(), felt252>;
+    fn verify_witness(
+        ref self: Engine<Transaction>, witness: Span<ByteArray>
+    ) -> Result<(), felt252>;
     // Ensure the stack size is within limits
     fn check_stack_size(ref self: Engine<Transaction>) -> Result<(), felt252>;
     // Check if the next opcode is a minimal push
@@ -379,7 +398,9 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         return is_push_only;
     }
 
-    fn pull_data_at(ref self: Engine<Transaction>, idx: usize, len: usize) -> Result<ByteArray, felt252> {
+    fn pull_data_at(
+        ref self: Engine<Transaction>, idx: usize, len: usize
+    ) -> Result<ByteArray, felt252> {
         let mut data = "";
         let mut i = idx;
         let mut end = i + len;
@@ -402,7 +423,9 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         return self.astack.stack_to_span();
     }
 
-    fn push_data_len(ref self: Engine<Transaction>, opcode: u8, idx: u32) -> Result<usize, felt252> {
+    fn push_data_len(
+        ref self: Engine<Transaction>, opcode: u8, idx: u32
+    ) -> Result<usize, felt252> {
         if opcode == Opcode::OP_PUSHDATA1 {
             return Result::Ok(
                 byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 1)?).try_into().unwrap()
@@ -649,7 +672,9 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         }
     }
 
-    fn verify_witness(ref self: Engine<Transaction>, witness: Span<ByteArray>) -> Result<(), felt252> {
+    fn verify_witness(
+        ref self: Engine<Transaction>, witness: Span<ByteArray>
+    ) -> Result<(), felt252> {
         if self.is_witness_active(0) {
             // Verify a base witness (segwit) program, ie P2WSH || P2WPKH
             if self.witness_program.len() == 20 {

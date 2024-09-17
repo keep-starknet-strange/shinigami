@@ -1,11 +1,28 @@
-use crate::transaction::{Transaction, TransactionTrait, TransactionInput, TransactionOutput, EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait};
+use crate::transaction::{
+    Transaction, TransactionTrait, TransactionInput, TransactionOutput, EngineTransactionTrait,
+    EngineTransactionInputTrait, EngineTransactionOutputTrait
+};
 use crate::signature::constants;
-use crate::signature::utils::{remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash};
+use crate::signature::utils::{
+    remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
+};
 use utils::bytecode::int_size_in_bytes;
 use utils::hash::double_sha256;
 
 // Calculates the signature hash for specified transaction data and hash type.
-pub fn calc_signature_hash<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>> (
+pub fn calc_signature_hash<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
     sub_script: @ByteArray, hash_type: u32, ref transaction: T, tx_idx: u32
 ) -> u256 {
     let transaction_outputs_len: usize = transaction.get_transaction_outputs().len();

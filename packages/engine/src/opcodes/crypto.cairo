@@ -1,5 +1,7 @@
 use crate::engine::{Engine, EngineExtrasTrait};
-use crate::transaction::{EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait};
+use crate::transaction::{
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+};
 use crate::stack::ScriptStackTrait;
 use crate::scriptflags::ScriptFlags;
 use crate::signature::signature;
@@ -67,7 +69,21 @@ pub fn opcode_ripemd160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt25
     return Result::Ok(());
 }
 
-pub fn opcode_checksig<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_checksig<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
 
@@ -110,7 +126,21 @@ pub fn opcode_checksig<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTra
     return Result::Ok(());
 }
 
-pub fn opcode_checkmultisig<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_checkmultisig<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     // TODO Error on taproot exec
 
     // Get number of public keys and construct array
@@ -247,13 +277,41 @@ pub fn opcode_codeseparator<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), fe
     Result::Ok(())
 }
 
-pub fn opcode_checksigverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_checksigverify<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     opcode_checksig(ref engine)?;
     utils::abstract_verify(ref engine)?;
     return Result::Ok(());
 }
 
-pub fn opcode_checkmultisigverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_checkmultisigverify<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     opcode_checkmultisig(ref engine)?;
     utils::abstract_verify(ref engine)?;
     return Result::Ok(());

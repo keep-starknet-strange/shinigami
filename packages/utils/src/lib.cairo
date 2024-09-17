@@ -6,5 +6,4 @@ pub mod hex;
 pub mod maths;
 
 #[cfg(test)]
-mod tests {
-}
+mod tests {}

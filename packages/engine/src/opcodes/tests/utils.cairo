@@ -14,7 +14,9 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine<Transaction> {
 }
 
 // Runs a bitcoin script `program` as script_pubkey with corresponding `transaction`
-pub fn test_compile_and_run_with_tx(program: ByteArray, transaction: Transaction) -> Engine<Transaction> {
+pub fn test_compile_and_run_with_tx(
+    program: ByteArray, transaction: Transaction
+) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
     let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, 0, 0).unwrap();

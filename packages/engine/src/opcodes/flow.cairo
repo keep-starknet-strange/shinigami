@@ -15,7 +15,10 @@ pub fn is_branching_opcode(opcode: u8) -> bool {
 }
 
 pub fn opcode_nop<T, +Drop<T>>(ref engine: Engine<T>, opcode: u8) -> Result<(), felt252> {
-    if opcode != Opcode::OP_NOP && EngineExtrasTrait::<T>::has_flag(ref engine, ScriptFlags::ScriptDiscourageUpgradableNops) {
+    if opcode != Opcode::OP_NOP
+        && EngineExtrasTrait::<
+            T
+        >::has_flag(ref engine, ScriptFlags::ScriptDiscourageUpgradableNops) {
         return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
     }
     return Result::Ok(());

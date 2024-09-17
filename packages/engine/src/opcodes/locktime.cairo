@@ -1,5 +1,7 @@
 use crate::engine::{Engine, EngineExtrasTrait};
-use crate::transaction::{EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait};
+use crate::transaction::{
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+};
 use crate::errors::Error;
 use crate::scriptflags::ScriptFlags;
 use crate::scriptnum::ScriptNum;
@@ -26,7 +28,21 @@ fn verify_locktime(tx_locktime: i64, threshold: i64, stack_locktime: i64) -> Res
     Result::Ok(())
 }
 
-pub fn opcode_checklocktimeverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_checklocktimeverify<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     if !engine.has_flag(ScriptFlags::ScriptVerifyCheckLockTimeVerify) {
         if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
             return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
@@ -35,7 +51,10 @@ pub fn opcode_checklocktimeverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransact
         return Result::Ok(());
     }
 
-    let tx_locktime: i64 = EngineTransactionTrait::<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>::get_locktime(@engine.transaction).into();
+    let tx_locktime: i64 = EngineTransactionTrait::<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >::get_locktime(@engine.transaction)
+        .into();
     // Get locktime as 5 byte integer because 'tx_locktime' is u32
     let stack_locktime: i64 = ScriptNum::try_into_num_n_bytes(
         engine.dstack.peek_byte_array(0)?, 5, engine.dstack.verify_minimal_data
@@ -47,7 +66,10 @@ pub fn opcode_checklocktimeverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransact
 
     // Check if tx sequence is not 'SEQUENCE_MAX' else if tx may be considered as finalized and the
     // behavior of OP_CHECKLOCKTIMEVERIFY can be bypassed
-    let transaction_input = EngineTransactionTrait::<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>::get_transaction_inputs(@engine.transaction).at(engine.tx_idx);
+    let transaction_input = EngineTransactionTrait::<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >::get_transaction_inputs(@engine.transaction)
+        .at(engine.tx_idx);
     let sequence = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);
     if sequence == SEQUENCE_MAX {
         return Result::Err(Error::FINALIZED_TX_CLTV);
@@ -56,7 +78,21 @@ pub fn opcode_checklocktimeverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransact
     verify_locktime(tx_locktime, LOCKTIME_THRESHOLD.into(), stack_locktime)
 }
 
-pub fn opcode_checksequenceverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_checksequenceverify<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     if !engine.has_flag(ScriptFlags::ScriptVerifyCheckSequenceVerify) {
         if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
             return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
@@ -83,12 +119,17 @@ pub fn opcode_checksequenceverify<T, +Drop<T>, I, +Drop<I>, impl IEngineTransact
     }
 
     // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
-    let version = EngineTransactionTrait::<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>::get_version(@engine.transaction);
+    let version = EngineTransactionTrait::<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >::get_version(@engine.transaction);
     if version < 2 {
         return Result::Err(Error::INVALID_TX_VERSION);
     }
 
-    let transaction_input = EngineTransactionTrait::<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>::get_transaction_inputs(@engine.transaction).at(engine.tx_idx);
+    let transaction_input = EngineTransactionTrait::<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >::get_transaction_inputs(@engine.transaction)
+        .at(engine.tx_idx);
     let tx_sequence: u32 = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);
 
     // Disabled bit set in 'tx_sequence' result is an error

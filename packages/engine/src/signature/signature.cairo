@@ -1,5 +1,7 @@
 use crate::engine::{Engine, EngineExtrasTrait};
-use crate::transaction::{EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait};
+use crate::transaction::{
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+};
 use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
@@ -31,7 +33,19 @@ pub trait BaseSigVerifierTrait<T> {
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool;
 }
 
-impl BaseSigVerifierImpl<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>> of BaseSigVerifierTrait<T> {
+impl BaseSigVerifierImpl<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+> of BaseSigVerifierTrait<T> {
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252> {
@@ -74,7 +88,9 @@ pub fn compare_data(script: @ByteArray, sig_bytes: @ByteArray, i: u32, push_data
 }
 
 // Check if hash_type obeys scrict encoding requirements.
-pub fn check_hash_type_encoding<T, +Drop<T>>(ref vm: Engine<T>, mut hash_type: u32) -> Result<(), felt252> {
+pub fn check_hash_type_encoding<T, +Drop<T>>(
+    ref vm: Engine<T>, mut hash_type: u32
+) -> Result<(), felt252> {
     if !vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding) {
         return Result::Ok(());
     }
@@ -100,7 +116,9 @@ pub fn check_hash_type_encoding<T, +Drop<T>>(ref vm: Engine<T>, mut hash_type: u
 // @param vm A reference to the `Engine` that manages the execution context and provides
 //           the necessary script verification flags.
 // @param sig_bytes The byte array containing the ECDSA signature that needs to be validated.
-pub fn check_signature_encoding<T, +Drop<T>>(ref vm: Engine<T>, sig_bytes: @ByteArray) -> Result<(), felt252> {
+pub fn check_signature_encoding<T, +Drop<T>>(
+    ref vm: Engine<T>, sig_bytes: @ByteArray
+) -> Result<(), felt252> {
     let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
         || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     let low_s = vm.has_flag(ScriptFlags::ScriptVerifyLowS);
@@ -230,7 +248,9 @@ fn is_supported_pub_key_type(pk_bytes: @ByteArray) -> bool {
 }
 
 // Checks if a public key adheres to specific encoding rules based on the engine flags.
-pub fn check_pub_key_encoding<T, +Drop<T>>(ref vm: Engine<T>, pk_bytes: @ByteArray) -> Result<(), felt252> {
+pub fn check_pub_key_encoding<T, +Drop<T>>(
+    ref vm: Engine<T>, pk_bytes: @ByteArray
+) -> Result<(), felt252> {
     // TODO check compressed pubkey post segwit
     // if vm.has_flag(ScriptFlags::ScriptVerifyWitnessPubKeyType) &&
     // vm.is_witness_version_active(BASE_SEGWIT_WITNESS_VERSION) && !is_compressed_pub_key(pk_bytes)

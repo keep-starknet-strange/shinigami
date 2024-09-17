@@ -27,7 +27,8 @@ pub fn byte_array_to_felt252_le(byte_array: @ByteArray) -> felt252 {
     value
 }
 
-pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: usize) -> felt252 {                                                                                 let byte_shift = 256;
+pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: usize) -> felt252 {
+    let byte_shift = 256;
     let mut value = 0;
     let mut i = offset;
     while i < offset + len {
@@ -38,7 +39,9 @@ pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: us
     value
 }
 
-pub fn byte_array_value_at_le(byte_array: @ByteArray, ref offset: usize, len: usize) -> felt252 {                                                                                 // TODO: Bounds check
+pub fn byte_array_value_at_le(
+    byte_array: @ByteArray, ref offset: usize, len: usize
+) -> felt252 { // TODO: Bounds check
     let byte_shift = 256;
     let mut value = 0;
     let mut i = offset + len - 1;

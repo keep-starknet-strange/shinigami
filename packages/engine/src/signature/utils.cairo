@@ -1,5 +1,8 @@
 use crate::signature::constants;
-use crate::transaction::{Transaction, OutPoint, TransactionInput, TransactionOutput, EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait};
+use crate::transaction::{
+    Transaction, OutPoint, TransactionInput, TransactionOutput, EngineTransactionTrait,
+    EngineTransactionInputTrait, EngineTransactionOutputTrait
+};
 use crate::opcodes::Opcode;
 
 // Removes `OP_CODESEPARATOR` opcodes from the `script`.
@@ -37,28 +40,43 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
 // @param signature_script The script that is added to the transaction input during processing.
 // @param hash_type The hash type that dictates how the transaction should be modified.
 // @return A modified copy of the transaction based on the provided hash type.
-pub fn transaction_procedure<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>> (
+pub fn transaction_procedure<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+    >
+>(
     ref transaction: T, index: u32, signature_script: ByteArray, hash_type: u32
 ) -> Transaction {
     let hash_type_masked = hash_type & constants::SIG_HASH_MASK;
     let mut transaction_inputs_clone = array![];
-    for input in transaction.get_transaction_inputs() {
-        let new_transaction_input = TransactionInput {
-            previous_outpoint: OutPoint { txid: input.get_prevout_txid(), vout: input.get_prevout_vout() },
-            signature_script: input.get_signature_script().clone(),
-            witness: input.get_witness().into(),
-            sequence: input.get_sequence()
+    for input in transaction
+        .get_transaction_inputs() {
+            let new_transaction_input = TransactionInput {
+                previous_outpoint: OutPoint {
+                    txid: input.get_prevout_txid(), vout: input.get_prevout_vout()
+                },
+                signature_script: input.get_signature_script().clone(),
+                witness: input.get_witness().into(),
+                sequence: input.get_sequence()
+            };
+            transaction_inputs_clone.append(new_transaction_input);
         };
-        transaction_inputs_clone.append(new_transaction_input);
-    };
     let mut transaction_outputs_clone = array![];
-    for output in transaction.get_transaction_outputs() {
-        let new_transaction_output = TransactionOutput {
-            value: output.get_value(),
-            publickey_script: output.get_publickey_script().clone()
+    for output in transaction
+        .get_transaction_outputs() {
+            let new_transaction_output = TransactionOutput {
+                value: output.get_value(), publickey_script: output.get_publickey_script().clone()
+            };
+            transaction_outputs_clone.append(new_transaction_output);
         };
-        transaction_outputs_clone.append(new_transaction_output);
-    };
     let mut transaction_copy = Transaction {
         version: transaction.get_version(),
         transaction_inputs: transaction_inputs_clone,

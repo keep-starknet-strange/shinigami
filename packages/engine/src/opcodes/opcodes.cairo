@@ -190,12 +190,28 @@ pub mod Opcode {
     pub const OP_NOP10: u8 = 185;
 
     use crate::engine::Engine;
-    use crate::transaction::{EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait};
+    use crate::transaction::{
+        EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    };
     use crate::opcodes::{
         constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils
     };
 
-    pub fn execute<T, +Drop<T>, I, +Drop<I>, impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>, O, +Drop<O>, impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>, impl IEngineTransactionTrait: EngineTransactionTrait<T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait>>(opcode: u8, ref engine: Engine<T>) -> Result<(), felt252> {
+    pub fn execute<
+        T,
+        +Drop<T>,
+        I,
+        +Drop<I>,
+        impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+        O,
+        +Drop<O>,
+        impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+        impl IEngineTransactionTrait: EngineTransactionTrait<
+            T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        >
+    >(
+        opcode: u8, ref engine: Engine<T>
+    ) -> Result<(), felt252> {
         match opcode {
             0 => constants::opcode_false(ref engine),
             1 => constants::opcode_push_data(1, ref engine),
@@ -387,7 +403,9 @@ pub mod Opcode {
         }
     }
 
-    pub fn is_opcode_disabled<T, +Drop<T>>(opcode: u8, ref engine: Engine<T>) -> Result<(), felt252> {
+    pub fn is_opcode_disabled<T, +Drop<T>>(
+        opcode: u8, ref engine: Engine<T>
+    ) -> Result<(), felt252> {
         if opcode == OP_CAT
             || opcode == OP_SUBSTR
             || opcode == OP_LEFT
@@ -409,7 +427,9 @@ pub mod Opcode {
         }
     }
 
-    pub fn is_opcode_always_illegal<T, +Drop<T>>(opcode: u8, ref engine: Engine<T>) -> Result<(), felt252> {
+    pub fn is_opcode_always_illegal<T, +Drop<T>>(
+        opcode: u8, ref engine: Engine<T>
+    ) -> Result<(), felt252> {
         if opcode == OP_VERIF {
             return utils::opcode_reserved("verif", ref engine);
         } else if opcode == OP_VERNOTIF {
@@ -481,7 +501,9 @@ pub mod Opcode {
             return Result::Ok(0);
         }
         return Result::Ok(
-            super::byte_array_to_felt252_le(@data_at(idx + 1, push_data_len, script)?).try_into().unwrap()
+            super::byte_array_to_felt252_le(@data_at(idx + 1, push_data_len, script)?)
+                .try_into()
+                .unwrap()
         );
     }
 }
