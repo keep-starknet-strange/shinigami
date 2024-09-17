@@ -56,5 +56,6 @@ mod tests {
     mod test_coinbase;
     mod test_transactions;
     mod test_p2pk;
+    mod test_p2pkh;
 }
 mod main;
