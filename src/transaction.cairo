@@ -152,13 +152,12 @@ pub impl TransactionImpl of TransactionTrait {
         };
         // TODO: Witness
         let locktime: u32 = utils::byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
-        let transaction = Transaction {
+        Transaction {
             version: version,
-            transaction_inputs: inputs.clone(),
-            transaction_outputs: outputs.clone(),
+            transaction_inputs: inputs,
+            transaction_outputs: outputs,
             locktime: locktime,
-        };
-        transaction
+        }
     }
 
     fn deserialize(raw: ByteArray) -> Transaction {

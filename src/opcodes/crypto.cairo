@@ -69,6 +69,7 @@ pub fn opcode_ripemd160(ref engine: Engine) -> Result<(), felt252> {
 pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
+
     if full_sig_bytes.len() < 1 {
         engine.dstack.push_bool(false);
         return Result::Ok(());

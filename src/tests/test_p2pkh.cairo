@@ -70,7 +70,7 @@ fn test_p2pkh_transaction_spend() {
 
 #[ignore]
 #[test]
-fn test_10000_btc_pizza_transaction() {// The famous 10000 BTC pizza transaction
+fn test_10000_btc_pizza_transaction() { // The famous 10000 BTC pizza transaction
 // tx: a1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d
 // TODO
 }
