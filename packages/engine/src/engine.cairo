@@ -21,24 +21,27 @@ pub trait SigCacheTrait<S> {
 }
 
 // HashCache caches the midstate of segwit v0 and v1 sighashes
-pub trait HashCacheTrait<C> {
+pub trait HashCacheTrait<
+    H,
+    I,
+    O,
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>
+> {
+    fn new(transaction: @T) -> H;
+
     // v0 represents sighash midstate used in the base segwit signatures BIP-143
-    fn get_hash_prevouts_v0(self: C) -> u256;
-    fn set_hash_prevouts_v0(ref self: C, hash: u256);
-    fn get_hash_sequence_v0(self: C) -> u256;
-    fn set_hash_sequence_v0(ref self: C, hash: u256);
-    fn get_hash_outputs_v0(self: C) -> u256;
-    fn set_hash_outputs_v0(ref self: C, hash: u256);
+    fn get_hash_prevouts_v0(self: H) -> u256;
+    fn get_hash_sequence_v0(self: H) -> u256;
+    fn get_hash_outputs_v0(self: H) -> u256;
 
     // v1 represents sighash midstate used to compute taproot signatures BIP-341
-    fn get_hash_prevouts_v1(self: C) -> u256;
-    fn set_hash_prevouts_v1(ref self: C, hash: u256);
-    fn get_hash_sequence_v1(self: C) -> u256;
-    fn set_hash_sequence_v1(ref self: C, hash: u256);
-    fn get_hash_outputs_v1(self: C) -> u256;
-    fn set_hash_outputs_v1(ref self: C, hash: u256);
-    fn get_hash_input_scripts_v1(self: C) -> u256;
-    fn set_hash_input_scripts_v1(ref self: C, hash: u256);
+    fn get_hash_prevouts_v1(self: H) -> u256;
+    fn get_hash_sequence_v1(self: H) -> u256;
+    fn get_hash_outputs_v1(self: H) -> u256;
+    fn get_hash_input_scripts_v1(self: H) -> u256;
 }
 
 // Represents the VM that executes Bitcoin scripts
@@ -76,16 +79,25 @@ pub struct Engine<T> {
     pub num_ops: u32,
 }
 
-pub trait EngineTrait<I, O, T, S, H> {
+// TODO: SigCache
+pub trait EngineTrait<
+    I,
+    O,
+    T,
+    H,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>,
+    +HashCacheTrait<H, I, O, T>
+> {
     // Create a new Engine with the given script
     fn new(
         script_pubkey: @ByteArray,
-        transaction: T,
+        transaction: @T,
         tx_idx: u32,
         flags: u32,
         amount: i64,
-        ref sig_cache: S,
-        ref hash_cache: H
+        hash_cache: @H
     ) -> Result<Engine<T>, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
     fn execute(ref self: Engine<T>) -> Result<ByteArray, felt252>;
@@ -93,30 +105,24 @@ pub trait EngineTrait<I, O, T, S, H> {
 
 pub impl EngineImpl<
     I,
-    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     O,
-    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     T,
-    impl IEngineTransaction: EngineTransactionTrait<
-        T, I, IEngineTransactionInput, O, IEngineTransactionOutput
-    >,
-    +Drop<T>,
-    S,
-    +Drop<S>,
-    +SigCacheTrait<S>,
     H,
-    +Drop<H>,
-    +HashCacheTrait<H>
-> of EngineTrait<I, O, T, S, H> {
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    impl IHashCache: HashCacheTrait<H, I, O, T>,
+> of EngineTrait<I, O, T, H> {
     // Create a new Engine with the given script
     fn new(
         script_pubkey: @ByteArray,
-        transaction: T,
+        transaction: @T,
         tx_idx: u32,
         flags: u32,
         amount: i64,
-        ref sig_cache: S,
-        ref hash_cache: H
+        hash_cache: @H
     ) -> Result<Engine<T>, felt252> {
         let _ = transaction.get_transaction_inputs();
         return Result::Err('todo');

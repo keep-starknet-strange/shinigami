@@ -341,7 +341,7 @@ pub impl EngineTransactionOutputTraitInternalImpl of EngineTransactionOutputTrai
 }
 
 pub trait EngineTransactionTrait<
-    T, I, +EngineTransactionInputTrait<I>, O, +EngineTransactionOutputTrait<O>
+    T, I, O, +EngineTransactionInputTrait<I>, +EngineTransactionOutputTrait<O>
 > {
     fn get_version(self: @T) -> i32;
     fn get_transaction_inputs(self: @T) -> Span<I>;
@@ -352,8 +352,8 @@ pub trait EngineTransactionTrait<
 pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
     Transaction,
     TransactionInput,
-    EngineTransactionInputTraitInternalImpl,
     TransactionOutput,
+    EngineTransactionInputTraitInternalImpl,
     EngineTransactionOutputTraitInternalImpl
 > {
     fn get_version(self: @Transaction) -> i32 {

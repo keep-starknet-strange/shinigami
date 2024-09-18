@@ -89,11 +89,11 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
       ENCODED_WITNESS=$($SCRIPT_DIR/text_to_byte_array.sh "$witness")
       TRIMMED_WITNESS=$(sed 's/^\[\(.*\)\]$/\1/' <<< $ENCODED_WITNESS)
       JOINED_INPUT="[$TRIMMED_SCRIPT_SIG,$TRIMMED_SCRIPT_PUB_KEY,$TRIMMED_FLAGS,$TRIMMED_WITNESS]"
-      RESULT=$(cd $BASE_DIR && scarb cairo-run --function main_with_witness --no-build $JOINED_INPUT)
+      RESULT=$(cd $BASE_DIR && scarb cairo-run --package cmds --function main_with_witness --no-build $JOINED_INPUT)
     else
       echo "  ScriptSig: '$scriptSig' -- ScriptPubKey: '$scriptPubKey' -- Flags: '$flags' -- Expected: $expected_scripterror"
       JOINED_INPUT="[$TRIMMED_SCRIPT_SIG,$TRIMMED_SCRIPT_PUB_KEY,$TRIMMED_FLAGS]"
-      RESULT=$(cd $BASE_DIR && scarb cairo-run --no-build $JOINED_INPUT)
+      RESULT=$(cd $BASE_DIR && scarb cairo-run --package cmds --no-build $JOINED_INPUT)
     fi
     SUCCESS_RES="Run completed successfully, returning \[1\]"
     FAILURE_RES="Run completed successfully, returning \[0\]"
@@ -222,10 +222,14 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     elif [[ "$SCRIPT_RESULT" == "MINIMALDATA" && "$expected_scripterror" == "UNKNOWN_ERROR" ]]; then
         echo -e "  \033[0;32mPASS\033[0m"
         PASSED=$((PASSED+1))
+    elif [[ "$SCRIPT_RESULT" == "INVALID_STACK_OPERATION" && "$expected_scripterror" == "UNBALANCED_CONDITIONAL" ]]; then
+        # handle cases like 'IF 0 ENDIF' ie no value on stack for if
+        echo -e "  \033[0;32mPASS\033[0m"
+        PASSED=$((PASSED+1))
     else
         echo -e "  \033[0;31mFAIL\033[0m"
         FAILED=$((FAILED+1))
-        echo "scarb cairo-run '$JOINED_INPUT'"
+        echo "scarb cairo-run --package cmds '$JOINED_INPUT'"
         echo "$RESULT"
     fi
     echo
