@@ -241,6 +241,7 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jsandinoDev"><img src="https://avatars.githubusercontent.com/u/49879640?v=4?s=100" width="100px;" alt="Josue Sandino"/><br /><sub><b>Josue Sandino</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=jsandinoDev" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/martinvibes"><img src="https://avatars.githubusercontent.com/u/127976766?v=4?s=100" width="100px;" alt="martin machiebe"/><br /><sub><b>martin machiebe</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=martinvibes" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/stevencartavia"><img src="https://avatars.githubusercontent.com/u/112043913?v=4?s=100" width="100px;" alt="Steven"/><br /><sub><b>Steven</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=stevencartavia" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/RedVelvetZip"><img src="https://avatars.githubusercontent.com/u/48105289?v=4?s=100" width="100px;" alt="Red"/><br /><sub><b>Red</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=RedVelvetZip" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
