@@ -2,6 +2,33 @@
 version = 1
 
 [[package]]
+name = "cmds"
+version = "0.1.0"
+dependencies = [
+ "compiler",
+ "engine",
+ "utils",
+]
+
+[[package]]
+name = "compiler"
+version = "0.1.0"
+dependencies = [
+ "engine",
+ "utils",
+]
+
+[[package]]
+name = "engine"
+version = "0.1.0"
+dependencies = [
+ "compiler",
+ "ripemd160",
+ "sha1",
+ "utils",
+]
+
+[[package]]
 name = "ripemd160"
 version = "0.1.0"
 source = "git+https://github.com/j1mbo64/ripemd160_cairo.git#cdc5ab58b0acc64db87e0b03851fb18213977dc8"
@@ -12,9 +39,5 @@ version = "0.1.0"
 source = "git+https://github.com/j1mbo64/sha1_cairo.git#280b4c64ae457fdc4bd7cd807efd17e8dced654e"
 
 [[package]]
-name = "shinigami"
+name = "utils"
 version = "0.1.0"
-dependencies = [
- "ripemd160",
- "sha1",
-]
