@@ -277,7 +277,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         }
 
         if engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly) && !engine.is_push_only() {
-            return Result::Err('Engine::new: script invalid');
+            return Result::Err('Engine::new: not pushonly');
         }
 
         let mut bip16 = false;

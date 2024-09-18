@@ -503,7 +503,7 @@ pub mod Opcode {
         return Result::Ok(
             super::byte_array_to_felt252_le(@data_at(idx + 1, push_data_len, script)?)
                 .try_into()
-                .unwrap()
+                .unwrap() + push_data_len
         );
     }
 }
