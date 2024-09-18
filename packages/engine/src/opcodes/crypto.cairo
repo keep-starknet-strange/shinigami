@@ -79,7 +79,7 @@ pub fn opcode_checksig<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     ref engine: Engine<T>
@@ -136,7 +136,7 @@ pub fn opcode_checkmultisig<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     ref engine: Engine<T>
@@ -287,7 +287,7 @@ pub fn opcode_checksigverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     ref engine: Engine<T>
@@ -307,7 +307,7 @@ pub fn opcode_checkmultisigverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     ref engine: Engine<T>

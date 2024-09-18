@@ -1,5 +1,5 @@
 use crate::opcodes::Opcode;
-use utils::bytecode::hex_to_bytecode;
+use shinigami_utils::bytecode::hex_to_bytecode;
 
 fn byte_to_smallint(byte: u8) -> Result<i64, felt252> {
     if byte == Opcode::OP_0 {

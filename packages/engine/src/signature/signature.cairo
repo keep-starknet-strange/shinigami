@@ -6,7 +6,7 @@ use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::scriptflags::ScriptFlags;
-use utils::byte_array::u256_from_byte_array_with_offset;
+use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
@@ -43,7 +43,7 @@ impl BaseSigVerifierImpl<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 > of BaseSigVerifierTrait<T> {
     fn new(

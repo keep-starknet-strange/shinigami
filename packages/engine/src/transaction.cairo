@@ -1,7 +1,7 @@
 use crate::errors::Error;
-use utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be, sub_byte_array};
-use utils::bytecode::int_size_in_bytes;
-use utils::bit_shifts::shr;
+use shinigami_utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be, sub_byte_array};
+use shinigami_utils::bytecode::int_size_in_bytes;
+use shinigami_utils::bit_shifts::shr;
 
 // Tracks previous transaction outputs
 #[derive(Drop, Copy)]

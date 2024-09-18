@@ -1,5 +1,5 @@
 use crate::transaction::TransactionTrait;
-use utils::bytecode::hex_to_bytecode;
+use shinigami_utils::bytecode::hex_to_bytecode;
 
 #[test]
 fn test_block_subsidy_calculation() {

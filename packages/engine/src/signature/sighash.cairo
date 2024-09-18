@@ -6,8 +6,8 @@ use crate::signature::constants;
 use crate::signature::utils::{
     remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
 };
-use utils::bytecode::int_size_in_bytes;
-use utils::hash::double_sha256;
+use shinigami_utils::bytecode::int_size_in_bytes;
+use shinigami_utils::hash::double_sha256;
 
 // Calculates the signature hash for specified transaction data and hash type.
 pub fn calc_signature_hash<
@@ -20,7 +20,7 @@ pub fn calc_signature_hash<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     sub_script: @ByteArray, hash_type: u32, ref transaction: T, tx_idx: u32

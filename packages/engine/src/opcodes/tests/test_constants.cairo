@@ -3,8 +3,8 @@ use crate::opcodes::tests::utils::{
     test_compile_and_run, test_compile_and_run_err, check_expected_dstack, check_dstack_size
 };
 use crate::scriptnum::ScriptNum;
-use utils::hex::int_to_hex;
-use utils::bytecode::hex_to_bytecode;
+use shinigami_utils::hex::int_to_hex;
+use shinigami_utils::bytecode::hex_to_bytecode;
 
 fn test_op_n(value: u8) {
     let program = format!("OP_{}", value);

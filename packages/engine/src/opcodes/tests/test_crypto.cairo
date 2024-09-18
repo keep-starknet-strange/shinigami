@@ -6,7 +6,7 @@ use crate::opcodes::tests::utils::{
 use crate::errors::Error;
 use crate::scriptnum::ScriptNum;
 use crate::scriptflags::ScriptFlags;
-use utils::bytecode::hex_to_bytecode;
+use shinigami_utils::bytecode::hex_to_bytecode;
 
 #[test]
 fn test_opcode_sha256_1() {

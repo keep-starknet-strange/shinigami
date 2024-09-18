@@ -1,4 +1,4 @@
-use utils::byte_array::byte_array_to_felt252_le;
+use shinigami_utils::byte_array::byte_array_to_felt252_le;
 
 pub mod Opcode {
     pub const OP_0: u8 = 0;
@@ -207,7 +207,7 @@ pub mod Opcode {
         +Drop<O>,
         impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
         impl IEngineTransactionTrait: EngineTransactionTrait<
-            T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+            T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
         >
     >(
         opcode: u8, ref engine: Engine<T>

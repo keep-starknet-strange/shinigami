@@ -6,9 +6,9 @@ use crate::stack::{ScriptStack, ScriptStackImpl};
 use crate::transaction::{
     Transaction, EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
-use utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
-use utils::bytecode::hex_to_bytecode;
-use utils::hash::sha256_byte_array;
+use shinigami_utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
+use shinigami_utils::bytecode::hex_to_bytecode;
+use shinigami_utils::hash::sha256_byte_array;
 use crate::witness;
 
 // SigCache implements an Schnorr+ECDSA signature verification cache. Only valid signatures will be

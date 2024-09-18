@@ -1,8 +1,8 @@
 use core::dict::{Felt252Dict, Felt252DictEntryTrait};
 use crate::errors::Error;
 use crate::scriptnum::ScriptNum;
-use utils::byte_array::byte_array_to_bool;
-use utils::bytecode::bytecode_to_hex;
+use shinigami_utils::byte_array::byte_array_to_bool;
+use shinigami_utils::bytecode::bytecode_to_hex;
 
 #[derive(Destruct)]
 pub struct ScriptStack {

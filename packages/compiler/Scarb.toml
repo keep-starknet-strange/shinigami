@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024_07"
 
 [dependencies]
-engine = { path = "../engine" }
-utils = { path = "../utils" }
+shinigami_engine = { path = "../engine" }
+shinigami_utils = { path = "../utils" }
 
 [dev-dependencies]
 cairo_test.workspace = true

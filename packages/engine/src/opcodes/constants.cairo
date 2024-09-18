@@ -1,6 +1,6 @@
 use crate::engine::{Engine, EngineExtrasTrait};
 use crate::stack::ScriptStackTrait;
-use utils::byte_array::byte_array_to_felt252_le;
+use shinigami_utils::byte_array::byte_array_to_felt252_le;
 
 pub fn opcode_false<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     engine.dstack.push_byte_array("");
