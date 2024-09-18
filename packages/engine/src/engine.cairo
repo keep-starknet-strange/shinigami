@@ -81,6 +81,7 @@ pub struct Engine<T> {
 
 // TODO: SigCache
 pub trait EngineTrait<
+    E,
     I,
     O,
     T,
@@ -98,9 +99,9 @@ pub trait EngineTrait<
         flags: u32,
         amount: i64,
         hash_cache: @H
-    ) -> Result<Engine<T>, felt252>;
+    ) -> Result<E, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
-    fn execute(ref self: Engine<T>) -> Result<ByteArray, felt252>;
+    fn execute(ref self: E) -> Result<ByteArray, felt252>;
 }
 
 pub impl EngineImpl<
@@ -114,7 +115,7 @@ pub impl EngineImpl<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput
     >,
     impl IHashCache: HashCacheTrait<H, I, O, T>,
-> of EngineTrait<I, O, T, H> {
+> of EngineTrait<Engine<T>, I, O, T, H> {
     // Create a new Engine with the given script
     fn new(
         script_pubkey: @ByteArray,
