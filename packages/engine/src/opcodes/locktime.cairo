@@ -38,7 +38,7 @@ pub fn opcode_checklocktimeverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     ref engine: Engine<T>
@@ -52,7 +52,7 @@ pub fn opcode_checklocktimeverify<
     }
 
     let tx_locktime: i64 = EngineTransactionTrait::<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >::get_locktime(@engine.transaction)
         .into();
     // Get locktime as 5 byte integer because 'tx_locktime' is u32
@@ -67,7 +67,7 @@ pub fn opcode_checklocktimeverify<
     // Check if tx sequence is not 'SEQUENCE_MAX' else if tx may be considered as finalized and the
     // behavior of OP_CHECKLOCKTIMEVERIFY can be bypassed
     let transaction_input = EngineTransactionTrait::<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >::get_transaction_inputs(@engine.transaction)
         .at(engine.tx_idx);
     let sequence = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);
@@ -88,7 +88,7 @@ pub fn opcode_checksequenceverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     ref engine: Engine<T>
@@ -120,14 +120,14 @@ pub fn opcode_checksequenceverify<
 
     // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
     let version = EngineTransactionTrait::<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >::get_version(@engine.transaction);
     if version < 2 {
         return Result::Err(Error::INVALID_TX_VERSION);
     }
 
     let transaction_input = EngineTransactionTrait::<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >::get_transaction_inputs(@engine.transaction)
         .at(engine.tx_idx);
     let tx_sequence: u32 = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);

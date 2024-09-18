@@ -1,8 +1,8 @@
 use crate::transaction::TransactionTrait;
 use crate::utxo::UTXO;
 use crate::validate;
-use utils::byte_array::u256_from_byte_array_with_offset;
-use utils::bytecode::hex_to_bytecode;
+use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
+use shinigami_utils::bytecode::hex_to_bytecode;
 
 // TODO: txid byte order reverse
 

@@ -50,7 +50,7 @@ pub fn transaction_procedure<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, IEngineTransactionInputTrait, O, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
     ref transaction: T, index: u32, signature_script: ByteArray, hash_type: u32

@@ -1,8 +1,8 @@
 use core::dict::Felt252Dict;
-use engine::opcodes::Opcode;
-use engine::scriptnum::ScriptNum;
-use utils::bytecode::hex_to_bytecode;
-use utils::byte_array::byte_array_to_felt252_be;
+use shinigami_engine::opcodes::Opcode;
+use shinigami_engine::scriptnum::ScriptNum;
+use shinigami_utils::bytecode::hex_to_bytecode;
+use shinigami_utils::byte_array::byte_array_to_felt252_be;
 use crate::utils::{is_hex, is_number, is_string};
 
 // Compiler that takes a Bitcoin Script program and compiles it into a bytecode

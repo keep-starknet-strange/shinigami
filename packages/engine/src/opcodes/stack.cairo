@@ -1,7 +1,7 @@
 use crate::engine::Engine;
 use crate::scriptnum::ScriptNum;
 use crate::stack::ScriptStackTrait;
-use utils::byte_array::byte_array_to_bool;
+use shinigami_utils::byte_array::byte_array_to_bool;
 
 pub fn opcode_toaltstack<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let value = engine.dstack.pop_byte_array()?;

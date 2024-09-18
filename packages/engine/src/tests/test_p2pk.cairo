@@ -1,9 +1,8 @@
-use compiler::compiler::CompilerImpl;
 use crate::engine::{EngineImpl};
 use crate::transaction::TransactionTrait;
 use crate::validate;
 use crate::utxo::UTXO;
-use utils::bytecode::hex_to_bytecode;
+use shinigami_utils::bytecode::hex_to_bytecode;
 
 // https://learnmeabitcoin.com/explorer/tx/3db8816c460f674e47f0e5799656721a249acdd53cd43a530c83384577485947
 #[test]

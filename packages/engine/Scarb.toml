@@ -1,13 +1,13 @@
 [package]
-name = "engine"
+name = "shinigami_engine"
 version = "0.1.0"
 edition = "2024_07"
 
 [dependencies]
 ripemd160.workspace = true
 sha1.workspace = true
-compiler = { path = "../compiler" }
-utils = { path = "../utils" }
+shinigami_compiler = { path = "../compiler" }
+shinigami_utils = { path = "../utils" }
 
 [dev-dependencies]
 cairo_test.workspace = true

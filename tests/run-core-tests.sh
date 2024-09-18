@@ -89,11 +89,11 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
       ENCODED_WITNESS=$($SCRIPT_DIR/text_to_byte_array.sh "$witness")
       TRIMMED_WITNESS=$(sed 's/^\[\(.*\)\]$/\1/' <<< $ENCODED_WITNESS)
       JOINED_INPUT="[$TRIMMED_SCRIPT_SIG,$TRIMMED_SCRIPT_PUB_KEY,$TRIMMED_FLAGS,$TRIMMED_WITNESS]"
-      RESULT=$(cd $BASE_DIR && scarb cairo-run --function main_with_witness --no-build $JOINED_INPUT)
+      RESULT=$(cd $BASE_DIR && scarb cairo-run --package cmds --function main_with_witness --no-build $JOINED_INPUT)
     else
       echo "  ScriptSig: '$scriptSig' -- ScriptPubKey: '$scriptPubKey' -- Flags: '$flags' -- Expected: $expected_scripterror"
       JOINED_INPUT="[$TRIMMED_SCRIPT_SIG,$TRIMMED_SCRIPT_PUB_KEY,$TRIMMED_FLAGS]"
-      RESULT=$(cd $BASE_DIR && scarb cairo-run --no-build $JOINED_INPUT)
+      RESULT=$(cd $BASE_DIR && scarb cairo-run --package cmds --no-build $JOINED_INPUT)
     fi
     SUCCESS_RES="Run completed successfully, returning \[1\]"
     FAILURE_RES="Run completed successfully, returning \[0\]"
@@ -125,7 +125,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         OP_COUNT="Execution failed: Too many operations"
         PUBKEY_COUNT="Execution failed: check multisig: num pk > max"
         SIG_COUNT="Execution failed: check multisig: num sigs > pk"
-        SIG_PUSHONLY="Execution failed: Engine::new: p2sh not pushonly"
+        SIG_PUSHONLY="Execution failed: Engine::new: not pushonly"
+        SIG_PUSHONLY2="Execution failed: Engine::new: p2sh not pushonly"
         PUBKEYTYPE="Execution failed: unsupported public key type"
         INVALID_SIG_FMT="Execution failed: invalid sig fmt: too short"
         INVALID_HASH_TYPE="Execution failed: invalid hash type"
@@ -171,6 +172,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         elif echo "$RESULT" | grep -q "$SIG_COUNT"; then
             SCRIPT_RESULT="SIG_COUNT"
         elif echo "$RESULT" | grep -q "$SIG_PUSHONLY"; then
+            SCRIPT_RESULT="SIG_PUSHONLY"
+        elif echo "$RESULT" | grep -q "$SIG_PUSHONLY2"; then
             SCRIPT_RESULT="SIG_PUSHONLY"
         elif echo "$RESULT" | grep -q "$PUBKEYTYPE"; then
             SCRIPT_RESULT="PUBKEYTYPE"
@@ -219,10 +222,14 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     elif [[ "$SCRIPT_RESULT" == "MINIMALDATA" && "$expected_scripterror" == "UNKNOWN_ERROR" ]]; then
         echo -e "  \033[0;32mPASS\033[0m"
         PASSED=$((PASSED+1))
+    elif [[ "$SCRIPT_RESULT" == "INVALID_STACK_OPERATION" && "$expected_scripterror" == "UNBALANCED_CONDITIONAL" ]]; then
+        # handle cases like 'IF 0 ENDIF' ie no value on stack for if
+        echo -e "  \033[0;32mPASS\033[0m"
+        PASSED=$((PASSED+1))
     else
         echo -e "  \033[0;31mFAIL\033[0m"
         FAILED=$((FAILED+1))
-        echo "scarb cairo-run '$JOINED_INPUT'"
+        echo "scarb cairo-run --package cmds '$JOINED_INPUT'"
         echo "$RESULT"
     fi
     echo

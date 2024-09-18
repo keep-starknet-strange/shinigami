@@ -1,4 +1,4 @@
-use utils::byte_array::byte_array_to_felt252_be;
+use shinigami_utils::byte_array::byte_array_to_felt252_be;
 
 #[derive(Copy, Drop)]
 pub enum ScriptFlags {

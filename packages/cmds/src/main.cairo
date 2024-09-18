@@ -1,12 +1,12 @@
-use compiler::compiler::CompilerImpl;
-use engine::engine::EngineInternalImpl;
-use engine::transaction::{TransactionImpl, TransactionTrait};
-use engine::utxo::UTXO;
-use engine::validate;
-use engine::scriptflags;
-use engine::witness;
-use utils::byte_array::felt252_to_byte_array;
-use utils::bytecode::hex_to_bytecode;
+use shinigami_compiler::compiler::CompilerImpl;
+use shinigami_engine::engine::EngineInternalImpl;
+use shinigami_engine::transaction::{TransactionImpl, TransactionTrait};
+use shinigami_engine::utxo::UTXO;
+use shinigami_engine::validate;
+use shinigami_engine::scriptflags;
+use shinigami_engine::witness;
+use shinigami_utils::byte_array::felt252_to_byte_array;
+use shinigami_utils::bytecode::hex_to_bytecode;
 
 #[derive(Clone, Drop)]
 struct InputData {

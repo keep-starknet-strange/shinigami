@@ -1,7 +1,7 @@
 use crate::errors::Error;
-use utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be, sub_byte_array};
-use utils::bytecode::int_size_in_bytes;
-use utils::bit_shifts::shr;
+use shinigami_utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be, sub_byte_array};
+use shinigami_utils::bytecode::int_size_in_bytes;
+use shinigami_utils::bit_shifts::shr;
 
 // Tracks previous transaction outputs
 #[derive(Drop, Copy)]
@@ -341,7 +341,7 @@ pub impl EngineTransactionOutputTraitInternalImpl of EngineTransactionOutputTrai
 }
 
 pub trait EngineTransactionTrait<
-    T, I, +EngineTransactionInputTrait<I>, O, +EngineTransactionOutputTrait<O>
+    T, I, O, +EngineTransactionInputTrait<I>, +EngineTransactionOutputTrait<O>
 > {
     fn get_version(self: @T) -> i32;
     fn get_transaction_inputs(self: @T) -> Span<I>;
@@ -352,8 +352,8 @@ pub trait EngineTransactionTrait<
 pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
     Transaction,
     TransactionInput,
-    EngineTransactionInputTraitInternalImpl,
     TransactionOutput,
+    EngineTransactionInputTraitInternalImpl,
     EngineTransactionOutputTraitInternalImpl
 > {
     fn get_version(self: @Transaction) -> i32 {

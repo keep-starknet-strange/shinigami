@@ -1,4 +1,4 @@
-use compiler::compiler::CompilerImpl;
+use shinigami_compiler::compiler::CompilerImpl;
 use crate::engine::{Engine, EngineInternalImpl, EngineInternalTrait};
 use crate::transaction::{Transaction, TransactionInput, TransactionOutput, OutPoint};
 
