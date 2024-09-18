@@ -33,15 +33,15 @@ pub trait HashCacheTrait<
     fn new(transaction: @T) -> H;
 
     // v0 represents sighash midstate used in the base segwit signatures BIP-143
-    fn get_hash_prevouts_v0(self: H) -> u256;
-    fn get_hash_sequence_v0(self: H) -> u256;
-    fn get_hash_outputs_v0(self: H) -> u256;
+    fn get_hash_prevouts_v0(self: @H) -> u256;
+    fn get_hash_sequence_v0(self: @H) -> u256;
+    fn get_hash_outputs_v0(self: @H) -> u256;
 
     // v1 represents sighash midstate used to compute taproot signatures BIP-341
-    fn get_hash_prevouts_v1(self: H) -> u256;
-    fn get_hash_sequence_v1(self: H) -> u256;
-    fn get_hash_outputs_v1(self: H) -> u256;
-    fn get_hash_input_scripts_v1(self: H) -> u256;
+    fn get_hash_prevouts_v1(self: @H) -> u256;
+    fn get_hash_sequence_v1(self: @H) -> u256;
+    fn get_hash_outputs_v1(self: @H) -> u256;
+    fn get_hash_input_scripts_v1(self: @H) -> u256;
 }
 
 // Represents the VM that executes Bitcoin scripts
