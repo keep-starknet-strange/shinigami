@@ -73,8 +73,9 @@ pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
     let mut byte_array = "";
     let mut valueU256: u256 = value.into();
     while valueU256 != 0 {
-        byte_array.append_byte((valueU256 % byte_shift).try_into().unwrap());
-        valueU256 /= byte_shift;
+        let (value_upper, value_lower) = DivRem::div_rem(valueU256, byte_shift);
+        byte_array.append_byte(value_lower.try_into().unwrap());
+        valueU256 = value_upper;
     };
     byte_array.rev()
 }

@@ -43,8 +43,7 @@ pub fn bytecode_to_hex(bytecode: @ByteArray) -> ByteArray {
         return "0x00";
     }
     while i != bytecode_len {
-        let upper_half_byte = bytecode[i] / half_byte_shift;
-        let lower_half_byte = bytecode[i] % half_byte_shift;
+        let (upper_half_byte, lower_half_byte) = DivRem::div_rem(bytecode[i], half_byte_shift);
         let upper_half: u8 = if upper_half_byte < 10 {
             upper_half_byte + zero
         } else {
