@@ -1,0 +1,14 @@
+[package]
+name = "compiler"
+version = "0.1.0"
+edition = "2024_07"
+
+[dependencies]
+engine = { path = "../engine" }
+utils = { path = "../utils" }
+
+[dev-dependencies]
+cairo_test.workspace = true
+
+[scripts]
+lint = "scarb fmt"
