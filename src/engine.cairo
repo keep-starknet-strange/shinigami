@@ -141,7 +141,8 @@ pub impl EngineImpl of EngineTrait {
 
         let mut i = 0;
         let mut valid_sizes = true;
-        while i < engine.scripts.len() {
+        let engine_len = engine.scripts.len();
+        while i < engine_len {
             let script = *(engine.scripts[i]);
             if script.len() > MAX_SCRIPT_SIZE {
                 valid_sizes = false;
@@ -225,7 +226,8 @@ pub impl EngineImpl of EngineTrait {
         let script: @ByteArray = *(self.scripts[0]);
         let mut i = 0;
         let mut is_push_only = true;
-        while i < script.len() {
+        let script_len = script.len();
+        while i < script_len {
             let opcode = script[i];
             if opcode > Opcode::OP_16 {
                 is_push_only = false;
@@ -624,7 +626,8 @@ pub impl EngineImpl of EngineTrait {
 
         let mut sub_script = "";
         let mut i = self.last_code_sep;
-        while i < script.len() {
+        let script_len = script.len();
+        while i < script_len {
             sub_script.append_byte(script[i]);
             i += 1;
         };

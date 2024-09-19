@@ -370,8 +370,8 @@ pub fn remove_signature(script: ByteArray, sig_bytes: @ByteArray) -> ByteArray {
 
     let mut processed_script: ByteArray = "";
     let mut i: usize = 0;
-
-    while i < script.len() {
+    let script_len = script.len();
+    while i < script_len {
         let push_data: u8 = script[i];
         if push_data >= 8 && push_data <= 72 {
             let mut len: usize = push_data.into();

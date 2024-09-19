@@ -106,7 +106,8 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn json(ref self: ScriptStack) {
         let mut i = 0;
         print!("[");
-        while i < self.len {
+        let self_len = self.len();
+        while i < self_len {
             let (entry, arr) = self.data.entry(i.into());
             let arr = arr.deref();
             print!("\"{}\"", utils::bytecode_to_hex(@arr.clone()));

@@ -17,7 +17,8 @@ pub fn opcode_sha256(ref engine: Engine) -> Result<(), felt252> {
     let res = compute_sha256_byte_array(arr).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i < res.len() {
+    let res_len = res.len();
+    while i < res_len {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };

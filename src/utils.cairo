@@ -294,7 +294,7 @@ pub fn int_to_hex(value: u8) -> felt252 {
 pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     let mut i = 0;
     let mut ret_bool = false;
-    let bytes_len = bytes.len(); 
+    let bytes_len = bytes.len();
     while i < bytes_len {
         if bytes.at(i).unwrap() != 0 {
             // Can be negative zero
