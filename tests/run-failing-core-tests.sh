@@ -15,14 +15,14 @@ START=0
 if [ -n "$1" ]; then
   START=$1
 fi
-END=100
+END=200
 if [ -n "$2" ]; then
   END=$2
 fi
 
 # Run the script_tests.json tests
 # TODO: Pull from bitcoin-core repo?
-SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests.json
+SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests_failing.json
 
 echo "Running script_tests.json tests..."
 echo
@@ -238,6 +238,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     if [ $SCRIPT_IDX -eq $END ]; then
       break #TODO: Remove this line
     fi
+    echo "-----------------------------------------------------------------"
+    echo
   done
 
   echo "Script tests complete!"
