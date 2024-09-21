@@ -278,7 +278,7 @@ pub fn check_pub_key_encoding<T, +Drop<T>>(
 //
 // @param pk_bytes The byte array representing the public key to be parsed.
 // @return A `Secp256k1Point` representing the public key on the secp256k1 elliptic curve.
-pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
+pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     let mut pk_bytes_uncompressed = pk_bytes.clone();
 
     if is_compressed_pub_key(pk_bytes) {
@@ -289,17 +289,24 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
         if pk_bytes[0] == 0x03 {
             parity = true;
         }
-        return Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
-            .unwrap_syscall()
-            .expect('Secp256k1Point: Invalid point.');
+        return Result::Ok(
+            Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
+                .unwrap_syscall()
+                .expect('Secp256k1Point: Invalid point.')
+        );
     } else {
         // Extract X coordinate and determine parity from last byte.
+        if pk_bytes_uncompressed.len() != 65 {
+            return Result::Err('invalid compressed pub key');
+        }
         let pub_key: u256 = u256_from_byte_array_with_offset(@pk_bytes_uncompressed, 1, 32);
         let parity = !(pk_bytes_uncompressed[64] & 1 == 0);
 
-        return Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
-            .unwrap_syscall()
-            .expect('Secp256k1Point: Invalid point.');
+        return Result::Ok(
+            Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
+                .unwrap_syscall()
+                .expect('Secp256k1Point: Invalid point.')
+        );
     }
 }
 
@@ -378,7 +385,7 @@ pub fn parse_base_sig_and_pk<T, +Drop<T>>(
     check_signature_encoding(ref vm, sig_bytes)?;
     check_pub_key_encoding(ref vm, pk_bytes)?;
 
-    let pub_key = parse_pub_key(pk_bytes);
+    let pub_key = parse_pub_key(pk_bytes)?;
     let sig = parse_signature(sig_bytes)?;
 
     Result::Ok((pub_key, sig, hash_type))
