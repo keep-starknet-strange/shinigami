@@ -7,7 +7,7 @@ use crate::transaction::{
     Transaction, EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
 use shinigami_utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
-use shinigami_utils::bytecode::hex_to_bytecode;
+use shinigami_utils::bytecode::{hex_to_bytecode, bytecode_to_hex};
 use shinigami_utils::hash::sha256_byte_array;
 use crate::witness;
 
