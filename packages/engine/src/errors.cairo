@@ -26,6 +26,16 @@ pub mod Error {
     pub const DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM: felt252 = 'Upgradable witness program';
     pub const WITNESS_PROGRAM_INVALID: felt252 = 'Invalid witness program';
     pub const SCRIPT_TOO_LARGE: felt252 = 'Script is too large';
+    pub const CODESEPARATOR_NON_SEGWIT: felt252 = 'CODESEPARATOR in non-segwit';
+    pub const TAPROOT_MULTISIG: felt252 = 'Multisig in taproot script';
+    pub const TAPROOT_EMPTY_PUBKEY: felt252 = 'Empty pubkey in taproot script';
+    pub const TAPROOT_INVALID_CONTROL_BLOCK: felt252 = 'Invalid control block';
+    pub const TAPROOT_INVALID_SIG: felt252 = 'Invalid signature in tap script';
+    pub const TAPROOT_PARITY_MISMATCH: felt252 = 'Parity mismatch in tap script';
+    pub const TAPROOT_INVALID_MERKLE_PROOF: felt252 = 'Invalid taproot merkle proof';
+    pub const DISCOURAGE_OP_SUCCESS: felt252 = 'OP_SUCCESS is discouraged';
+    pub const DISCOURAGE_UPGRADABLE_TAPROOT_VERSION: felt252 = 'Upgradable taproot version';
+    pub const TAPROOT_SIGOPS_EXCEEDED: felt252 = 'Taproot sigops exceeded';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {

@@ -1,19 +1,22 @@
 use crate::engine::{Engine, EngineExtrasTrait};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
+    Transaction
 };
 use crate::stack::ScriptStackTrait;
 use crate::scriptflags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
-use crate::signature::signature::BaseSigVerifierTrait;
+use crate::signature::signature::{BaseSigVerifierTrait, TaprootSigVerifierTrait};
 use starknet::secp256_trait::{is_valid_signature};
 use core::sha256::compute_sha256_byte_array;
 use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
+use crate::taproot::TaprootContextTrait;
 
 const MAX_KEYS_PER_MULTISIG: i64 = 20;
+const BASE_SEGWIT_VERSION: i64 = 0;
 
 pub fn opcode_sha256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;
@@ -95,29 +98,32 @@ pub fn opcode_checksig<
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
-    let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
-    if res.is_err() {
-        // TODO: Some errors can return an error code instead of pushing false?
-        engine.dstack.push_bool(false);
-        return Result::Ok(());
-    }
-    let mut sig_verifier = res.unwrap();
+    if engine.witness_program.len() == 0 {
+        let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+        if res.is_err() {
+            // TODO: Some errors can return an error code instead of pushing false?
+            engine.dstack.push_bool(false);
+            return Result::Ok(());
+        }
+        let mut sig_verifier = res.unwrap();
 
-    if sig_verifier.verify(ref engine) {
-        is_valid = true;
-    } else {
+        is_valid = sig_verifier.verify(ref engine);
+    } else if engine.is_witness_active(BASE_SEGWIT_VERSION) {
+        // TODO: Implement
         is_valid = false;
+    } else if engine.use_taproot {
+        engine.taproot_context.use_ops_budget()?;
+        if pk_bytes.len() == 0 {
+            return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
+        }
+
+        let mut verifier = TaprootSigVerifierTrait::<Transaction>::new_base(@full_sig_bytes, @pk_bytes)?;
+        is_valid = TaprootSigVerifierTrait::<Transaction>::verify(ref verifier);
     }
-    // else use BaseSigWitnessVerifier
-    // let mut sig_verifier: BaseSigWitnessVerifier = BaseSigWitnessVerifierTrait::new(ref engine,
-    // @full_sig_bytes, @pk_bytes)?;
 
-    // if sig_verifier.verify(ref engine) {
-    //     is_valid = true;
-    // } else {
-    //     is_valid = false;
-    // }
-
+    if !is_valid && @engine.use_taproot == @true {
+        return Result::Err(Error::SIG_NULLFAIL);
+    }
     if !is_valid && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) && full_sig_bytes.len() > 0 {
         return Result::Err(Error::SIG_NULLFAIL);
     }
@@ -141,7 +147,9 @@ pub fn opcode_checkmultisig<
 >(
     ref engine: Engine<T>
 ) -> Result<(), felt252> {
-    // TODO Error on taproot exec
+    if engine.use_taproot {
+        return Result::Err(Error::TAPROOT_MULTISIG);
+    }
 
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
@@ -267,12 +275,12 @@ pub fn opcode_checkmultisig<
 pub fn opcode_codeseparator<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     engine.last_code_sep = engine.opcode_idx;
 
-    // TODO Disable OP_CODESEPARATOR for non-segwit scripts.
-    // if engine.witness_program.len() == 0 &&
-    // engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
-
-    // return Result::Err('opcode_codeseparator:non-segwit');
-    // }
+    if !engine.use_taproot {
+        // TODO: Check if this is correct
+        engine.taproot_context.code_sep = engine.opcode_idx;
+    } else if engine.witness_program.len() == 0 && engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
+        return Result::Err(Error::CODESEPARATOR_NON_SEGWIT);
+    }
 
     Result::Ok(())
 }
