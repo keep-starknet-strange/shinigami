@@ -1,4 +1,5 @@
 [
+["Format is: [[wit..., amount]?, scriptSig, scriptPubKey, flags, expected_scripterror, ... comments]"],
 ["0x01 0x00","1","MINIMALDATA","OK"],
 ["0x27 0x3024021077777777777777777777777777777777020a7777777777777777777777777777777701","0 CHECKSIG NOT","","OK","S with invalid S length is correctly encoded"],
 ["0x27 0x302402107777777777777777777777777777777702108777777777777777777777777777777701","0 CHECKSIG NOT","","OK","Negative S is correctly encoded"],
