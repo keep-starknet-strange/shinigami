@@ -14,11 +14,6 @@
 <a href="https://x.com/BitcoinWildlife"><img src="https://img.shields.io/badge/BitcoinWildlife-%23000.svg?style=for-the-badge&logo=X&logoColor=white
 " alt="X" height="30"></a>
 
-
-
-
-
-
 </div>
 
 ## Overview
