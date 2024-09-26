@@ -18,6 +18,7 @@ import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StackItem } from "../../types";
 import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-script";
+import * as bitcoin from 'bitcoinjs-lib';
 
 const jura = Jura({ subsets: ["latin"] });
 
@@ -327,14 +328,37 @@ export default function ScriptEditor() {
     </div>
   );
 
-  const fetchTxData = async (txID: string) => {
-    //the txID is the transaction hash
-    const response = await fetch(`https://blockchain.info/rawtx/${txID}`);
-    const result = await response.json()
-    return result;
+  const decodeScript = (scriptHex: string): string => {
+    const script = bitcoin.script.decompile(Buffer.from(scriptHex, 'hex'));
+    if (!script) return 'Unable to decode script';
+    
+    return script.map(op => {
+      if (typeof op === 'number') {
+        return bitcoin.script.toASM([op]).split(' ')[0]; // Convert opcode number to string representation
+      } else if (op instanceof Buffer) {
+        return op.toString('hex');
+      }
+      return op.toString();
+    }).join(' ');
+  };
+
+  const [txid, setTxid] = useState("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
+
+  const fetchTxData = async () => {
+    try {
+      const response = await fetch(`https://blockchain.info/rawtx/${txid}`);
+      const result = await response.json()
+      const sig = result.inputs[0].script;
+      const pubKey = result.out[0].script;
+      setScriptSig(decodeScript(sig));
+      setScriptPubKey(decodeScript(pubKey));
+      console.log(decodeScript(pubKey))
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  fetchTxData("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
+  fetchTxData();
 
   return (
     <div className="w-full h-full">

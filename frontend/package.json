@@ -11,7 +11,9 @@
   "dependencies": {
     "@material-tailwind/react": "^2.1.9",
     "@monaco-editor/react": "^4.6.0",
+    "@types/bitcoinjs-lib": "^5.0.0",
     "autoprefixer": "^10.4.20",
+    "bitcoinjs-lib": "^7.0.0-rc.0",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
