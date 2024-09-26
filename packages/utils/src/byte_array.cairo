@@ -116,7 +116,8 @@ pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usi
 pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     let mut i = 0;
     let mut ret_bool = false;
-    while i < bytes.len() {
+    let byte_array = bytes.len();
+    while i < byte_array {
         if bytes.at(i).unwrap() != 0 {
             // Can be negative zero
             if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {

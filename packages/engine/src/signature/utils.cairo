@@ -12,7 +12,8 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
     let mut i: usize = 0;
 
     // TODO: tokenizer/standardize script parsing
-    while i < script.len() {
+    let script_len = script.len() ;
+    while i < script_len {
         let opcode = script[i];
         // TODO: Error handling
         if opcode == Opcode::OP_CODESEPARATOR {
