@@ -334,6 +334,7 @@ export default function ScriptEditor() {
     
     return script.map(op => {
       if (typeof op === 'number') {
+        console.log(bitcoin.script.toASM([op]).split(' ')[0])
         return bitcoin.script.toASM([op]).split(' ')[0]; // Convert opcode number to string representation
       } else if (op instanceof Buffer) {
         return op.toString('hex');
@@ -342,23 +343,21 @@ export default function ScriptEditor() {
     }).join(' ');
   };
 
-  const [txid, setTxid] = useState("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
-
-  const fetchTxData = async () => {
+  const fetchTxData = async (txId: string) => {
     try {
-      const response = await fetch(`https://blockchain.info/rawtx/${txid}`);
+      const response = await fetch(`https://blockchain.info/rawtx/${txId}`);
       const result = await response.json()
       const sig = result.inputs[0].script;
       const pubKey = result.out[0].script;
       setScriptSig(decodeScript(sig));
       setScriptPubKey(decodeScript(pubKey));
-      console.log(decodeScript(pubKey))
+      console.log(decodeScript(pubKey));
     } catch (error) {
       console.log(error);
     }
   }
 
-  fetchTxData();
+  fetchTxData("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
 
   return (
     <div className="w-full h-full">
