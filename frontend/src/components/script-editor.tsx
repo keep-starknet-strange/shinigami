@@ -357,7 +357,8 @@ export default function ScriptEditor() {
     }
   }
 
-  fetchTxData("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
+  // get the transaction data, the reason we're commenting this out is to avoid it updating the editor on every render
+  // fetchTxData("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
 
   return (
     <div className="w-full h-full">
