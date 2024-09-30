@@ -213,10 +213,14 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
         }
 
         // Check if witness stack is clean
-        if final_script && self.is_witness_active(0) && self.dstack.len() != 1 { // TODO: Hardcoded 0
+        if final_script
+            && self.is_witness_active(0)
+            && self.dstack.len() != 1 { // TODO: Hardcoded 0
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
-        if final_script && self.has_flag(ScriptFlags::ScriptVerifyCleanStack) && self.dstack.len() != 1 {
+        if final_script
+            && self.has_flag(ScriptFlags::ScriptVerifyCleanStack)
+            && self.dstack.len() != 1 {
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
 
@@ -224,7 +228,7 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
         if self.dstack.len() < 1 {
             return Result::Err(Error::SCRIPT_EMPTY_STACK);
         }
-        
+
         // Check the final stack value
         match self.dstack.pop_bool() {
             Result::Ok(v) => {
@@ -233,11 +237,9 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
                     return Result::Err(Error::SCRIPT_FAILED);
                 }
             },
-            Result::Err(e) => {
-                return Result::Err(e);
-            },
+            Result::Err(e) => { return Result::Err(e); },
         }
-        
+
         Result::Ok(())
     }
 }
@@ -683,7 +685,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                 self.dstack.peek_byte_array(0)
             },
             Result::Err(e) => Result::Err(e),
-        } 
+        }
     }
 
     fn verify_witness(
