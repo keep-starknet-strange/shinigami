@@ -8,6 +8,7 @@ use starknet::secp256k1::{Secp256k1Point};
 use crate::scriptflags::ScriptFlags;
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
+use crate::errors::Error;
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -117,10 +118,9 @@ pub fn check_hash_type_encoding<T, +Drop<T>>(
 //           the necessary script verification flags.
 // @param sig_bytes The byte array containing the ECDSA signature that needs to be validated.
 pub fn check_signature_encoding<T, +Drop<T>>(
-    ref vm: Engine<T>, sig_bytes: @ByteArray
+    ref vm: Engine<T>, sig_bytes: @ByteArray, strict_encoding: bool
 ) -> Result<(), felt252> {
-    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
-        || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+    
     let low_s = vm.has_flag(ScriptFlags::ScriptVerifyLowS);
 
     // ASN.1 identifiers for sequence and integer types.*
@@ -382,7 +382,14 @@ pub fn parse_base_sig_and_pk<T, +Drop<T>>(
     let hash_type: u32 = sig_bytes[hash_type_offset].into();
 
     check_hash_type_encoding(ref vm, hash_type)?;
-    check_signature_encoding(ref vm, sig_bytes)?;
+    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
+        || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+    let res = check_signature_encoding(ref vm, sig_bytes, strict_encoding);
+    if strict_encoding && res.is_err(){
+        return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+    } else if res.is_err() {
+        return Result::Err(res.unwrap_err());
+    };
     check_pub_key_encoding(ref vm, pk_bytes)?;
 
     let pub_key = parse_pub_key(pk_bytes)?;

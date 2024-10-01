@@ -135,6 +135,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         CLEAN_STACK="Execution failed: Non-clean stack after execute"
         MINIMAL_DATA="Execution failed: Opcode represents non-minimal"
         INVALID_WITNESS="Execution failed: Invalid witness program"
+        SIG_DER="Execution failed: Signature DER error"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -201,6 +202,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="CLEANSTACK"
         elif echo "$RESULT" | grep -q "$MINIMAL_DATA"; then
             SCRIPT_RESULT="MINIMALDATA"
+        elif echo "$RESULT" | grep -q "$SIG_DER"; then
+            SCRIPT_RESULT="SIG_DER"
         else
             SCRIPT_RESULT="FAIL"
         fi

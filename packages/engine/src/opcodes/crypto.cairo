@@ -102,6 +102,9 @@ pub fn opcode_checksig<
     let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
     if res.is_err() {
         // TODO: Some errors can return an error code instead of pushing false?
+        if res.unwrap_err() == Error::SCRIPT_ERR_SIG_DER {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        };
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
