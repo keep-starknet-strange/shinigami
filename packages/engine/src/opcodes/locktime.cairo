@@ -53,7 +53,7 @@ pub fn opcode_checklocktimeverify<
 
     let tx_locktime: i64 = EngineTransactionTrait::<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >::get_locktime(@engine.transaction)
+    >::get_locktime(engine.transaction)
         .into();
     // Get locktime as 5 byte integer because 'tx_locktime' is u32
     let stack_locktime: i64 = ScriptNum::try_into_num_n_bytes(
@@ -68,7 +68,7 @@ pub fn opcode_checklocktimeverify<
     // behavior of OP_CHECKLOCKTIMEVERIFY can be bypassed
     let transaction_input = EngineTransactionTrait::<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >::get_transaction_inputs(@engine.transaction)
+    >::get_transaction_inputs(engine.transaction)
         .at(engine.tx_idx);
     let sequence = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);
     if sequence == SEQUENCE_MAX {
@@ -121,14 +121,14 @@ pub fn opcode_checksequenceverify<
     // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
     let version = EngineTransactionTrait::<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >::get_version(@engine.transaction);
+    >::get_version(engine.transaction);
     if version < 2 {
         return Result::Err(Error::INVALID_TX_VERSION);
     }
 
     let transaction_input = EngineTransactionTrait::<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >::get_transaction_inputs(@engine.transaction)
+    >::get_transaction_inputs(engine.transaction)
         .at(engine.tx_idx);
     let tx_sequence: u32 = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);
 

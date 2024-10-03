@@ -44,9 +44,9 @@ pub trait TransactionTrait {
     fn btc_decode(raw: ByteArray, encoding: u32) -> Transaction;
     fn deserialize(raw: ByteArray) -> Transaction;
     fn deserialize_no_witness(raw: ByteArray) -> Transaction;
-    fn btc_encode(self: Transaction, encoding: u32) -> ByteArray;
-    fn serialize(self: Transaction) -> ByteArray;
-    fn serialize_no_witness(self: Transaction) -> ByteArray;
+    fn btc_encode(self: @Transaction, encoding: u32) -> ByteArray;
+    fn serialize(self: @Transaction) -> ByteArray;
+    fn serialize_no_witness(self: @Transaction) -> ByteArray;
     fn calculate_block_subsidy(block_height: u32) -> i64;
     fn is_coinbase(self: @Transaction) -> bool;
     fn validate_coinbase(
@@ -169,9 +169,9 @@ pub impl TransactionImpl of TransactionTrait {
     }
 
     // Serialize the transaction data for hashing based on encoding used.
-    fn btc_encode(self: Transaction, encoding: u32) -> ByteArray {
+    fn btc_encode(self: @Transaction, encoding: u32) -> ByteArray {
         let mut bytes = "";
-        bytes.append_word_rev(self.version.into(), 4);
+        bytes.append_word_rev((*self.version).into(), 4);
         // TODO: Witness encoding
 
         // Serialize each input in the transaction.
@@ -213,15 +213,15 @@ pub impl TransactionImpl of TransactionTrait {
             i += 1;
         };
 
-        bytes.append_word_rev(self.locktime.into(), 4);
+        bytes.append_word_rev((*self.locktime).into(), 4);
         bytes
     }
 
-    fn serialize(self: Transaction) -> ByteArray {
+    fn serialize(self: @Transaction) -> ByteArray {
         self.btc_encode(WITNESS_ENCODING)
     }
 
-    fn serialize_no_witness(self: Transaction) -> ByteArray {
+    fn serialize_no_witness(self: @Transaction) -> ByteArray {
         self.btc_encode(BASE_ENCODING)
     }
 

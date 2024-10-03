@@ -1,15 +1,52 @@
 use crate::transaction::{
-    Transaction, TransactionTrait, TransactionInput, TransactionOutput, EngineTransactionTrait,
+    Transaction, TransactionInput, TransactionOutput, EngineTransactionTrait,
     EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::signature::constants;
-use crate::signature::utils::{
-    remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
-};
+use crate::signature::utils::{is_witness_pub_key_hash};
 use shinigami_utils::bytecode::int_size_in_bytes;
 use shinigami_utils::hash::double_sha256;
 
 // Calculates the signature hash for specified transaction data and hash type.
+// pub fn calc_signature_hash<
+//     T,
+//     +Drop<T>,
+//     I,
+//     +Drop<I>,
+//     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+//     O,
+//     +Drop<O>,
+//     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+//     impl IEngineTransactionTrait: EngineTransactionTrait<
+//         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+//     >
+// >(
+//     sub_script: @ByteArray, hash_type: u32, ref transaction: T, tx_idx: u32
+// ) -> u256 {
+//     let transaction_outputs_len: usize = transaction.get_transaction_outputs().len();
+//     // `SIG_HASH_SINGLE` only signs corresponding input/output pair.
+//     // The original Satoshi client gave a signature hash of 0x01 in cases where the input index
+//     // was out of bounds. This buggy/dangerous behavior is part of the consensus rules,
+//     // and would require a hard fork to fix.
+//     if hash_type & constants::SIG_HASH_MASK == constants::SIG_HASH_SINGLE
+//         && tx_idx >= transaction_outputs_len {
+//         return 0x01;
+//     }
+
+//     // Remove any OP_CODESEPARATOR opcodes from the subscript.
+//     let mut signature_script: @ByteArray = remove_opcodeseparator(sub_script);
+//     // Create a modified copy of the transaction according to the hash type.
+//     let transaction_copy: Transaction = transaction_procedure(
+//         ref transaction, tx_idx, signature_script.clone(), hash_type
+//     );
+
+//     let mut sig_hash_bytes: ByteArray = transaction.serialize_no_witness();
+//     sig_hash_bytes.append_word_rev(hash_type.into(), 4);
+
+//     // Hash and return the serialized transaction data twice using SHA-256.
+//     double_sha256(@sig_hash_bytes)
+// }
+
 pub fn calc_signature_hash<
     T,
     +Drop<T>,
@@ -23,30 +60,10 @@ pub fn calc_signature_hash<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
-    sub_script: @ByteArray, hash_type: u32, ref transaction: T, tx_idx: u32
+    sub_script: @ByteArray, hash_type: u32, transaction: @T, tx_idx: u32
 ) -> u256 {
-    let transaction_outputs_len: usize = transaction.get_transaction_outputs().len();
-    // `SIG_HASH_SINGLE` only signs corresponding input/output pair.
-    // The original Satoshi client gave a signature hash of 0x01 in cases where the input index
-    // was out of bounds. This buggy/dangerous behavior is part of the consensus rules,
-    // and would require a hard fork to fix.
-    if hash_type & constants::SIG_HASH_MASK == constants::SIG_HASH_SINGLE
-        && tx_idx >= transaction_outputs_len {
-        return 0x01;
-    }
-
-    // Remove any OP_CODESEPARATOR opcodes from the subscript.
-    let mut signature_script: @ByteArray = remove_opcodeseparator(sub_script);
-    // Create a modified copy of the transaction according to the hash type.
-    let transaction_copy: Transaction = transaction_procedure(
-        ref transaction, tx_idx, signature_script.clone(), hash_type
-    );
-
-    let mut sig_hash_bytes: ByteArray = transaction_copy.serialize_no_witness();
-    sig_hash_bytes.append_word_rev(hash_type.into(), 4);
-
-    // Hash and return the serialized transaction data twice using SHA-256.
-    double_sha256(@sig_hash_bytes)
+    // TODO: reorganize signature calculations
+    0
 }
 
 // Calculates the signature hash for a Segregated Witness (SegWit) transaction and hash type.

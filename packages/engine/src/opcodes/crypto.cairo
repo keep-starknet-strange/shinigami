@@ -236,7 +236,7 @@ pub fn opcode_checkmultisig<
         }
         let (parsed_pub_key, parsed_sig, hash_type) = res.unwrap();
         let sig_hash: u256 = sighash::calc_signature_hash(
-            @script, hash_type, ref engine.transaction, engine.tx_idx
+            @script, hash_type, engine.transaction, engine.tx_idx
         );
         if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
             sig_idx += 1;
