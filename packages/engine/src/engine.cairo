@@ -747,7 +747,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         let script = *(self.scripts[self.script_idx]);
         if opcode == Opcode::OP_DATA_1 {
             let value: u8 = script.at(self.opcode_idx + 1).unwrap();
-            if value <= 16 {
+            if value >= 1 && value <= 16 {
                 // Should be OP_1 to OP_16
                 return Result::Err(Error::MINIMAL_DATA);
             }
@@ -756,6 +756,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                 return Result::Err(Error::MINIMAL_DATA);
             }
         }
+
         // TODO: More checks?
         if !Opcode::is_push_opcode(opcode) {
             return Result::Ok(());
