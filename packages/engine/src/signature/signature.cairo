@@ -297,7 +297,7 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     } else {
         // Extract X coordinate and determine parity from last byte.
         if pk_bytes_uncompressed.len() != 65 {
-            return Result::Err('invalid compressed pub key');
+            return Result::Err('Invalid public key length');
         }
         let pub_key: u256 = u256_from_byte_array_with_offset(@pk_bytes_uncompressed, 1, 32);
         let parity = !(pk_bytes_uncompressed[64] & 1 == 0);
