@@ -20,7 +20,8 @@ pub fn opcode_sha256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> 
     let res = compute_sha256_byte_array(arr).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -33,7 +34,8 @@ pub fn opcode_hash160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252>
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -47,14 +49,16 @@ pub fn opcode_hash256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252>
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
     let res2 = compute_sha256_byte_array(@res_bytes).span();
     let mut res2_bytes: ByteArray = "";
     let mut j: usize = 0;
-    while j != res2.len() {
+    let end = res2.len();
+    while j != end {
         res2_bytes.append_word((*res2[j]).into(), 4);
         j += 1;
     };
@@ -204,7 +208,8 @@ pub fn opcode_checkmultisig<
 
     // TODO: add witness context inside engine to check if witness is active
     let mut s: u32 = 0;
-    while s != sigs.len() {
+    let end = sigs.len();
+    while s != end {
         script = signature::remove_signature(script, sigs.at(s));
         s += 1;
     };

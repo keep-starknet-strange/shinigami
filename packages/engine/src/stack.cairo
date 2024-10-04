@@ -107,12 +107,13 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn json(ref self: ScriptStack) {
         let mut i = 0;
         print!("[");
-        while i != self.len {
+        let end = self.len;
+        while i != end {
             let (entry, arr) = self.data.entry(i.into());
             let arr = arr.deref();
             print!("\"{}\"", bytecode_to_hex(@arr.clone()));
             self.data = entry.finalize(NullableTrait::new(arr));
-            if i < self.len - 1 {
+            if i < end - 1 {
                 print!(",");
             }
             i += 1;
@@ -145,7 +146,8 @@ pub impl ScriptStackImpl of ScriptStackTrait {
     fn stack_to_span(ref self: ScriptStack) -> Span<ByteArray> {
         let mut result = array![];
         let mut i = 0;
-        while i != self.len {
+        let end = self.len;
+        while i != end {
             let (entry, arr) = self.data.entry(i.into());
             let arr = arr.deref();
             result.append(arr.clone());

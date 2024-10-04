@@ -12,7 +12,8 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
     let mut i: usize = 0;
 
     // TODO: tokenizer/standardize script parsing
-    while i < script.len() {
+    let script_len = script.len();
+    while i < script_len {
         let opcode = script[i];
         // TODO: Error handling
         if opcode == Opcode::OP_CODESEPARATOR {
@@ -92,7 +93,8 @@ pub fn transaction_procedure<
         TransactionOutput
     >::new();
 
-    while i != transaction_input.len() {
+    let tx_input_len = transaction_input.len();
+    while i != tx_input_len {
         // TODO: Optimize this
         let mut temp_transaction_input: TransactionInput = transaction_input[i].clone();
 
