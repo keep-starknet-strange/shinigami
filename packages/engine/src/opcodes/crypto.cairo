@@ -87,7 +87,7 @@ pub fn opcode_checksig<
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
 
-    if full_sig_bytes.len() < 1 {
+    if full_sig_bytes.len() < 1 || pk_bytes.len() < 1 {
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
