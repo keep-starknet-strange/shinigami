@@ -93,7 +93,8 @@ pub fn transaction_procedure<
         TransactionOutput
     >::new();
 
-    while i != transaction_input.len() {
+    let tx_input_len = transaction_input.len();
+    while i != tx_input_len {
         // TODO: Optimize this
         let mut temp_transaction_input: TransactionInput = transaction_input[i].clone();
 

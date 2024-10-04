@@ -77,7 +77,8 @@ pub mod ScriptNum {
             return Result::Ok(0);
         }
         let snap_input = @input;
-        while i != snap_input.len() - 1 {
+        let end = snap_input.len() - 1;
+        while i != end {
             result += snap_input.at(i).unwrap().into() * multiplier;
             multiplier *= BYTESHIFT;
             i += 1;
@@ -117,7 +118,8 @@ pub mod ScriptNum {
             return Result::Ok(0);
         }
         let snap_input = @input;
-        while i != snap_input.len() - 1 {
+        let end = snap_input.len() - 1;
+        while i != end {
             result += snap_input.at(i).unwrap().into() * multiplier;
             multiplier *= BYTESHIFT;
             i += 1;

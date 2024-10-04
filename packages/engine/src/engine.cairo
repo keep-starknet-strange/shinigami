@@ -197,7 +197,8 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
 
         let mut sub_script = "";
         let mut i = self.last_code_sep;
-        while i != script.len() {
+        let script_len = script.len();
+        while i != script_len {
             sub_script.append_byte(script[i]);
             i += 1;
         };
@@ -298,7 +299,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
 
         let mut i = 0;
         let mut valid_sizes = true;
-        while i != engine.scripts.len() {
+        let scripts_len = engine.scripts.len();
+        while i != scripts_len {
             let script = *(engine.scripts[i]);
             if script.len() > MAX_SCRIPT_SIZE {
                 valid_sizes = false;
@@ -338,7 +340,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                     let mut remaining = "";
                     let mut i = 1;
                     // TODO: Optimize
-                    while i != sig_clone.len() {
+                    let sig_len = sig_clone.len();
+                    while i != sig_len {
                         remaining.append_byte(sig_clone[i]);
                         i += 1;
                     };
@@ -382,7 +385,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         let script: @ByteArray = *(self.scripts[0]);
         let mut i = 0;
         let mut is_push_only = true;
-        while i != script.len() {
+        let script_len = script.len();
+        while i != script_len {
             // TODO: Error handling if i outside bounds
             let opcode = script[i];
             if opcode > Opcode::OP_16 {
@@ -534,7 +538,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         // TODO: Optimize with != instead of < and check for bounds errors within the loop
         while self.script_idx < self.scripts.len() {
             let script: @ByteArray = *self.scripts[self.script_idx];
-            while self.opcode_idx < script.len() {
+            let script_len = script.len();
+            while self.opcode_idx < script_len {
                 let opcode = script[self.opcode_idx];
 
                 // Check if the opcode is always illegal (reserved).
@@ -656,7 +661,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
             let ret_val = top_stack.clone();
             let mut is_ok = false;
             let mut i = 0;
-            while i != top_stack.len() {
+            let top_stack_len = top_stack.len();
+            while i != top_stack_len {
                 if top_stack[i] != 0 {
                     is_ok = true;
                     break;

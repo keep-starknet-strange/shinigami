@@ -152,7 +152,8 @@ pub fn calc_witness_transaction_hash(
         sig_hash_bytes.append_byte(0xa9);
         sig_hash_bytes.append_byte(0x14);
         i = 2;
-        while i != sub_script.len() {
+        let subscript_len = sub_script.len();
+        while i != subscript_len {
             sig_hash_bytes.append_byte(sub_script[i]);
             i += 1;
         };
