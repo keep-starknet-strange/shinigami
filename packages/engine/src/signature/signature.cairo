@@ -120,7 +120,6 @@ pub fn check_hash_type_encoding<T, +Drop<T>>(
 pub fn check_signature_encoding<T, +Drop<T>>(
     ref vm: Engine<T>, sig_bytes: @ByteArray, strict_encoding: bool
 ) -> Result<(), felt252> {
-    
     let low_s = vm.has_flag(ScriptFlags::ScriptVerifyLowS);
 
     // ASN.1 identifiers for sequence and integer types.*
@@ -385,7 +384,7 @@ pub fn parse_base_sig_and_pk<T, +Drop<T>>(
     let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
         || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     let res = check_signature_encoding(ref vm, sig_bytes, strict_encoding);
-    if strict_encoding && res.is_err(){
+    if strict_encoding && res.is_err() {
         return Result::Err(Error::SCRIPT_ERR_SIG_DER);
     } else if res.is_err() {
         return Result::Err(res.unwrap_err());

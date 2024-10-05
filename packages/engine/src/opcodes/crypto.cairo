@@ -99,7 +99,7 @@ pub fn opcode_checksig<
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
-    
+
     let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
     if res.is_err() {
         // TODO: Some errors can return an error code instead of pushing false?

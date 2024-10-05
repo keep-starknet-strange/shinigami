@@ -27,7 +27,6 @@ pub mod Error {
     pub const WITNESS_PROGRAM_INVALID: felt252 = 'Invalid witness program';
     pub const SCRIPT_TOO_LARGE: felt252 = 'Script is too large';
     pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
-
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
