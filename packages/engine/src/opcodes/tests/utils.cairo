@@ -1,5 +1,6 @@
 use shinigami_compiler::compiler::CompilerImpl;
-use crate::engine::{Engine, EngineInternalImpl, EngineInternalTrait};
+use crate::engine::{Engine, EngineImpl, EngineInternalTrait};
+use crate::hash_cache::HashCacheImpl;
 use crate::transaction::{Transaction, TransactionInput, TransactionOutput, OutPoint};
 
 // Runs a basic bitcoin script as the script_pubkey with empty script_sig
@@ -7,8 +8,9 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program).unwrap();
     // TODO: Nullable
-    let mut engine = EngineInternalImpl::new(@bytecode, Default::default(), 0, 0, 0).unwrap();
-    let res = EngineInternalTrait::execute(ref engine);
+    let hash_cache = HashCacheImpl::new(Default::default());
+    let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0, @hash_cache).unwrap();
+    let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
 }
@@ -19,7 +21,8 @@ pub fn test_compile_and_run_with_tx(
 ) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, 0, 0).unwrap();
+    let hash_cache = HashCacheImpl::new(@transaction);
+    let mut engine = EngineImpl::new(@bytecode, @transaction, 0, 0, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
@@ -31,7 +34,8 @@ pub fn test_compile_and_run_with_tx_flags(
 ) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, flags, 0).unwrap();
+    let hash_cache = HashCacheImpl::new(@transaction);
+    let mut engine = EngineImpl::new(@bytecode, @transaction, 0, flags, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
     engine
@@ -41,7 +45,8 @@ pub fn test_compile_and_run_with_tx_flags(
 pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program).unwrap();
-    let mut engine = EngineInternalImpl::new(@bytecode, Default::default(), 0, 0, 0).unwrap();
+    let hash_cache = HashCacheImpl::new(Default::default());
+    let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();
@@ -56,7 +61,8 @@ pub fn test_compile_and_run_with_tx_err(
 ) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, 0, 0).unwrap();
+    let hash_cache = HashCacheImpl::new(@transaction);
+    let mut engine = EngineImpl::new(@bytecode, @transaction, 0, 0, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();
@@ -71,7 +77,8 @@ pub fn test_compile_and_run_with_tx_flags_err(
 ) -> Engine<Transaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let mut engine = EngineInternalImpl::new(@bytecode, transaction, 0, flags, 0).unwrap();
+    let hash_cache = HashCacheImpl::new(@transaction);
+    let mut engine = EngineImpl::new(@bytecode, @transaction, 0, flags, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
     let err = res.unwrap_err();

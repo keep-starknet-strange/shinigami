@@ -1,6 +1,6 @@
-use crate::engine::{Engine, EngineExtrasTrait};
+use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
 use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
@@ -26,7 +26,14 @@ pub struct BaseSigVerifier {
     hash_type: u32,
 }
 
-pub trait BaseSigVerifierTrait<T> {
+pub trait BaseSigVerifierTrait<
+    I,
+    O,
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>
+> {
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252>;
@@ -34,18 +41,18 @@ pub trait BaseSigVerifierTrait<T> {
 }
 
 impl BaseSigVerifierImpl<
-    T,
-    +Drop<T>,
     I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    +Drop<I>,
     +Drop<O>,
-    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
-    impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
-> of BaseSigVerifierTrait<T> {
+    +Drop<T>
+> of BaseSigVerifierTrait<I, O, T> {
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252> {
@@ -57,9 +64,9 @@ impl BaseSigVerifierImpl<
 
     // TODO: add signature cache mechanism for optimization
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool {
-        let sig_hash: u256 = sighash::calc_signature_hash(
-            @self.sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
-        );
+        let sig_hash: u256 = sighash::calc_signature_hash::<
+            I, O, T
+        >(@self.sub_script, self.hash_type, vm.transaction, vm.tx_idx);
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
@@ -88,7 +95,19 @@ pub fn compare_data(script: @ByteArray, sig_bytes: @ByteArray, i: u32, push_data
 }
 
 // Check if hash_type obeys scrict encoding requirements.
-pub fn check_hash_type_encoding<T, +Drop<T>>(
+pub fn check_hash_type_encoding<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
     ref vm: Engine<T>, mut hash_type: u32
 ) -> Result<(), felt252> {
     if !vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding) {
@@ -116,7 +135,19 @@ pub fn check_hash_type_encoding<T, +Drop<T>>(
 // @param vm A reference to the `Engine` that manages the execution context and provides
 //           the necessary script verification flags.
 // @param sig_bytes The byte array containing the ECDSA signature that needs to be validated.
-pub fn check_signature_encoding<T, +Drop<T>>(
+pub fn check_signature_encoding<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
     ref vm: Engine<T>, sig_bytes: @ByteArray
 ) -> Result<(), felt252> {
     let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
@@ -249,7 +280,19 @@ fn is_supported_pub_key_type(pk_bytes: @ByteArray) -> bool {
 }
 
 // Checks if a public key adheres to specific encoding rules based on the engine flags.
-pub fn check_pub_key_encoding<T, +Drop<T>>(
+pub fn check_pub_key_encoding<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
     ref vm: Engine<T>, pk_bytes: @ByteArray
 ) -> Result<(), felt252> {
     // TODO check compressed pubkey post segwit
@@ -371,7 +414,19 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 
 // Parses the public key and signature byte arrays based on consensus rules.
 // Returning a tuple containing the parsed public key, signature, and hash type.
-pub fn parse_base_sig_and_pk<T, +Drop<T>>(
+pub fn parse_base_sig_and_pk<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
     if sig_bytes.len() == 0 {

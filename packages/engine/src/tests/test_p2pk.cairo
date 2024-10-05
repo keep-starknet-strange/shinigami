@@ -17,7 +17,7 @@ fn test_compressed_pubkey() {
     let transaction = TransactionTrait::deserialize(raw_transaction);
     let utxo_hints = array![prev_out];
 
-    let res = validate::validate_transaction(transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -35,7 +35,7 @@ fn test_block_181_tx_mainnet() {
     let transaction = TransactionTrait::deserialize(raw_transaction);
     let utxo_hints = array![prev_out];
 
-    let res = validate::validate_transaction(transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -53,7 +53,7 @@ fn test_block_182_tx_mainnet() {
     let transaction = TransactionTrait::deserialize(raw_transaction);
     let utxo_hints = array![prev_out];
 
-    let res = validate::validate_transaction(transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -82,6 +82,6 @@ fn test_block_496_tx_mainnet() {
     let transaction = TransactionTrait::deserialize(raw_transaction);
     let utxo_hints = array![prev_out, prev_out2, prev_out3];
 
-    let res = validate::validate_transaction(transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
