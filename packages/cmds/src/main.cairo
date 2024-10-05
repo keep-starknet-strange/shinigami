@@ -194,11 +194,26 @@ struct ValidateRawInput {
     utxo_hints: Array<UTXO>
 }
 
-fn run_raw_transaction(input: ValidateRawInput) -> u8 {
+fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
     println!("Running Bitcoin Script with raw transaction: '{}'", input.raw_transaction);
     let raw_transaction = hex_to_bytecode(@input.raw_transaction);
     let transaction = TransactionTrait::deserialize(raw_transaction);
-    let res = validate::validate_transaction(@transaction, 0, input.utxo_hints);
+    let mut utxo_hints = array![];
+    for hint in input
+        .utxo_hints
+        .span() {
+            println!("UTXO hint: 'amount: {}, script_pubkey: {}'", hint.amount, hint.pubkey_script);
+            let pubkey_script = hex_to_bytecode(hint.pubkey_script);
+            utxo_hints
+                .append(
+                    UTXO {
+                        amount: *hint.amount,
+                        pubkey_script: pubkey_script,
+                        block_height: *hint.block_height,
+                    }
+                );
+        };
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     match res {
         Result::Ok(_) => {
             println!("Execution successful");

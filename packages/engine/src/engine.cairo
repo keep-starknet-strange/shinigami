@@ -9,7 +9,7 @@ use crate::transaction::{
 use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
 use shinigami_utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
-use shinigami_utils::bytecode::hex_to_bytecode;
+use shinigami_utils::bytecode::{hex_to_bytecode, bytecode_to_hex};
 use shinigami_utils::hash::sha256_byte_array;
 
 pub const MAX_STACK_SIZE: u32 = 1000;
