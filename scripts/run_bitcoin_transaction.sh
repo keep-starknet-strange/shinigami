@@ -70,6 +70,6 @@ UTXOS=$(sed 's/,$//' <<< $UTXOS)
 JOINED_INPUT="[$RAW_TX_INPUT,[$UTXOS]]"
 # echo "JOINED_INPUT: $JOINED_INPUT"
 
-# echo "scarb cairo-run --package shinigami_cmds --function run_raw_transaction \"$JOINED_INPUT\""
+echo "scarb cairo-run --package shinigami_cmds --function run_raw_transaction \"$JOINED_INPUT\""
 scarb cairo-run --package shinigami_cmds --function run_raw_transaction --no-build $JOINED_INPUT
 # TODO: Error checking

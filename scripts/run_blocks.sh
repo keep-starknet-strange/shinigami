@@ -5,6 +5,11 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BASE_DIR=$SCRIPT_DIR/..
 
+echo "Building shinigami..."
+cd $BASE_DIR && scarb build
+echo "Shinigami built successfully!"
+echo
+
 START_BLOCK=$1
 END_BLOCK=$2
 echo "Running blocks $START_BLOCK to $END_BLOCK"
