@@ -88,7 +88,6 @@ pub fn opcode_checksig<
 >(
     ref engine: Engine<T>
 ) -> Result<(), felt252> {
-
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
 
@@ -96,7 +95,6 @@ pub fn opcode_checksig<
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
-
 
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
@@ -154,9 +152,8 @@ pub fn opcode_checkmultisig<
 ) -> Result<(), felt252> {
     // TODO Error on taproot exec
 
-    
     let strict_encoding = engine.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
-    || engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+        || engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
     let mut num_pub_keys: i64 = ScriptNum::to_int32(num_keys).into();
@@ -257,7 +254,7 @@ pub fn opcode_checkmultisig<
         if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
             sig_idx += 1;
             num_sigs -= 1;
-        } 
+        }
     };
 
     if err != 0 {

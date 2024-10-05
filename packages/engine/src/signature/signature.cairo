@@ -50,7 +50,6 @@ impl BaseSigVerifierImpl<
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252> {
-
         let mut sub_script = vm.sub_script();
         sub_script = remove_signature(sub_script, sig_bytes);
         let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
