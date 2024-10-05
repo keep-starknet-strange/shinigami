@@ -50,6 +50,7 @@ impl BaseSigVerifierImpl<
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252> {
+
         let mut sub_script = vm.sub_script();
         sub_script = remove_signature(sub_script, sig_bytes);
         let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
@@ -373,26 +374,60 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 pub fn parse_base_sig_and_pk<T, +Drop<T>>(
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
+    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
+        || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     if sig_bytes.len() == 0 {
-        return Result::Err('empty signature');
+        return if strict_encoding {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err('empty signature')
+        };
     }
+
     // TODO: strct encoding
     let hash_type_offset: usize = sig_bytes.len() - 1;
     let hash_type: u32 = sig_bytes[hash_type_offset].into();
 
-    check_hash_type_encoding(ref vm, hash_type)?;
-    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
-        || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
-    let res = check_signature_encoding(ref vm, sig_bytes, strict_encoding);
-    if strict_encoding && res.is_err() {
-        return Result::Err(Error::SCRIPT_ERR_SIG_DER);
-    } else if res.is_err() {
-        return Result::Err(res.unwrap_err());
-    };
-    check_pub_key_encoding(ref vm, pk_bytes)?;
+    if let Result::Err(e) = check_hash_type_encoding(ref vm, hash_type) {
+        return if strict_encoding {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
+    if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes, strict_encoding) {
+        return if strict_encoding {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
 
-    let pub_key = parse_pub_key(pk_bytes)?;
-    let sig = parse_signature(sig_bytes)?;
+    if let Result::Err(e) = check_pub_key_encoding(ref vm, pk_bytes) {
+        return if strict_encoding {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
+
+    let pub_key = match parse_pub_key(pk_bytes) {
+        Result::Ok(key) => key,
+        Result::Err(e) => if strict_encoding {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        } else {
+            return Result::Err(e);
+        },
+    };
+
+    let sig = match parse_signature(sig_bytes) {
+        Result::Ok(signature) => signature,
+        Result::Err(e) => if strict_encoding {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        } else {
+            return Result::Err(e);
+        },
+    };
 
     Result::Ok((pub_key, sig, hash_type))
 }
