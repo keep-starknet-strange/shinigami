@@ -1,4 +1,4 @@
-use crate::engine::{Engine, EngineExtrasTrait};
+use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
@@ -20,7 +20,8 @@ pub fn opcode_sha256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> 
     let res = compute_sha256_byte_array(arr).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -33,7 +34,8 @@ pub fn opcode_hash160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252>
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -47,14 +49,16 @@ pub fn opcode_hash256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252>
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
     let res2 = compute_sha256_byte_array(@res_bytes).span();
     let mut res2_bytes: ByteArray = "";
     let mut j: usize = 0;
-    while j != res2.len() {
+    let end = res2.len();
+    while j != end {
         res2_bytes.append_word((*res2[j]).into(), 4);
         j += 1;
     };
@@ -87,7 +91,7 @@ pub fn opcode_checksig<
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
 
-    if full_sig_bytes.len() < 1 {
+    if full_sig_bytes.len() < 1 || pk_bytes.len() < 1 {
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
@@ -204,7 +208,8 @@ pub fn opcode_checkmultisig<
 
     // TODO: add witness context inside engine to check if witness is active
     let mut s: u32 = 0;
-    while s != sigs.len() {
+    let end = sigs.len();
+    while s != end {
         script = signature::remove_signature(script, sigs.at(s));
         s += 1;
     };
@@ -236,7 +241,7 @@ pub fn opcode_checkmultisig<
         }
         let (parsed_pub_key, parsed_sig, hash_type) = res.unwrap();
         let sig_hash: u256 = sighash::calc_signature_hash(
-            @script, hash_type, ref engine.transaction, engine.tx_idx
+            @script, hash_type, engine.transaction, engine.tx_idx
         );
         if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
             sig_idx += 1;

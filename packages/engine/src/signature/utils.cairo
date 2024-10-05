@@ -12,7 +12,8 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
     let mut i: usize = 0;
 
     // TODO: tokenizer/standardize script parsing
-    while i < script.len() {
+    let script_len = script.len();
+    while i < script_len {
         let opcode = script[i];
         // TODO: Error handling
         if opcode == Opcode::OP_CODESEPARATOR {
@@ -41,19 +42,19 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
 // @param hash_type The hash type that dictates how the transaction should be modified.
 // @return A modified copy of the transaction based on the provided hash type.
 pub fn transaction_procedure<
-    T,
-    +Drop<T>,
     I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
-    +Drop<O>,
+    T,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+    >,
+    +Drop<O>,
+    +Drop<I>,
+    +Drop<T>,
 >(
-    ref transaction: T, index: u32, signature_script: ByteArray, hash_type: u32
+    transaction: @T, index: u32, signature_script: ByteArray, hash_type: u32
 ) -> Transaction {
     let hash_type_masked = hash_type & constants::SIG_HASH_MASK;
     let mut transaction_inputs_clone = array![];
@@ -92,7 +93,8 @@ pub fn transaction_procedure<
         TransactionOutput
     >::new();
 
-    while i != transaction_input.len() {
+    let tx_input_len = transaction_input.len();
+    while i != tx_input_len {
         // TODO: Optimize this
         let mut temp_transaction_input: TransactionInput = transaction_input[i].clone();
 
