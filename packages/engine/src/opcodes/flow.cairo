@@ -29,7 +29,9 @@ pub fn opcode_nop<
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
->(ref engine: Engine<T>, opcode: u8) -> Result<(), felt252> {
+>(
+    ref engine: Engine<T>, opcode: u8
+) -> Result<(), felt252> {
     if opcode != Opcode::OP_NOP
         && EngineInternalTrait::<
             I, O, T
@@ -55,7 +57,9 @@ pub fn opcode_if<
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
->(ref engine: Engine<T>) -> Result<(), felt252> {
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     // TODO: Pop if bool
     if engine.cond_stack.branch_executing() {
@@ -82,7 +86,9 @@ pub fn opcode_notif<
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
->(ref engine: Engine<T>) -> Result<(), felt252> {
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     if engine.cond_stack.branch_executing() {
         let ok = engine.pop_if_bool()?;

@@ -471,9 +471,7 @@ pub trait EngineInternalTrait<
     // Returns the length of the next push data opcode
     fn push_data_len(ref self: Engine<T>, opcode: u8, idx: u32) -> Result<usize, felt252>;
     // Pulls the next len bytes from the script at the given index
-    fn pull_data_at(
-        ref self: Engine<T>, idx: usize, len: usize
-    ) -> Result<ByteArray, felt252>;
+    fn pull_data_at(ref self: Engine<T>, idx: usize, len: usize) -> Result<ByteArray, felt252>;
     // Returns the data stack
     fn get_dstack(ref self: Engine<T>) -> Span<ByteArray>;
     // Returns the alt stack
@@ -485,9 +483,7 @@ pub trait EngineInternalTrait<
     // Check if the next opcode is a minimal push
     fn check_minimal_data_push(ref self: Engine<T>, opcode: u8) -> Result<(), felt252>;
     // Validate witness program using witness input
-    fn verify_witness(
-        ref self: Engine<T>, witness: Span<ByteArray>
-    ) -> Result<(), felt252>;
+    fn verify_witness(ref self: Engine<T>, witness: Span<ByteArray>) -> Result<(), felt252>;
     // Prints the engine state as json
     fn json(ref self: Engine<T>);
 }
@@ -589,9 +585,7 @@ pub impl EngineInternalImpl<
         return false;
     }
 
-    fn push_data_len(
-        ref self: Engine<T>, opcode: u8, idx: u32
-    ) -> Result<usize, felt252> {
+    fn push_data_len(ref self: Engine<T>, opcode: u8, idx: u32) -> Result<usize, felt252> {
         if opcode == Opcode::OP_PUSHDATA1 {
             return Result::Ok(
                 byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 1)?).try_into().unwrap()
@@ -608,9 +602,7 @@ pub impl EngineInternalImpl<
         return Result::Err('Engine::push_data_len: invalid');
     }
 
-    fn pull_data_at(
-        ref self: Engine<T>, idx: usize, len: usize
-    ) -> Result<ByteArray, felt252> {
+    fn pull_data_at(ref self: Engine<T>, idx: usize, len: usize) -> Result<ByteArray, felt252> {
         let mut data = "";
         let mut i = idx;
         let mut end = i + len;
@@ -628,7 +620,7 @@ pub impl EngineInternalImpl<
     fn get_dstack(ref self: Engine<T>) -> Span<ByteArray> {
         return self.dstack.stack_to_span();
     }
-    
+
     fn get_astack(ref self: Engine<T>) -> Span<ByteArray> {
         return self.astack.stack_to_span();
     }
@@ -689,9 +681,7 @@ pub impl EngineInternalImpl<
         return Result::Ok(());
     }
 
-    fn verify_witness(
-        ref self: Engine<T>, witness: Span<ByteArray>
-    ) -> Result<(), felt252> {
+    fn verify_witness(ref self: Engine<T>, witness: Span<ByteArray>) -> Result<(), felt252> {
         if self.is_witness_active(0) {
             // Verify a base witness (segwit) program, ie P2WSH || P2WPKH
             if self.witness_program.len() == 20 {

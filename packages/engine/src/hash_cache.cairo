@@ -13,7 +13,7 @@ pub trait SigCacheTrait<S> {
 
 // TODO
 #[derive(Drop)]
-pub struct HashCache<T> { }
+pub struct HashCache<T> {}
 
 // HashCache caches the midstate of segwit v0 and v1 sighashes
 pub trait HashCacheTrait<
@@ -45,10 +45,12 @@ pub impl HashCacheImpl<
     T,
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
-    impl IEngineTransaction: EngineTransactionTrait<T, I, O, IEngineTransactionInput, IEngineTransactionOutput>
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >
 > of HashCacheTrait<I, O, T> {
     fn new(transaction: @T) -> HashCache<T> {
-        HashCache { }
+        HashCache {}
     }
 
     fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256 {

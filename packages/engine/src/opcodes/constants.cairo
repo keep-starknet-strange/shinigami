@@ -22,7 +22,9 @@ pub fn opcode_push_data<
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
->(n: usize, ref engine: Engine<T>) -> Result<(), felt252> {
+>(
+    n: usize, ref engine: Engine<T>
+) -> Result<(), felt252> {
     let data = EngineInternalTrait::<I, O, T>::pull_data(ref engine, n)?;
     engine.dstack.push_byte_array(data);
     return Result::Ok(());
@@ -40,7 +42,9 @@ pub fn opcode_push_data_x<
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
->(n: usize, ref engine: Engine<T>) -> Result<(), felt252> {
+>(
+    n: usize, ref engine: Engine<T>
+) -> Result<(), felt252> {
     let data_len_bytes = EngineInternalTrait::<I, O, T>::pull_data(ref engine, n)?;
     let data_len: usize = byte_array_to_felt252_le(@data_len_bytes).try_into().unwrap();
     let data = engine.pull_data(data_len)?;

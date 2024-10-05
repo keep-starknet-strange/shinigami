@@ -64,9 +64,9 @@ impl BaseSigVerifierImpl<
 
     // TODO: add signature cache mechanism for optimization
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool {
-        let sig_hash: u256 = sighash::calc_signature_hash::<I, O, T>(
-            @self.sub_script, self.hash_type, vm.transaction, vm.tx_idx
-        );
+        let sig_hash: u256 = sighash::calc_signature_hash::<
+            I, O, T
+        >(@self.sub_script, self.hash_type, vm.transaction, vm.tx_idx);
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
