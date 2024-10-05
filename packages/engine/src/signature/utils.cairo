@@ -42,19 +42,19 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
 // @param hash_type The hash type that dictates how the transaction should be modified.
 // @return A modified copy of the transaction based on the provided hash type.
 pub fn transaction_procedure<
-    T,
-    +Drop<T>,
     I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
-    +Drop<O>,
+    T,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+    >,
+    +Drop<O>,
+    +Drop<I>,
+    +Drop<T>,
 >(
-    ref transaction: T, index: u32, signature_script: ByteArray, hash_type: u32
+    transaction: @T, index: u32, signature_script: ByteArray, hash_type: u32
 ) -> Transaction {
     let hash_type_masked = hash_type & constants::SIG_HASH_MASK;
     let mut transaction_inputs_clone = array![];

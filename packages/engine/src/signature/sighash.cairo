@@ -11,19 +11,19 @@ use shinigami_utils::hash::double_sha256;
 
 // Calculates the signature hash for specified transaction data and hash type.
 pub fn calc_signature_hash<
-    T,
-    +Drop<T>,
     I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    +Drop<I>,
     +Drop<O>,
-    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
-    impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+    +Drop<T>
 >(
-    sub_script: @ByteArray, hash_type: u32, ref transaction: T, tx_idx: u32
+    sub_script: @ByteArray, hash_type: u32, transaction: @T, tx_idx: u32
 ) -> u256 {
     let transaction_outputs_len: usize = transaction.get_transaction_outputs().len();
     // `SIG_HASH_SINGLE` only signs corresponding input/output pair.
@@ -39,7 +39,7 @@ pub fn calc_signature_hash<
     let mut signature_script: @ByteArray = remove_opcodeseparator(sub_script);
     // Create a modified copy of the transaction according to the hash type.
     let transaction_copy: Transaction = transaction_procedure(
-        ref transaction, tx_idx, signature_script.clone(), hash_type
+        transaction, tx_idx, signature_script.clone(), hash_type
     );
 
     let mut sig_hash_bytes: ByteArray = transaction_copy.serialize_no_witness();
