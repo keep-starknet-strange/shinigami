@@ -152,8 +152,7 @@ pub fn opcode_checkmultisig<
 ) -> Result<(), felt252> {
     // TODO Error on taproot exec
 
-    let strict_encoding = engine.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
-        || engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+    let verify_der = engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
     let mut num_pub_keys: i64 = ScriptNum::to_int32(num_keys).into();
@@ -273,7 +272,7 @@ pub fn opcode_checkmultisig<
             if err != '' {
                 return Result::Err(err);
             }
-        } else if strict_encoding {
+        } else if verify_der {
             return Result::Err(Error::SCRIPT_ERR_SIG_DER);
         }
     }
