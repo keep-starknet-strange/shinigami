@@ -30,10 +30,10 @@ jobs:
         run: cargo install scarb-cairo-lint --git https://github.com/keep-starknet-strange/cairo-lint
 
       - uses: asdf-vm/actions/install@v3
-      - name: Run cairo-lint
+      - name: Run cairo-lint and check for warnings
         run: |
-          scarb cairo-lint > lint_output.txt
-          if grep -i "warning:" lint_output.txt; then
+          scarb cairo-lint > lint_output.txt 2>&1
+          if grep -qi "warning:" lint_output.txt; then
             echo "Linting failed due to warnings"
             exit 1
           fi
