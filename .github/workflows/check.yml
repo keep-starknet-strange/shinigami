@@ -33,7 +33,7 @@ jobs:
       - name: Run cairo-lint
         run: |
           scarb cairo-lint > lint_output.txt
-          if grep -q "warning:" lint_output.txt; then
+          if grep -i "warning:" lint_output.txt; then
             echo "Linting failed due to warnings"
             exit 1
           fi
