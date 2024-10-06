@@ -429,7 +429,7 @@ pub fn parse_base_sig_and_pk<
 >(
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
-    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
+    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
     let verify_der = vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     if sig_bytes.len() == 0 {
         return if strict_encoding {
