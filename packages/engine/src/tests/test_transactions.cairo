@@ -143,6 +143,6 @@ fn test_validate_transaction() {
     let utxo_hints = array![prev_out];
 
     // Run Shinigami and validate the transaction execution
-    let res = validate::validate_transaction(transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }

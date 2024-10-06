@@ -1,4 +1,5 @@
-use crate::engine::EngineInternalImpl;
+use crate::engine::EngineImpl;
+use crate::hash_cache::HashCacheImpl;
 use crate::transaction::Transaction;
 use crate::utxo::UTXO;
 
@@ -7,7 +8,7 @@ use crate::utxo::UTXO;
 // TODO: Remove hints?
 // utxo_hints: Set of existing utxos that are being spent by this transaction
 pub fn validate_transaction(
-    tx: Transaction, flags: u32, utxo_hints: Array<UTXO>
+    tx: @Transaction, flags: u32, utxo_hints: Array<UTXO>
 ) -> Result<(), felt252> {
     let input_count = tx.transaction_inputs.len();
     if input_count != utxo_hints.len() {
@@ -18,9 +19,10 @@ pub fn validate_transaction(
     let mut err = '';
     while i != input_count {
         let utxo = utxo_hints[i];
+        let hash_cache = HashCacheImpl::new(tx);
         // TODO: Error handling
-        let mut engine = EngineInternalImpl::new(
-            utxo.pubkey_script, tx.clone(), i, flags, *utxo.amount
+        let mut engine = EngineImpl::new(
+            utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache
         )
             .unwrap();
         let res = engine.execute();
