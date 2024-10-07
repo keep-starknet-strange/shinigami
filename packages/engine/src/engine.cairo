@@ -147,6 +147,8 @@ pub trait EngineExtrasTrait<T> {
     fn is_witness_active(ref self: Engine<T>, version: i64) -> bool;
     // Return the script since last OP_CODESEPARATOR
     fn sub_script(ref self: Engine<T>) -> ByteArray;
+    // Check if the script has failed and return an error if it has
+    fn check_error_condition(ref self: Engine<T>, final_script: bool) -> Result<(), felt252>;
 }
 
 pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
@@ -202,6 +204,43 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
             i += 1;
         };
         return sub_script;
+    }
+
+    fn check_error_condition(ref self: Engine<T>, final_script: bool) -> Result<(), felt252> {
+        // Check if execution is actually done
+        if self.script_idx < self.scripts.len() {
+            return Result::Err(Error::SCRIPT_UNFINISHED);
+        }
+
+        // Check if witness stack is clean
+        if final_script
+            && self.is_witness_active(0)
+            && self.dstack.len() != 1 { // TODO: Hardcoded 0
+            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
+        }
+        if final_script
+            && self.has_flag(ScriptFlags::ScriptVerifyCleanStack)
+            && self.dstack.len() != 1 {
+            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
+        }
+
+        // Check if stack has at least one item
+        if self.dstack.len() < 1 {
+            return Result::Err(Error::SCRIPT_EMPTY_STACK);
+        }
+
+        // Check the final stack value
+        match self.dstack.pop_bool() {
+            Result::Ok(v) => {
+                if !v {
+                    // TODO: Implement logging of failed scripts if needed
+                    return Result::Err(Error::SCRIPT_FAILED);
+                }
+            },
+            Result::Err(e) => { return Result::Err(e); },
+        }
+
+        Result::Ok(())
     }
 }
 
@@ -640,36 +679,14 @@ pub impl EngineInternalImpl of EngineInternalTrait {
             return Result::Err(err);
         }
 
-        // TODO: CheckErrorCondition
-        if self.is_witness_active(0) && self.dstack.len() != 1 { // TODO: Hardcoded 0
-            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
-        }
-        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack) && self.dstack.len() != 1 {
-            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
-        }
-
-        if self.dstack.len() < 1 {
-            return Result::Err(Error::SCRIPT_EMPTY_STACK);
-        } else {
-            // TODO: pop bool?
-            let top_stack = self.dstack.peek_byte_array(0)?;
-            let ret_val = top_stack.clone();
-            let mut is_ok = false;
-            let mut i = 0;
-            while i != top_stack.len() {
-                if top_stack[i] != 0 {
-                    is_ok = true;
-                    break;
-                }
-                i += 1;
-            };
-            if is_ok {
-                return Result::Ok(ret_val);
-            } else {
-                return Result::Err(Error::SCRIPT_FAILED);
-            }
-        }
-    }
+       match self.check_error_condition(true) {
+            Result::Ok(_) => {
+                // Script executed successfully, return top of stack
+                self.dstack.peek_byte_array(0)
+            },
+            Result::Err(e) => Result::Err(e),
+       }
+    }   
 
     fn verify_witness(
         ref self: Engine<Transaction>, witness: Span<ByteArray>
