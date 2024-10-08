@@ -22,9 +22,9 @@ fi
 
 # Run the script_tests.json tests
 # TODO: Pull from bitcoin-core repo?
-SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests_failing.json
+SCRIPT_TESTS_JSON=$SCRIPT_DIR/sig_der_failing_tests.json
 
-echo "Running script_tests.json tests..."
+echo "Running sig_der_failing_tests.json tests..."
 echo
 SCRIPT_IDX=0
 PASSED=0

@@ -91,7 +91,7 @@ pub fn opcode_checksig<
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
 
-    if full_sig_bytes.len() < 1 || pk_bytes.len() < 1 {
+    if full_sig_bytes.len() < 1 {
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
@@ -99,9 +99,14 @@ pub fn opcode_checksig<
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
+
     let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+
     if res.is_err() {
         // TODO: Some errors can return an error code instead of pushing false?
+        if res.unwrap_err() == Error::SCRIPT_ERR_SIG_DER {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        };
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
@@ -147,6 +152,7 @@ pub fn opcode_checkmultisig<
 ) -> Result<(), felt252> {
     // TODO Error on taproot exec
 
+    let verify_der = engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
     let mut num_pub_keys: i64 = ScriptNum::to_int32(num_keys).into();
@@ -232,36 +238,42 @@ pub fn opcode_checkmultisig<
         if sig.len() == 0 {
             continue;
         }
-
         let res = signature::parse_base_sig_and_pk(ref engine, pub_key, sig);
         if res.is_err() {
             success = false;
             err = res.unwrap_err();
             break;
         }
+
         let (parsed_pub_key, parsed_sig, hash_type) = res.unwrap();
         let sig_hash: u256 = sighash::calc_signature_hash(
             @script, hash_type, engine.transaction, engine.tx_idx
         );
+
         if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
             sig_idx += 1;
             num_sigs -= 1;
         }
     };
+
     if err != 0 {
         return Result::Err(err);
     }
 
-    if !success && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
-        let mut err = '';
-        for s in sigs {
-            if s.len() > 0 {
-                err = Error::SIG_NULLFAIL;
-                break;
+    if !success {
+        if engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
+            let mut err = '';
+            for s in sigs {
+                if s.len() > 0 {
+                    err = Error::SIG_NULLFAIL;
+                    break;
+                }
+            };
+            if err != '' {
+                return Result::Err(err);
             }
-        };
-        if err != '' {
-            return Result::Err(err);
+        } else if verify_der {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
         }
     }
 

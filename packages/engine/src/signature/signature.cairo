@@ -8,6 +8,7 @@ use starknet::secp256k1::{Secp256k1Point};
 use crate::scriptflags::ScriptFlags;
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
+use crate::errors::Error;
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -135,6 +136,7 @@ pub fn check_hash_type_encoding<
 // @param vm A reference to the `Engine` that manages the execution context and provides
 //           the necessary script verification flags.
 // @param sig_bytes The byte array containing the ECDSA signature that needs to be validated.
+
 pub fn check_signature_encoding<
     T,
     +Drop<T>,
@@ -148,10 +150,8 @@ pub fn check_signature_encoding<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
-    ref vm: Engine<T>, sig_bytes: @ByteArray
+    ref vm: Engine<T>, sig_bytes: @ByteArray, strict_encoding: bool
 ) -> Result<(), felt252> {
-    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
-        || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     let low_s = vm.has_flag(ScriptFlags::ScriptVerifyLowS);
 
     // ASN.1 identifiers for sequence and integer types.*
@@ -429,19 +429,60 @@ pub fn parse_base_sig_and_pk<
 >(
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
+    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
+    let verify_der = vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     if sig_bytes.len() == 0 {
-        return Result::Err('empty signature');
+        return if strict_encoding {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err('empty signature')
+        };
     }
+
     // TODO: strct encoding
     let hash_type_offset: usize = sig_bytes.len() - 1;
     let hash_type: u32 = sig_bytes[hash_type_offset].into();
 
-    check_hash_type_encoding(ref vm, hash_type)?;
-    check_signature_encoding(ref vm, sig_bytes)?;
-    check_pub_key_encoding(ref vm, pk_bytes)?;
+    if let Result::Err(e) = check_hash_type_encoding(ref vm, hash_type) {
+        return if verify_der {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
+    if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes, strict_encoding) {
+        return if verify_der {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
 
-    let pub_key = parse_pub_key(pk_bytes)?;
-    let sig = parse_signature(sig_bytes)?;
+    if let Result::Err(e) = check_pub_key_encoding(ref vm, pk_bytes) {
+        return if verify_der {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
+
+    let pub_key = match parse_pub_key(pk_bytes) {
+        Result::Ok(key) => key,
+        Result::Err(e) => if verify_der {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        } else {
+            return Result::Err(e);
+        },
+    };
+
+    let sig = match parse_signature(sig_bytes) {
+        Result::Ok(signature) => signature,
+        Result::Err(e) => if verify_der {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        } else {
+            return Result::Err(e);
+        },
+    };
 
     Result::Ok((pub_key, sig, hash_type))
 }
