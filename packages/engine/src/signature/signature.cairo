@@ -429,8 +429,8 @@ pub fn parse_base_sig_and_pk<
 >(
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
-    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
     let verify_der = vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding) || verify_der;
     if sig_bytes.len() == 0 {
         return if strict_encoding {
             Result::Err(Error::SCRIPT_ERR_SIG_DER)
@@ -442,7 +442,6 @@ pub fn parse_base_sig_and_pk<
     // TODO: strct encoding
     let hash_type_offset: usize = sig_bytes.len() - 1;
     let hash_type: u32 = sig_bytes[hash_type_offset].into();
-
     if let Result::Err(e) = check_hash_type_encoding(ref vm, hash_type) {
         return if verify_der {
             Result::Err(Error::SCRIPT_ERR_SIG_DER)
