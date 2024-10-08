@@ -35,7 +35,7 @@ pub mod opcodes {
 }
 pub mod scriptnum;
 pub use scriptnum::ScriptNum;
-pub mod scriptflags;
+pub mod flags;
 pub mod signature {
     pub mod signature;
     pub mod sighash;

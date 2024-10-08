@@ -1,7 +1,7 @@
 use crate::cond_stack::{ConditionalStack, ConditionalStackImpl};
 use crate::errors::Error;
 use crate::opcodes::{flow, opcodes::Opcode};
-use crate::scriptflags::ScriptFlags;
+use crate::flags::ScriptFlags;
 use crate::stack::{ScriptStack, ScriptStackImpl};
 use crate::transaction::{
     EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
@@ -9,7 +9,7 @@ use crate::transaction::{
 use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
 use shinigami_utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
-use shinigami_utils::bytecode::{hex_to_bytecode, bytecode_to_hex};
+use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::hash::sha256_byte_array;
 
 pub const MAX_STACK_SIZE: u32 = 1000;
@@ -135,13 +135,13 @@ pub impl EngineImpl<
             return Result::Err('Engine::new: invalid flag combo');
         }
 
-        if engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly) && !engine.is_push_only() {
+        if engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly) && !is_push_only(script_sig) {
             return Result::Err('Engine::new: not pushonly');
         }
 
         let mut bip16 = false;
-        if engine.has_flag(ScriptFlags::ScriptBip16) && engine.is_script_hash() {
-            if !engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly) && !engine.is_push_only() {
+        if engine.has_flag(ScriptFlags::ScriptBip16) && is_script_hash(script_pubkey) {
+            if !engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly) && !is_push_only(script_sig) {
                 return Result::Err('Engine::new: p2sh not pushonly');
             }
             engine.bip16 = true;
@@ -185,7 +185,7 @@ pub impl EngineImpl<
                 }
                 witness_program = script_pubkey.clone();
             } else if witness_len != 0 && bip16 {
-                let sig_clone = engine.scripts[0].clone();
+                let sig_clone = script_sig.clone();
                 if sig_clone.len() > 2 {
                     let first_elem = sig_clone[0];
                     let mut remaining = "";
@@ -444,6 +444,38 @@ pub impl EngineImpl<
     }
 }
 
+// Returns true if the script is a script hash
+fn is_script_hash(script_pubkey: @ByteArray) -> bool {
+    if script_pubkey.len() == 23
+        && script_pubkey[0] == Opcode::OP_HASH160
+        && script_pubkey[1] == Opcode::OP_DATA_20
+        && script_pubkey[22] == Opcode::OP_EQUAL {
+        return true;
+    }
+    return false;
+}
+
+
+// Returns true if the script sig is push only
+fn is_push_only(script: @ByteArray) -> bool {
+    let mut i = 0;
+    let mut is_push_only = true;
+    let script_len = script.len();
+    while i != script_len {
+        // TODO: Error handling if i outside bounds
+        let opcode = script[i];
+        if opcode > Opcode::OP_16 {
+            is_push_only = false;
+            break;
+        }
+
+        // TODO: Error handling
+        let data_len = Opcode::data_len(i, script).unwrap();
+        i += data_len + 1;
+    };
+    return is_push_only;
+}
+
 // TODO: Remove functions that can be locally used only
 pub trait EngineInternalTrait<
     I,
@@ -464,10 +496,6 @@ pub trait EngineInternalTrait<
     fn is_witness_active(ref self: Engine<T>, version: i64) -> bool;
     // Return the script since last OP_CODESEPARATOR
     fn sub_script(ref self: Engine<T>) -> ByteArray;
-    // Returns true if the script sig is push only
-    fn is_push_only(ref self: Engine<T>) -> bool;
-    // Returns true if the script is a script hash
-    fn is_script_hash(ref self: Engine<T>) -> bool;
     // Returns the length of the next push data opcode
     fn push_data_len(ref self: Engine<T>, opcode: u8, idx: u32) -> Result<usize, felt252>;
     // Pulls the next len bytes from the script at the given index
@@ -552,37 +580,6 @@ pub impl EngineInternalImpl<
             i += 1;
         };
         return sub_script;
-    }
-
-    fn is_push_only(ref self: Engine<T>) -> bool {
-        let script: @ByteArray = *(self.scripts[0]);
-        let mut i = 0;
-        let mut is_push_only = true;
-        let script_len = script.len();
-        while i != script_len {
-            // TODO: Error handling if i outside bounds
-            let opcode = script[i];
-            if opcode > Opcode::OP_16 {
-                is_push_only = false;
-                break;
-            }
-
-            // TODO: Error handling
-            let data_len = Opcode::data_len(i, script).unwrap();
-            i += data_len + 1;
-        };
-        return is_push_only;
-    }
-
-    fn is_script_hash(ref self: Engine<T>) -> bool {
-        let script_pubkey = *(self.scripts[1]);
-        if script_pubkey.len() == 23
-            && script_pubkey[0] == Opcode::OP_HASH160
-            && script_pubkey[1] == Opcode::OP_DATA_20
-            && script_pubkey[22] == Opcode::OP_EQUAL {
-            return true;
-        }
-        return false;
     }
 
     fn push_data_len(ref self: Engine<T>, opcode: u8, idx: u32) -> Result<usize, felt252> {
