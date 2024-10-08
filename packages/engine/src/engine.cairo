@@ -411,8 +411,8 @@ pub impl EngineImpl<
             return Result::Err(err);
         }
 
-       return self.check_error_condition();
-    }   
+        return self.check_error_condition();
+    }
 }
 
 // TODO: Remove functions that can be locally used only
@@ -721,12 +721,10 @@ pub impl EngineInternalImpl<
         }
 
         // Check if witness stack is clean
-        if self.is_witness_active(0)
-            && self.dstack.len() != 1 { // TODO: Hardcoded 0
+        if self.is_witness_active(0) && self.dstack.len() != 1 { // TODO: Hardcoded 0
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
-        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack)
-            && self.dstack.len() != 1 {
+        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack) && self.dstack.len() != 1 {
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
 
