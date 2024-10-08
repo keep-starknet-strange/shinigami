@@ -148,7 +148,7 @@ pub trait EngineExtrasTrait<T> {
     // Return the script since last OP_CODESEPARATOR
     fn sub_script(ref self: Engine<T>) -> ByteArray;
     // Check if the script has failed and return an error if it has
-    fn check_error_condition(ref self: Engine<T>, final_script: bool) -> Result<(), felt252>;
+    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252>;
 }
 
 pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
@@ -206,20 +206,18 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
         return sub_script;
     }
 
-    fn check_error_condition(ref self: Engine<T>, final_script: bool) -> Result<(), felt252> {
+    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252> {
         // Check if execution is actually done
         if self.script_idx < self.scripts.len() {
             return Result::Err(Error::SCRIPT_UNFINISHED);
         }
 
         // Check if witness stack is clean
-        if final_script
-            && self.is_witness_active(0)
+        if self.is_witness_active(0)
             && self.dstack.len() != 1 { // TODO: Hardcoded 0
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
-        if final_script
-            && self.has_flag(ScriptFlags::ScriptVerifyCleanStack)
+        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack)
             && self.dstack.len() != 1 {
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
@@ -227,20 +225,15 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
         // Check if stack has at least one item
         if self.dstack.len() < 1 {
             return Result::Err(Error::SCRIPT_EMPTY_STACK);
+        } else {
+            // Check the final stack value
+            let is_ok = self.dstack.peek_bool(0)?;
+            if is_ok {
+                return Result::Ok(self.dstack.peek_byte_array(0)?);
+            } else {
+                return Result::Err(Error::SCRIPT_FAILED);
+            }
         }
-
-        // Check the final stack value
-        match self.dstack.pop_bool() {
-            Result::Ok(v) => {
-                if !v {
-                    // TODO: Implement logging of failed scripts if needed
-                    return Result::Err(Error::SCRIPT_FAILED);
-                }
-            },
-            Result::Err(e) => { return Result::Err(e); },
-        }
-
-        Result::Ok(())
     }
 }
 
@@ -679,13 +672,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
             return Result::Err(err);
         }
 
-       match self.check_error_condition(true) {
-            Result::Ok(_) => {
-                // Script executed successfully, return top of stack
-                self.dstack.peek_byte_array(0)
-            },
-            Result::Err(e) => Result::Err(e),
-       }
+       return self.check_error_condition();
     }   
 
     fn verify_witness(
