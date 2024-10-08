@@ -26,6 +26,7 @@ pub mod Error {
     pub const DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM: felt252 = 'Upgradable witness program';
     pub const WITNESS_PROGRAM_INVALID: felt252 = 'Invalid witness program';
     pub const SCRIPT_TOO_LARGE: felt252 = 'Script is too large';
+    pub const SCRIPT_UNFINISHED: felt252 = 'Script unfinished';
     pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
 }
 
