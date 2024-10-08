@@ -3,8 +3,9 @@
 # Runs the tests from bitcoin-core
 # https://github.com/bitcoin/bitcoin/blob/master/src/test/data/
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BASE_DIR=$SCRIPT_DIR/..
+TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BASE_DIR=$TEST_DIR/..
+SCRIPT_DIR=$BASE_DIR/scripts
 
 echo "Building shinigami..."
 cd $BASE_DIR && scarb build
@@ -22,7 +23,14 @@ fi
 
 # Run the script_tests.json tests
 # TODO: Pull from bitcoin-core repo?
-SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests.json
+SCRIPT_TESTS_JSON=$TEST_DIR/script_tests.json
+PASSING_TESTS_JSON=$TEST_DIR/script_tests_passing.json
+FAILED_TESTS_JSON=$TEST_DIR/script_tests_failing.json
+
+rm -f $PASSING_TESTS_JSON
+rm -f $FAILED_TESTS_JSON
+touch $PASSING_TESTS_JSON
+touch $FAILED_TESTS_JSON
 
 echo "Running script_tests.json tests..."
 echo
@@ -224,18 +232,22 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     if [ "$SCRIPT_RESULT" == "$expected_scripterror" ]; then
         echo -e "  \033[0;32mPASS\033[0m"
         PASSED=$((PASSED+1))
+        echo $line, >> $PASSING_TESTS_JSON
     elif [[ "$SCRIPT_RESULT" == "MINIMALDATA" && "$expected_scripterror" == "UNKNOWN_ERROR" ]]; then
         echo -e "  \033[0;32mPASS\033[0m"
         PASSED=$((PASSED+1))
+        echo $line, >> $PASSING_TESTS_JSON
     elif [[ "$SCRIPT_RESULT" == "INVALID_STACK_OPERATION" && "$expected_scripterror" == "UNBALANCED_CONDITIONAL" ]]; then
         # handle cases like 'IF 0 ENDIF' ie no value on stack for if
         echo -e "  \033[0;32mPASS\033[0m"
         PASSED=$((PASSED+1))
+        echo $line, >> $PASSING_TESTS_JSON
     else
         echo -e "  \033[0;31mFAIL\033[0m"
         FAILED=$((FAILED+1))
         echo "scarb cairo-run --package shinigami_cmds '$JOINED_INPUT'"
         echo "$RESULT"
+        echo $line, >> $FAILED_TESTS_JSON
     fi
     echo
 
@@ -253,7 +265,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
 # TODO: Pull from bitcoin-core repo?
 # Run the tx_valid.json tests
 exit 0 # TODO
-TX_VALID_JSON=$SCRIPT_DIR/tx_valid.json
+TX_VALID_JSON=$TEST_DIR/tx_valid.json
 
 jq -c '.[]' $TX_VALID_JSON | while read line; do
     # If line contains on string, ie ["XXX"], skip it
