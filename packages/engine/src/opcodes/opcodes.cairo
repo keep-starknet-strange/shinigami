@@ -179,6 +179,8 @@ pub mod Opcode {
     pub const OP_CHECKMULTISIG: u8 = 174;
     pub const OP_CHECKMULTISIGVERIFY: u8 = 175;
     pub const OP_NOP1: u8 = 176;
+    pub const OP_NOP2: u8 = 177;
+    pub const OP_NOP3: u8 = 178;
     pub const OP_CHECKLOCKTIMEVERIFY: u8 = 177;
     pub const OP_CHECKSEQUENCEVERIFY: u8 = 178;
     pub const OP_NOP4: u8 = 179;

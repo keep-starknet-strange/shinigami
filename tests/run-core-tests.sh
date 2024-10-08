@@ -134,6 +134,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         SCRIPT_SIZE="Execution failed: Engine::new: script too large"
         CLEAN_STACK="Execution failed: Non-clean stack after execute"
         MINIMAL_DATA="Execution failed: Opcode represents non-minimal"
+        SIG_DER="Execution failed: Signature DER error"
         INVALID_WITNESS="Execution failed: Invalid witness program"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
@@ -201,6 +202,10 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="CLEANSTACK"
         elif echo "$RESULT" | grep -q "$MINIMAL_DATA"; then
             SCRIPT_RESULT="MINIMALDATA"
+        elif echo "$RESULT" | grep -q "$INVALID_WITNESS"; then
+            SCRIPT_RESULT="INVALID_WITNESS"
+        elif echo "$RESULT" | grep -q "$SIG_DER"; then
+            SCRIPT_RESULT="SIG_DER"
         else
             SCRIPT_RESULT="FAIL"
         fi

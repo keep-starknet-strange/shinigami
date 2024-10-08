@@ -1,4 +1,4 @@
-use crate::engine::{Engine, EngineExtrasTrait};
+use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
@@ -20,7 +20,8 @@ pub fn opcode_sha256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> 
     let res = compute_sha256_byte_array(arr).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -33,7 +34,8 @@ pub fn opcode_hash160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252>
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
@@ -47,14 +49,16 @@ pub fn opcode_hash256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252>
     let res = compute_sha256_byte_array(@m).span();
     let mut res_bytes: ByteArray = "";
     let mut i: usize = 0;
-    while i != res.len() {
+    let end = res.len();
+    while i != end {
         res_bytes.append_word((*res[i]).into(), 4);
         i += 1;
     };
     let res2 = compute_sha256_byte_array(@res_bytes).span();
     let mut res2_bytes: ByteArray = "";
     let mut j: usize = 0;
-    while j != res2.len() {
+    let end = res2.len();
+    while j != end {
         res2_bytes.append_word((*res2[j]).into(), 4);
         j += 1;
     };
@@ -95,9 +99,14 @@ pub fn opcode_checksig<
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
+
     let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+
     if res.is_err() {
         // TODO: Some errors can return an error code instead of pushing false?
+        if res.unwrap_err() == Error::SCRIPT_ERR_SIG_DER {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        };
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
@@ -143,6 +152,7 @@ pub fn opcode_checkmultisig<
 ) -> Result<(), felt252> {
     // TODO Error on taproot exec
 
+    let verify_der = engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
     let mut num_pub_keys: i64 = ScriptNum::to_int32(num_keys).into();
@@ -204,7 +214,8 @@ pub fn opcode_checkmultisig<
 
     // TODO: add witness context inside engine to check if witness is active
     let mut s: u32 = 0;
-    while s != sigs.len() {
+    let end = sigs.len();
+    while s != end {
         script = signature::remove_signature(script, sigs.at(s));
         s += 1;
     };
@@ -227,36 +238,42 @@ pub fn opcode_checkmultisig<
         if sig.len() == 0 {
             continue;
         }
-
         let res = signature::parse_base_sig_and_pk(ref engine, pub_key, sig);
         if res.is_err() {
             success = false;
             err = res.unwrap_err();
             break;
         }
+
         let (parsed_pub_key, parsed_sig, hash_type) = res.unwrap();
         let sig_hash: u256 = sighash::calc_signature_hash(
-            @script, hash_type, ref engine.transaction, engine.tx_idx
+            @script, hash_type, engine.transaction, engine.tx_idx
         );
+
         if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
             sig_idx += 1;
             num_sigs -= 1;
         }
     };
+
     if err != 0 {
         return Result::Err(err);
     }
 
-    if !success && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
-        let mut err = '';
-        for s in sigs {
-            if s.len() > 0 {
-                err = Error::SIG_NULLFAIL;
-                break;
+    if !success {
+        if engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
+            let mut err = '';
+            for s in sigs {
+                if s.len() > 0 {
+                    err = Error::SIG_NULLFAIL;
+                    break;
+                }
+            };
+            if err != '' {
+                return Result::Err(err);
             }
-        };
-        if err != '' {
-            return Result::Err(err);
+        } else if verify_der {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
         }
     }
 

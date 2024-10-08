@@ -1,6 +1,6 @@
-use crate::engine::{Engine, EngineExtrasTrait};
+use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
 use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
@@ -8,6 +8,7 @@ use starknet::secp256k1::{Secp256k1Point};
 use crate::scriptflags::ScriptFlags;
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
+use crate::errors::Error;
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -26,7 +27,14 @@ pub struct BaseSigVerifier {
     hash_type: u32,
 }
 
-pub trait BaseSigVerifierTrait<T> {
+pub trait BaseSigVerifierTrait<
+    I,
+    O,
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>
+> {
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252>;
@@ -34,18 +42,18 @@ pub trait BaseSigVerifierTrait<T> {
 }
 
 impl BaseSigVerifierImpl<
-    T,
-    +Drop<T>,
     I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    +Drop<I>,
     +Drop<O>,
-    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
-    impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
-> of BaseSigVerifierTrait<T> {
+    +Drop<T>
+> of BaseSigVerifierTrait<I, O, T> {
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252> {
@@ -57,9 +65,9 @@ impl BaseSigVerifierImpl<
 
     // TODO: add signature cache mechanism for optimization
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool {
-        let sig_hash: u256 = sighash::calc_signature_hash(
-            @self.sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
-        );
+        let sig_hash: u256 = sighash::calc_signature_hash::<
+            I, O, T
+        >(@self.sub_script, self.hash_type, vm.transaction, vm.tx_idx);
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
@@ -88,7 +96,19 @@ pub fn compare_data(script: @ByteArray, sig_bytes: @ByteArray, i: u32, push_data
 }
 
 // Check if hash_type obeys scrict encoding requirements.
-pub fn check_hash_type_encoding<T, +Drop<T>>(
+pub fn check_hash_type_encoding<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
     ref vm: Engine<T>, mut hash_type: u32
 ) -> Result<(), felt252> {
     if !vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding) {
@@ -116,11 +136,22 @@ pub fn check_hash_type_encoding<T, +Drop<T>>(
 // @param vm A reference to the `Engine` that manages the execution context and provides
 //           the necessary script verification flags.
 // @param sig_bytes The byte array containing the ECDSA signature that needs to be validated.
-pub fn check_signature_encoding<T, +Drop<T>>(
-    ref vm: Engine<T>, sig_bytes: @ByteArray
+
+pub fn check_signature_encoding<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
+    ref vm: Engine<T>, sig_bytes: @ByteArray, strict_encoding: bool
 ) -> Result<(), felt252> {
-    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding)
-        || vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     let low_s = vm.has_flag(ScriptFlags::ScriptVerifyLowS);
 
     // ASN.1 identifiers for sequence and integer types.*
@@ -249,7 +280,19 @@ fn is_supported_pub_key_type(pk_bytes: @ByteArray) -> bool {
 }
 
 // Checks if a public key adheres to specific encoding rules based on the engine flags.
-pub fn check_pub_key_encoding<T, +Drop<T>>(
+pub fn check_pub_key_encoding<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
     ref vm: Engine<T>, pk_bytes: @ByteArray
 ) -> Result<(), felt252> {
     // TODO check compressed pubkey post segwit
@@ -278,7 +321,7 @@ pub fn check_pub_key_encoding<T, +Drop<T>>(
 //
 // @param pk_bytes The byte array representing the public key to be parsed.
 // @return A `Secp256k1Point` representing the public key on the secp256k1 elliptic curve.
-pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
+pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     let mut pk_bytes_uncompressed = pk_bytes.clone();
 
     if is_compressed_pub_key(pk_bytes) {
@@ -289,17 +332,24 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
         if pk_bytes[0] == 0x03 {
             parity = true;
         }
-        return Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
-            .unwrap_syscall()
-            .expect('Secp256k1Point: Invalid point.');
+        return Result::Ok(
+            Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
+                .unwrap_syscall()
+                .expect('Secp256k1Point: Invalid point.')
+        );
     } else {
         // Extract X coordinate and determine parity from last byte.
+        if pk_bytes_uncompressed.len() != 65 {
+            return Result::Err('Invalid public key length');
+        }
         let pub_key: u256 = u256_from_byte_array_with_offset(@pk_bytes_uncompressed, 1, 32);
         let parity = !(pk_bytes_uncompressed[64] & 1 == 0);
 
-        return Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
-            .unwrap_syscall()
-            .expect('Secp256k1Point: Invalid point.');
+        return Result::Ok(
+            Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
+                .unwrap_syscall()
+                .expect('Secp256k1Point: Invalid point.')
+        );
     }
 }
 
@@ -364,22 +414,74 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 
 // Parses the public key and signature byte arrays based on consensus rules.
 // Returning a tuple containing the parsed public key, signature, and hash type.
-pub fn parse_base_sig_and_pk<T, +Drop<T>>(
+pub fn parse_base_sig_and_pk<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
+    let verify_der = vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding) || verify_der;
     if sig_bytes.len() == 0 {
-        return Result::Err('empty signature');
+        return if strict_encoding {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err('empty signature')
+        };
     }
+
     // TODO: strct encoding
     let hash_type_offset: usize = sig_bytes.len() - 1;
     let hash_type: u32 = sig_bytes[hash_type_offset].into();
+    if let Result::Err(e) = check_hash_type_encoding(ref vm, hash_type) {
+        return if verify_der {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
+    if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes, strict_encoding) {
+        return if verify_der {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
 
-    check_hash_type_encoding(ref vm, hash_type)?;
-    check_signature_encoding(ref vm, sig_bytes)?;
-    check_pub_key_encoding(ref vm, pk_bytes)?;
+    if let Result::Err(e) = check_pub_key_encoding(ref vm, pk_bytes) {
+        return if verify_der {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
 
-    let pub_key = parse_pub_key(pk_bytes);
-    let sig = parse_signature(sig_bytes)?;
+    let pub_key = match parse_pub_key(pk_bytes) {
+        Result::Ok(key) => key,
+        Result::Err(e) => if verify_der {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        } else {
+            return Result::Err(e);
+        },
+    };
+
+    let sig = match parse_signature(sig_bytes) {
+        Result::Ok(signature) => signature,
+        Result::Err(e) => if verify_der {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        } else {
+            return Result::Err(e);
+        },
+    };
 
     Result::Ok((pub_key, sig, hash_type))
 }
@@ -393,7 +495,8 @@ pub fn remove_signature(script: ByteArray, sig_bytes: @ByteArray) -> ByteArray {
     let mut processed_script: ByteArray = "";
     let mut i: usize = 0;
 
-    while i < script.len() {
+    let script_len = script.len();
+    while i < script_len {
         let push_data: u8 = script[i];
         if push_data >= 8 && push_data <= 72 {
             let mut len: usize = push_data.into();
@@ -413,7 +516,7 @@ pub fn remove_signature(script: ByteArray, sig_bytes: @ByteArray) -> ByteArray {
                 continue;
             }
             processed_script.append_byte(push_data);
-            while len != 0 && i - len < script.len() {
+            while len != 0 && i - len < script_len {
                 processed_script.append_byte(script[i - len + 1]);
                 len -= 1;
             };

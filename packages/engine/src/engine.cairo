@@ -4,45 +4,18 @@ use crate::opcodes::{flow, opcodes::Opcode};
 use crate::scriptflags::ScriptFlags;
 use crate::stack::{ScriptStack, ScriptStackImpl};
 use crate::transaction::{
-    Transaction, EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
+use crate::hash_cache::{HashCache, HashCacheTrait};
+use crate::witness;
 use shinigami_utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::hash::sha256_byte_array;
-use crate::witness;
 
-// SigCache implements an Schnorr+ECDSA signature verification cache. Only valid signatures will be
-// added to the cache.
-pub trait SigCacheTrait<S> {
-    // Returns true if sig cache contains sig_hash corresponding to signature and public key
-    fn exists(sig_hash: u256, signature: ByteArray, pub_key: ByteArray) -> bool;
-    // Adds a signature to the cache
-    fn add(sig_hash: u256, signature: ByteArray, pub_key: ByteArray);
-}
-
-// HashCache caches the midstate of segwit v0 and v1 sighashes
-pub trait HashCacheTrait<
-    H,
-    I,
-    O,
-    T,
-    +EngineTransactionInputTrait<I>,
-    +EngineTransactionOutputTrait<O>,
-    +EngineTransactionTrait<T, I, O>
-> {
-    fn new(transaction: @T) -> H;
-
-    // v0 represents sighash midstate used in the base segwit signatures BIP-143
-    fn get_hash_prevouts_v0(self: @H) -> u256;
-    fn get_hash_sequence_v0(self: @H) -> u256;
-    fn get_hash_outputs_v0(self: @H) -> u256;
-
-    // v1 represents sighash midstate used to compute taproot signatures BIP-341
-    fn get_hash_prevouts_v1(self: @H) -> u256;
-    fn get_hash_sequence_v1(self: @H) -> u256;
-    fn get_hash_outputs_v1(self: @H) -> u256;
-    fn get_hash_input_scripts_v1(self: @H) -> u256;
-}
+pub const MAX_STACK_SIZE: u32 = 1000;
+pub const MAX_SCRIPT_SIZE: u32 = 10000;
+pub const MAX_OPS_PER_SCRIPT: u32 = 201;
+pub const MAX_SCRIPT_ELEMENT_SIZE: u32 = 520;
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -52,7 +25,7 @@ pub struct Engine<T> {
     // Is Bip16 p2sh
     bip16: bool,
     // Transaction context being executed
-    pub transaction: T,
+    pub transaction: @T,
     // Input index within the tx containing signature script being executed
     pub tx_idx: u32,
     // Amount of the input being spent
@@ -81,15 +54,13 @@ pub struct Engine<T> {
 
 // TODO: SigCache
 pub trait EngineTrait<
-    E,
     I,
     O,
     T,
-    H,
     +EngineTransactionInputTrait<I>,
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>,
-    +HashCacheTrait<H, I, O, T>
+    +HashCacheTrait<I, O, T>
 > {
     // Create a new Engine with the given script
     fn new(
@@ -98,24 +69,27 @@ pub trait EngineTrait<
         tx_idx: u32,
         flags: u32,
         amount: i64,
-        hash_cache: @H
-    ) -> Result<E, felt252>;
+        hash_cache: @HashCache<T>
+    ) -> Result<Engine<T>, felt252>;
+    // Executes a single step of the script, returning true if more steps are needed
+    fn step(ref self: Engine<T>) -> Result<bool, felt252>;
     // Executes the entire script and returns top of stack or error if script fails
-    fn execute(ref self: E) -> Result<ByteArray, felt252>;
+    fn execute(ref self: Engine<T>) -> Result<ByteArray, felt252>;
 }
 
 pub impl EngineImpl<
     I,
     O,
     T,
-    H,
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput
     >,
-    impl IHashCache: HashCacheTrait<H, I, O, T>,
-> of EngineTrait<Engine<T>, I, O, T, H> {
+    +Drop<I>,
+    +Drop<O>,
+    +Drop<T>,
+> of EngineTrait<I, O, T> {
     // Create a new Engine with the given script
     fn new(
         script_pubkey: @ByteArray,
@@ -123,174 +97,20 @@ pub impl EngineImpl<
         tx_idx: u32,
         flags: u32,
         amount: i64,
-        hash_cache: @H
+        hash_cache: @HashCache<T>
     ) -> Result<Engine<T>, felt252> {
-        let _ = transaction.get_transaction_inputs();
-        return Result::Err('todo');
-    }
-
-    // Executes the entire script and returns top of stack or error if script fails
-    fn execute(ref self: Engine<T>) -> Result<ByteArray, felt252> {
-        // TODO
-        Result::Ok("0")
-    }
-}
-
-pub trait EngineExtrasTrait<T> {
-    // Pulls the next len bytes from the script and advances the program counter
-    fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252>;
-    // Return true if the script engine instance has the specified flag set.
-    fn has_flag(ref self: Engine<T>, flag: ScriptFlags) -> bool;
-    // Pop bool enforcing minimal if
-    fn pop_if_bool(ref self: Engine<T>) -> Result<bool, felt252>;
-    // Return true if the witness program was active
-    fn is_witness_active(ref self: Engine<T>, version: i64) -> bool;
-    // Return the script since last OP_CODESEPARATOR
-    fn sub_script(ref self: Engine<T>) -> ByteArray;
-    // Check if the script has failed and return an error if it has
-    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252>;
-}
-
-pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
-    fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252> {
-        let mut data = "";
-        let mut i = self.opcode_idx + 1;
-        let mut end = i + len;
-        let script = *(self.scripts[self.script_idx]);
-        if end > script.len() {
-            return Result::Err(Error::SCRIPT_INVALID);
-        }
-        while i != end {
-            data.append_byte(script[i]);
-            i += 1;
-        };
-        self.opcode_idx = end - 1;
-        return Result::Ok(data);
-    }
-
-    fn has_flag(ref self: Engine<T>, flag: ScriptFlags) -> bool {
-        self.flags & flag.into() == flag.into()
-    }
-
-    fn pop_if_bool(ref self: Engine<T>) -> Result<bool, felt252> {
-        if !self.is_witness_active(0) || !self.has_flag(ScriptFlags::ScriptVerifyMinimalIf) {
-            return self.dstack.pop_bool();
-        }
-        let top = self.dstack.pop_byte_array()?;
-        if top.len() > 1 {
-            return Result::Err(Error::MINIMAL_IF);
-        }
-
-        if top.len() == 1 && top[0] != 0x01 {
-            return Result::Err(Error::MINIMAL_IF);
-        }
-        return Result::Ok(byte_array_to_bool(@top));
-    }
-
-    fn is_witness_active(ref self: Engine<T>, version: i64) -> bool {
-        return self.witness_version == version && self.witness_program.len() != 0;
-    }
-
-    fn sub_script(ref self: Engine<T>) -> ByteArray {
-        let script = *(self.scripts[self.script_idx]);
-        if self.last_code_sep == 0 {
-            return script.clone();
-        }
-
-        let mut sub_script = "";
-        let mut i = self.last_code_sep;
-        while i != script.len() {
-            sub_script.append_byte(script[i]);
-            i += 1;
-        };
-        return sub_script;
-    }
-
-    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252> {
-        // Check if execution is actually done
-        if self.script_idx < self.scripts.len() {
-            return Result::Err(Error::SCRIPT_UNFINISHED);
-        }
-
-        // Check if witness stack is clean
-        if self.is_witness_active(0)
-            && self.dstack.len() != 1 { // TODO: Hardcoded 0
-            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
-        }
-        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack)
-            && self.dstack.len() != 1 {
-            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
-        }
-
-        // Check if stack has at least one item
-        if self.dstack.len() < 1 {
-            return Result::Err(Error::SCRIPT_EMPTY_STACK);
-        } else {
-            // Check the final stack value
-            let is_ok = self.dstack.peek_bool(0)?;
-            if is_ok {
-                return Result::Ok(self.dstack.peek_byte_array(0)?);
-            } else {
-                return Result::Err(Error::SCRIPT_FAILED);
-            }
-        }
-    }
-}
-
-pub trait EngineInternalTrait {
-    // Create a new Engine with the given script
-    fn new(
-        script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
-    ) -> Result<Engine<Transaction>, felt252>;
-    // Returns true if the script is a script hash
-    fn is_script_hash(ref self: Engine<Transaction>) -> bool;
-    // Returns true if the script sig is push only
-    fn is_push_only(ref self: Engine<Transaction>) -> bool;
-    // Pulls the next len bytes from the script at the given index
-    fn pull_data_at(
-        ref self: Engine<Transaction>, idx: usize, len: usize
-    ) -> Result<ByteArray, felt252>;
-    fn get_dstack(ref self: Engine<Transaction>) -> Span<ByteArray>;
-    fn get_astack(ref self: Engine<Transaction>) -> Span<ByteArray>;
-    // Returns the length of the next push data opcode
-    fn push_data_len(ref self: Engine<Transaction>, opcode: u8, idx: u32) -> Result<usize, felt252>;
-    // Skip the next opcode if it is a push opcode in unexecuted conditional branch
-    fn skip_push_data(ref self: Engine<Transaction>, opcode: u8) -> Result<(), felt252>;
-    // Executes the next instruction in the script
-    fn step(ref self: Engine<Transaction>) -> Result<bool, felt252>;
-    // Executes the entire script and returns top of stack or error if script fails
-    fn execute(ref self: Engine<Transaction>) -> Result<ByteArray, felt252>;
-    // Validate witness program using witness input
-    fn verify_witness(
-        ref self: Engine<Transaction>, witness: Span<ByteArray>
-    ) -> Result<(), felt252>;
-    // Ensure the stack size is within limits
-    fn check_stack_size(ref self: Engine<Transaction>) -> Result<(), felt252>;
-    // Check if the next opcode is a minimal push
-    fn check_minimal_data_push(ref self: Engine<Transaction>, opcode: u8) -> Result<(), felt252>;
-    // Print engine data as a JSON object
-    fn json(ref self: Engine<Transaction>);
-}
-
-pub const MAX_STACK_SIZE: u32 = 1000;
-pub const MAX_SCRIPT_SIZE: u32 = 10000;
-pub const MAX_OPS_PER_SCRIPT: u32 = 201;
-pub const MAX_SCRIPT_ELEMENT_SIZE: u32 = 520;
-
-pub impl EngineInternalImpl of EngineInternalTrait {
-    fn new(
-        script_pubkey: @ByteArray, transaction: Transaction, tx_idx: u32, flags: u32, amount: i64
-    ) -> Result<Engine<Transaction>, felt252> {
-        if tx_idx >= transaction.transaction_inputs.len() {
+        let transaction_inputs = transaction.get_transaction_inputs();
+        if tx_idx >= transaction_inputs.len() {
             return Result::Err('Engine::new: tx_idx invalid');
         }
-        let script_sig = transaction.transaction_inputs[tx_idx].signature_script;
+        let tx_input = transaction_inputs[tx_idx];
+        let script_sig = tx_input.get_signature_script();
 
         if script_sig.len() == 0 && script_pubkey.len() == 0 {
             return Result::Err(Error::SCRIPT_EMPTY_STACK);
         }
 
-        let witness_len = transaction.transaction_inputs[tx_idx].witness.len();
+        let witness_len = tx_input.get_witness().len();
         let mut engine = Engine {
             flags: flags,
             bip16: false,
@@ -330,7 +150,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
 
         let mut i = 0;
         let mut valid_sizes = true;
-        while i != engine.scripts.len() {
+        let scripts_len = engine.scripts.len();
+        while i != scripts_len {
             let script = *(engine.scripts[i]);
             if script.len() > MAX_SCRIPT_SIZE {
                 valid_sizes = false;
@@ -370,7 +191,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                     let mut remaining = "";
                     let mut i = 1;
                     // TODO: Optimize
-                    while i != sig_clone.len() {
+                    let sig_len = sig_clone.len();
+                    while i != sig_len {
                         remaining.append_byte(sig_clone[i]);
                         i += 1;
                     };
@@ -399,94 +221,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         return Result::Ok(engine);
     }
 
-    fn is_script_hash(ref self: Engine<Transaction>) -> bool {
-        let script_pubkey = *(self.scripts[1]);
-        if script_pubkey.len() == 23
-            && script_pubkey[0] == Opcode::OP_HASH160
-            && script_pubkey[1] == Opcode::OP_DATA_20
-            && script_pubkey[22] == Opcode::OP_EQUAL {
-            return true;
-        }
-        return false;
-    }
-
-    fn is_push_only(ref self: Engine<Transaction>) -> bool {
-        let script: @ByteArray = *(self.scripts[0]);
-        let mut i = 0;
-        let mut is_push_only = true;
-        while i != script.len() {
-            // TODO: Error handling if i outside bounds
-            let opcode = script[i];
-            if opcode > Opcode::OP_16 {
-                is_push_only = false;
-                break;
-            }
-
-            // TODO: Error handling
-            let data_len = Opcode::data_len(i, script).unwrap();
-            i += data_len + 1;
-        };
-        return is_push_only;
-    }
-
-    fn pull_data_at(
-        ref self: Engine<Transaction>, idx: usize, len: usize
-    ) -> Result<ByteArray, felt252> {
-        let mut data = "";
-        let mut i = idx;
-        let mut end = i + len;
-        let script = *(self.scripts[self.script_idx]);
-        if end > script.len() {
-            return Result::Err(Error::SCRIPT_INVALID);
-        }
-        while i != end {
-            data.append_byte(script[i]);
-            i += 1;
-        };
-        return Result::Ok(data);
-    }
-
-    fn get_dstack(ref self: Engine<Transaction>) -> Span<ByteArray> {
-        return self.dstack.stack_to_span();
-    }
-
-    fn get_astack(ref self: Engine<Transaction>) -> Span<ByteArray> {
-        return self.astack.stack_to_span();
-    }
-
-    fn push_data_len(
-        ref self: Engine<Transaction>, opcode: u8, idx: u32
-    ) -> Result<usize, felt252> {
-        if opcode == Opcode::OP_PUSHDATA1 {
-            return Result::Ok(
-                byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 1)?).try_into().unwrap()
-            );
-        } else if opcode == Opcode::OP_PUSHDATA2 {
-            return Result::Ok(
-                byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 2)?).try_into().unwrap()
-            );
-        } else if opcode == Opcode::OP_PUSHDATA4 {
-            return Result::Ok(
-                byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 4)?).try_into().unwrap()
-            );
-        }
-        return Result::Err('Engine::push_data_len: invalid');
-    }
-
-    fn skip_push_data(ref self: Engine<Transaction>, opcode: u8) -> Result<(), felt252> {
-        if opcode == Opcode::OP_PUSHDATA1 {
-            self.opcode_idx += self.push_data_len(opcode, self.opcode_idx)? + 2;
-        } else if opcode == Opcode::OP_PUSHDATA2 {
-            self.opcode_idx += self.push_data_len(opcode, self.opcode_idx)? + 3;
-        } else if opcode == Opcode::OP_PUSHDATA4 {
-            self.opcode_idx += self.push_data_len(opcode, self.opcode_idx)? + 5;
-        } else {
-            return Result::Err(Error::SCRIPT_INVALID);
-        }
-        Result::Ok(())
-    }
-
-    fn step(ref self: Engine<Transaction>) -> Result<bool, felt252> {
+    fn step(ref self: Engine<T>) -> Result<bool, felt252> {
+        // TODO: Make it match engine.execute after recent changes
         if self.script_idx >= self.scripts.len() {
             return Result::Ok(false);
         }
@@ -561,12 +297,14 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         return Result::Ok(true);
     }
 
-    fn execute(ref self: Engine<Transaction>) -> Result<ByteArray, felt252> {
+    // Executes the entire script and returns top of stack or error if script fails
+    fn execute(ref self: Engine<T>) -> Result<ByteArray, felt252> {
         let mut err = '';
         // TODO: Optimize with != instead of < and check for bounds errors within the loop
         while self.script_idx < self.scripts.len() {
             let script: @ByteArray = *self.scripts[self.script_idx];
-            while self.opcode_idx < script.len() {
+            let script_len = script.len();
+            while self.opcode_idx < script_len {
                 let opcode = script[self.opcode_idx];
 
                 // Check if the opcode is always illegal (reserved).
@@ -656,8 +394,9 @@ pub impl EngineInternalImpl of EngineInternalTrait {
             if (self.script_idx == 1 && self.witness_program.len() != 0)
                 || (self.script_idx == 2 && self.witness_program.len() != 0 && self.bip16) {
                 self.script_idx += 1;
-                let witness = self.transaction.transaction_inputs[self.tx_idx].witness;
-                let res = self.verify_witness(witness.span());
+                let tx_input = self.transaction.get_transaction_inputs()[self.tx_idx];
+                let witness = tx_input.get_witness();
+                let res = self.verify_witness(witness);
                 if res.is_err() {
                     err = res.unwrap_err();
                     break;
@@ -674,10 +413,248 @@ pub impl EngineInternalImpl of EngineInternalTrait {
 
        return self.check_error_condition();
     }   
+}
 
-    fn verify_witness(
-        ref self: Engine<Transaction>, witness: Span<ByteArray>
-    ) -> Result<(), felt252> {
+// TODO: Remove functions that can be locally used only
+pub trait EngineInternalTrait<
+    I,
+    O,
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>,
+    +HashCacheTrait<I, O, T>,
+> {
+    // Pulls the next len bytes from the script and advances the program counter
+    fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252>;
+    // Return true if the script engine instance has the specified flag set.
+    fn has_flag(ref self: Engine<T>, flag: ScriptFlags) -> bool;
+    // Pop bool enforcing minimal if
+    fn pop_if_bool(ref self: Engine<T>) -> Result<bool, felt252>;
+    // Return true if the witness program was active
+    fn is_witness_active(ref self: Engine<T>, version: i64) -> bool;
+    // Return the script since last OP_CODESEPARATOR
+    fn sub_script(ref self: Engine<T>) -> ByteArray;
+    // Returns true if the script sig is push only
+    fn is_push_only(ref self: Engine<T>) -> bool;
+    // Returns true if the script is a script hash
+    fn is_script_hash(ref self: Engine<T>) -> bool;
+    // Returns the length of the next push data opcode
+    fn push_data_len(ref self: Engine<T>, opcode: u8, idx: u32) -> Result<usize, felt252>;
+    // Pulls the next len bytes from the script at the given index
+    fn pull_data_at(ref self: Engine<T>, idx: usize, len: usize) -> Result<ByteArray, felt252>;
+    // Returns the data stack
+    fn get_dstack(ref self: Engine<T>) -> Span<ByteArray>;
+    // Returns the alt stack
+    fn get_astack(ref self: Engine<T>) -> Span<ByteArray>;
+    // Ensure the stack size is within limits
+    fn check_stack_size(ref self: Engine<T>) -> Result<(), felt252>;
+    // Skip the next opcode if it is a push opcode in unexecuted conditional branch
+    fn skip_push_data(ref self: Engine<T>, opcode: u8) -> Result<(), felt252>;
+    // Check if the next opcode is a minimal push
+    fn check_minimal_data_push(ref self: Engine<T>, opcode: u8) -> Result<(), felt252>;
+    // Validate witness program using witness input
+    fn verify_witness(ref self: Engine<T>, witness: Span<ByteArray>) -> Result<(), felt252>;
+    // Check if the script has failed and return an error if it has
+    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252>;
+    // Prints the engine state as json
+    fn json(ref self: Engine<T>);
+}
+
+pub impl EngineInternalImpl<
+    I,
+    O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    +Drop<T>,
+> of EngineInternalTrait<I, O, T> {
+    fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252> {
+        let mut data = "";
+        let mut i = self.opcode_idx + 1;
+        let mut end = i + len;
+        let script = *(self.scripts[self.script_idx]);
+        if end > script.len() {
+            return Result::Err(Error::SCRIPT_INVALID);
+        }
+        while i != end {
+            data.append_byte(script[i]);
+            i += 1;
+        };
+        self.opcode_idx = end - 1;
+        return Result::Ok(data);
+    }
+
+    fn has_flag(ref self: Engine<T>, flag: ScriptFlags) -> bool {
+        self.flags & flag.into() == flag.into()
+    }
+
+    fn pop_if_bool(ref self: Engine<T>) -> Result<bool, felt252> {
+        if !self.is_witness_active(0) || !self.has_flag(ScriptFlags::ScriptVerifyMinimalIf) {
+            return self.dstack.pop_bool();
+        }
+        let top = self.dstack.pop_byte_array()?;
+        if top.len() > 1 {
+            return Result::Err(Error::MINIMAL_IF);
+        }
+
+        if top.len() == 1 && top[0] != 0x01 {
+            return Result::Err(Error::MINIMAL_IF);
+        }
+        return Result::Ok(byte_array_to_bool(@top));
+    }
+
+    fn is_witness_active(ref self: Engine<T>, version: i64) -> bool {
+        return self.witness_version == version && self.witness_program.len() != 0;
+    }
+
+    fn sub_script(ref self: Engine<T>) -> ByteArray {
+        let script = *(self.scripts[self.script_idx]);
+        if self.last_code_sep == 0 {
+            return script.clone();
+        }
+
+        let mut sub_script = "";
+        let mut i = self.last_code_sep;
+        let script_len = script.len();
+        while i != script_len {
+            sub_script.append_byte(script[i]);
+            i += 1;
+        };
+        return sub_script;
+    }
+
+    fn is_push_only(ref self: Engine<T>) -> bool {
+        let script: @ByteArray = *(self.scripts[0]);
+        let mut i = 0;
+        let mut is_push_only = true;
+        let script_len = script.len();
+        while i != script_len {
+            // TODO: Error handling if i outside bounds
+            let opcode = script[i];
+            if opcode > Opcode::OP_16 {
+                is_push_only = false;
+                break;
+            }
+
+            // TODO: Error handling
+            let data_len = Opcode::data_len(i, script).unwrap();
+            i += data_len + 1;
+        };
+        return is_push_only;
+    }
+
+    fn is_script_hash(ref self: Engine<T>) -> bool {
+        let script_pubkey = *(self.scripts[1]);
+        if script_pubkey.len() == 23
+            && script_pubkey[0] == Opcode::OP_HASH160
+            && script_pubkey[1] == Opcode::OP_DATA_20
+            && script_pubkey[22] == Opcode::OP_EQUAL {
+            return true;
+        }
+        return false;
+    }
+
+    fn push_data_len(ref self: Engine<T>, opcode: u8, idx: u32) -> Result<usize, felt252> {
+        if opcode == Opcode::OP_PUSHDATA1 {
+            return Result::Ok(
+                byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 1)?).try_into().unwrap()
+            );
+        } else if opcode == Opcode::OP_PUSHDATA2 {
+            return Result::Ok(
+                byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 2)?).try_into().unwrap()
+            );
+        } else if opcode == Opcode::OP_PUSHDATA4 {
+            return Result::Ok(
+                byte_array_to_felt252_le(@self.pull_data_at(idx + 1, 4)?).try_into().unwrap()
+            );
+        }
+        return Result::Err('Engine::push_data_len: invalid');
+    }
+
+    fn pull_data_at(ref self: Engine<T>, idx: usize, len: usize) -> Result<ByteArray, felt252> {
+        let mut data = "";
+        let mut i = idx;
+        let mut end = i + len;
+        let script = *(self.scripts[self.script_idx]);
+        if end > script.len() {
+            return Result::Err(Error::SCRIPT_INVALID);
+        }
+        while i != end {
+            data.append_byte(script[i]);
+            i += 1;
+        };
+        return Result::Ok(data);
+    }
+
+    fn get_dstack(ref self: Engine<T>) -> Span<ByteArray> {
+        return self.dstack.stack_to_span();
+    }
+
+    fn get_astack(ref self: Engine<T>) -> Span<ByteArray> {
+        return self.astack.stack_to_span();
+    }
+
+    fn skip_push_data(ref self: Engine<T>, opcode: u8) -> Result<(), felt252> {
+        if opcode == Opcode::OP_PUSHDATA1 {
+            self.opcode_idx += self.push_data_len(opcode, self.opcode_idx)? + 2;
+        } else if opcode == Opcode::OP_PUSHDATA2 {
+            self.opcode_idx += self.push_data_len(opcode, self.opcode_idx)? + 3;
+        } else if opcode == Opcode::OP_PUSHDATA4 {
+            self.opcode_idx += self.push_data_len(opcode, self.opcode_idx)? + 5;
+        } else {
+            return Result::Err(Error::SCRIPT_INVALID);
+        }
+        Result::Ok(())
+    }
+
+    fn check_minimal_data_push(ref self: Engine<T>, opcode: u8) -> Result<(), felt252> {
+        if opcode == Opcode::OP_0 {
+            return Result::Ok(());
+        }
+        let script = *(self.scripts[self.script_idx]);
+        if opcode == Opcode::OP_DATA_1 {
+            let value: u8 = script.at(self.opcode_idx + 1).unwrap();
+            if value >= 1 && value <= 16 {
+                // Should be OP_1 to OP_16
+                return Result::Err(Error::MINIMAL_DATA);
+            }
+            if value == 0x81 {
+                // Should be OP_1NEGATE
+                return Result::Err(Error::MINIMAL_DATA);
+            }
+        }
+
+        // TODO: More checks?
+        if !Opcode::is_push_opcode(opcode) {
+            return Result::Ok(());
+        }
+
+        let len = self.push_data_len(opcode, self.opcode_idx)?;
+        if len <= 75 {
+            // Should have used OP_DATA_X
+            return Result::Err(Error::MINIMAL_DATA);
+        } else if len <= 255 && opcode != Opcode::OP_PUSHDATA1 {
+            // Should have used OP_PUSHDATA1
+            return Result::Err(Error::MINIMAL_DATA);
+        } else if len <= 65535 && opcode != Opcode::OP_PUSHDATA2 {
+            // Should have used OP_PUSHDATA2
+            return Result::Err(Error::MINIMAL_DATA);
+        }
+        return Result::Ok(());
+    }
+
+    fn check_stack_size(ref self: Engine<T>) -> Result<(), felt252> {
+        if self.dstack.len() + self.astack.len() > MAX_STACK_SIZE {
+            return Result::Err(Error::STACK_OVERFLOW);
+        }
+        return Result::Ok(());
+    }
+
+    fn verify_witness(ref self: Engine<T>, witness: Span<ByteArray>) -> Result<(), felt252> {
         if self.is_witness_active(0) {
             // Verify a base witness (segwit) program, ie P2WSH || P2WPKH
             if self.witness_program.len() == 20 {
@@ -737,49 +714,37 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         return Result::Ok(());
     }
 
-    fn check_stack_size(ref self: Engine<Transaction>) -> Result<(), felt252> {
-        if self.dstack.len() + self.astack.len() > MAX_STACK_SIZE {
-            return Result::Err(Error::STACK_OVERFLOW);
+    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252> {
+        // Check if execution is actually done
+        if self.script_idx < self.scripts.len() {
+            return Result::Err(Error::SCRIPT_UNFINISHED);
         }
-        return Result::Ok(());
+
+        // Check if witness stack is clean
+        if self.is_witness_active(0)
+            && self.dstack.len() != 1 { // TODO: Hardcoded 0
+            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
+        }
+        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack)
+            && self.dstack.len() != 1 {
+            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
+        }
+
+        // Check if stack has at least one item
+        if self.dstack.len() < 1 {
+            return Result::Err(Error::SCRIPT_EMPTY_STACK);
+        } else {
+            // Check the final stack value
+            let is_ok = self.dstack.peek_bool(0)?;
+            if is_ok {
+                return Result::Ok(self.dstack.peek_byte_array(0)?);
+            } else {
+                return Result::Err(Error::SCRIPT_FAILED);
+            }
+        }
     }
 
-    fn check_minimal_data_push(ref self: Engine<Transaction>, opcode: u8) -> Result<(), felt252> {
-        if opcode == Opcode::OP_0 {
-            return Result::Ok(());
-        }
-        let script = *(self.scripts[self.script_idx]);
-        if opcode == Opcode::OP_DATA_1 {
-            let value: u8 = script.at(self.opcode_idx + 1).unwrap();
-            if value <= 16 {
-                // Should be OP_1 to OP_16
-                return Result::Err(Error::MINIMAL_DATA);
-            }
-            if value == 0x81 {
-                // Should be OP_1NEGATE
-                return Result::Err(Error::MINIMAL_DATA);
-            }
-        }
-        // TODO: More checks?
-        if !Opcode::is_push_opcode(opcode) {
-            return Result::Ok(());
-        }
-
-        let len = self.push_data_len(opcode, self.opcode_idx)?;
-        if len <= 75 {
-            // Should have used OP_DATA_X
-            return Result::Err(Error::MINIMAL_DATA);
-        } else if len <= 255 && opcode != Opcode::OP_PUSHDATA1 {
-            // Should have used OP_PUSHDATA1
-            return Result::Err(Error::MINIMAL_DATA);
-        } else if len <= 65535 && opcode != Opcode::OP_PUSHDATA2 {
-            // Should have used OP_PUSHDATA2
-            return Result::Err(Error::MINIMAL_DATA);
-        }
-        return Result::Ok(());
-    }
-
-    fn json(ref self: Engine<Transaction>) {
+    fn json(ref self: Engine<T>) {
         self.dstack.json();
     }
 }
