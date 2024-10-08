@@ -18,6 +18,7 @@ dependencies = [
  "shinigami_compiler",
  "shinigami_engine",
  "shinigami_utils",
+ "snforge_std",
 ]
 
 [[package]]
@@ -26,6 +27,7 @@ version = "0.1.0"
 dependencies = [
  "shinigami_engine",
  "shinigami_utils",
+ "snforge_std",
 ]
 
 [[package]]
@@ -36,8 +38,27 @@ dependencies = [
  "sha1",
  "shinigami_compiler",
  "shinigami_utils",
+ "snforge_std",
 ]
 
 [[package]]
 name = "shinigami_utils"
 version = "0.1.0"
+dependencies = [
+ "snforge_std",
+]
+
+[[package]]
+name = "snforge_scarb_plugin"
+version = "0.31.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:1fce075fcbf7fce1b0935f6f9a034549704837fb221da212d3b6e9134cebfdaa"
+
+[[package]]
+name = "snforge_std"
+version = "0.31.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:60ac980b297281f9a59a5f1668cb56bdea1b28fd2f8008008270f9a3c91ad3ba"
+dependencies = [
+ "snforge_scarb_plugin",
+]
