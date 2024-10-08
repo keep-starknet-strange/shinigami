@@ -6,7 +6,13 @@ edition = "2024_07"
 [dependencies]
 
 [dev-dependencies]
-cairo_test.workspace = true
+assert_macros = "2.8.2"
+snforge_std = "0.31.0"
 
 [scripts]
 lint = "scarb fmt"
+
+[profile.dev.cairo]
+unstable-add-statements-code-locations-debug-info = true
+unstable-add-statements-functions-debug-info = true
+inlining-strategy = "avoid"
