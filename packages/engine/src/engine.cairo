@@ -9,7 +9,7 @@ use crate::transaction::{
 use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
 use shinigami_utils::byte_array::{byte_array_to_bool, byte_array_to_felt252_le};
-use shinigami_utils::bytecode::{hex_to_bytecode, bytecode_to_hex};
+use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::hash::sha256_byte_array;
 
 pub const MAX_STACK_SIZE: u32 = 1000;
@@ -411,36 +411,7 @@ pub impl EngineImpl<
             return Result::Err(err);
         }
 
-        // TODO: CheckErrorCondition
-        if self.is_witness_active(0) && self.dstack.len() != 1 { // TODO: Hardcoded 0
-            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
-        }
-        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack) && self.dstack.len() != 1 {
-            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
-        }
-
-        if self.dstack.len() < 1 {
-            return Result::Err(Error::SCRIPT_EMPTY_STACK);
-        } else {
-            // TODO: pop bool?
-            let top_stack = self.dstack.peek_byte_array(0)?;
-            let ret_val = top_stack.clone();
-            let mut is_ok = false;
-            let mut i = 0;
-            let top_stack_len = top_stack.len();
-            while i != top_stack_len {
-                if top_stack[i] != 0 {
-                    is_ok = true;
-                    break;
-                }
-                i += 1;
-            };
-            if is_ok {
-                return Result::Ok(ret_val);
-            } else {
-                return Result::Err(Error::SCRIPT_FAILED);
-            }
-        }
+        return self.check_error_condition();
     }
 }
 
@@ -484,6 +455,8 @@ pub trait EngineInternalTrait<
     fn check_minimal_data_push(ref self: Engine<T>, opcode: u8) -> Result<(), felt252>;
     // Validate witness program using witness input
     fn verify_witness(ref self: Engine<T>, witness: Span<ByteArray>) -> Result<(), felt252>;
+    // Check if the script has failed and return an error if it has
+    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252>;
     // Prints the engine state as json
     fn json(ref self: Engine<T>);
 }
@@ -739,6 +712,34 @@ pub impl EngineInternalImpl<
         }
 
         return Result::Ok(());
+    }
+
+    fn check_error_condition(ref self: Engine<T>) -> Result<ByteArray, felt252> {
+        // Check if execution is actually done
+        if self.script_idx < self.scripts.len() {
+            return Result::Err(Error::SCRIPT_UNFINISHED);
+        }
+
+        // Check if witness stack is clean
+        if self.is_witness_active(0) && self.dstack.len() != 1 { // TODO: Hardcoded 0
+            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
+        }
+        if self.has_flag(ScriptFlags::ScriptVerifyCleanStack) && self.dstack.len() != 1 {
+            return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
+        }
+
+        // Check if stack has at least one item
+        if self.dstack.len() < 1 {
+            return Result::Err(Error::SCRIPT_EMPTY_STACK);
+        } else {
+            // Check the final stack value
+            let is_ok = self.dstack.peek_bool(0)?;
+            if is_ok {
+                return Result::Ok(self.dstack.peek_byte_array(0)?);
+            } else {
+                return Result::Err(Error::SCRIPT_FAILED);
+            }
+        }
     }
 
     fn json(ref self: Engine<T>) {

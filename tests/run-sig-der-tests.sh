@@ -5,6 +5,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BASE_DIR=$SCRIPT_DIR/..
+TEXT_TO_BYTE_ARRAY_SCRIPT="$BASE_DIR/scripts/text_to_byte_array.sh"
 
 echo "Building shinigami..."
 cd $BASE_DIR && scarb build
@@ -22,9 +23,9 @@ fi
 
 # Run the script_tests.json tests
 # TODO: Pull from bitcoin-core repo?
-SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests_failing.json
+SCRIPT_TESTS_JSON=$SCRIPT_DIR/sig_der_failing_tests.json
 
-echo "Running script_tests.json tests..."
+echo "Running sig_der_failing_tests.json tests..."
 echo
 SCRIPT_IDX=0
 PASSED=0
@@ -74,9 +75,9 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     # echo "                  "
 
     # Run the test
-    ENCODED_SCRIPT_SIG=$($SCRIPT_DIR/text_to_byte_array.sh "$scriptSig") # Encoded like [["123", "456", ...], "789", 3]
-    ENCODED_SCRIPT_PUB_KEY=$($SCRIPT_DIR/text_to_byte_array.sh "$scriptPubKey") # Encoded like [["123", "456", ...], "789", 3]
-    ENCODED_FLAGS=$($SCRIPT_DIR/text_to_byte_array.sh "$flags") # Encoded like [["123", "456", ...], "789", 3]
+    ENCODED_SCRIPT_SIG=$($TEXT_TO_BYTE_ARRAY_SCRIPT "$scriptSig") # Encoded like [["123", "456", ...], "789", 3]
+    ENCODED_SCRIPT_PUB_KEY=$($TEXT_TO_BYTE_ARRAY_SCRIPT "$scriptPubKey") # Encoded like [["123", "456", ...], "789", 3]
+    ENCODED_FLAGS=$($TEXT_TO_BYTE_ARRAY_SCRIPT "$flags") # Encoded like [["123", "456", ...], "789", 3]
     # Remove the outer brackets and join the arrays
     TRIMMED_SCRIPT_SIG=$(sed 's/^\[\(.*\)\]$/\1/' <<< $ENCODED_SCRIPT_SIG)
     TRIMMED_SCRIPT_PUB_KEY=$(sed 's/^\[\(.*\)\]$/\1/' <<< $ENCODED_SCRIPT_PUB_KEY)
@@ -86,7 +87,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     if [ $has_witness == "true" ]; then
       #TODO: Value
       echo "  ScriptSig: '$scriptSig' -- ScriptPubKey: '$scriptPubKey' -- Flags: '$flags' -- Expected: $expected_scripterror -- Witness: $witness"
-      ENCODED_WITNESS=$($SCRIPT_DIR/text_to_byte_array.sh "$witness")
+      ENCODED_WITNESS=$($TEXT_TO_BYTE_ARRAY_SCRIPT "$witness")
       TRIMMED_WITNESS=$(sed 's/^\[\(.*\)\]$/\1/' <<< $ENCODED_WITNESS)
       JOINED_INPUT="[$TRIMMED_SCRIPT_SIG,$TRIMMED_SCRIPT_PUB_KEY,$TRIMMED_FLAGS,$TRIMMED_WITNESS]"
       RESULT=$(cd $BASE_DIR && scarb cairo-run --package shinigami_cmds --function main_with_witness --no-build $JOINED_INPUT)

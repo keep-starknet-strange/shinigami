@@ -27,6 +27,8 @@ pub mod Error {
     pub const WITNESS_PROGRAM_INVALID: felt252 = 'Invalid witness program';
     pub const SCRIPT_TOO_LARGE: felt252 = 'Script is too large';
     pub const INVALID_P2MS: felt252 = 'Invalid P2MS transaction';
+    pub const SCRIPT_UNFINISHED: felt252 = 'Script unfinished';
+    pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
