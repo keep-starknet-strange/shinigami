@@ -51,4 +51,5 @@ mod tests {
     mod test_scriptnum;
     mod test_p2pk;
     mod test_p2pkh;
+    mod test_p2ms;
 }
