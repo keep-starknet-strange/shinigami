@@ -45,23 +45,23 @@ fn test_p2ms_3_of_3() {
 }
 
 // #[test]
-// fn test_p2ms_2_of_3() {
-//     // Third P2MS transaction made on 03 Feb 2012
-//     let prevout_pk_script = "0x522102c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242210265bf906bf385fbf3f777832e55a87991bcfbe19b097fb7c5ca2e4025a4d5e5d621027140775f9337088b982780b7e380b7e66907cc4d4a538d7332c427e5a78896a153ae";
-//     let prev_out = UTXO {
-//         amount: 1500000,
-//         pubkey_script: hex_to_bytecode(@prevout_pk_script),
-//         block_height: 163686
-//     };
+fn test_p2ms_2_of_3() {
+    // Third P2MS transaction made on 03 Feb 2012
+    let prevout_pk_script = "0x52410496ec45f878b62c46c4be8e336dff7cc58df9b502178cc240eb3d31b1266f69f5767071aa3e017d1b82a0bb28dab5e27d4d8e9725b3e68ed5f8a2d45c730621e34104cc71eb30d653c0c3163990c47b976f3fb3f37cccdcbedb169a1dfef58bbfbfaff7d8a473e7e2e6d317b87bafe8bde97e3cf8f065dec022b51d11fcdd0d348ac4410461cbdcc5409fb4b4d42b51d33381354d80e550078cb532a34bfa2fcfdeb7d76519aecc62770f5b0e4ef8551946d8a540911abe3e7854a26f39f58b25c15342af53ae";
+    let prev_out = UTXO {
+        amount: 1500000,
+        pubkey_script: hex_to_bytecode(@prevout_pk_script),
+        block_height: 163686
+    };
 
-//     let raw_transaction_hex = "0x01000000011b022baf6bf8ae9d9852e9d8e1b3a1089fe1f7f8b2b5c17c2b8a536b9b9955d0000000004847304402200f8f5a1e298f823a1468ffdc9c30c6088f7d3df4d9e648c4cea0f969f6670d4602200bc4a92b23354b7ce51f1bb77bf2c1b31e3d4fc7165860e30c3147e5a3b819e001ffffffff0160ea0000000000001976a914cbc20a7664f2f69e5355aa427045bc15e7c6c77288ac00000000";
-//     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-//     let transaction = TransactionTrait::deserialize(raw_transaction);
-//     let utxo_hints = array![prev_out];
+    let raw_transaction_hex = "0x010000000139c92b102879eb95f14e7344e4dd7d481e1238b1bfb1fa0f735068d2927b231400000000910047304402208fc06d216ebb4b6a3a3e0f906e1512c372fa8a9c2a92505d04e9b451ea7acd0c0220764303bb7e514ddd77855949d941c934e9cbda8e3c3827bfdb5777477e73885b014730440220569ec6d2e81625dd18c73920e0079cdb4c1d67d3d7616759eb0c18cf566b3d3402201c60318f0a62e3ba85ca0f158d4dfe63c0779269eb6765b6fc939fc51e7a8ea901ffffffff0140787d01000000001976a914641ad5051edd97029a003fe9efb29359fcee409d88ac00000000";
+    let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
+    let transaction = TransactionTrait::deserialize(raw_transaction);
+    let utxo_hints = array![prev_out];
 
-//     let res = validate::validate_p2ms(@transaction, 0, utxo_hints);
-//     assert!(res.is_ok(), "P2MS 2-of-3 transaction validation failed");
-// }
+    let res = validate::validate_p2ms(@transaction, 0, utxo_hints);
+    assert!(res.is_ok(), "P2MS 2-of-3 transaction validation failed");
+}
 
 // #[test]
 // fn test_p2ms_edge_cases() {
