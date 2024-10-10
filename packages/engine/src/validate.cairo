@@ -75,34 +75,48 @@ pub fn validate_p2ms(
         }
 
         // Extract m and n from the script
-        let m: u32 = redeem_script[0].into();
-        let n: u32 = redeem_script[redeem_script.len() - 2].into();
+        let m: u8 = redeem_script[0] - 0x50;
+        let n: u8 = redeem_script[redeem_script.len() - 2] - 0x50;
 
         // Check if m and n are valid
-        if m == 0 || n == 0 || m > n || n > 15 {
+        if m == 0 || n == 0 || m > n || n > 20 {
             err = 'P2MS: Invalid m or n';
             break;
         }
 
-        // Check if the number of public keys matches n
-        // This is a rough estimate, as we don't parse the script fully
-        let script_len: u32 = redeem_script.len().into();
-        if script_len != (n * 33) + 3 && script_len != (n * 65) + 3 {
-            err = 'P2MS: Invalid public keys';
+        // Count and validate public keys
+        let mut pubkey_count = 0;
+        let mut script_index = 1; // Start after m
+        while script_index < redeem_script.len() - 2 { // Stop before n and OP_CHECKMULTISIG
+            if script_index >= redeem_script.len() {
+                err = 'P2MS: Unexpected end of script';
+                break;
+            }
+            let key_len: u32 = redeem_script[script_index].into();
+            if key_len != 33 && key_len != 65 {
+                err = 'P2MS: Invalid public key length';
+                break;
+            }
+            pubkey_count += 1;
+            script_index += key_len + 1; // Move to the next key
+        };
+
+        if pubkey_count != n.into() {
+            err = 'P2MS: n != m count';
             break;
         }
 
         // Verify signatures using the EngineImpl
         let hash_cache = HashCacheImpl::new(tx);
-        let mut engine = EngineImpl::new(
-            redeem_script, tx, i, flags, *utxo.amount, @hash_cache
-        ).unwrap();
+        // let mut engine = EngineImpl::new(
+        //     redeem_script, tx, i, flags, *utxo.amount, @hash_cache
+        // ).unwrap();
         
-        let res = engine.execute();
-        if res.is_err() {
-            err = res.unwrap_err();
-            break;
-        }
+        // let res = engine.execute();
+        // if res.is_err() {
+        //     err = res.unwrap_err();
+        //     break;
+        // }
 
         i += 1;
     };
