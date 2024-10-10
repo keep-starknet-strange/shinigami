@@ -108,15 +108,15 @@ pub fn validate_p2ms(
 
         // Verify signatures using the EngineImpl
         let hash_cache = HashCacheImpl::new(tx);
-        // let mut engine = EngineImpl::new(
-        //     redeem_script, tx, i, flags, *utxo.amount, @hash_cache
-        // ).unwrap();
+        let mut engine = EngineImpl::new(
+            redeem_script, tx, i, flags, *utxo.amount, @hash_cache
+        ).unwrap();
         
-        // let res = engine.execute();
-        // if res.is_err() {
-        //     err = res.unwrap_err();
-        //     break;
-        // }
+        let res = engine.execute();
+        if res.is_err() {
+            err = res.unwrap_err();
+            break;
+        }
 
         i += 1;
     };
