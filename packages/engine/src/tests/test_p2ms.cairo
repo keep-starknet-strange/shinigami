@@ -44,9 +44,9 @@ fn test_p2ms_3_of_3() {
 #[test]
 fn test_p2ms_2_of_3() {
     // Third P2MS transaction made on 03 Feb 2012
-    let prevout_pk_script = "0x522102c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242210318c57da9ddf7fb52499e98d641808c8a8fd172dd61d681458369694e7cffbe1321031104e387cd1a103c88fec6cf9cffdc03493c2ad85252c7eb69b0c61a06839d7153ae";
+    let prevout_pk_script = "0x522102c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242210265bf906bf385fbf3f777832e55a87991bcfbe19b097fb7c5ca2e4025a4d5e5d621027140775f9337088b982780b7e380b7e66907cc4d4a538d7332c427e5a78896a153ae";
     let prev_out = UTXO {
-        amount: 3000000,
+        amount: 1500000,
         pubkey_script: hex_to_bytecode(@prevout_pk_script),
         block_height: 163686
     };
@@ -71,22 +71,21 @@ fn test_p2ms_edge_cases() {
     };
 
     // Test case for 1-of-2 multisig with an invalid public key
-    let prevout_pk_script_1of2_invalid = "0x512102a5613bd857b7048924264d1e70e08fb2a7e6527d32b7ab1bb993ac59964ff397210000000000000000000000000000000000000000000000000000000000000000052ae";
+    let prevout_pk_script_1of2_invalid = "0x512102953397b893148acec2a9da8341159e9e7fb3d32987c3563e8bdf22116213623210000000000000000000000000000000000000000000000000000000000000000052ae";
     let prev_out_1of2_invalid = UTXO {
-        amount: 2000000,
+        amount: 1000000,
         pubkey_script: hex_to_bytecode(@prevout_pk_script_1of2_invalid),
         block_height: 100001
     };
 
-    // Test case for maximum standard 3-of-3 multisig
-    let prevout_pk_script_3of3 = "0x532102a5613bd857b7048924264d1e70e08fb2a7e6527d32b7ab1bb993ac59964ff39721034f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa2102e1781b38a2ae0b9e6b7e6906e4d1efb9d4f3d887a4c5d8c3f71010e2c7da32d953ae";
+    // Test case for 3-of-3 multisig with maximum allowed public keys
+    let prevout_pk_script_3of3 = "0x532102953397b893148acec2a9da8341159e9e7fb3d32987c3563e8bdf22116213623210386d8884a5a1f9de0b2c9749462a1b9e8c9ecd9c8d9c589be6617e7dd05c9a745210211db4efc20880c5b57cfa4ee2495266c3d1f7f25c0b033967f00db12773a0c3353ae";
     let prev_out_3of3 = UTXO {
-        amount: 3000000,
+        amount: 1000000,
         pubkey_script: hex_to_bytecode(@prevout_pk_script_3of3),
         block_height: 100002
     };
 
-    // Create a transaction that spends from all these outputs
     let raw_transaction_hex = "0x0100000003..."; // Replace with actual transaction hex
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
     let transaction = TransactionTrait::deserialize(raw_transaction);
