@@ -17,20 +17,20 @@ pub mod opcodes {
     pub mod arithmetic;
     pub mod crypto;
     pub mod utils;
-    // #[cfg(test)]
-    // mod tests {
-    //     mod test_constants;
-    //     mod test_flow;
-    //     mod test_locktime;
-    //     mod test_stack;
-    //     mod test_splice;
-    //     mod test_bitwise;
-    //     mod test_arithmetic;
-    //     mod test_crypto;
-    //     mod test_reserved;
-    //     mod test_disabled;
-    //     mod utils;
-    // }
+    #[cfg(test)]
+    mod tests {
+        mod test_constants;
+        mod test_flow;
+        mod test_locktime;
+        mod test_stack;
+        mod test_splice;
+        mod test_bitwise;
+        mod test_arithmetic;
+        mod test_crypto;
+        mod test_reserved;
+        mod test_disabled;
+        mod utils;
+    }
     pub use opcodes::Opcode;
 }
 pub mod scriptnum;

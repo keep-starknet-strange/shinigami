@@ -41,9 +41,7 @@ pub fn validate_transaction(
     Result::Ok(())
 }
 
-pub fn validate_p2ms(
-    tx: @Transaction, flags: u32, utxo_hints: Array<UTXO>
-) -> Result<(), felt252> {
+pub fn validate_p2ms(tx: @Transaction, flags: u32, utxo_hints: Array<UTXO>) -> Result<(), felt252> {
     // Check if the transaction has at least one input
     if tx.transaction_inputs.len() == 0 {
         return Result::Err('P2MS: No inputs');
@@ -69,7 +67,8 @@ pub fn validate_p2ms(
         }
 
         // Check if the redeem script follows the P2MS pattern
-        if redeem_script.len() < 4 || redeem_script[redeem_script.len() - 1] != Opcode::OP_CHECKMULTISIG {
+        if redeem_script.len() < 4 || redeem_script[redeem_script.len()
+            - 1] != Opcode::OP_CHECKMULTISIG {
             err = 'P2MS: Invalid redeem script';
             break;
         }
@@ -108,10 +107,9 @@ pub fn validate_p2ms(
 
         // Verify signatures using the EngineImpl
         let hash_cache = HashCacheImpl::new(tx);
-        let mut engine = EngineImpl::new(
-            redeem_script, tx, i, flags, *utxo.amount, @hash_cache
-        ).unwrap();
-        
+        let mut engine = EngineImpl::new(redeem_script, tx, i, flags, *utxo.amount, @hash_cache)
+            .unwrap();
+
         let res = engine.execute();
         if res.is_err() {
             err = res.unwrap_err();
