@@ -5,6 +5,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BASE_DIR=$SCRIPT_DIR/..
+TEXT_TO_BYTE_ARRAY_SCRIPT="$BASE_DIR/scripts/text_to_byte_array.sh"
 
 echo "Building shinigami..."
 cd $BASE_DIR && scarb build
@@ -74,9 +75,9 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     # echo "                  "
 
     # Run the test
-    ENCODED_SCRIPT_SIG=$($SCRIPT_DIR/text_to_byte_array.sh "$scriptSig") # Encoded like [["123", "456", ...], "789", 3]
-    ENCODED_SCRIPT_PUB_KEY=$($SCRIPT_DIR/text_to_byte_array.sh "$scriptPubKey") # Encoded like [["123", "456", ...], "789", 3]
-    ENCODED_FLAGS=$($SCRIPT_DIR/text_to_byte_array.sh "$flags") # Encoded like [["123", "456", ...], "789", 3]
+    ENCODED_SCRIPT_SIG=$($TEXT_TO_BYTE_ARRAY_SCRIPT "$scriptSig") # Encoded like [["123", "456", ...], "789", 3]
+    ENCODED_SCRIPT_PUB_KEY=$($TEXT_TO_BYTE_ARRAY_SCRIPT "$scriptPubKey") # Encoded like [["123", "456", ...], "789", 3]
+    ENCODED_FLAGS=$($TEXT_TO_BYTE_ARRAY_SCRIPT "$flags") # Encoded like [["123", "456", ...], "789", 3]
     # Remove the outer brackets and join the arrays
     TRIMMED_SCRIPT_SIG=$(sed 's/^\[\(.*\)\]$/\1/' <<< $ENCODED_SCRIPT_SIG)
     TRIMMED_SCRIPT_PUB_KEY=$(sed 's/^\[\(.*\)\]$/\1/' <<< $ENCODED_SCRIPT_PUB_KEY)
