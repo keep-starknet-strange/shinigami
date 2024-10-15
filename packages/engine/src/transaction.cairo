@@ -112,9 +112,12 @@ pub impl TransactionImpl of TransactionTrait {
     fn btc_decode(raw: ByteArray, encoding: u32) -> Transaction {
         let mut offset: usize = 0;
         let version: i32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
+        if encoding == WITNESS_ENCODING {
+            // consume flags
+            offset += 2;
+        }
         // TODO: ReadVerIntBuf
         let input_len: u8 = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
-        // TODO: input_len = 0 -> segwit
         // TODO: Error handling and bounds checks
         // TODO: Byte orderings
         let mut i = 0;
@@ -150,18 +153,61 @@ pub impl TransactionImpl of TransactionTrait {
             outputs.append(output);
             i += 1;
         };
-        // TODO: Witness
+
+        let mut inputs_with_witness: Array<TransactionInput> = array![];
+
+        if encoding == WITNESS_ENCODING {
+            // one witness for each input
+            i = 0;
+            while i != input_len {
+                let witness_count: u8 = byte_array_value_at_le(@raw, ref offset, 1)
+                    .try_into()
+                    .unwrap();
+                let mut j = 0;
+                let mut witness: Array<ByteArray> = array![];
+                while j != witness_count {
+                    let script_len = byte_array_value_at_le(@raw, ref offset, 1)
+                        .try_into()
+                        .unwrap();
+                    let script = sub_byte_array(@raw, ref offset, script_len);
+                    witness.append(script);
+                    j += 1;
+                };
+                // update Transaction Input
+                let input = inputs.at(i.into());
+                let mut input_with_witness = input.clone();
+                input_with_witness.witness = witness;
+                inputs_with_witness.append(input_with_witness);
+                i += 1;
+            };
+        }
         let locktime: u32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
-        Transaction {
-            version: version,
-            transaction_inputs: inputs,
-            transaction_outputs: outputs,
-            locktime: locktime,
+        if encoding == WITNESS_ENCODING {
+            Transaction {
+                version: version,
+                transaction_inputs: inputs_with_witness,
+                transaction_outputs: outputs,
+                locktime: locktime,
+            }
+        } else {
+            Transaction {
+                version: version,
+                transaction_inputs: inputs,
+                transaction_outputs: outputs,
+                locktime: locktime,
+            }
         }
     }
 
     fn deserialize(raw: ByteArray) -> Transaction {
-        Self::btc_decode(raw, WITNESS_ENCODING)
+        let mut offset: usize = 0;
+        let _version: i32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
+        let flags: u16 = byte_array_value_at_le(@raw, ref offset, 2).try_into().unwrap();
+        if flags == 0x100 {
+            Self::btc_decode(raw, WITNESS_ENCODING)
+        } else {
+            Self::btc_decode(raw, BASE_ENCODING)
+        }
     }
 
     fn deserialize_no_witness(raw: ByteArray) -> Transaction {
