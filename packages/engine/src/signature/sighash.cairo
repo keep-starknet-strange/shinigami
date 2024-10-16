@@ -1,13 +1,15 @@
 use crate::transaction::{
-    Transaction, TransactionTrait, TransactionInput, TransactionOutput, EngineTransactionTrait,
+    EngineTransaction, EngineTransactionTrait, EngineInternalTransactionImpl,
     EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::signature::constants;
 use crate::signature::utils::{
     remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
 };
+use crate::hash_cache::SegwitSigHashMidstate;
 use shinigami_utils::bytecode::int_size_in_bytes;
 use shinigami_utils::hash::double_sha256;
+use crate::opcodes::opcodes::Opcode;
 
 // Calculates the signature hash for specified transaction data and hash type.
 pub fn calc_signature_hash<
@@ -38,7 +40,7 @@ pub fn calc_signature_hash<
     // Remove any OP_CODESEPARATOR opcodes from the subscript.
     let mut signature_script: @ByteArray = remove_opcodeseparator(sub_script);
     // Create a modified copy of the transaction according to the hash type.
-    let transaction_copy: Transaction = transaction_procedure(
+    let transaction_copy: EngineTransaction = transaction_procedure(
         transaction, tx_idx, signature_script.clone(), hash_type
     );
 
@@ -50,127 +52,108 @@ pub fn calc_signature_hash<
 }
 
 // Calculates the signature hash for a Segregated Witness (SegWit) transaction and hash type.
-pub fn calc_witness_transaction_hash(
-    sub_script: @ByteArray, hash_type: u32, ref transaction: Transaction, index: u32, amount: i64
+pub fn calc_witness_signature_hash<
+    I,
+    O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    +Drop<I>,
+    +Drop<O>,
+    +Drop<T>
+>(
+    sub_script: @ByteArray,
+    sig_hashes: @SegwitSigHashMidstate,
+    hash_type: u32,
+    transaction: @T,
+    tx_idx: u32,
+    amount: i64
 ) -> u256 {
-    let transaction_outputs_len: usize = transaction.transaction_outputs.len();
-    if hash_type & constants::SIG_HASH_MASK == constants::SIG_HASH_SINGLE
-        && index > transaction_outputs_len {
-        return 0x01;
-    }
+    // TODO: Bounds check?
+
     let mut sig_hash_bytes: ByteArray = "";
-    let mut input_byte: ByteArray = "";
-    let mut output_byte: ByteArray = "";
-    let mut sequence_byte: ByteArray = "";
-    // Serialize the transaction's version number.
-    sig_hash_bytes.append_word_rev(transaction.version.into(), 4);
-    // Serialize each input in the transaction.
-    let input_len: usize = transaction.transaction_inputs.len();
-    let mut i: usize = 0;
-    while i != input_len {
-        let input: @TransactionInput = transaction.transaction_inputs.at(i);
+    sig_hash_bytes.append_word_rev(transaction.get_version().into(), 4);
 
-        let input_txid: u256 = *input.previous_outpoint.txid;
-        let vout: u32 = *input.previous_outpoint.vout;
-        let sequence: u32 = *input.sequence;
-
-        input_byte.append_word(input_txid.high.into(), 16);
-        input_byte.append_word(input_txid.low.into(), 16);
-        input_byte.append_word_rev(vout.into(), 4);
-        sequence_byte.append_word_rev(sequence.into(), 4);
-
-        i += 1;
-    };
-    // Serialize each output if not using SIG_HASH_SINGLE or SIG_HASH_NONE else serialize only the
-    // relevant output.
-    if hash_type & constants::SIG_HASH_SINGLE != constants::SIG_HASH_SINGLE
-        && hash_type & constants::SIG_HASH_NONE != constants::SIG_HASH_NONE {
-        let output_len: usize = transaction.transaction_outputs.len();
-
-        i = 0;
-        while i != output_len {
-            let output: @TransactionOutput = transaction.transaction_outputs.at(i);
-            let value: i64 = *output.value;
-            let script: @ByteArray = output.publickey_script;
-            let script_len: usize = script.len();
-
-            output_byte.append_word_rev(value.into(), 8);
-            output_byte.append_word_rev(script_len.into(), int_size_in_bytes(script_len));
-            output_byte.append(script);
-
-            i += 1;
-        };
-    } else if hash_type & constants::SIG_HASH_SINGLE == constants::SIG_HASH_SINGLE {
-        if index < transaction.transaction_outputs.len() {
-            let output: @TransactionOutput = transaction.transaction_outputs.at(index);
-            let value: i64 = *output.value;
-            let script: @ByteArray = output.publickey_script;
-            let script_len: usize = script.len();
-
-            output_byte.append_word_rev(value.into(), 8);
-            output_byte.append_word_rev(script_len.into(), int_size_in_bytes(script_len));
-            output_byte.append(script);
-        }
-    }
-    let mut hash_prevouts: u256 = 0;
-    if hash_type & constants::SIG_HASH_ANYONECANPAY != constants::SIG_HASH_ANYONECANPAY {
-        hash_prevouts = double_sha256(@input_byte);
+    let zero: u256 = 0;
+    if hash_type & constants::SIG_HASH_ANYONECANPAY == 0 {
+        let hash_prevouts_v0: u256 = *sig_hashes.hash_prevouts_v0;
+        sig_hash_bytes.append_word(hash_prevouts_v0.high.into(), 16);
+        sig_hash_bytes.append_word(hash_prevouts_v0.low.into(), 16);
+    } else {
+        sig_hash_bytes.append_word(zero.high.into(), 16);
+        sig_hash_bytes.append_word(zero.low.into(), 16);
     }
 
-    let mut hash_sequence: u256 = 0;
-    if hash_type & constants::SIG_HASH_ANYONECANPAY != constants::SIG_HASH_ANYONECANPAY
-        && hash_type & constants::SIG_HASH_SINGLE != constants::SIG_HASH_SINGLE
-        && hash_type & constants::SIG_HASH_NONE != constants::SIG_HASH_NONE {
-        hash_sequence = double_sha256(@sequence_byte);
+    if hash_type & constants::SIG_HASH_ANYONECANPAY == 0
+        && hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_SINGLE
+        && hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_NONE {
+        let hash_sequence_v0: u256 = *sig_hashes.hash_sequence_v0;
+        sig_hash_bytes.append_word(hash_sequence_v0.high.into(), 16);
+        sig_hash_bytes.append_word(hash_sequence_v0.low.into(), 16);
+    } else {
+        sig_hash_bytes.append_word(zero.high.into(), 16);
+        sig_hash_bytes.append_word(zero.low.into(), 16);
     }
 
-    let mut hash_outputs: u256 = 0;
-    if hash_type & constants::SIG_HASH_ANYONECANPAY == constants::SIG_HASH_ANYONECANPAY
-        || hash_type & constants::SIG_HASH_SINGLE == constants::SIG_HASH_SINGLE
-        || hash_type & constants::SIG_HASH_ALL == constants::SIG_HASH_ALL {
-        hash_sequence = double_sha256(@output_byte);
-    }
+    let input = transaction.get_transaction_inputs().at(tx_idx);
+    sig_hash_bytes.append_word(input.get_prevout_txid().high.into(), 16);
+    sig_hash_bytes.append_word(input.get_prevout_txid().low.into(), 16);
+    sig_hash_bytes.append_word_rev(input.get_prevout_vout().into(), 4);
 
-    // Append the hashed previous outputs and sequences.
-    sig_hash_bytes.append_word_rev(hash_prevouts.high.into(), 16);
-    sig_hash_bytes.append_word_rev(hash_prevouts.low.into(), 16);
-    sig_hash_bytes.append_word_rev(hash_sequence.high.into(), 16);
-    sig_hash_bytes.append_word_rev(hash_sequence.low.into(), 16);
-    // Add the input being signed.
-
-    let mut input: @TransactionInput = transaction.transaction_inputs.at(i);
-    let input_txid: u256 = *input.previous_outpoint.txid;
-    let vout: u32 = *input.previous_outpoint.vout;
-    let sequence: u32 = *input.sequence;
-    sig_hash_bytes.append_word_rev(input_txid.high.into(), 16);
-    sig_hash_bytes.append_word_rev(input_txid.low.into(), 16);
-    sig_hash_bytes.append_word_rev(vout.into(), 4);
-    // Check if the script is a witness pubkey hash and serialize accordingly.
     if is_witness_pub_key_hash(sub_script) {
+        // P2WKH with 0x19 OP_DUP OP_HASH160 OP_DATA_20 <pubkey hash> OP_EQUALVERIFY OP_CHECKSIG
         sig_hash_bytes.append_byte(0x19);
-        sig_hash_bytes.append_byte(0x76);
-        sig_hash_bytes.append_byte(0xa9);
-        sig_hash_bytes.append_byte(0x14);
-        i = 2;
+        sig_hash_bytes.append_byte(Opcode::OP_DUP);
+        sig_hash_bytes.append_byte(Opcode::OP_HASH160);
+        sig_hash_bytes.append_byte(Opcode::OP_DATA_20);
         let subscript_len = sub_script.len();
+        // TODO: extractWitnessPubKeyHash
+        let mut i: usize = 2;
         while i != subscript_len {
             sig_hash_bytes.append_byte(sub_script[i]);
             i += 1;
         };
-        sig_hash_bytes.append_byte(0x88);
-        sig_hash_bytes.append_byte(0xac);
+        sig_hash_bytes.append_byte(Opcode::OP_EQUALVERIFY);
+        sig_hash_bytes.append_byte(Opcode::OP_CHECKSIG);
     } else {
+        // TODO: VarIntBuf
+        sig_hash_bytes
+            .append_word_rev(sub_script.len().into(), int_size_in_bytes(sub_script.len()));
         sig_hash_bytes.append(sub_script);
     }
-    // Serialize the amount and sequence number.
+
     sig_hash_bytes.append_word_rev(amount.into(), 8);
-    sig_hash_bytes.append_word_rev(sequence.into(), 4);
-    // Serialize the hashed outputs.
-    sig_hash_bytes.append_word_rev(hash_outputs.high.into(), 16);
-    sig_hash_bytes.append_word_rev(hash_outputs.low.into(), 16);
-    // Serialize the transaction's locktime and hash type.
-    sig_hash_bytes.append_word_rev(transaction.locktime.into(), 4);
+    sig_hash_bytes.append_word_rev(input.get_sequence().into(), 4);
+
+    if hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_SINGLE
+        && hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_NONE {
+        let hash_outputs_v0: u256 = *sig_hashes.hash_outputs_v0;
+        sig_hash_bytes.append_word(hash_outputs_v0.high.into(), 16);
+        sig_hash_bytes.append_word(hash_outputs_v0.low.into(), 16);
+    } else if hash_type & constants::SIG_HASH_MASK == constants::SIG_HASH_SINGLE
+        && tx_idx < transaction.get_transaction_outputs().len() {
+        let output = transaction.get_transaction_outputs().at(tx_idx);
+        let mut output_bytes: ByteArray = "";
+        output_bytes.append_word_rev(output.get_value().into(), 8);
+        output_bytes
+            .append_word_rev(
+                output.get_publickey_script().len().into(),
+                int_size_in_bytes(output.get_publickey_script().len())
+            );
+        output_bytes.append(output.get_publickey_script());
+        let hashed_output: u256 = double_sha256(@output_bytes);
+        sig_hash_bytes.append_word(hashed_output.high.into(), 16);
+        sig_hash_bytes.append_word(hashed_output.low.into(), 16);
+    } else {
+        sig_hash_bytes.append_word(zero.high.into(), 16);
+        sig_hash_bytes.append_word(zero.low.into(), 16);
+    }
+
+    sig_hash_bytes.append_word_rev(transaction.get_locktime().into(), 4);
     sig_hash_bytes.append_word_rev(hash_type.into(), 4);
-    // Hash and return the serialized transaction data twice using SHA-256.
+
     double_sha256(@sig_hash_bytes)
 }
