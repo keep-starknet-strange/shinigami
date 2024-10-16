@@ -1,8 +1,8 @@
 use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
 use shinigami_engine::transaction::EngineTransaction;
+use shinigami_engine::opcodes::Opcode;
 use crate::utxo::UTXO;
-use crate::opcodes::Opcode;
 
 // TODO: Move validate coinbase here
 
@@ -41,7 +41,9 @@ pub fn validate_transaction(
     Result::Ok(())
 }
 
-pub fn validate_p2ms(tx: @Transaction, flags: u32, utxo_hints: Array<UTXO>) -> Result<(), felt252> {
+pub fn validate_p2ms(
+    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>
+) -> Result<(), felt252> {
     // Check if the transaction has at least one input
     if tx.transaction_inputs.len() == 0 {
         return Result::Err('P2MS: No inputs');
@@ -74,8 +76,8 @@ pub fn validate_p2ms(tx: @Transaction, flags: u32, utxo_hints: Array<UTXO>) -> R
         }
 
         // Extract m and n from the script
-        let m: u8 = redeem_script[0] - 0x50;
-        let n: u8 = redeem_script[redeem_script.len() - 2] - 0x50;
+        let m: u32 = (redeem_script[0] - 0x50).try_into().unwrap();
+        let n: u32 = (redeem_script[redeem_script.len() - 2] - 0x50).try_into().unwrap();
 
         // Check if m and n are valid
         if m == 0 || n == 0 || m > n || n > 20 {
@@ -100,7 +102,7 @@ pub fn validate_p2ms(tx: @Transaction, flags: u32, utxo_hints: Array<UTXO>) -> R
             script_index += key_len + 1; // Move to the next key
         };
 
-        if pubkey_count != n.into() {
+        if pubkey_count != n {
             err = 'P2MS: n != m count';
             break;
         }

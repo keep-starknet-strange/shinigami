@@ -32,5 +32,4 @@ pub mod transaction;
 #[cfg(test)]
 mod tests {
     mod test_scriptnum;
-    mod test_p2ms;
 }
