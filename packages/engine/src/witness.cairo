@@ -1,4 +1,5 @@
 use crate::opcodes::Opcode;
+use crate::parser;
 use shinigami_utils::bytecode::hex_to_bytecode;
 
 fn byte_to_smallint(byte: u8) -> Result<i64, felt252> {
@@ -17,8 +18,8 @@ pub fn parse_witness_program(witness: @ByteArray) -> Result<(i64, ByteArray), fe
     }
 
     let version: i64 = byte_to_smallint(witness[0])?;
-    let data_len = Opcode::data_len(1, witness)?;
-    let program: ByteArray = Opcode::data_at(2, data_len, witness)?;
+    let data_len = parser::data_len(witness, 1)?;
+    let program: ByteArray = parser::data_at(witness, 2, data_len)?;
     if !Opcode::is_canonical_push(witness[1], @program) {
         return Result::Err('Non-canonical witness program');
     }
@@ -35,16 +36,23 @@ pub fn parse_witness_input(input: ByteArray) -> Array<ByteArray> {
     let mut witness_data: Array<ByteArray> = array![];
     let mut i = 0;
     let mut temp_witness: ByteArray = "";
-    while i != input.len() {
-        if input[i] == ',' {
+    let witness_input_len = input.len();
+    while i != witness_input_len {
+        let char = input[i].into();
+        if char == ',' {
             let witness_bytes = hex_to_bytecode(@temp_witness);
             witness_data.append(witness_bytes);
             temp_witness = "";
         } else {
-            temp_witness.append_byte(input[i]);
+            temp_witness.append_byte(char);
         }
         i += 1;
     };
+    // Handle the last witness data
+    let witness_bytes = hex_to_bytecode(@temp_witness);
+    witness_data.append(witness_bytes);
+
+    // TODO: Empty witness?
 
     witness_data
 }

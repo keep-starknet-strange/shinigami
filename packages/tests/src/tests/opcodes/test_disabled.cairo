@@ -1,5 +1,5 @@
-use crate::errors::Error;
-use crate::opcodes::tests::utils;
+use shinigami_engine::errors::Error;
+use crate::utils;
 
 // TODO is there a way to define this as a const?
 fn disabled_opcodes() -> core::array::Array<ByteArray> {

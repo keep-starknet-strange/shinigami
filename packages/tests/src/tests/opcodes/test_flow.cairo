@@ -1,6 +1,6 @@
-use crate::errors::Error;
-use crate::opcodes::tests::utils;
-use crate::scriptnum::ScriptNum;
+use shinigami_engine::errors::Error;
+use shinigami_engine::scriptnum::ScriptNum;
+use crate::utils;
 
 #[test]
 fn test_op_nop() {

@@ -17,6 +17,7 @@ version = "0.1.0"
 dependencies = [
  "shinigami_compiler",
  "shinigami_engine",
+ "shinigami_tests",
  "shinigami_utils",
 ]
 
@@ -34,7 +35,15 @@ version = "0.1.0"
 dependencies = [
  "ripemd160",
  "sha1",
+ "shinigami_utils",
+]
+
+[[package]]
+name = "shinigami_tests"
+version = "0.1.0"
+dependencies = [
  "shinigami_compiler",
+ "shinigami_engine",
  "shinigami_utils",
 ]
 
