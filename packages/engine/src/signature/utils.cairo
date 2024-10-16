@@ -1,8 +1,9 @@
 use crate::signature::constants;
 use crate::transaction::{
-    Transaction, OutPoint, TransactionInput, TransactionOutput, EngineTransactionTrait,
-    EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransaction, EngineOutPoint, EngineTransactionInput, EngineTransactionOutput,
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
+use crate::parser;
 use crate::opcodes::Opcode;
 
 // Removes `OP_CODESEPARATOR` opcodes from the `script`.
@@ -20,7 +21,7 @@ pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
             i += 1;
             continue;
         }
-        let data_len = Opcode::data_len(i, script).unwrap();
+        let data_len = parser::data_len(script, i).unwrap();
         let end = i + data_len + 1;
         while i != end {
             parsed_script.append_byte(script[i]);
@@ -55,13 +56,13 @@ pub fn transaction_procedure<
     +Drop<T>,
 >(
     transaction: @T, index: u32, signature_script: ByteArray, hash_type: u32
-) -> Transaction {
+) -> EngineTransaction {
     let hash_type_masked = hash_type & constants::SIG_HASH_MASK;
     let mut transaction_inputs_clone = array![];
     for input in transaction
         .get_transaction_inputs() {
-            let new_transaction_input = TransactionInput {
-                previous_outpoint: OutPoint {
+            let new_transaction_input = EngineTransactionInput {
+                previous_outpoint: EngineOutPoint {
                     txid: input.get_prevout_txid(), vout: input.get_prevout_vout()
                 },
                 signature_script: input.get_signature_script().clone(),
@@ -73,40 +74,40 @@ pub fn transaction_procedure<
     let mut transaction_outputs_clone = array![];
     for output in transaction
         .get_transaction_outputs() {
-            let new_transaction_output = TransactionOutput {
+            let new_transaction_output = EngineTransactionOutput {
                 value: output.get_value(), publickey_script: output.get_publickey_script().clone()
             };
             transaction_outputs_clone.append(new_transaction_output);
         };
-    let mut transaction_copy = Transaction {
+    let mut transaction_copy = EngineTransaction {
         version: transaction.get_version(),
         transaction_inputs: transaction_inputs_clone,
         transaction_outputs: transaction_outputs_clone,
         locktime: transaction.get_locktime()
     };
     let mut i: usize = 0;
-    let mut transaction_input: Array<TransactionInput> = transaction_copy.transaction_inputs;
-    let mut processed_transaction_input: Array<TransactionInput> = ArrayTrait::<
-        TransactionInput
+    let mut transaction_input: Array<EngineTransactionInput> = transaction_copy.transaction_inputs;
+    let mut processed_transaction_input: Array<EngineTransactionInput> = ArrayTrait::<
+        EngineTransactionInput
     >::new();
-    let mut processed_transaction_output: Array<TransactionOutput> = ArrayTrait::<
-        TransactionOutput
+    let mut processed_transaction_output: Array<EngineTransactionOutput> = ArrayTrait::<
+        EngineTransactionOutput
     >::new();
 
     let tx_input_len = transaction_input.len();
     while i != tx_input_len {
         // TODO: Optimize this
-        let mut temp_transaction_input: TransactionInput = transaction_input[i].clone();
+        let mut temp_transaction_input: EngineTransactionInput = transaction_input[i].clone();
 
         if hash_type_masked == constants::SIG_HASH_SINGLE && i < index {
             processed_transaction_output
-                .append(TransactionOutput { value: -1, publickey_script: "", });
+                .append(EngineTransactionOutput { value: -1, publickey_script: "", });
         }
 
         if i == index {
             processed_transaction_input
                 .append(
-                    TransactionInput {
+                    EngineTransactionInput {
                         previous_outpoint: temp_transaction_input.previous_outpoint,
                         signature_script: signature_script.clone(),
                         witness: temp_transaction_input.witness.clone(),
@@ -124,7 +125,7 @@ pub fn transaction_procedure<
             }
             processed_transaction_input
                 .append(
-                    TransactionInput {
+                    EngineTransactionInput {
                         previous_outpoint: temp_transaction_input.previous_outpoint,
                         signature_script: "",
                         witness: temp_transaction_input.witness.clone(),
@@ -139,7 +140,7 @@ pub fn transaction_procedure<
     transaction_copy.transaction_inputs = processed_transaction_input;
 
     if hash_type_masked == constants::SIG_HASH_NONE {
-        transaction_copy.transaction_outputs = ArrayTrait::<TransactionOutput>::new();
+        transaction_copy.transaction_outputs = ArrayTrait::<EngineTransactionOutput>::new();
     }
 
     if hash_type_masked == constants::SIG_HASH_SINGLE {

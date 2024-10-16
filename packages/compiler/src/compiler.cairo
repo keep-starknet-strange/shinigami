@@ -26,7 +26,7 @@ pub impl CompilerImpl of CompilerTrait {
         let mut compiler = Compiler { opcodes: Default::default() };
         // Add the opcodes to the dict
         compiler.add_opcode('OP_0', Opcode::OP_0);
-        compiler.add_opcode('OP_FALSE', Opcode::OP_0);
+        compiler.add_opcode('OP_FALSE', Opcode::OP_FALSE);
         compiler.add_opcode('OP_DATA_1', Opcode::OP_DATA_1);
         compiler.add_opcode('OP_DATA_2', Opcode::OP_DATA_2);
         compiler.add_opcode('OP_DATA_3', Opcode::OP_DATA_3);

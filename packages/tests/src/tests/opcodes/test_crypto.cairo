@@ -1,11 +1,11 @@
-use crate::opcodes::tests::utils::{
+use crate::utils::{
     test_compile_and_run, check_expected_dstack, check_dstack_size,
     test_compile_and_run_with_tx_flags_err, mock_transaction_legacy_p2ms,
     test_compile_and_run_with_tx_err, test_compile_and_run_with_tx, mock_transaction_legacy_p2pkh
 };
-use crate::errors::Error;
-use crate::scriptnum::ScriptNum;
-use crate::scriptflags::ScriptFlags;
+use shinigami_engine::errors::Error;
+use shinigami_engine::scriptnum::ScriptNum;
+use shinigami_engine::flags::ScriptFlags;
 use shinigami_utils::bytecode::hex_to_bytecode;
 
 #[test]
