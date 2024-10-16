@@ -65,7 +65,12 @@ pub fn calc_witness_signature_hash<
     +Drop<O>,
     +Drop<T>
 >(
-    sub_script: @ByteArray, sig_hashes: @SegwitSigHashMidstate, hash_type: u32, transaction: @T, tx_idx: u32, amount: i64
+    sub_script: @ByteArray,
+    sig_hashes: @SegwitSigHashMidstate,
+    hash_type: u32,
+    transaction: @T,
+    tx_idx: u32,
+    amount: i64
 ) -> u256 {
     // TODO: Bounds check?
 
@@ -115,7 +120,8 @@ pub fn calc_witness_signature_hash<
         sig_hash_bytes.append_byte(Opcode::OP_CHECKSIG);
     } else {
         // TODO: VarIntBuf
-        sig_hash_bytes.append_word_rev(sub_script.len().into(), int_size_in_bytes(sub_script.len()));
+        sig_hash_bytes
+            .append_word_rev(sub_script.len().into(), int_size_in_bytes(sub_script.len()));
         sig_hash_bytes.append(sub_script);
     }
 
@@ -132,7 +138,11 @@ pub fn calc_witness_signature_hash<
         let output = transaction.get_transaction_outputs().at(tx_idx);
         let mut output_bytes: ByteArray = "";
         output_bytes.append_word_rev(output.get_value().into(), 8);
-        output_bytes.append_word_rev(output.get_publickey_script().len().into(), int_size_in_bytes(output.get_publickey_script().len()));
+        output_bytes
+            .append_word_rev(
+                output.get_publickey_script().len().into(),
+                int_size_in_bytes(output.get_publickey_script().len())
+            );
         output_bytes.append(output.get_publickey_script());
         let hashed_output: u256 = double_sha256(@output_bytes);
         sig_hash_bytes.append_word(hashed_output.high.into(), 16);
@@ -146,5 +156,4 @@ pub fn calc_witness_signature_hash<
     sig_hash_bytes.append_word_rev(hash_type.into(), 4);
 
     double_sha256(@sig_hash_bytes)
-
 }

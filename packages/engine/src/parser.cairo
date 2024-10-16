@@ -24,7 +24,8 @@ pub fn is_push_only(script: @ByteArray) -> bool {
         let opcode = script[i];
         if opcode > Opcode::OP_16 {
             is_push_only = false;
-            break;                                                                                    }
+            break;
+        }
 
         // TODO: Error handling
         let data_len = data_len(script, i).unwrap();
@@ -64,9 +65,7 @@ pub fn data_len(script: @ByteArray, idx: usize) -> Result<usize, felt252> {
         return Result::Ok(0);
     }
     return Result::Ok(
-        byte_array_to_felt252_le(@data_at(script, idx + 1, push_data_len)?)
-            .try_into()
-            .unwrap()
+        byte_array_to_felt252_le(@data_at(script, idx + 1, push_data_len)?).try_into().unwrap()
             + push_data_len
     );
 }
@@ -86,9 +85,7 @@ pub fn push_data_len(script: @ByteArray, idx: usize) -> Result<usize, felt252> {
     }
 
     return Result::Ok(
-        byte_array_to_felt252_le(@data_at(script, idx + 1, len)?)
-            .try_into()
-            .unwrap()
+        byte_array_to_felt252_le(@data_at(script, idx + 1, len)?).try_into().unwrap()
     );
 }
 

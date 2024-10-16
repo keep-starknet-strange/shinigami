@@ -6,31 +6,31 @@ use shinigami_utils::hash::double_sha256;
 
 #[derive(Clone, Copy, Drop)]
 pub struct SegwitSigHashMidstate {
-  pub hash_prevouts_v0: u256,
-  pub hash_sequence_v0: u256,
-  pub hash_outputs_v0: u256
+    pub hash_prevouts_v0: u256,
+    pub hash_sequence_v0: u256,
+    pub hash_outputs_v0: u256
 }
 
 pub trait SigHashMidstateTrait<
-  I,
-  O,
-  T,
-  +EngineTransactionInputTrait<I>,
-  +EngineTransactionOutputTrait<O>,
-  +EngineTransactionTrait<T, I, O>
+    I,
+    O,
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>
 > {
     fn new(transaction: @T) -> SegwitSigHashMidstate;
 }
 
 pub impl SigHashMidstateImpl<
-  I,
-  O,
-  T,
-  impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
-  impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
-  impl IEngineTransaction: EngineTransactionTrait<
-    T, I, O, IEngineTransactionInput, IEngineTransactionOutput
-  >
+    I,
+    O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >
 > of SigHashMidstateTrait<I, O, T> {
     fn new(transaction: @T) -> SegwitSigHashMidstate {
         let mut prevouts_v0_bytes: ByteArray = "";
@@ -49,7 +49,11 @@ pub impl SigHashMidstateImpl<
         let outputs = transaction.get_transaction_outputs();
         for output in outputs {
             outputs_v0_bytes.append_word_rev(output.get_value().into(), 8);
-             outputs_v0_bytes.append_word_rev(output.get_publickey_script().len().into(), int_size_in_bytes(output.get_publickey_script().len()));
+            outputs_v0_bytes
+                .append_word_rev(
+                    output.get_publickey_script().len().into(),
+                    int_size_in_bytes(output.get_publickey_script().len())
+                );
             outputs_v0_bytes.append(output.get_publickey_script());
         };
         SegwitSigHashMidstate {

@@ -330,8 +330,9 @@ pub fn check_pub_key_encoding<
 >(
     ref vm: Engine<T>, pk_bytes: @ByteArray
 ) -> Result<(), felt252> {
-    if vm.has_flag(ScriptFlags::ScriptVerifyWitnessPubKeyType) && vm.is_witness_active(0) && !is_compressed_pub_key(pk_bytes)
-    {
+    if vm.has_flag(ScriptFlags::ScriptVerifyWitnessPubKeyType)
+        && vm.is_witness_active(0)
+        && !is_compressed_pub_key(pk_bytes) {
         return Result::Err(Error::WITNESS_PUBKEYTYPE);
     }
 

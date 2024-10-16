@@ -63,7 +63,9 @@ fn run_with_witness(input: InputDataWithWitness) -> Result<(), felt252> {
     let script_sig = compiler.compile(input.ScriptSig)?;
     let witness = witness::parse_witness_input(input.Witness);
     let value = 1; // TODO
-    let tx = EngineInternalTransactionImpl::new_signed_witness(script_sig, script_pubkey.clone(), witness, value);
+    let tx = EngineInternalTransactionImpl::new_signed_witness(
+        script_sig, script_pubkey.clone(), witness, value
+    );
     let flags = flags::parse_flags(input.Flags);
     let hash_cache = HashCacheImpl::new(@tx);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, flags, value, @hash_cache)?;

@@ -1,7 +1,9 @@
 use shinigami_compiler::compiler::CompilerImpl;
 use shinigami_engine::engine::{Engine, EngineImpl, EngineInternalTrait};
 use shinigami_engine::hash_cache::HashCacheImpl;
-use shinigami_engine::transaction::{EngineTransaction, EngineTransactionInput, EngineTransactionOutput, EngineOutPoint};
+use shinigami_engine::transaction::{
+    EngineTransaction, EngineTransactionInput, EngineTransactionOutput, EngineOutPoint
+};
 
 // Runs a basic bitcoin script as the script_pubkey with empty script_sig
 pub fn test_compile_and_run(program: ByteArray) -> Engine<EngineTransaction> {
@@ -42,7 +44,9 @@ pub fn test_compile_and_run_with_tx_flags(
 }
 
 // Runs a bitcoin script `program` as script_pubkey with empty script_sig expecting an error
-pub fn test_compile_and_run_err(program: ByteArray, expected_err: felt252) -> Engine<EngineTransaction> {
+pub fn test_compile_and_run_err(
+    program: ByteArray, expected_err: felt252
+) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program).unwrap();
     let hash_cache = HashCacheImpl::new(Default::default());
@@ -126,7 +130,9 @@ pub fn mock_transaction_input(script_sig: ByteArray) -> EngineTransactionInput {
     mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), 0xffffffff)
 }
 
-pub fn mock_transaction_output_with(value: i64, script_pubkey: ByteArray) -> EngineTransactionOutput {
+pub fn mock_transaction_output_with(
+    value: i64, script_pubkey: ByteArray
+) -> EngineTransactionOutput {
     EngineTransactionOutput { value: value, publickey_script: script_pubkey }
 }
 
@@ -196,7 +202,9 @@ pub fn mock_witness_transaction() -> EngineTransaction {
         witness: ArrayTrait::<ByteArray>::new(),
         sequence: 0xffffffff
     };
-    let mut transaction_inputs: Array<EngineTransactionInput> = ArrayTrait::<EngineTransactionInput>::new();
+    let mut transaction_inputs: Array<EngineTransactionInput> = ArrayTrait::<
+        EngineTransactionInput
+    >::new();
     transaction_inputs.append(transaction_input_0);
     let script_u256: u256 = 0x76a914ce72abfd0e6d9354a660c18f2825eb392f060fdc88ac;
     let mut script_byte: ByteArray = "";
@@ -207,7 +215,9 @@ pub fn mock_witness_transaction() -> EngineTransaction {
     let output_0: EngineTransactionOutput = EngineTransactionOutput {
         value: 15000, publickey_script: script_byte
     };
-    let mut transaction_outputs: Array<EngineTransactionOutput> = ArrayTrait::<EngineTransactionOutput>::new();
+    let mut transaction_outputs: Array<EngineTransactionOutput> = ArrayTrait::<
+        EngineTransactionOutput
+    >::new();
     transaction_outputs.append(output_0);
 
     EngineTransaction {
@@ -229,7 +239,9 @@ pub fn mock_transaction_legacy_locktime(script_sig: ByteArray, locktime: u32) ->
 }
 
 // Mock transaction version 2 with the specified 'sequence'
-pub fn mock_transaction_legacy_sequence_v2(script_sig: ByteArray, sequence: u32) -> EngineTransaction {
+pub fn mock_transaction_legacy_sequence_v2(
+    script_sig: ByteArray, sequence: u32
+) -> EngineTransaction {
     let mut inputs = ArrayTrait::<EngineTransactionInput>::new();
     let outpoint = EngineOutPoint { txid: 0, vout: 0 };
     let input = mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), sequence);

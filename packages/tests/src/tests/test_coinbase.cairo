@@ -3,16 +3,21 @@ use shinigami_utils::bytecode::hex_to_bytecode;
 
 #[test]
 fn test_block_subsidy_calculation() {
-    assert(EngineInternalTransactionTrait::calculate_block_subsidy(0) == 5000000000, 'Incorrect genesis subsidy');
     assert(
-        EngineInternalTransactionTrait::calculate_block_subsidy(210000) == 2500000000, 'Incorrect halving subsidy'
+        EngineInternalTransactionTrait::calculate_block_subsidy(0) == 5000000000,
+        'Incorrect genesis subsidy'
+    );
+    assert(
+        EngineInternalTransactionTrait::calculate_block_subsidy(210000) == 2500000000,
+        'Incorrect halving subsidy'
     );
     assert(
         EngineInternalTransactionTrait::calculate_block_subsidy(420000) == 1250000000,
         'Incorrect 2nd halving subsidy'
     );
     assert(
-        EngineInternalTransactionTrait::calculate_block_subsidy(13440000) == 0, 'Should be 0 after 64 halvings'
+        EngineInternalTransactionTrait::calculate_block_subsidy(13440000) == 0,
+        'Should be 0 after 64 halvings'
     );
 }
 

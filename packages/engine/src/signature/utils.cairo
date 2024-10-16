@@ -1,7 +1,7 @@
 use crate::signature::constants;
 use crate::transaction::{
-    EngineTransaction, EngineOutPoint, EngineTransactionInput, EngineTransactionOutput, EngineTransactionTrait,
-    EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransaction, EngineOutPoint, EngineTransactionInput, EngineTransactionOutput,
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::parser;
 use crate::opcodes::Opcode;

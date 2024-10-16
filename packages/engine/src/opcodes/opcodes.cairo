@@ -472,10 +472,7 @@ pub mod Opcode {
     }
 
     pub fn is_branching_opcode(opcode: u8) -> bool {
-        if opcode == OP_IF
-            || opcode == OP_NOTIF
-            || opcode == OP_ELSE
-            || opcode == OP_ENDIF {
+        if opcode == OP_IF || opcode == OP_NOTIF || opcode == OP_ELSE || opcode == OP_ENDIF {
             return true;
         }
         return false;

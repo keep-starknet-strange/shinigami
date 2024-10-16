@@ -139,13 +139,15 @@ pub impl EngineImpl<
             return Result::Err('Engine::new: invalid flag combo');
         }
 
-        if engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly) && !parser::is_push_only(script_sig) {
+        if engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly)
+            && !parser::is_push_only(script_sig) {
             return Result::Err('Engine::new: not pushonly');
         }
 
         let mut bip16 = false;
         if engine.has_flag(ScriptFlags::ScriptBip16) && parser::is_script_hash(script_pubkey) {
-            if !engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly) && !parser::is_push_only(script_sig) {
+            if !engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly)
+                && !parser::is_push_only(script_sig) {
                 return Result::Err('Engine::new: p2sh not pushonly');
             }
             engine.bip16 = true;

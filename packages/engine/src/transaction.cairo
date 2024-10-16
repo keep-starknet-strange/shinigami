@@ -25,7 +25,8 @@ pub struct EngineTransactionOutput {
     pub publickey_script: ByteArray,
 }
 
-// TODO: Move these EngineTransaction structs to the testing dir after signature::transaction_procedure cleanup
+// TODO: Move these EngineTransaction structs to the testing dir after
+// signature::transaction_procedure cleanup
 #[derive(Drop, Clone)]
 pub struct EngineTransaction {
     pub version: i32,
@@ -42,7 +43,9 @@ pub trait EngineInternalTransactionTrait {
         locktime: u32
     ) -> EngineTransaction;
     fn new_signed(script_sig: ByteArray, pubkey_script: ByteArray) -> EngineTransaction;
-    fn new_signed_witness(script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64) -> EngineTransaction;
+    fn new_signed_witness(
+        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64
+    ) -> EngineTransaction;
     fn btc_decode(raw: ByteArray, encoding: u32) -> EngineTransaction;
     fn deserialize(raw: ByteArray) -> EngineTransaction;
     fn deserialize_no_witness(raw: ByteArray) -> EngineTransaction;
@@ -85,10 +88,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             }
         ];
         let coinbase_tx_outputs = array![
-            EngineTransactionOutput {
-                value: 0,
-                publickey_script: pubkey_script,
-            }
+            EngineTransactionOutput { value: 0, publickey_script: pubkey_script, }
         ];
         let coinbase_tx = EngineTransaction {
             version: 1,
@@ -109,10 +109,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
                 }
             ],
             transaction_outputs: array![
-                EngineTransactionOutput {
-                    value: 0,
-                    publickey_script: "",
-                }
+                EngineTransactionOutput { value: 0, publickey_script: "", }
             ],
             locktime: 0,
         };
@@ -132,7 +129,9 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
         transaction
     }
 
-    fn new_signed_witness(script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64) -> EngineTransaction {
+    fn new_signed_witness(
+        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64
+    ) -> EngineTransaction {
         let coinbase_tx_inputs = array![
             EngineTransactionInput {
                 previous_outpoint: EngineOutPoint { txid: 0x0, vout: 0xffffffff, },
@@ -142,10 +141,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             }
         ];
         let coinbase_tx_outputs = array![
-            EngineTransactionOutput {
-                value: value,
-                publickey_script: pubkey_script,
-            }
+            EngineTransactionOutput { value: value, publickey_script: pubkey_script, }
         ];
         let coinbase_tx = EngineTransaction {
             version: 1,
@@ -166,10 +162,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
                 }
             ],
             transaction_outputs: array![
-                EngineTransactionOutput {
-                    value: value,
-                    publickey_script: "",
-                }
+                EngineTransactionOutput { value: value, publickey_script: "", }
             ],
             locktime: 0,
         };
@@ -349,7 +342,9 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
         let mut i = 0;
         while i != self.transaction_inputs.len() {
             let input = self.transaction_inputs.at(i);
-            println!("  Input {}: {} {}", i, input.previous_outpoint.txid, input.previous_outpoint.vout);
+            println!(
+                "  Input {}: {} {}", i, input.previous_outpoint.txid, input.previous_outpoint.vout
+            );
             println!("    Txid: {}", input.previous_outpoint.txid);
             println!("    Vout: {}", input.previous_outpoint.vout);
             println!("    Script: {}", bytecode_to_hex(input.signature_script));
@@ -400,7 +395,9 @@ pub trait EngineTransactionInputTrait<I> {
     fn get_sequence(self: @I) -> u32;
 }
 
-pub impl EngineTransactionInputTraitInternalImpl of EngineTransactionInputTrait<EngineTransactionInput> {
+pub impl EngineTransactionInputTraitInternalImpl of EngineTransactionInputTrait<
+    EngineTransactionInput
+> {
     fn get_prevout_txid(self: @EngineTransactionInput) -> u256 {
         *self.previous_outpoint.txid
     }
