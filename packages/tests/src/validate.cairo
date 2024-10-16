@@ -1,6 +1,6 @@
-use crate::engine::EngineImpl;
-use crate::hash_cache::HashCacheImpl;
-use crate::transaction::Transaction;
+use shinigami_engine::engine::EngineImpl;
+use shinigami_engine::hash_cache::HashCacheImpl;
+use shinigami_engine::transaction::EngineTransaction;
 use crate::utxo::UTXO;
 
 // TODO: Move validate coinbase here
@@ -8,7 +8,7 @@ use crate::utxo::UTXO;
 // TODO: Remove hints?
 // utxo_hints: Set of existing utxos that are being spent by this transaction
 pub fn validate_transaction(
-    tx: @Transaction, flags: u32, utxo_hints: Array<UTXO>
+    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>
 ) -> Result<(), felt252> {
     let input_count = tx.transaction_inputs.len();
     if input_count != utxo_hints.len() {

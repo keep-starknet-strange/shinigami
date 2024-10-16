@@ -6,7 +6,6 @@ edition = "2024_07"
 [dependencies]
 ripemd160.workspace = true
 sha1.workspace = true
-shinigami_compiler = { path = "../compiler" }
 shinigami_utils = { path = "../utils" }
 
 [dev-dependencies]
