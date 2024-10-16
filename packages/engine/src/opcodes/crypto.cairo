@@ -3,10 +3,10 @@ use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::stack::ScriptStackTrait;
-use crate::scriptflags::ScriptFlags;
+use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
-use crate::signature::signature::BaseSigVerifierTrait;
+use crate::signature::signature::{BaseSigVerifierTrait, BaseSegwitSigVerifierTrait};
 use starknet::secp256_trait::{is_valid_signature};
 use core::sha256::compute_sha256_byte_array;
 use crate::opcodes::utils;
@@ -96,36 +96,44 @@ pub fn opcode_checksig<
         return Result::Ok(());
     }
 
-    // TODO: add witness context inside engine to check if witness is active
-    //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
+    if engine.witness_program.len() == 0 {
+        // Base Signature Verification
+        let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+        if res.is_err() {
+            let err = res.unwrap_err();
+            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::WITNESS_PUBKEYTYPE {
+                return Result::Err(err);
+            };
+            engine.dstack.push_bool(false);
+            return Result::Ok(());
+        }
 
-    let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+        let mut sig_verifier = res.unwrap();
+        if BaseSigVerifierTrait::verify(ref sig_verifier, ref engine) {
+            is_valid = true;
+        } else {
+            is_valid = false;
+        }
+    } else if engine.is_witness_active(0) {
+        // Witness Signature Verification
+        let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+        if res.is_err() {
+            let err = res.unwrap_err();
+            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::WITNESS_PUBKEYTYPE {
+                return Result::Err(err);
+            };
+            engine.dstack.push_bool(false);
+            return Result::Ok(());
+        }
 
-    if res.is_err() {
-        // TODO: Some errors can return an error code instead of pushing false?
-        if res.unwrap_err() == Error::SCRIPT_ERR_SIG_DER {
-            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
-        };
-        engine.dstack.push_bool(false);
-        return Result::Ok(());
-    }
-    let mut sig_verifier = res.unwrap();
-
-    if sig_verifier.verify(ref engine) {
-        is_valid = true;
-    } else {
-        is_valid = false;
-    }
-    // else use BaseSigWitnessVerifier
-    // let mut sig_verifier: BaseSigWitnessVerifier = BaseSigWitnessVerifierTrait::new(ref engine,
-    // @full_sig_bytes, @pk_bytes)?;
-
-    // if sig_verifier.verify(ref engine) {
-    //     is_valid = true;
-    // } else {
-    //     is_valid = false;
-    // }
+        let mut sig_verifier = res.unwrap();
+        if BaseSegwitSigVerifierTrait::verify(ref sig_verifier, ref engine) {
+            is_valid = true;
+        } else {
+            is_valid = false;
+        }
+    } // TODO: Add Taproot verification
 
     if !is_valid && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) && full_sig_bytes.len() > 0 {
         return Result::Err(Error::SIG_NULLFAIL);
@@ -212,11 +220,10 @@ pub fn opcode_checkmultisig<
 
     let mut script = engine.sub_script();
 
-    // TODO: add witness context inside engine to check if witness is active
     let mut s: u32 = 0;
     let end = sigs.len();
     while s != end {
-        script = signature::remove_signature(script, sigs.at(s));
+        script = signature::remove_signature(@script, sigs.at(s)).clone();
         s += 1;
     };
 

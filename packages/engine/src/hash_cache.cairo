@@ -1,6 +1,64 @@
 use crate::transaction::{
     EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
+use shinigami_utils::bytecode::int_size_in_bytes;
+use shinigami_utils::hash::double_sha256;
+
+#[derive(Clone, Copy, Drop)]
+pub struct SegwitSigHashMidstate {
+  pub hash_prevouts_v0: u256,
+  pub hash_sequence_v0: u256,
+  pub hash_outputs_v0: u256
+}
+
+pub trait SigHashMidstateTrait<
+  I,
+  O,
+  T,
+  +EngineTransactionInputTrait<I>,
+  +EngineTransactionOutputTrait<O>,
+  +EngineTransactionTrait<T, I, O>
+> {
+    fn new(transaction: @T) -> SegwitSigHashMidstate;
+}
+
+pub impl SigHashMidstateImpl<
+  I,
+  O,
+  T,
+  impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+  impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+  impl IEngineTransaction: EngineTransactionTrait<
+    T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+  >
+> of SigHashMidstateTrait<I, O, T> {
+    fn new(transaction: @T) -> SegwitSigHashMidstate {
+        let mut prevouts_v0_bytes: ByteArray = "";
+        let inputs = transaction.get_transaction_inputs();
+        for input in inputs {
+            let txid = input.get_prevout_txid();
+            prevouts_v0_bytes.append_word(txid.high.into(), 16);
+            prevouts_v0_bytes.append_word(txid.low.into(), 16);
+            prevouts_v0_bytes.append_word_rev(input.get_prevout_vout().into(), 4);
+        };
+        let mut sequence_v0_bytes: ByteArray = "";
+        for input in inputs {
+            sequence_v0_bytes.append_word_rev(input.get_sequence().into(), 4);
+        };
+        let mut outputs_v0_bytes: ByteArray = "";
+        let outputs = transaction.get_transaction_outputs();
+        for output in outputs {
+            outputs_v0_bytes.append_word_rev(output.get_value().into(), 8);
+             outputs_v0_bytes.append_word_rev(output.get_publickey_script().len().into(), int_size_in_bytes(output.get_publickey_script().len()));
+            outputs_v0_bytes.append(output.get_publickey_script());
+        };
+        SegwitSigHashMidstate {
+            hash_prevouts_v0: double_sha256(@prevouts_v0_bytes),
+            hash_sequence_v0: double_sha256(@sequence_v0_bytes),
+            hash_outputs_v0: double_sha256(@outputs_v0_bytes)
+        }
+    }
+}
 
 // SigCache implements an Schnorr+ECDSA signature verification cache. Only valid signatures will be
 // added to the cache.

@@ -142,8 +142,16 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         SCRIPT_SIZE="Execution failed: Engine::new: script too large"
         CLEAN_STACK="Execution failed: Non-clean stack after execute"
         MINIMAL_DATA="Execution failed: Opcode represents non-minimal"
+        MINIMAL_IF="Execution failed: If conditional must be 0 or 1"
         SIG_DER="Execution failed: Signature DER error"
         INVALID_WITNESS="Execution failed: Invalid witness program"
+        WITNESS_PROGRAM_MISMATCH="Execution failed: Witness program mismatch"
+        WITNESS_UNEXPECTED="Execution failed: Unexpected witness data"
+        WITNESS_MALLEATED="Execution failed: Witness program with sig script"
+        WITNESS_PROGRAM_WRONG_LENGTH="Execution failed: Witness program wrong length"
+        WITNESS_PROGRAM_EMPTY="Execution failed: Empty witness program"
+        WITNESS_MALLEATED_P2SH="Execution failed: Signature script for p2sh wit"
+        WITNESS_PUBKEYTYPE="Execution failed: Non-compressed key post-segwit"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -210,8 +218,24 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="CLEANSTACK"
         elif echo "$RESULT" | grep -q "$MINIMAL_DATA"; then
             SCRIPT_RESULT="MINIMALDATA"
+        elif echo "$RESULT" | grep -q "$MINIMAL_IF"; then
+            SCRIPT_RESULT="MINIMALIF"
         elif echo "$RESULT" | grep -q "$INVALID_WITNESS"; then
             SCRIPT_RESULT="INVALID_WITNESS"
+        elif echo "$RESULT" | grep -q "$WITNESS_PROGRAM_MISMATCH"; then
+            SCRIPT_RESULT="WITNESS_PROGRAM_MISMATCH"
+        elif echo "$RESULT" | grep -q "$WITNESS_UNEXPECTED"; then
+            SCRIPT_RESULT="WITNESS_UNEXPECTED"
+        elif echo "$RESULT" | grep -q "$WITNESS_MALLEATED"; then
+            SCRIPT_RESULT="WITNESS_MALLEATED"
+        elif echo "$RESULT" | grep -q "$WITNESS_PROGRAM_WRONG_LENGTH"; then
+            SCRIPT_RESULT="WITNESS_PROGRAM_WRONG_LENGTH"
+        elif echo "$RESULT" | grep -q "$WITNESS_PROGRAM_EMPTY"; then
+            SCRIPT_RESULT="WITNESS_PROGRAM_WITNESS_EMPTY"
+        elif echo "$RESULT" | grep -q "$WITNESS_MALLEATED_P2SH"; then
+            SCRIPT_RESULT="WITNESS_MALLEATED_P2SH"
+        elif echo "$RESULT" | grep -q "$WITNESS_PUBKEYTYPE"; then
+            SCRIPT_RESULT="WITNESS_PUBKEYTYPE"
         elif echo "$RESULT" | grep -q "$SIG_DER"; then
             SCRIPT_RESULT="SIG_DER"
         else
@@ -245,7 +269,12 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
     else
         echo -e "  \033[0;31mFAIL\033[0m"
         FAILED=$((FAILED+1))
-        echo "scarb cairo-run --package shinigami_cmds '$JOINED_INPUT'"
+        # Print the command that failed
+        if [ $has_witness == "true" ]; then
+          echo "scarb cairo-run --package shinigami_cmds --function main_with_witness '$JOINED_INPUT'"
+        else
+          echo "scarb cairo-run --package shinigami_cmds '$JOINED_INPUT'"
+        fi
         echo "$RESULT"
         echo $line, >> $FAILED_TESTS_JSON
     fi

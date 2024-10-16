@@ -1,5 +1,5 @@
-use crate::errors::Error;
-use crate::opcodes::tests::utils;
+use shinigami_engine::errors::Error;
+use crate::utils;
 
 #[test]
 fn test_op_reserved() {

@@ -1,10 +1,10 @@
-use crate::errors::Error;
-use crate::opcodes::tests::utils::{
-    test_compile_and_run, test_compile_and_run_err, check_expected_dstack, check_dstack_size
-};
-use crate::scriptnum::ScriptNum;
+use shinigami_engine::errors::Error;
+use shinigami_engine::scriptnum::ScriptNum;
 use shinigami_utils::hex::int_to_hex;
 use shinigami_utils::bytecode::hex_to_bytecode;
+use crate::utils::{
+    test_compile_and_run, test_compile_and_run_err, check_expected_dstack, check_dstack_size
+};
 
 fn test_op_n(value: u8) {
     let program = format!("OP_{}", value);

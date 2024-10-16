@@ -2,20 +2,10 @@ use crate::engine::{Engine, EngineInternalTrait};
 use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
-use crate::scriptflags::ScriptFlags;
+use crate::flags::ScriptFlags;
 use crate::cond_stack::ConditionalStackTrait;
 use crate::opcodes::{utils, Opcode};
 use crate::errors::Error;
-
-pub fn is_branching_opcode(opcode: u8) -> bool {
-    if opcode == Opcode::OP_IF
-        || opcode == Opcode::OP_NOTIF
-        || opcode == Opcode::OP_ELSE
-        || opcode == Opcode::OP_ENDIF {
-        return true;
-    }
-    return false;
-}
 
 pub fn opcode_nop<
     T,

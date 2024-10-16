@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Runs the tests from bitcoin-core
+# Runs the failing tests from bitcoin-core
 # https://github.com/bitcoin/bitcoin/blob/master/src/test/data/
 
 TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

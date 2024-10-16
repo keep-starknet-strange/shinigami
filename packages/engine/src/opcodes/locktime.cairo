@@ -3,7 +3,7 @@ use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::errors::Error;
-use crate::scriptflags::ScriptFlags;
+use crate::flags::ScriptFlags;
 use crate::scriptnum::ScriptNum;
 use crate::stack::ScriptStackTrait;
 
