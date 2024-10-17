@@ -66,27 +66,6 @@ fn test_p2ms_3_of_3() {
     assert!(res.is_ok(), "P2MS 3-of-3 transaction validation failed");
 }
 
-// #[test]
-// fn test_p2ms_1of1() {
-//     // Test case for 1-of-1 multisig
-//     let prevout_pk_script_1of1 =
-//         "0x514104cc71eb30d653c0c3163990c47b976f3fb3f37cccdcbedb169a1dfef58bbfbfaff7d8a473e7e2e6d317b87bafe8bde97e3cf8f065dec022b51d11fcdd0d348ac4410461cbdcc5409fb4b4d42b51d33381354d80e550078cb532a34bfa2fcfdeb7d76519aecc62770f5b0e4ef8551946d8a540911abe3e7854a26f39f58b25c15342af52ae";
-//     let prev_out_1of1 = UTXO {
-//         amount: 1000000,
-//         pubkey_script: hex_to_bytecode(@prevout_pk_script_1of1),
-//         block_height: 164467
-//     };
-
-//     let raw_transaction_hex =
-//         "0x0100000001b14bdcbc3e01bdaad36cc08e81e69c82e1060bc14e518db2b49aa43ad90ba26000000000490047304402203f16c6f40162ab686621ef3000b04e75418a0c0cb2d8aebeac894ae360ac1e780220ddc15ecdfc3507ac48e1681a33eb60996631bf6bf5bc0a0682c4db743ce7ca2b01ffffffff0140420f00000000001976a914660d4ef3a743e3e696ad990364e555c271ad504b88ac00000000";
-//     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-//     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
-//     let utxo_hints = array![prev_out_1of1];
-
-//     let res = validate::validate_p2ms(@transaction, 0, utxo_hints);
-//     assert!(res.is_ok(), "P2MS 1-of-1 multisig validation failed");
-// }
-
 #[test]
 fn test_p2ms_1of2_invalid_pubkey() {
     // Test case for 1-of-2 multisig with an invalid public key
@@ -107,70 +86,4 @@ fn test_p2ms_1of2_invalid_pubkey() {
 
     let res = validate::validate_p2ms(@transaction, 0, utxo_hints);
     assert!(res.is_err(), "P2MS 1-of-2 with invalid public key should fail validation");
-}
-
-// #[test]
-// fn test_p2ms_edge_cases() {
-//     // Test case for 1-of-1 multisig
-//     let prevout_pk_script_1of1 = "0x514104cc71eb30d653c0c3163990c47b976f3fb3f37cccdcbedb169a1dfef58bbfbfaff7d8a473e7e2e6d317b87bafe8bde97e3cf8f065dec022b51d11fcdd0d348ac4410461cbdcc5409fb4b4d42b51d33381354d80e550078cb532a34bfa2fcfdeb7d76519aecc62770f5b0e4ef8551946d8a540911abe3e7854a26f39f58b25c15342af52ae";
-//     let prev_out_1of1 = UTXO {
-//         amount: 1000000,
-//         pubkey_script: hex_to_bytecode(@prevout_pk_script_1of1),
-//         block_height: 164467
-//     };
-
-//     // Test case for 1-of-2 multisig with an invalid public key
-//     let prevout_pk_script_1of2_invalid = "0x5121037953dbf08030f67352134992643d033417eaa6fcfb770c038f364ff40d7615882100bd2fda4cf456d64386a0756f580101a607c25bd8d6814693bdf16e2a7ba3e45c52ae";
-//     let prev_out_1of2_invalid = UTXO {
-//         amount: 92750000,
-//         pubkey_script: hex_to_bytecode(@prevout_pk_script_1of2_invalid),
-//         block_height: 229517
-//     };
-
-//     // Test case for 2-of-3 multisig with maximum allowed public keys (20)
-//     let prevout_pk_script_3of3 = "0x0114410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc34550114ae";
-//     let prev_out_3of3 = UTXO {
-//         amount: 2201000,
-//         pubkey_script: hex_to_bytecode(@prevout_pk_script_3of3),
-//         block_height: 284029
-//     };
-
-//     let raw_transaction_hex = "0x0100000001b14bdcbc3e01bdaad36cc08e81e69c82e1060bc14e518db2b49aa43ad90ba26000000000490047304402203f16c6f40162ab686621ef3000b04e75418a0c0cb2d8aebeac894ae360ac1e780220ddc15ecdfc3507ac48e1681a33eb60996631bf6bf5bc0a0682c4db743ce7ca2b01ffffffff0140420f00000000001976a914660d4ef3a743e3e696ad990364e555c271ad504b88ac00000000"; // Replace with actual transaction hex
-//     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-//     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
-//     let utxo_hints = array![prev_out_1of1, prev_out_1of2_invalid, prev_out_3of3];
-
-//     let res = validate::validate_p2ms(@transaction, 0, utxo_hints);
-//     assert!(res.is_ok(), "P2MS edge cases validation failed");
-// }
-
-#[test]
-fn test_p2ms_1_of_1() {
-    // Transaction data from the provided transaction
-    // TXID: ac1d9ed701af32ea52fabd0834acfb1ba4e3584cf0553551f1b61b3d7fb05ee7
-    // Block: 431,077
-    // Inputs: 1
-    // Outputs: 3
-    // Fee: 20,000 sats
-    // Amount: 30,858,918 sats
-
-    // Previous output public key script (P2MS)
-    let prevout_pk_script =
-        "0x51210281feb90c058c3436f8bc361930ae99fcfb530a699cdad141d7244bfcad521a1f51ae"; // P2MS script
-    let prev_out = UTXO {
-        amount: 20000, // Amount for the P2MS output
-        pubkey_script: hex_to_bytecode(@prevout_pk_script),
-        block_height: 431077
-    };
-
-    // Raw transaction hex
-    let raw_transaction_hex =
-        "0x0100000001ffc0d6d6b592cd2b4160300a278ea5e250b5055b5536dcfb2da5dcc46022765a00000000694630430220575ddd235a989befbf98f43b008666e56af07be89e47e09d18690c75846fb587021f00830605aa09febc51132001e0dbcad860e54d4657b55aaf961b527a935b8a01210281feb90c058c3436f8bc361930ae99fcfb530a699cdad141d7244bfcad521a1fffffffff03204e0000000000002551210281feb90c058c3436f8bc361930ae99fcfb530a699cdad141d7244bfcad521a1f51ae204e0000000000001976a914a988f8039a203cf86136e0d32b9d77eafa5a6bef88ac46f4d501000000001976a914161d7a3d0ee15c793ab300433192f949d8f3566588ac00000000";
-    let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
-    let utxo_hints = array![prev_out];
-
-    // Validate the P2MS transaction
-    let res = validate::validate_p2ms(@transaction, 0, utxo_hints);
-    assert!(res.is_ok(), "P2MS 1-of-1 transaction validation failed");
 }
