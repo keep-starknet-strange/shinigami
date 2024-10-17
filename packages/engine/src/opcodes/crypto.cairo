@@ -8,7 +8,7 @@ use crate::signature::signature;
 use crate::signature::sighash;
 use crate::signature::signature::BaseSigVerifierTrait;
 use starknet::secp256_trait::{is_valid_signature};
-use shinigami_utils::hash::sha256_byte_array;
+use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
@@ -32,9 +32,8 @@ pub fn opcode_hash160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252>
 
 pub fn opcode_hash256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let m = engine.dstack.pop_byte_array()?;
-    let res = sha256_byte_array(@m);
-    let res2 = sha256_byte_array(@res);
-    engine.dstack.push_byte_array(res2);
+    let res = double_sha256_bytearray(@m);
+    engine.dstack.push_byte_array(res.into());
     return Result::Ok(());
 }
 

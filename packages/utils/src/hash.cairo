@@ -10,6 +10,10 @@ pub fn sha256_byte_array(byte: @ByteArray) -> ByteArray {
     hash_value
 }
 
+pub fn double_sha256_bytearray(byte: @ByteArray) -> ByteArray {
+    return sha256_byte_array(@sha256_byte_array(byte));
+}
+
 pub fn double_sha256(byte: @ByteArray) -> u256 {
     let msg_hash = compute_sha256_byte_array(byte);
     let mut res_bytes = "";
