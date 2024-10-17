@@ -51,7 +51,7 @@ fn test_p2wpkh_first_transaction() {
 
     let prevout_script = "0x00148d7a0a3461e3891723e5fdf8129caa0075060cff";
     let prevout = UTXO {
-        amount: 194300, // Specify amount in satoshis
+        amount: 194300,
         pubkey_script: hex_to_bytecode(@prevout_script),
         block_height: 481824
     };
