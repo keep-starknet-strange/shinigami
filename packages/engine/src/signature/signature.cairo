@@ -387,6 +387,35 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     }
 }
 
+// ParsePubKey parses a public key for a koblitz curve from a bytestring into a
+// Secp256k1Point, verifying that it is valid. It only supports public keys in
+// the BIP-340 32-byte format.
+pub fn parse_schnorr_pub_key(pub_key_str: @ByteArray) -> Result<Secp256k1Point, felt252> {
+    if pub_key_str.len() == 0 {
+        return Result::Err('nil pubkey byte string');
+    }
+    if pub_key_str.len() != constants::PUB_KEY_BYTES_LEN {
+        return Result::Err('bad pubkey byte string size');
+    }
+
+    let mut key_compressed = "";
+    key_compressed.append_byte(0x02);
+    key_compressed.append(pub_key_str);
+
+    if key_compressed.len() != constants::PUB_KEY_BYTES_LEN_COMPRESSED {
+        return Result::Err('Invalid compressed public key');
+    }
+
+    let pub_key: u256 = u256_from_byte_array_with_offset(@key_compressed, 1,constants:: PUB_KEY_BYTES_LEN);
+    let parity: bool = key_compressed[0] == 0x03;
+
+    Result::Ok(
+        Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
+            .unwrap_syscall()
+            .expect('Secp256k1Point: Invalid point.')
+    )
+}
+
 // Parses a DER-encoded ECDSA signature byte array into a `Signature` struct.
 //
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
