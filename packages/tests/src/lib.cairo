@@ -19,4 +19,5 @@ pub mod tests {
     mod test_transactions;
     mod test_p2pk;
     mod test_p2pkh;
+    mod test_p2wsh;
 }
