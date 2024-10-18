@@ -514,25 +514,25 @@ pub mod Opcode {
             // OP_UNKNOWNX
             return true;
         }
-        if opcode == OP_RESERVED ||
-            opcode == OP_VER ||
-            opcode == OP_CAT ||
-            opcode == OP_SUBSTR ||
-            opcode == OP_LEFT ||
-            opcode == OP_RIGHT ||
-            opcode == OP_INVERT ||
-            opcode == OP_AND ||
-            opcode == OP_OR ||
-            opcode == OP_XOR ||
-            opcode == OP_RESERVED1 ||
-            opcode == OP_RESERVED2 ||
-            opcode == OP_2MUL ||
-            opcode == OP_2DIV ||
-            opcode == OP_MUL ||
-            opcode == OP_DIV ||
-            opcode == OP_MOD ||
-            opcode == OP_LSHIFT ||
-            opcode == OP_RSHIFT {
+        if opcode == OP_RESERVED
+            || opcode == OP_VER
+            || opcode == OP_CAT
+            || opcode == OP_SUBSTR
+            || opcode == OP_LEFT
+            || opcode == OP_RIGHT
+            || opcode == OP_INVERT
+            || opcode == OP_AND
+            || opcode == OP_OR
+            || opcode == OP_XOR
+            || opcode == OP_RESERVED1
+            || opcode == OP_RESERVED2
+            || opcode == OP_2MUL
+            || opcode == OP_2DIV
+            || opcode == OP_MUL
+            || opcode == OP_DIV
+            || opcode == OP_MOD
+            || opcode == OP_LSHIFT
+            || opcode == OP_RSHIFT {
             return true;
         }
         return false;

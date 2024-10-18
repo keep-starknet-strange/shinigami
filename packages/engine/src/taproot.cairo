@@ -65,7 +65,12 @@ pub fn serialized_compressed(pub_key: Secp256k1Point) -> ByteArray {
 #[generate_trait()]
 pub impl ControlBlockImpl of ControlBlockTrait {
     // TODO: From parse
-    fn new(internal_pubkey: Secp256k1Point, output_key_y_is_odd: bool, leaf_version: u8, control_block: @ByteArray) -> ControlBlock {
+    fn new(
+        internal_pubkey: Secp256k1Point,
+        output_key_y_is_odd: bool,
+        leaf_version: u8,
+        control_block: @ByteArray
+    ) -> ControlBlock {
         ControlBlock {
             internal_pubkey: internal_pubkey,
             output_key_y_is_odd: output_key_y_is_odd,
@@ -79,7 +84,9 @@ pub impl ControlBlockImpl of ControlBlockTrait {
         return "";
     }
 
-    fn verify_taproot_leaf(self: @ControlBlock, witness_program: @ByteArray, script: @ByteArray) -> Result<(), felt252> {
+    fn verify_taproot_leaf(
+        self: @ControlBlock, witness_program: @ByteArray, script: @ByteArray
+    ) -> Result<(), felt252> {
         let root_hash = self.root_hash(script);
         let taproot_key = compute_taproot_output_key(self.internal_pubkey, @root_hash);
         let expected_witness_program = serialize_pub_key(taproot_key);
@@ -99,7 +106,8 @@ pub impl ControlBlockImpl of ControlBlockTrait {
 const CONTROL_BLOCK_BASE_SIZE: u32 = 33;
 const CONTROL_BLOCK_NODE_SIZE: u32 = 32;
 const CONTROL_BLOCK_MAX_NODE_COUNT: u32 = 128;
-const CONTROL_BLOCK_MAX_SIZE: u32 = CONTROL_BLOCK_BASE_SIZE + (CONTROL_BLOCK_MAX_NODE_COUNT * CONTROL_BLOCK_NODE_SIZE);
+const CONTROL_BLOCK_MAX_SIZE: u32 = CONTROL_BLOCK_BASE_SIZE
+    + (CONTROL_BLOCK_MAX_NODE_COUNT * CONTROL_BLOCK_NODE_SIZE);
 
 const SIG_OPS_DELTA: i32 = 50;
 const BASE_CODE_SEP: u32 = 0xFFFFFFFF;
@@ -129,14 +137,18 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         }
     }
 
-    fn verify_taproot_spend(witness_program: @ByteArray, raw_sig: @ByteArray, tx: @Transaction, tx_idx: u32) -> Result<(), felt252> {
+    fn verify_taproot_spend(
+        witness_program: @ByteArray, raw_sig: @ByteArray, tx: @Transaction, tx_idx: u32
+    ) -> Result<(), felt252> {
         let witness: Span<ByteArray> = tx.get_transaction_inputs()[tx_idx].get_witness();
         let mut annex = @"";
         if is_annexed_witness(witness, witness.len()) {
             annex = witness[witness.len() - 1];
         }
 
-      let mut verifier = TaprootSigVerifierImpl::<Transaction>::new(raw_sig, witness_program, annex)?;
+        let mut verifier = TaprootSigVerifierImpl::<
+            Transaction
+        >::new(raw_sig, witness_program, annex)?;
         let is_valid = TaprootSigVerifierImpl::<Transaction>::verify(ref verifier);
         if !is_valid {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
@@ -174,12 +186,14 @@ pub fn parse_control_block(control_block: @ByteArray) -> Result<ControlBlock, fe
         i += 1;
     };
     let pubkey = parse_schnorr_pub_key(@raw_pubkey);
-    return Result::Ok(ControlBlock {
-        internal_pubkey: pubkey,
-        output_key_y_is_odd: output_key_y_is_odd,
-        leaf_version: leaf_version,
-        control_block: control_block
-    });
+    return Result::Ok(
+        ControlBlock {
+            internal_pubkey: pubkey,
+            output_key_y_is_odd: output_key_y_is_odd,
+            leaf_version: leaf_version,
+            control_block: control_block
+        }
+    );
 }
 
 pub fn is_annexed_witness(witness: Span<ByteArray>, witness_len: usize) -> bool {

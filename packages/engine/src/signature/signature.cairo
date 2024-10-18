@@ -454,10 +454,8 @@ pub struct TaprootSigVerifier {
 pub trait TaprootSigVerifierTrait<T> {
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
-    ) -> Result<TaprootSigVerifier, felt252>; 
-    fn new_base(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<TaprootSigVerifier, felt252>;
+    fn new_base(sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> Result<TaprootSigVerifier, felt252>;
     fn verify(ref self: TaprootSigVerifier) -> bool;
     fn verify_base(ref self: TaprootSigVerifier) -> bool;
 }
