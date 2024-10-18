@@ -128,7 +128,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         SIG_COUNT="Execution failed: check multisig: num sigs > pk"
         SIG_PUSHONLY="Execution failed: Engine::new: not pushonly"
         SIG_PUSHONLY2="Execution failed: Engine::new: p2sh not pushonly"
-        PUBKEYTYPE="Execution failed: unsupported public key type"
+        PUBKEYTYPE="Execution failed: Unsupported public key type"
         INVALID_SIG_FMT="Execution failed: invalid sig fmt: too short"
         INVALID_HASH_TYPE="Execution failed: invalid hash type"
         INVALID_LOCKTIME="Execution failed: Unsatisfied locktime"
@@ -137,6 +137,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         MINIMAL_DATA="Execution failed: Opcode represents non-minimal"
         INVALID_WITNESS="Execution failed: Invalid witness program"
         SIG_DER="Execution failed: Signature DER error"
+        SIG_HIGH_S="Execution failed: Sig not canonical high S value"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -205,6 +206,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="MINIMALDATA"
         elif echo "$RESULT" | grep -q "$SIG_DER"; then
             SCRIPT_RESULT="SIG_DER"
+        elif echo "$RESULT" | grep -q "$SIG_HIGH_S"; then
+            SCRIPT_RESULT="SIG_HIGH_S"
         else
             SCRIPT_RESULT="FAIL"
         fi

@@ -10,6 +10,8 @@ use crate::hash_cache::SigHashMidstateTrait;
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
 use crate::errors::Error;
+use shinigami_utils::byte_array::{sub_byte_array};
+
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -153,8 +155,8 @@ pub fn check_hash_type_encoding<
     if hash_type > constants::SIG_HASH_ANYONECANPAY {
         hash_type -= constants::SIG_HASH_ANYONECANPAY;
     }
-
     if hash_type < constants::SIG_HASH_ALL || hash_type > constants::SIG_HASH_SINGLE {
+        println!("Invalid hash type: {}", hash_type);
         return Result::Err('invalid hash type');
     }
 
@@ -185,9 +187,15 @@ pub fn check_signature_encoding<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 >(
-    ref vm: Engine<T>, sig_bytes: @ByteArray, strict_encoding: bool
+    ref vm: Engine<T>, sig_bytes: @ByteArray
 ) -> Result<(), felt252> {
+    // https://github.com/btcsuite/btcd/blob/master/txscript/engine.go#L1221
     let low_s = vm.has_flag(ScriptFlags::ScriptVerifyLowS);
+    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
+    let verify_der = vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+    if !low_s && !strict_encoding && !verify_der {
+        return Result::Ok(());
+    }
 
     // ASN.1 identifiers for sequence and integer types.*
     let asn1_sequence_id: u8 = 0x30;
@@ -205,24 +213,29 @@ pub fn check_signature_encoding<
     if sig_bytes_len == 0 {
         return Result::Err('invalid sig fmt: empty sig');
     }
+
     // Calculate the actual length of the signature, excluding the hash type.
     let sig_len = sig_bytes_len - constants::HASH_TYPE_LEN;
     // Check if the signature is too short.
     if sig_len < constants::MIN_SIG_LEN {
         return Result::Err('invalid sig fmt: too short');
     }
+
     // Check if the signature is too long.
     if sig_len > constants::MAX_SIG_LEN {
         return Result::Err('invalid sig fmt: too long');
     }
+
     // Ensure the signature starts with the correct ASN.1 sequence identifier.
     if sig_bytes[sequence_offset] != asn1_sequence_id {
         return Result::Err('invalid sig fmt: wrong type');
     }
+
     // Verify that the length field matches the expected length.
     if sig_bytes[data_len_offset] != (sig_len - data_offset).try_into().unwrap() {
         return Result::Err('invalid sig fmt: bad length');
     }
+
     // Determine the length of the `R` value in the signature.
     let r_len: usize = sig_bytes[r_len_offset].into();
     let s_type_offset = r_offset + r_len;
@@ -231,6 +244,7 @@ pub fn check_signature_encoding<
     if s_type_offset > sig_len {
         return Result::Err('invalid sig fmt: S type missing');
     }
+
     // Check if the `S` length offset exceeds the length of the signature.
     if s_len_offset > sig_len {
         return Result::Err('invalid sig fmt: miss S length');
@@ -246,16 +260,14 @@ pub fn check_signature_encoding<
     if r_len <= 0 || r_len > sig_len - r_offset - 3 {
         return Result::Err('invalid sig fmt:R length');
     }
-    // If strict encoding is enforced, check for negative or excessively padded `R` values.
-    if strict_encoding {
-        if sig_bytes[r_offset] & 0x80 != 0 {
-            return Result::Err('invalid sig fmt: negative R');
-        }
-
-        if r_len > 1 && sig_bytes[r_offset] == 0 && sig_bytes[r_offset + 1] & 0x80 == 0 {
-            return Result::Err('invalid sig fmt: R padding');
-        }
+    if sig_bytes[r_offset] & 0x80 != 0 {
+        return Result::Err('invalid sig fmt: negative R');
     }
+
+    if r_len > 1 && sig_bytes[r_offset] == 0 && sig_bytes[r_offset + 1] & 0x80 == 0 {
+        return Result::Err('invalid sig fmt: R padding');
+    }
+
     // Ensure the `S` value is correctly identified as an ASN.1 integer.
     if sig_bytes[s_type_offset] != asn1_integer_id {
         return Result::Err('invalid sig fmt:S ASN.1');
@@ -264,16 +276,17 @@ pub fn check_signature_encoding<
     if s_len <= 0 || s_len > sig_len - s_offset {
         return Result::Err('invalid sig fmt:S length');
     }
+
     // If strict encoding is enforced, check for negative or excessively padded `S` values.
     if strict_encoding {
         if sig_bytes[s_offset] & 0x80 != 0 {
             return Result::Err('invalid sig fmt: negative S');
         }
-
         if s_len > 1 && sig_bytes[s_offset] == 0 && sig_bytes[s_offset + 1] & 0x80 == 0 {
             return Result::Err('invalid sig fmt: S padding');
         }
     }
+
     // If the "low S" rule is enforced, check that the `S` value is below the threshold.
     if low_s {
         let s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset, 32);
@@ -283,9 +296,8 @@ pub fn check_signature_encoding<
         let carry = half_order_high_lower;
         half_order.low = (half_order.low / 2) + (carry * (constants::MAX_U128 / 2 + 1));
         half_order.high = half_order_high_upper;
-
         if s_value > half_order {
-            return Result::Err('sig not canonical high S value');
+            return Result::Err(Error::SIG_HIGH_S);
         }
     }
 
@@ -341,7 +353,7 @@ pub fn check_pub_key_encoding<
     }
 
     if !is_supported_pub_key_type(pk_bytes) {
-        return Result::Err('unsupported public key type');
+        return Result::Err(Error::PUBKEYTYPE);
     }
 
     return Result::Ok(());
@@ -392,13 +404,17 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
 // The function performs various checks to ensure the integrity and validity of the signature.
 pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
-    let mut sig_len: usize = sig_bytes.len() - constants::HASH_TYPE_LEN;
+    let mut sig_len: usize = sig_bytes[1].into();
+    if sig_len + 2 > sig_bytes.len() || sig_len + 2 < constants::MIN_SIG_LEN {
+        return Result::Err('invalid sig fmt: bad length');
+    }
+    let mut start = 0;
+    let sig_bytes = @sub_byte_array(sig_bytes, ref start, sig_len + 2);
     let mut r_len: usize = sig_bytes[3].into();
     let mut s_len: usize = sig_bytes[r_len + 5].into();
     let mut r_offset = 4;
     let mut s_offset = 6 + r_len;
     let order: u256 = Secp256Trait::<Secp256k1Point>::get_curve_size();
-
     let mut i = 0;
 
     //Strip leading zero
@@ -440,9 +456,11 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
     if s_sig == 0 {
         return Result::Err('invalid sig: S is zero');
     }
-    if sig_len != r_len + s_len + 6 {
+
+    if sig_bytes.len() != sig_bytes[3].into() + sig_bytes[sig_bytes[3].into() + 5].into() + 6 {
         return Result::Err('invalid sig: bad final length');
     }
+
     return Result::Ok(Signature { r: r_sig, s: s_sig, y_parity: false, });
 }
 
@@ -464,7 +482,9 @@ pub fn parse_base_sig_and_pk<
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
     let verify_der = vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
-    let strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding) || verify_der;
+    let verify_strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
+    let strict_encoding = verify_strict_encoding || verify_der;
+
     if sig_bytes.len() == 0 {
         return if strict_encoding {
             Result::Err(Error::SCRIPT_ERR_SIG_DER)
@@ -472,18 +492,21 @@ pub fn parse_base_sig_and_pk<
             Result::Err('empty signature')
         };
     }
-
     // TODO: strct encoding
     let hash_type_offset: usize = sig_bytes.len() - 1;
     let hash_type: u32 = sig_bytes[hash_type_offset].into();
-    if let Result::Err(e) = check_hash_type_encoding(ref vm, hash_type) {
-        return if verify_der {
-            Result::Err(Error::SCRIPT_ERR_SIG_DER)
-        } else {
-            Result::Err(e)
-        };
+
+    if strict_encoding {
+        if let Result::Err(e) = check_hash_type_encoding(ref vm, hash_type) {
+            return if verify_der {
+                Result::Err(Error::SCRIPT_ERR_SIG_DER)
+            } else {
+                Result::Err(e)
+            };
+        }
     }
-    if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes, strict_encoding) {
+
+    if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes) {
         return if verify_der {
             Result::Err(Error::SCRIPT_ERR_SIG_DER)
         } else {
@@ -499,15 +522,11 @@ pub fn parse_base_sig_and_pk<
         };
     }
 
-    let pub_key = match parse_pub_key(pk_bytes) {
-        Result::Ok(key) => key,
-        Result::Err(e) => if verify_der {
-            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
-        } else {
-            return Result::Err(e);
-        },
-    };
-
+    let mut start = 0;
+    if hash_type_offset < 1 {
+        return Result::Err('invalid hash offset');
+    }
+    let sig_bytes = @sub_byte_array(sig_bytes, ref start, hash_type_offset);
     let sig = match parse_signature(sig_bytes) {
         Result::Ok(signature) => signature,
         Result::Err(e) => if verify_der {
@@ -515,6 +534,12 @@ pub fn parse_base_sig_and_pk<
         } else {
             return Result::Err(e);
         },
+    };
+    println!("Parsed sig and pk");
+
+    let pub_key = match parse_pub_key(pk_bytes) {
+        Result::Ok(key) => key,
+        Result::Err(e) => { return Result::Err(e); }
     };
 
     Result::Ok((pub_key, sig, hash_type))
@@ -535,7 +560,6 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
         if push_data >= 8 && push_data <= 72 {
             let mut len: usize = push_data.into();
             let mut found: bool = false;
-
             if len == sig_bytes.len() {
                 found = compare_data(script, sig_bytes, i, push_data);
             }
@@ -549,6 +573,7 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
                 i += 1;
                 continue;
             }
+
             processed_script.append_byte(push_data);
             while len != 0 && i - len < script_len {
                 processed_script.append_byte(script[i - len + 1]);

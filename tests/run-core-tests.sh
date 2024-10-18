@@ -17,7 +17,7 @@ START=0
 if [ -n "$1" ]; then
   START=$1
 fi
-END=100
+END=1257
 if [ -n "$2" ]; then
   END=$2
 fi
@@ -48,6 +48,13 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
       SCRIPT_IDX=$((SCRIPT_IDX+1))
       continue
     fi
+    
+    # if start then write initial array bracket
+    if [ $SCRIPT_IDX -eq $START ]; then
+      echo "[" >> $FAILED_TESTS_JSON
+      echo "[" >> $PASSING_TESTS_JSON
+    fi
+
 
     has_witness="false"
     # Otherwise, line encoded like [[wit..., amount]?, scriptSig, scriptPubKey, flags, expected_scripterror, ... comments]
@@ -136,7 +143,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         SIG_COUNT="Execution failed: check multisig: num sigs > pk"
         SIG_PUSHONLY="Execution failed: Engine::new: not pushonly"
         SIG_PUSHONLY2="Execution failed: Engine::new: p2sh not pushonly"
-        PUBKEYTYPE="Execution failed: unsupported public key type"
+        PUBKEYTYPE="Execution failed: Unsupported public key type"
         INVALID_SIG_FMT="Execution failed: invalid sig fmt: too short"
         INVALID_HASH_TYPE="Execution failed: invalid hash type"
         INVALID_LOCKTIME="Execution failed: Unsatisfied locktime"
@@ -153,6 +160,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         WITNESS_PROGRAM_EMPTY="Execution failed: Empty witness program"
         WITNESS_MALLEATED_P2SH="Execution failed: Signature script for p2sh wit"
         WITNESS_PUBKEYTYPE="Execution failed: Non-compressed key post-segwit"
+        SIG_HIGH_S="Execution failed: Sig not canonical high S value"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -283,9 +291,16 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
 
     SCRIPT_IDX=$((SCRIPT_IDX+1))
     if [ $SCRIPT_IDX -eq $END ]; then
+
       break #TODO: Remove this line
     fi
   done
+    # if end then write final array bracket, remove trailing comma from last element
+    truncate -s-2 $FAILED_TESTS_JSON
+    truncate -s-2 $PASSING_TESTS_JSON
+    echo "]" >> $FAILED_TESTS_JSON
+    echo "]" >> $PASSING_TESTS_JSON
+
 
   echo "Script tests complete!"
   echo "Passed: $PASSED    Failed: $FAILED    Total: $((PASSED+FAILED))"
