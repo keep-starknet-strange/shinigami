@@ -11,7 +11,7 @@ pub fn abstract_verify<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252
 }
 
 pub fn not_implemented<T>(ref engine: Engine<T>) -> Result<(), felt252> {
-    return Result::Err(Error::OPCODE_NOT_IMPLEMENTED);
+    return Result::Err(Error::OPCODE_RESERVED);
 }
 
 pub fn opcode_reserved<T>(msg: ByteArray, ref engine: Engine<T>) -> Result<(), felt252> {

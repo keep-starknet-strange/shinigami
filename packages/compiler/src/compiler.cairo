@@ -26,7 +26,7 @@ pub impl CompilerImpl of CompilerTrait {
         let mut compiler = Compiler { opcodes: Default::default() };
         // Add the opcodes to the dict
         compiler.add_opcode('OP_0', Opcode::OP_0);
-        compiler.add_opcode('OP_FALSE', Opcode::OP_0);
+        compiler.add_opcode('OP_FALSE', Opcode::OP_FALSE);
         compiler.add_opcode('OP_DATA_1', Opcode::OP_DATA_1);
         compiler.add_opcode('OP_DATA_2', Opcode::OP_DATA_2);
         compiler.add_opcode('OP_DATA_3', Opcode::OP_DATA_3);
@@ -286,6 +286,8 @@ pub impl CompilerImpl of CompilerTrait {
         compiler.add_opcode('OP_LSHIFT', Opcode::OP_LSHIFT);
         compiler.add_opcode('OP_RSHIFT', Opcode::OP_RSHIFT);
         compiler.add_opcode('OP_NOP1', Opcode::OP_NOP1);
+        compiler.add_opcode('OP_NOP2', Opcode::OP_NOP2);
+        compiler.add_opcode('OP_NOP3', Opcode::OP_NOP3);
         compiler.add_opcode('OP_NOP4', Opcode::OP_NOP4);
         compiler.add_opcode('OP_NOP5', Opcode::OP_NOP5);
         compiler.add_opcode('OP_NOP6', Opcode::OP_NOP6);

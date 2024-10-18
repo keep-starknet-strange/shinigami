@@ -1,5 +1,7 @@
 use crate::errors::Error;
-use crate::transaction::{Transaction, EngineTransactionTrait, EngineTransactionInputTrait};
+use crate::transaction::{
+    EngineTransactionTrait, EngineTransactionOutputTrait, EngineTransactionInputTrait
+};
 use crate::signature::signature::parse_schnorr_pub_key;
 use crate::signature::signature::{TaprootSigVerifierImpl};
 use starknet::secp256k1::{Secp256k1Point};
@@ -137,8 +139,20 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         }
     }
 
-    fn verify_taproot_spend(
-        witness_program: @ByteArray, raw_sig: @ByteArray, tx: @Transaction, tx_idx: u32
+    fn verify_taproot_spend<
+        T,
+        +Drop<T>,
+        I,
+        +Drop<I>,
+        impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+        O,
+        +Drop<O>,
+        impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+        impl IEngineTransactionTrait: EngineTransactionTrait<
+            T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+        >
+    >(
+        witness_program: @ByteArray, raw_sig: @ByteArray, tx: @T, tx_idx: u32
     ) -> Result<(), felt252> {
         let witness: Span<ByteArray> = tx.get_transaction_inputs()[tx_idx].get_witness();
         let mut annex = @"";
@@ -146,10 +160,8 @@ pub impl TaprootContextImpl of TaprootContextTrait {
             annex = witness[witness.len() - 1];
         }
 
-        let mut verifier = TaprootSigVerifierImpl::<
-            Transaction
-        >::new(raw_sig, witness_program, annex)?;
-        let is_valid = TaprootSigVerifierImpl::<Transaction>::verify(ref verifier);
+        let mut verifier = TaprootSigVerifierImpl::<I, O, T>::new(raw_sig, witness_program, annex)?;
+        let is_valid = TaprootSigVerifierImpl::<I, O, T>::verify(ref verifier);
         if !is_valid {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
         }

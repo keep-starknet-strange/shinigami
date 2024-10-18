@@ -1,10 +1,11 @@
 #!/bin/bash
 #
-# Runs the tests from bitcoin-core
+# Runs the failing tests from bitcoin-core
 # https://github.com/bitcoin/bitcoin/blob/master/src/test/data/
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BASE_DIR=$SCRIPT_DIR/..
+TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BASE_DIR=$TEST_DIR/..
+SCRIPT_DIR=$BASE_DIR/scripts
 
 echo "Building shinigami..."
 cd $BASE_DIR && scarb build
@@ -22,7 +23,7 @@ fi
 
 # Run the script_tests.json tests
 # TODO: Pull from bitcoin-core repo?
-SCRIPT_TESTS_JSON=$SCRIPT_DIR/script_tests_failing.json
+SCRIPT_TESTS_JSON=$TEST_DIR/script_tests_failing.json
 
 echo "Running script_tests.json tests..."
 echo
@@ -135,6 +136,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         CLEAN_STACK="Execution failed: Non-clean stack after execute"
         MINIMAL_DATA="Execution failed: Opcode represents non-minimal"
         INVALID_WITNESS="Execution failed: Invalid witness program"
+        SIG_DER="Execution failed: Signature DER error"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -201,6 +203,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="CLEANSTACK"
         elif echo "$RESULT" | grep -q "$MINIMAL_DATA"; then
             SCRIPT_RESULT="MINIMALDATA"
+        elif echo "$RESULT" | grep -q "$SIG_DER"; then
+            SCRIPT_RESULT="SIG_DER"
         else
             SCRIPT_RESULT="FAIL"
         fi
@@ -245,39 +249,3 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
   echo "Script tests complete!"
   echo "Passed: $PASSED    Failed: $FAILED    Total: $((PASSED+FAILED))"
 }
-
-
-# TODO: Pull from bitcoin-core repo?
-# Run the tx_valid.json tests
-exit 0 # TODO
-TX_VALID_JSON=$SCRIPT_DIR/tx_valid.json
-
-jq -c '.[]' $TX_VALID_JSON | while read line; do
-    # If line contains on string, ie ["XXX"], skip it
-    if [[ $line != *\"*\"*\,\"*\"* ]]; then
-        continue
-    fi
-    # Otherwise, line encoded like [[[prevout hash, prevout index, prevout scriptPubKey, amount?], [input 2], ...], serializedTransaction, excluded verifyFlags]
-    # Extract line data
-    prevouts=$(echo $line | jq -r '.[0]') # TODO: Use prevouts
-    tx=$(echo $line | jq -r '.[1]')
-    flags=$(echo $line | jq -r '.[2]') # TODO: Use flags
-
-    # Extract prevouts
-    prevout_hashs=$(jq -r '.[] | .[0]' <<< $prevouts)
-    prevout_indexes=$(jq -r '.[] | .[1]' <<< $prevouts)
-    prevout_scripts=$(jq -r '.[] | .[2]' <<< $prevouts)
-    prevout_amounts=$(jq -r '.[] | .[3]' <<< $prevouts)
-
-    echo "Running test with "
-    echo "                  Tx: $tx"
-    echo "                  Prevout Hashs: $prevout_hashs"
-    echo "                  Prevout Indexes: $prevout_indexes"
-    echo "                  Prevout Scripts: $prevout_scripts"
-    echo "                  Prevout Amounts: $prevout_amounts"
-    echo "                  Flags: $flags"
-    echo "                  "
-    echo "-----------------------------------------------------------------"
-    echo "                  "
-
-done
