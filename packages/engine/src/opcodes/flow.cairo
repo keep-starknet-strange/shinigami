@@ -1,23 +1,30 @@
-use crate::engine::{Engine, EngineExtrasTrait};
+use crate::engine::{Engine, EngineInternalTrait};
+use crate::transaction::{
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+};
+use crate::flags::ScriptFlags;
 use crate::cond_stack::ConditionalStackTrait;
 use crate::opcodes::{utils, Opcode};
-use crate::scriptflags::ScriptFlags;
 use crate::errors::Error;
 
-pub fn is_branching_opcode(opcode: u8) -> bool {
-    if opcode == Opcode::OP_IF
-        || opcode == Opcode::OP_NOTIF
-        || opcode == Opcode::OP_ELSE
-        || opcode == Opcode::OP_ENDIF {
-        return true;
-    }
-    return false;
-}
-
-pub fn opcode_nop<T, +Drop<T>>(ref engine: Engine<T>, opcode: u8) -> Result<(), felt252> {
+pub fn opcode_nop<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>, opcode: u8
+) -> Result<(), felt252> {
     if opcode != Opcode::OP_NOP
-        && EngineExtrasTrait::<
-            T
+        && EngineInternalTrait::<
+            I, O, T
         >::has_flag(ref engine, ScriptFlags::ScriptDiscourageUpgradableNops) {
         return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
     }
@@ -28,7 +35,21 @@ pub fn opcode_nop<T, +Drop<T>>(ref engine: Engine<T>, opcode: u8) -> Result<(), 
 const op_cond_false: u8 = 0;
 const op_cond_true: u8 = 1;
 const op_cond_skip: u8 = 2;
-pub fn opcode_if<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_if<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     // TODO: Pop if bool
     if engine.cond_stack.branch_executing() {
@@ -43,7 +64,21 @@ pub fn opcode_if<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     return Result::Ok(());
 }
 
-pub fn opcode_notif<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_notif<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     if engine.cond_stack.branch_executing() {
         let ok = engine.pop_if_bool()?;
