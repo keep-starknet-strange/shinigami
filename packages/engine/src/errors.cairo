@@ -33,6 +33,7 @@ pub mod Error {
     pub const WITNESS_PROGRAM_WRONG_LENGTH: felt252 = 'Witness program wrong length';
     pub const WITNESS_PROGRAM_EMPTY: felt252 = 'Empty witness program';
     pub const SCRIPT_TOO_LARGE: felt252 = 'Script is too large';
+    pub const INVALID_P2MS: felt252 = 'Invalid P2MS transaction';
     pub const SCRIPT_UNFINISHED: felt252 = 'Script unfinished';
     pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
 }
