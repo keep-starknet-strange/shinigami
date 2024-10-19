@@ -551,10 +551,6 @@ pub fn parse_base_sig_and_pk<
     Result::Ok((pub_key, sig, hash_type))
 }
 
-// TaprootSigVerifierImpl::new : use this as a reference from btcd
-// https://github.com/btcsuite/btcd/blob/24eb815168f49dea84767817717a11bd7928eb23/txscript/sigvalidate.go#L313
-// TaprootSigVerifierImpl::verify : use this as a reference from btcd
-
 //`TaprootSigVerifier` is used to verify Schnorr signatures encoded in the Taproot format.
 #[derive(Drop)]
 pub struct TaprootSigVerifier {
