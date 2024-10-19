@@ -1,3 +1,5 @@
+use crate::byte_array::byte_array_value_at_le;
+
 // TODO: little-endian?
 // TODO: if odd number of bytes, prepend 0?
 pub fn hex_to_bytecode(script_item: @ByteArray) -> ByteArray {
@@ -73,4 +75,46 @@ pub fn int_size_in_bytes(u_32: u32) -> u32 {
         size = 1;
     }
     size
+}
+
+pub fn var_int_size(buf: @ByteArray, mut offset: u32) -> u32 {
+    let discriminant = byte_array_value_at_le(buf, ref offset, 1);
+    if discriminant == 0xff {
+        return 8;
+    } else if discriminant == 0xfe {
+        return 4;
+    } else if discriminant == 0xfd {
+        return 2;
+    } else {
+        return 1;
+    }
+}
+
+pub fn read_var_int(buf: @ByteArray, ref offset: u32) -> u64 {
+    // TODO: Error handling
+    let discriminant: u64 = byte_array_value_at_le(buf, ref offset, 1).try_into().unwrap();
+    if discriminant == 0xff {
+        return byte_array_value_at_le(buf, ref offset, 8).try_into().unwrap();
+    } else if discriminant == 0xfe {
+        return byte_array_value_at_le(buf, ref offset, 4).try_into().unwrap();
+    } else if discriminant == 0xfd {
+        return byte_array_value_at_le(buf, ref offset, 2).try_into().unwrap();
+    } else {
+        return discriminant;
+    }
+}
+
+pub fn write_var_int(ref buf: ByteArray, value: u64) {
+    if value < 0xfd {
+        buf.append_byte(value.try_into().unwrap());
+    } else if value < 0x10000 {
+        buf.append_byte(0xfd);
+        buf.append_word_rev(value.into(), 2);
+    } else if value < 0x100000000 {
+        buf.append_byte(0xfe);
+        buf.append_word_rev(value.into(), 4);
+    } else {
+        buf.append_byte(0xff);
+        buf.append_word_rev(value.into(), 8);
+    }
 }

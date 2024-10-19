@@ -41,6 +41,22 @@ pub fn validate_transaction(
     Result::Ok(())
 }
 
+pub fn validate_transaction_at(
+    tx: @EngineTransaction, flags: u32, prevout: UTXO, at: u32
+) -> Result<(), felt252> {
+    let hash_cache = HashCacheImpl::new(tx);
+    let mut engine = EngineImpl::new(
+        @prevout.pubkey_script, tx, at, flags, prevout.amount, @hash_cache
+    )
+        .unwrap();
+    let res = engine.execute();
+    if res.is_err() {
+        return Result::Err(res.unwrap_err());
+    }
+
+    Result::Ok(())
+}
+
 pub fn validate_p2ms(
     tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>
 ) -> Result<(), felt252> {

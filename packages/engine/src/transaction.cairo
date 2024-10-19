@@ -1,6 +1,6 @@
 use crate::errors::Error;
 use shinigami_utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be, sub_byte_array};
-use shinigami_utils::bytecode::{int_size_in_bytes, bytecode_to_hex};
+use shinigami_utils::bytecode::{bytecode_to_hex, read_var_int, write_var_int};
 use shinigami_utils::bit_shifts::shr;
 use shinigami_utils::hash::double_sha256;
 
@@ -173,8 +173,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
     fn btc_decode(raw: ByteArray, encoding: u32) -> EngineTransaction {
         let mut offset: usize = 0;
         let version: i32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
-        // TODO: ReadVerIntBuf
-        let input_len: u8 = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+        let input_len = read_var_int(@raw, ref offset);
         // TODO: input_len = 0 -> segwit
         // TODO: Error handling and bounds checks
         // TODO: Byte orderings
@@ -186,7 +185,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
                 low: byte_array_value_at_be(@raw, ref offset, 16).try_into().unwrap(),
             };
             let vout: u32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
-            let script_len = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+            let script_len = read_var_int(@raw, ref offset).try_into().unwrap();
             let script = sub_byte_array(@raw, ref offset, script_len);
             let sequence: u32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
             let input = EngineTransactionInput {
@@ -199,13 +198,13 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             i += 1;
         };
 
-        let output_len: u8 = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+        let output_len = read_var_int(@raw, ref offset);
         let mut i = 0;
         let mut outputs: Array<EngineTransactionOutput> = array![];
         while i != output_len {
             // TODO: negative values
             let value: i64 = byte_array_value_at_le(@raw, ref offset, 8).try_into().unwrap();
-            let script_len = byte_array_value_at_le(@raw, ref offset, 1).try_into().unwrap();
+            let script_len = read_var_int(@raw, ref offset).try_into().unwrap();
             let script = sub_byte_array(@raw, ref offset, script_len);
             let output = EngineTransactionOutput { value: value, publickey_script: script, };
             outputs.append(output);
@@ -237,7 +236,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
 
         // Serialize each input in the transaction.
         let input_len: usize = self.transaction_inputs.len();
-        bytes.append_word_rev(input_len.into(), int_size_in_bytes(input_len));
+        write_var_int(ref bytes, input_len.into());
         let mut i: usize = 0;
         while i != input_len {
             let input: @EngineTransactionInput = self.transaction_inputs.at(i);
@@ -250,7 +249,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             bytes.append_word(input_txid.high.into(), 16);
             bytes.append_word(input_txid.low.into(), 16);
             bytes.append_word_rev(vout.into(), 4);
-            bytes.append_word_rev(script_len.into(), int_size_in_bytes(script_len));
+            write_var_int(ref bytes, script_len.into());
             bytes.append(script);
             bytes.append_word_rev(sequence.into(), 4);
 
@@ -259,7 +258,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
 
         // Serialize each output in the transaction.
         let output_len: usize = self.transaction_outputs.len();
-        bytes.append_word_rev(output_len.into(), int_size_in_bytes(output_len));
+        write_var_int(ref bytes, output_len.into());
         i = 0;
         while i != output_len {
             let output: @EngineTransactionOutput = self.transaction_outputs.at(i);
@@ -268,7 +267,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             let script_len: usize = script.len();
 
             bytes.append_word_rev(value.into(), 8);
-            bytes.append_word_rev(script_len.into(), int_size_in_bytes(script_len));
+            write_var_int(ref bytes, script_len.into());
             bytes.append(script);
 
             i += 1;
