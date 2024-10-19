@@ -549,6 +549,81 @@ pub fn parse_base_sig_and_pk<
     Result::Ok((pub_key, sig, hash_type))
 }
 
+pub struct TaprootSigVerifier {
+    pub_key: Secp256k1Point,
+    sig: Signature,
+    full_sig_bytes: @ByteArray,
+    pk_bytes: @ByteArray,
+    hash_type: u32,
+    tx_idx: u32,
+    annex: Option<ByteArray>,
+}
+
+pub trait TaprootSigVerifierTrait<
+    I,
+    O,
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>
+> {
+    fn new(
+        ref vm: Engine<T>,
+        pk_bytes: @ByteArray,
+        full_sig_bytes: @ByteArray,
+        annex: Option<ByteArray>
+    ) -> Result<TaprootSigVerifier, felt252>;
+    fn verify(ref self: TaprootSigVerifier, ref vm: Engine<T>) -> bool;
+}
+
+impl TaprootSigVerifierImpl<
+    I,
+    O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    +Drop<I>,
+    +Drop<O>,
+    +Drop<T>
+> of TaprootSigVerifierTrait<I, O, T> {
+    fn new(
+        ref vm: Engine<T>,
+        pk_bytes: @ByteArray,
+        full_sig_bytes: @ByteArray,
+        annex: Option<ByteArray>
+    ) -> Result<TaprootSigVerifier, felt252> {
+        let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(pk_bytes, full_sig_bytes)?;
+        
+        Result::Ok(TaprootSigVerifier {
+            pub_key,
+            sig,
+            full_sig_bytes,
+            pk_bytes,
+            hash_type,
+            tx_idx: vm.tx_idx,
+            annex,
+        })
+    }
+
+    fn verify(ref self: TaprootSigVerifier, ref vm: Engine<T>) -> bool {
+        // TODO: Implement the verification logic
+        // This is a placeholder implementation
+        false
+    }
+}
+
+fn parse_taproot_sig_and_pk(
+    pk_bytes: @ByteArray,
+    raw_sig: @ByteArray
+) -> Result<(Secp256k1Point, Signature, u32), felt252> {
+    // TODO: Implement the parsing logic
+    // This is a placeholder implementation
+    Result::Err('Not implemented')
+}
+
 // Removes the ECDSA signature from a given script.
 pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray {
     if script.len() == 0 || sig_bytes.len() == 0 {
