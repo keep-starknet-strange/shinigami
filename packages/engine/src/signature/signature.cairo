@@ -406,7 +406,9 @@ pub fn parse_schnorr_pub_key(pub_key_str: @ByteArray) -> Result<Secp256k1Point, 
         return Result::Err('Invalid compressed public key');
     }
 
-    let pub_key: u256 = u256_from_byte_array_with_offset(@key_compressed, 1,constants:: PUB_KEY_BYTES_LEN);
+    let pub_key: u256 = u256_from_byte_array_with_offset(
+        @key_compressed, 1, constants::PUB_KEY_BYTES_LEN
+    );
     let parity: bool = key_compressed[0] == 0x03;
 
     Result::Ok(
@@ -549,14 +551,25 @@ pub fn parse_base_sig_and_pk<
     Result::Ok((pub_key, sig, hash_type))
 }
 
+// TaprootSigVerifierImpl::new : use this as a reference from btcd
+// https://github.com/btcsuite/btcd/blob/24eb815168f49dea84767817717a11bd7928eb23/txscript/sigvalidate.go#L313
+// TaprootSigVerifierImpl::verify : use this as a reference from btcd
+
+//`TaprootSigVerifier` is used to verify Schnorr signatures encoded in the Taproot format.
+#[derive(Drop)]
 pub struct TaprootSigVerifier {
+    // public key as a point on the secp256k1 curve, used to verify the signature
     pub_key: Secp256k1Point,
+    // Schnorr signature
     sig: Signature,
-    full_sig_bytes: @ByteArray,
+    // raw byte array of the signature
+    sig_bytes: @ByteArray,
+    // raw byte array of the public key
     pk_bytes: @ByteArray,
+    // part of the script being verified
+    sub_script: ByteArray,
+    // specifies how the transaction was hashed for signing
     hash_type: u32,
-    tx_idx: u32,
-    annex: Option<ByteArray>,
 }
 
 pub trait TaprootSigVerifierTrait<
@@ -568,10 +581,7 @@ pub trait TaprootSigVerifierTrait<
     +EngineTransactionTrait<T, I, O>
 > {
     fn new(
-        ref vm: Engine<T>,
-        pk_bytes: @ByteArray,
-        full_sig_bytes: @ByteArray,
-        annex: Option<ByteArray>
+        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<TaprootSigVerifier, felt252>;
     fn verify(ref self: TaprootSigVerifier, ref vm: Engine<T>) -> bool;
 }
@@ -590,38 +600,20 @@ impl TaprootSigVerifierImpl<
     +Drop<T>
 > of TaprootSigVerifierTrait<I, O, T> {
     fn new(
-        ref vm: Engine<T>,
-        pk_bytes: @ByteArray,
-        full_sig_bytes: @ByteArray,
-        annex: Option<ByteArray>
+        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<TaprootSigVerifier, felt252> {
-        let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(pk_bytes, full_sig_bytes)?;
-        
-        Result::Ok(TaprootSigVerifier {
-            pub_key,
-            sig,
-            full_sig_bytes,
-            pk_bytes,
-            hash_type,
-            tx_idx: vm.tx_idx,
-            annex,
-        })
+        let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
+        let sub_script = vm.sub_script();
+        Result::Ok(TaprootSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type })
     }
-
     fn verify(ref self: TaprootSigVerifier, ref vm: Engine<T>) -> bool {
-        // TODO: Implement the verification logic
-        // This is a placeholder implementation
-        false
-    }
-}
+        let sig_hashes = SigHashMidstateTrait::new(vm.transaction);
+        let sig_hash: u256 = sighash::calc_witness_signature_hash::<
+            I, O, T
+        >(@self.sub_script, @sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
 
-fn parse_taproot_sig_and_pk(
-    pk_bytes: @ByteArray,
-    raw_sig: @ByteArray
-) -> Result<(Secp256k1Point, Signature, u32), felt252> {
-    // TODO: Implement the parsing logic
-    // This is a placeholder implementation
-    Result::Err('Not implemented')
+        is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
+    }
 }
 
 // Removes the ECDSA signature from a given script.
