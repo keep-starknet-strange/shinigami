@@ -1,6 +1,6 @@
 use crate::engine::{Engine, EngineExtrasTrait};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait, Transaction
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::stack::ScriptStackTrait;
 use crate::scriptflags::ScriptFlags;
@@ -116,10 +116,8 @@ pub fn opcode_checksig<
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
-        let mut verifier = TaprootSigVerifierTrait::<
-            Transaction
-        >::new_base(@full_sig_bytes, @pk_bytes)?;
-        is_valid = TaprootSigVerifierTrait::<Transaction>::verify(ref verifier);
+        let mut verifier = TaprootSigVerifierTrait::<T>::new_base(@full_sig_bytes, @pk_bytes)?;
+        is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
     }
 
     if !is_valid && @engine.use_taproot == @true {
@@ -332,4 +330,51 @@ pub fn opcode_sha1<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let h: ByteArray = sha1::sha1_hash(@m).into();
     engine.dstack.push_byte_array(h);
     return Result::Ok(());
+}
+
+pub fn opcode_checksigadd<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
+    if !engine.use_taproot {
+        return Result::Err(Error::OPCODE_RESERVED);
+    }
+
+    let pk_bytes: ByteArray = engine.dstack.pop_byte_array()?;
+    let n: i64 = engine.dstack.pop_int()?;
+    let sig_bytes: ByteArray = engine.dstack.pop_byte_array()?;
+
+    if sig_bytes.len() != 0 {
+        engine.taproot_context.use_ops_budget()?;
+    }
+
+    if pk_bytes.len() == 0 {
+        return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
+    }
+
+    if sig_bytes.len() == 0 {
+        engine.dstack.push_int(n);
+        return Result::Ok(());
+    }
+
+    let mut verifier = TaprootSigVerifierTrait::<
+        T
+    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
+    if !(TaprootSigVerifierTrait::<T>::verify(ref verifier)) {
+        return Result::Err(Error::TAPROOT_INVALID_SIG);
+    }
+
+    engine.dstack.push_int(n + 1);
+    Result::Ok(())
 }
