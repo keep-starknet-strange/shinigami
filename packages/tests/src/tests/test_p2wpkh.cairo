@@ -2,6 +2,7 @@ use shinigami_engine::transaction::EngineInternalTransactionTrait;
 use crate::utxo::UTXO;
 use crate::validate;
 use shinigami_utils::bytecode::hex_to_bytecode;
+use shinigami_engine::flags::ScriptFlags;
 
 #[test]
 fn test_p2wpkh_create_transaction() {
@@ -11,13 +12,14 @@ fn test_p2wpkh_create_transaction() {
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
-    let prevout_script = "0x00140d6c887ce96acf1fdd900f24f4e5cbffbef4683c";
+    let prevout_script = "0x0014841b80d2cc75f5345c482af96294d04fdd66b2b7";
     let prevout = UTXO {
-        amount: 151398, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 680226
+        amount: 2595489, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 680226
     };
 
     let utxo_hints = array![prevout];
-    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
+    let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
 
     assert!(res.is_ok(), "Transaction validation failed");
 }
@@ -36,7 +38,8 @@ fn test_p2wpkh_unlock_transaction() {
     };
 
     let utxo_hints = array![prevout];
-    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
+    let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
 
     assert!(res.is_ok(), "Transaction validation failed");
 }
@@ -55,8 +58,9 @@ fn test_p2wpkh_first_transaction() {
     };
 
     let utxo_hints = array![prevout];
+    let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
-    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "P2WPKH Transaction validation failed");
 }
 
@@ -73,8 +77,9 @@ fn test_p2wpkh_first_witness_spend() {
         amount: 194300, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 481824
     };
     let utxo_hints = array![prevout];
+    let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
-    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "P2WPKH first follow-up spend witness validation failed");
 }
 
@@ -92,8 +97,9 @@ fn test_p2wpkh_uncompressed_key_scriptpubkey_validation() {
     };
 
     let utxo_hints = array![prevout];
+    let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
-    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "P2WPKH uncompressed key ScriptPubKey validation failed");
 }
 
