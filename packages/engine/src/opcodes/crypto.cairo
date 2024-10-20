@@ -1,7 +1,6 @@
 use crate::engine::{Engine, EngineExtrasTrait};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
-    Transaction
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait, Transaction
 };
 use crate::stack::ScriptStackTrait;
 use crate::scriptflags::ScriptFlags;
@@ -117,7 +116,9 @@ pub fn opcode_checksig<
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
-        let mut verifier = TaprootSigVerifierTrait::<Transaction>::new_base(@full_sig_bytes, @pk_bytes)?;
+        let mut verifier = TaprootSigVerifierTrait::<
+            Transaction
+        >::new_base(@full_sig_bytes, @pk_bytes)?;
         is_valid = TaprootSigVerifierTrait::<Transaction>::verify(ref verifier);
     }
 
@@ -278,7 +279,8 @@ pub fn opcode_codeseparator<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), fe
     if !engine.use_taproot {
         // TODO: Check if this is correct
         engine.taproot_context.code_sep = engine.opcode_idx;
-    } else if engine.witness_program.len() == 0 && engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
+    } else if engine.witness_program.len() == 0
+        && engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
         return Result::Err(Error::CODESEPARATOR_NON_SEGWIT);
     }
 

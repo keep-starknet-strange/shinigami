@@ -184,7 +184,9 @@ pub impl EngineExtrasImpl<T, +Drop<T>> of EngineExtrasTrait<T> {
     }
 
     fn pop_if_bool(ref self: Engine<T>) -> Result<bool, felt252> {
-        if !self.is_witness_active(TAPROOT_WITNESS_VERSION) && (!self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION) || !self.has_flag(ScriptFlags::ScriptVerifyMinimalIf)) {
+        if !self.is_witness_active(TAPROOT_WITNESS_VERSION)
+            && (!self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION)
+                || !self.has_flag(ScriptFlags::ScriptVerifyMinimalIf)) {
             return self.dstack.pop_bool();
         }
         let top = self.dstack.pop_byte_array()?;
@@ -656,7 +658,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
         }
 
         // TODO: CheckErrorCondition
-        if self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION) && self.dstack.len() != 1 { // TODO: Hardcoded 0
+        if self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION)
+            && self.dstack.len() != 1 { // TODO: Hardcoded 0
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
         if self.has_flag(ScriptFlags::ScriptVerifyCleanStack) && self.dstack.len() != 1 {
@@ -723,7 +726,9 @@ pub impl EngineInternalImpl of EngineInternalTrait {
             } else {
                 return Result::Err(Error::WITNESS_PROGRAM_INVALID);
             }
-        } else if self.is_witness_active(TAPROOT_WITNESS_VERSION) && witness_prog_len == PAY_TO_TAPROOT_DATA_SIZE && !self.bip16.clone() {
+        } else if self.is_witness_active(TAPROOT_WITNESS_VERSION)
+            && witness_prog_len == PAY_TO_TAPROOT_DATA_SIZE
+            && !self.bip16.clone() {
             // Verify a taproot witness program
             if !self.has_flag(ScriptFlags::ScriptVerifyTaproot) {
                 return Result::Ok(());
@@ -732,9 +737,11 @@ pub impl EngineInternalImpl of EngineInternalTrait {
             if witness.len() == 0 {
                 return Result::Err(Error::WITNESS_PROGRAM_INVALID);
             }
-            
+
             self.use_taproot = true;
-            self.taproot_context = TaprootContextImpl::new(witness::serialized_witness_size(witness));
+            self
+                .taproot_context =
+                    TaprootContextImpl::new(witness::serialized_witness_size(witness));
             let mut witness_len = witness.len();
             if taproot::is_annexed_witness(witness, witness_len) {
                 self.taproot_context.annex = witness[witness_len - 1];
@@ -743,10 +750,7 @@ pub impl EngineInternalImpl of EngineInternalTrait {
 
             if witness_len == 1 {
                 TaprootContextImpl::verify_taproot_spend(
-                    @self.witness_program,
-                    witness[0],
-                    @self.transaction,
-                    self.tx_idx
+                    @self.witness_program, witness[0], @self.transaction, self.tx_idx
                 )?;
                 self.taproot_context.must_succeed = true;
                 return Result::Ok(());
@@ -773,7 +777,9 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                     }
                 }
 
-                self.taproot_context.tapleaf_hash = taproot::tap_hash(witness_script, taproot::BASE_LEAF_VERSION);
+                self
+                    .taproot_context
+                    .tapleaf_hash = taproot::tap_hash(witness_script, taproot::BASE_LEAF_VERSION);
                 self.scripts.append(witness_script);
                 self.dstack.set_stack(witness, 0, witness_len - 2);
             }
@@ -788,7 +794,8 @@ pub impl EngineInternalImpl of EngineInternalTrait {
                 return Result::Err(Error::STACK_OVERFLOW);
             }
         }
-        if self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION) || self.is_witness_active(TAPROOT_WITNESS_VERSION) {
+        if self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION)
+            || self.is_witness_active(TAPROOT_WITNESS_VERSION) {
             // Sanity checks
             let mut err = '';
             for w in self
