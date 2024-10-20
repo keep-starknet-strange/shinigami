@@ -1,6 +1,6 @@
 use crate::engine::{Engine, EngineExtrasTrait};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait, Transaction
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::stack::ScriptStackTrait;
 use crate::scriptflags::ScriptFlags;
@@ -335,16 +335,6 @@ pub fn opcode_sha1<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     return Result::Ok(());
 }
 
-// https://github.com/btcsuite/btcd/blob/67b8efd3ba53b60ff0eba5d79babe2c3d82f6c54/txscript/opcode.go#L2126
-// opcodeCheckSigAdd implements the OP_CHECKSIGADD operation defined in BIP
-// 342. This is a replacement for OP_CHECKMULTISIGVERIFY and OP_CHECKMULTISIG
-// that lends better to batch sig validation, as well as a possible future of
-// signature aggregation across inputs.
-//
-// The op code takes a public key, an integer (N) and a signature, and returns
-// N if the signature was the empty vector, and n+1 otherwise.
-//
-// Stack transformation: [... pubkey n signature] -> [... n | n+1 ] -> [...]
 pub fn opcode_checksigadd<
     T,
     +Drop<T>,
@@ -360,9 +350,6 @@ pub fn opcode_checksigadd<
 >(
     ref engine: Engine<T>
 ) -> Result<(), felt252> {
-    // This op code can only be used if tapscript execution is active.
-    // Before the soft fork, this opcode was marked as an invalid reserved
-    // op code.
     if !engine.use_taproot {
         return Result::Err(Error::OPCODE_RESERVED);
     }
@@ -371,42 +358,26 @@ pub fn opcode_checksigadd<
     let n: i64 = engine.dstack.pop_int()?;
     let sig_bytes: ByteArray = engine.dstack.pop_byte_array()?;
 
-    // Only non-empty signatures count towards the total tapscript sig op
-    // limit.
     if sig_bytes.len() != 0 {
-        // Account for changes in the sig ops budget after this execution.
         engine.taproot_context.use_ops_budget()?;
     }
 
-    // Empty public keys immediately cause execution to fail.
     if pk_bytes.len() == 0 {
         return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
     }
 
-    // If the signature is empty, then we'll just push the value N back
-    // onto the stack and continue from here.
     if sig_bytes.len() == 0 {
         engine.dstack.push_int(n);
         return Result::Ok(());
     }
 
-    // Otherwise, we'll attempt to validate the signature as normal.
-    //
-    // If the constructor fails immediately, then it's because the public
-    // key size is zero, so we'll fail all script execution.
     let mut verifier = TaprootSigVerifierTrait::<
-        Transaction
+        T
     >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
-    if !(TaprootSigVerifierTrait::<Transaction>::verify(ref verifier)) {
+    if !(TaprootSigVerifierTrait::<T>::verify(ref verifier)) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
 
-    // Otherwise, we increment the accumulatorInt by one, and push that
-    // back onto the stack.
-    let (n_add_1, overflow) = n.overflowing_add(1);
-    if overflow {
-        return Result::Err(Error::STACK_OVERFLOW);
-    }
-    engine.dstack.push_int(n_add_1);
+    engine.dstack.push_int(n + 1);
     Result::Ok(())
 }
