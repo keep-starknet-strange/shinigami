@@ -9,7 +9,6 @@ use crate::signature::sighash;
 use crate::signature::signature::{BaseSigVerifierTrait, TaprootSigVerifierTrait};
 use starknet::secp256_trait::{is_valid_signature};
 use core::sha256::compute_sha256_byte_array;
-use core::num::traits::OverflowingAdd;
 use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
@@ -118,9 +117,9 @@ pub fn opcode_checksig<
         }
 
         let mut verifier = TaprootSigVerifierTrait::<
-            Transaction
+            T
         >::new_base(@full_sig_bytes, @pk_bytes)?;
-        is_valid = TaprootSigVerifierTrait::<Transaction>::verify(ref verifier);
+        is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
     }
 
     if !is_valid && @engine.use_taproot == @true {
