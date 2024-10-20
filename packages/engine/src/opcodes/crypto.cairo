@@ -116,9 +116,7 @@ pub fn opcode_checksig<
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
-        let mut verifier = TaprootSigVerifierTrait::<
-            T
-        >::new_base(@full_sig_bytes, @pk_bytes)?;
+        let mut verifier = TaprootSigVerifierTrait::<T>::new_base(@full_sig_bytes, @pk_bytes)?;
         is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
     }
 
