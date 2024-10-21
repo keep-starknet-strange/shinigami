@@ -22,4 +22,5 @@ pub mod tests {
     mod test_p2wpkh;
     mod test_p2wsh;
     mod test_p2ms;
+    mod test_p2sh;
 }
