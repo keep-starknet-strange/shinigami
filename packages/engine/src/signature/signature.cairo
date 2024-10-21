@@ -267,7 +267,6 @@ pub fn check_signature_encoding<
         return Result::Err('invalid sig fmt: R padding');
     }
 
-
     // Ensure the `S` value is correctly identified as an ASN.1 integer.
     if sig_bytes[s_type_offset] != asn1_integer_id {
         return Result::Err('invalid sig fmt:S ASN.1');
@@ -277,13 +276,12 @@ pub fn check_signature_encoding<
         return Result::Err('invalid sig fmt:S length');
     }
 
-        if sig_bytes[s_offset] & 0x80 != 0 {
-            return Result::Err('invalid sig fmt: negative S');
-        }
-        if s_len > 1 && sig_bytes[s_offset] == 0 && sig_bytes[s_offset + 1] & 0x80 == 0 {
-            return Result::Err('invalid sig fmt: S padding');
-        }
-
+    if sig_bytes[s_offset] & 0x80 != 0 {
+        return Result::Err('invalid sig fmt: negative S');
+    }
+    if s_len > 1 && sig_bytes[s_offset] == 0 && sig_bytes[s_offset + 1] & 0x80 == 0 {
+        return Result::Err('invalid sig fmt: S padding');
+    }
 
     // If the "low S" rule is enforced, check that the `S` value is below the threshold.
     if low_s {
@@ -425,7 +423,7 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
     if s_len <= 0 || s_len > sig_len - r_len - 4 {
         return Result::Err('invalid sig fmt: bogus S length');
     }
-    
+
     let mut r_offset = 4;
     let mut s_offset = 6 + r_len;
     let order: u256 = Secp256Trait::<Secp256k1Point>::get_curve_size();
@@ -519,7 +517,6 @@ pub fn parse_base_sig_and_pk<
             };
         }
     }
-    println!("1");
 
     if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes) {
         return if strict_encoding {
@@ -528,7 +525,6 @@ pub fn parse_base_sig_and_pk<
             Result::Err(e)
         };
     }
-    println!("2");
 
     if let Result::Err(e) = check_pub_key_encoding(ref vm, pk_bytes) {
         return if verify_der {
@@ -537,13 +533,11 @@ pub fn parse_base_sig_and_pk<
             Result::Err(e)
         };
     }
-    println!("3");
 
     let mut start = 0;
     if hash_type_offset < 1 {
         return Result::Err('invalid hash offset');
     }
-    println!("4");
 
     let sig_bytes = @sub_byte_array(sig_bytes, ref start, hash_type_offset);
     let sig = match parse_signature(sig_bytes) {
@@ -554,8 +548,6 @@ pub fn parse_base_sig_and_pk<
             return Result::Err(e);
         },
     };
-    println!("5");
-
 
     let pub_key = match parse_pub_key(pk_bytes) {
         Result::Ok(key) => key,
