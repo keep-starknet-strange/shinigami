@@ -11,7 +11,7 @@ use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
 use crate::errors::Error;
 use shinigami_utils::byte_array::{sub_byte_array};
-
+use crate::parser;
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -589,7 +589,7 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
                 i += 1;
             }
             if found {
-                i += 1;
+                i = end;
                 continue;
             }
 
@@ -601,7 +601,10 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
         } else {
             processed_script.append_byte(push_data);
         }
-        i += 1;
+        while i != end {
+            processed_script.append_byte(script[i]);
+            i += 1;
+        };
     };
 
     @processed_script

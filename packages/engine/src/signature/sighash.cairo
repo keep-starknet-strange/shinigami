@@ -7,7 +7,7 @@ use crate::signature::utils::{
     remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
 };
 use crate::hash_cache::SegwitSigHashMidstate;
-use shinigami_utils::bytecode::int_size_in_bytes;
+use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::hash::double_sha256;
 use crate::opcodes::opcodes::Opcode;
 
@@ -119,9 +119,7 @@ pub fn calc_witness_signature_hash<
         sig_hash_bytes.append_byte(Opcode::OP_EQUALVERIFY);
         sig_hash_bytes.append_byte(Opcode::OP_CHECKSIG);
     } else {
-        // TODO: VarIntBuf
-        sig_hash_bytes
-            .append_word_rev(sub_script.len().into(), int_size_in_bytes(sub_script.len()));
+        write_var_int(ref sig_hash_bytes, sub_script.len().into());
         sig_hash_bytes.append(sub_script);
     }
 
@@ -138,11 +136,7 @@ pub fn calc_witness_signature_hash<
         let output = transaction.get_transaction_outputs().at(tx_idx);
         let mut output_bytes: ByteArray = "";
         output_bytes.append_word_rev(output.get_value().into(), 8);
-        output_bytes
-            .append_word_rev(
-                output.get_publickey_script().len().into(),
-                int_size_in_bytes(output.get_publickey_script().len())
-            );
+        write_var_int(ref output_bytes, output.get_publickey_script().len().into());
         output_bytes.append(output.get_publickey_script());
         let hashed_output: u256 = double_sha256(@output_bytes);
         sig_hash_bytes.append_word(hashed_output.high.into(), 16);
