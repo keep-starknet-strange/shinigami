@@ -567,31 +567,15 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
 
     let script_len = script.len();
     while i < script_len {
-        let push_data: u8 = script[i];
-        if push_data >= 8 && push_data <= 72 {
-            let mut len: usize = push_data.into();
-            let mut found: bool = false;
-            if len == sig_bytes.len() {
-                found = compare_data(script, sig_bytes, i, push_data);
-            }
-
-            if i + len <= script.len() {
-                i += len;
-            } else {
-                i += 1;
-            }
+        let opcode = script[i];
+        let data_len = parser::data_len(script, i).unwrap();
+        let end = i + data_len + 1;
+        if data_len == sig_bytes.len() {
+            let mut found = compare_data(script, sig_bytes, i, opcode);
             if found {
                 i = end;
                 continue;
             }
-
-            processed_script.append_byte(push_data);
-            while len != 0 && i - len < script_len {
-                processed_script.append_byte(script[i - len + 1]);
-                len -= 1;
-            };
-        } else {
-            processed_script.append_byte(push_data);
         }
         while i != end {
             processed_script.append_byte(script[i]);

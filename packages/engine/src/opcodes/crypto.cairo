@@ -75,7 +75,8 @@ pub fn opcode_checksig<
             let err = res.unwrap_err();
             if err == Error::SCRIPT_ERR_SIG_DER
                 || err == Error::PUBKEYTYPE
-                || err == Error::SIG_HASHTYPE {
+                || err == Error::SIG_HASHTYPE 
+                || err == Error::SIG_HIGH_S {
                 return Result::Err(err);
             };
             engine.dstack.push_bool(false);
