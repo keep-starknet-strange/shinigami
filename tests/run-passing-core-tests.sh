@@ -135,7 +135,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
           SIG_COUNT="Execution failed: check multisig: num sigs > pk"
           SIG_PUSHONLY="Execution failed: Engine::new: not pushonly"
           SIG_PUSHONLY2="Execution failed: Engine::new: p2sh not pushonly"
-          PUBKEYTYPE="Execution failed: unsupported public key type"
+          PUBKEYTYPE="Execution failed: Unsupported public key type"
           INVALID_SIG_FMT="Execution failed: invalid sig fmt: too short"
           INVALID_HASH_TYPE="Execution failed: invalid hash type"
           INVALID_LOCKTIME="Execution failed: Unsatisfied locktime"
