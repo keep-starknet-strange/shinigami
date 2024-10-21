@@ -102,7 +102,7 @@ pub fn opcode_checksig<
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
         if res.is_err() {
             let err = res.unwrap_err();
-            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::PUBKEYTYPE {
+            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::PUBKEYTYPE || err == Error::SIG_HASHTYPE {
                 return Result::Err(err);
             };
             engine.dstack.push_bool(false);
@@ -211,7 +211,6 @@ pub fn opcode_checkmultisig<
     if err != 0 {
         return Result::Err(err);
     }
-    println!("num_sigs: {}", sigs[0].len());
     // Historical bug
     let dummy = engine.dstack.pop_byte_array()?;
 
@@ -234,6 +233,7 @@ pub fn opcode_checkmultisig<
     num_pub_keys += 1; // Offset due to decrementing it in the loop
     let mut pub_key_idx: i64 = -1;
     let mut sig_idx: i64 = 0;
+
     while num_sigs != 0 {
         pub_key_idx += 1;
         num_pub_keys -= 1;
@@ -279,12 +279,11 @@ pub fn opcode_checkmultisig<
                 return Result::Err(err);
             }
         } else if verify_der || strict_encoding {
-            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::PUBKEYTYPE {
-                return Result::Err(err);
-            }
             if err == 'invalid sig fmt: S padding' {
                 return Result::Err(Error::SCRIPT_ERR_SIG_DER);
-            }
+            } else if err != ''{
+                return Result::Err(err);
+            } 
         } else if err == Error::SIG_HIGH_S {
             return Result::Err(err);
         }

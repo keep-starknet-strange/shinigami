@@ -185,7 +185,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         elif echo "$RESULT" | grep -q "$INVALID_SIG_FMT"; then
             SCRIPT_RESULT="SIG_DER"
         elif echo "$RESULT" | grep -q "$INVALID_HASH_TYPE"; then
-            SCRIPT_RESULT="SIG_DER"
+            SCRIPT_RESULT="SIG_HASHTYPE"
         elif echo "$RESULT" | grep -q "$NONZERO_NULLFAIL"; then
             SCRIPT_RESULT="NULLFAIL"
         elif echo "$RESULT" | grep -q "$SIG_NULLFAIL"; then

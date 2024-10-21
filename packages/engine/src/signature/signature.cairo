@@ -156,8 +156,7 @@ pub fn check_hash_type_encoding<
         hash_type -= constants::SIG_HASH_ANYONECANPAY;
     }
     if hash_type < constants::SIG_HASH_ALL || hash_type > constants::SIG_HASH_SINGLE {
-        println!("Invalid hash type: {}", hash_type);
-        return Result::Err('invalid hash type');
+        return Result::Err(Error::SIG_HASHTYPE);
     }
 
     return Result::Ok(());
@@ -268,6 +267,7 @@ pub fn check_signature_encoding<
         return Result::Err('invalid sig fmt: R padding');
     }
 
+
     // Ensure the `S` value is correctly identified as an ASN.1 integer.
     if sig_bytes[s_type_offset] != asn1_integer_id {
         return Result::Err('invalid sig fmt:S ASN.1');
@@ -277,19 +277,17 @@ pub fn check_signature_encoding<
         return Result::Err('invalid sig fmt:S length');
     }
 
-    // If strict encoding is enforced, check for negative or excessively padded `S` values.
-    if strict_encoding {
         if sig_bytes[s_offset] & 0x80 != 0 {
             return Result::Err('invalid sig fmt: negative S');
         }
         if s_len > 1 && sig_bytes[s_offset] == 0 && sig_bytes[s_offset + 1] & 0x80 == 0 {
             return Result::Err('invalid sig fmt: S padding');
         }
-    }
+
 
     // If the "low S" rule is enforced, check that the `S` value is below the threshold.
     if low_s {
-        let s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset, 32);
+        let s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset, s_len);
         let mut half_order = Secp256Trait::<Secp256k1Point>::get_curve_size();
 
         let (half_order_high_upper, half_order_high_lower) = DivRem::div_rem(half_order.high, 2);
@@ -404,14 +402,30 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
 // The function performs various checks to ensure the integrity and validity of the signature.
 pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
+    if sig_bytes[0] != 0x30 {
+        return Result::Err('invalid sig fmt: no header');
+    }
     let mut sig_len: usize = sig_bytes[1].into();
     if sig_len + 2 > sig_bytes.len() || sig_len + 2 < constants::MIN_SIG_LEN {
         return Result::Err('invalid sig fmt: bad length');
     }
+
     let mut start = 0;
     let sig_bytes = @sub_byte_array(sig_bytes, ref start, sig_len + 2);
+    if sig_bytes[2] != 0x02 {
+        return Result::Err('invalid sig fmt: no 1st marker');
+    }
+
     let mut r_len: usize = sig_bytes[3].into();
+    if r_len <= 0 || r_len > sig_len - 5 {
+        return Result::Err('invalid sig fmt: bogus R length');
+    }
+
     let mut s_len: usize = sig_bytes[r_len + 5].into();
+    if s_len <= 0 || s_len > sig_len - r_len - 4 {
+        return Result::Err('invalid sig fmt: bogus S length');
+    }
+    
     let mut r_offset = 4;
     let mut s_offset = 6 + r_len;
     let order: u256 = Secp256Trait::<Secp256k1Point>::get_curve_size();
@@ -505,14 +519,16 @@ pub fn parse_base_sig_and_pk<
             };
         }
     }
+    println!("1");
 
     if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes) {
-        return if verify_der {
+        return if strict_encoding {
             Result::Err(Error::SCRIPT_ERR_SIG_DER)
         } else {
             Result::Err(e)
         };
     }
+    println!("2");
 
     if let Result::Err(e) = check_pub_key_encoding(ref vm, pk_bytes) {
         return if verify_der {
@@ -521,11 +537,14 @@ pub fn parse_base_sig_and_pk<
             Result::Err(e)
         };
     }
+    println!("3");
 
     let mut start = 0;
     if hash_type_offset < 1 {
         return Result::Err('invalid hash offset');
     }
+    println!("4");
+
     let sig_bytes = @sub_byte_array(sig_bytes, ref start, hash_type_offset);
     let sig = match parse_signature(sig_bytes) {
         Result::Ok(signature) => signature,
@@ -535,13 +554,13 @@ pub fn parse_base_sig_and_pk<
             return Result::Err(e);
         },
     };
-    println!("Parsed sig and pk");
+    println!("5");
+
 
     let pub_key = match parse_pub_key(pk_bytes) {
         Result::Ok(key) => key,
         Result::Err(e) => { return Result::Err(e); }
     };
-
     Result::Ok((pub_key, sig, hash_type))
 }
 

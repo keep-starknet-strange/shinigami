@@ -37,6 +37,7 @@ pub mod Error {
     pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
     pub const PUBKEYTYPE: felt252 = 'Unsupported public key type';
     pub const SIG_HIGH_S: felt252 = 'Sig not canonical high S value';
+    pub const SIG_HASHTYPE: felt252 = 'invalid hash type';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
