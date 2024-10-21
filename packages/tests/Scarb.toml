@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024_07"
 
 [dependencies]
+ripemd160.workspace = true
 shinigami_compiler = { path = "../compiler" }
 shinigami_engine = { path = "../engine" }
 shinigami_utils = { path = "../utils" }
