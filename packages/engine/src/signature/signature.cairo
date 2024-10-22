@@ -476,8 +476,32 @@ pub impl TaprootSigVerifierImpl<
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
     ) -> Result<TaprootSigVerifier, felt252> {
-        // TODO
-        return Result::Err('TaprootSig not implemented');
+        if sig_bytes.len() != 64 && sig_bytes.len() != 65 {
+            return Result::Err('Invalid Schnorr signature');
+        }
+
+        if pk_bytes.len() != 32 {
+            return Result::Err('Invalid public key length');
+        }
+
+        let hash_type = if sig_bytes.len() == 65 {
+            sig_bytes[64].into()
+        } else {
+            constants::SIG_HASH_DEFAULT
+        };
+
+        let pub_key = parse_schnorr_pub_key(pk_bytes);
+        let sig = Signature {
+            r: u256_from_byte_array_with_offset(sig_bytes, 0, 32),
+            s: u256_from_byte_array_with_offset(sig_bytes, 32, 32),
+            y_parity: false, // Schnorr signatures don't use y_parity
+        };
+
+        Result::Ok(
+            TaprootSigVerifier {
+                pub_key, sig, sig_bytes: sig_bytes, pk_bytes: pk_bytes, hash_type, annex,
+            }
+        )
     }
 
     fn new_base(
