@@ -388,6 +388,37 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     }
 }
 
+// ParsePubKey parses a public key for a koblitz curve from a bytestring into a
+// Secp256k1Point, verifying that it is valid. It only supports public keys in
+// the BIP-340 32-byte format.
+pub fn parse_schnorr_pub_key(pub_key_str: @ByteArray) -> Result<Secp256k1Point, felt252> {
+    if pub_key_str.len() == 0 {
+        return Result::Err('nil pubkey byte string');
+    }
+    if pub_key_str.len() != constants::PUB_KEY_BYTES_LEN {
+        return Result::Err('bad pubkey byte string size');
+    }
+
+    let mut key_compressed = "";
+    key_compressed.append_byte(0x02);
+    key_compressed.append(pub_key_str);
+
+    if key_compressed.len() != constants::PUB_KEY_BYTES_LEN_COMPRESSED {
+        return Result::Err('Invalid compressed public key');
+    }
+
+    let pub_key: u256 = u256_from_byte_array_with_offset(
+        @key_compressed, 1, constants::PUB_KEY_BYTES_LEN
+    );
+    let parity: bool = key_compressed[0] == 0x03;
+
+    Result::Ok(
+        Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
+            .unwrap_syscall()
+            .expect('Secp256k1Point: Invalid point.')
+    )
+}
+
 // Parses a DER-encoded ECDSA signature byte array into a `Signature` struct.
 //
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
@@ -519,6 +550,67 @@ pub fn parse_base_sig_and_pk<
     };
 
     Result::Ok((pub_key, sig, hash_type))
+}
+
+//`TaprootSigVerifier` is used to verify Schnorr signatures encoded in the Taproot format.
+#[derive(Drop)]
+pub struct TaprootSigVerifier {
+    // public key as a point on the secp256k1 curve, used to verify the signature
+    pub_key: Secp256k1Point,
+    // Schnorr signature
+    sig: Signature,
+    // raw byte array of the signature
+    sig_bytes: @ByteArray,
+    // raw byte array of the public key
+    pk_bytes: @ByteArray,
+    // part of the script being verified
+    sub_script: ByteArray,
+    // specifies how the transaction was hashed for signing
+    hash_type: u32,
+}
+
+pub trait TaprootSigVerifierTrait<
+    I,
+    O,
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>
+> {
+    fn new(
+        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
+    ) -> Result<TaprootSigVerifier, felt252>;
+    fn verify(ref self: TaprootSigVerifier, ref vm: Engine<T>) -> bool;
+}
+
+impl TaprootSigVerifierImpl<
+    I,
+    O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+    >,
+    +Drop<I>,
+    +Drop<O>,
+    +Drop<T>
+> of TaprootSigVerifierTrait<I, O, T> {
+    fn new(
+        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
+    ) -> Result<TaprootSigVerifier, felt252> {
+        let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
+        let sub_script = vm.sub_script();
+        Result::Ok(TaprootSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type })
+    }
+    fn verify(ref self: TaprootSigVerifier, ref vm: Engine<T>) -> bool {
+        let sig_hashes = SigHashMidstateTrait::new(vm.transaction);
+        let sig_hash: u256 = sighash::calc_witness_signature_hash::<
+            I, O, T
+        >(@self.sub_script, @sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
+
+        is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
+    }
 }
 
 // Removes the ECDSA signature from a given script.
