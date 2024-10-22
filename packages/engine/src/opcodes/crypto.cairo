@@ -75,7 +75,7 @@ pub fn opcode_checksig<
             let err = res.unwrap_err();
             if err == Error::SCRIPT_ERR_SIG_DER
                 || err == Error::PUBKEYTYPE
-                || err == Error::SIG_HASHTYPE 
+                || err == Error::SIG_HASHTYPE
                 || err == Error::SIG_HIGH_S {
                 return Result::Err(err);
             };
@@ -256,7 +256,7 @@ pub fn opcode_checkmultisig<
             if err == 'invalid sig fmt: S padding' {
                 return Result::Err(Error::SCRIPT_ERR_SIG_DER);
             } else if err != '' {
-                if err != Error::INVALID_PUBKEY_LEN{
+                if err != Error::INVALID_PUBKEY_LEN {
                     return Result::Err(err);
                 }
             }
