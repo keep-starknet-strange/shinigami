@@ -256,7 +256,9 @@ pub fn opcode_checkmultisig<
             if err == 'invalid sig fmt: S padding' {
                 return Result::Err(Error::SCRIPT_ERR_SIG_DER);
             } else if err != '' {
-                return Result::Err(err);
+                if err != Error::INVALID_PUBKEY_LEN{
+                    return Result::Err(err);
+                }
             }
         } else if err == Error::SIG_HIGH_S {
             return Result::Err(err);
