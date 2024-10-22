@@ -43,6 +43,7 @@ pub mod Error {
     pub const DISCOURAGE_OP_SUCCESS: felt252 = 'OP_SUCCESS is discouraged';
     pub const DISCOURAGE_UPGRADABLE_TAPROOT_VERSION: felt252 = 'Upgradable taproot version';
     pub const TAPROOT_SIGOPS_EXCEEDED: felt252 = 'Taproot sigops exceeded';
+    pub const INVALID_P2MS: felt252 = 'Invalid P2MS transaction';
     pub const SCRIPT_UNFINISHED: felt252 = 'Script unfinished';
     pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
 }

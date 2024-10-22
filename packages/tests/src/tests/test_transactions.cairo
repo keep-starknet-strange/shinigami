@@ -162,6 +162,58 @@ fn test_deserialize_p2wsh_transaction() {
 }
 
 #[test]
+fn test_deserialize_p2wpkh_transaction() {
+    // https://learnmeabitcoin.com/explorer/tx/c178d8dacdfb989f9d4fa45828ed188cd54a0414d625c3e61e75c5e3ac15a83a#output-0
+    let raw_transaction_hex =
+        "0x020000000001016972546966be990440a0665b73d0f4c3c942592d1f64d1033717aaa3e2c2ec913300000000ffffffff024087100000000000160014841b80d2cc75f5345c482af96294d04fdd66b2b760e31600000000001600142e8734f8e263e516d47fcaa2dfe1bd01e0dc935802473044022042e5e3ed2a41214ae864634b6fde33ca2ff312f3d89d6aa3e14c026d50d8ed3202206c38dcd0432a0724490356fbf599cdae40e334c3667a9253f8f4cc57cf3c4480012103f465315805ed271eb972e43d84d2a9e19494d10151d9f6adb32b8534bfd764ab00000000";
+    let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
+
+    assert_eq!(transaction.version, 2, "Transaction version is incorrect");
+    assert_eq!(transaction.transaction_inputs.len(), 1, "Incorrect number of transaction inputs");
+    let input0 = transaction.transaction_inputs[0];
+    let expected_txid_hex = "0x6972546966be990440a0665b73d0f4c3c942592d1f64d1033717aaa3e2c2ec91";
+    let expected_txid = hex_to_bytecode(@expected_txid_hex);
+
+    assert_eq!(input0.previous_outpoint.vout, @51, "Outpoint vout on input 0 is incorrect");
+    assert_eq!(
+        input0.previous_outpoint.txid,
+        @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
+        "Outpoint txid on input 0 is incorrect"
+    );
+    assert_eq!(input0.signature_script.len(), 0, "Signature script on input 0 should be empty");
+
+    let expected_witness_1_hex =
+        "0x3044022042e5e3ed2a41214ae864634b6fde33ca2ff312f3d89d6aa3e14c026d50d8ed3202206c38dcd0432a0724490356fbf599cdae40e334c3667a9253f8f4cc57cf3c448001";
+    let expected_witness_2_hex =
+        "0x03f465315805ed271eb972e43d84d2a9e19494d10151d9f6adb32b8534bfd764ab";
+    let expected_witness_1 = hex_to_bytecode(@expected_witness_1_hex);
+    let expected_witness_2 = hex_to_bytecode(@expected_witness_2_hex);
+
+    assert_eq!(input0.witness.len(), 2, "Witness length on input 0 is incorrect");
+    assert_eq!(input0.witness[0], @expected_witness_1, "Witness 1 on input 0 is incorrect");
+    assert_eq!(input0.witness[1], @expected_witness_2, "Witness 2 on input 0 is incorrect");
+    assert_eq!(input0.sequence, @0xFFFFFFFF, "Sequence on input 0 is incorrect");
+
+    assert_eq!(transaction.transaction_outputs.len(), 2, "Incorrect number of transaction outputs");
+    let output0 = transaction.transaction_outputs[0];
+    let output1 = transaction.transaction_outputs[1];
+
+    assert_eq!(output0.value, @1083200, "Output 0 value is incorrect");
+    let expected_pk_script0_hex = "0x0014841b80d2cc75f5345c482af96294d04fdd66b2b7";
+    let expected_pk_script0 = hex_to_bytecode(@expected_pk_script0_hex);
+    assert_eq!(output0.publickey_script, @expected_pk_script0, "Output 0 pk_script is incorrect");
+
+    assert_eq!(output1.value, @1500000, "Output 1 value is incorrect");
+    let expected_pk_script1_hex = "0x00142e8734f8e263e516d47fcaa2dfe1bd01e0dc9358";
+    let expected_pk_script1 = hex_to_bytecode(@expected_pk_script1_hex);
+    assert_eq!(output1.publickey_script, @expected_pk_script1, "Output 1 pk_script is incorrect");
+
+    assert_eq!(transaction.locktime, 0, "Locktime is incorrect");
+}
+
+
+#[test]
 fn test_deserialize_coinbase_transaction() { // TODO
 }
 

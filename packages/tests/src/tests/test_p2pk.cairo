@@ -4,15 +4,16 @@ use crate::validate;
 use crate::utxo::UTXO;
 use shinigami_utils::bytecode::hex_to_bytecode;
 
-// https://learnmeabitcoin.com/explorer/tx/3db8816c460f674e47f0e5799656721a249acdd53cd43a530c83384577485947
+// https://learnmeabitcoin.com/explorer/tx/cda1f7d88232ff7e4fc1fcbf8a66b2cc3b8e19b5bc0ad22618453b8b75156740
 #[test]
 fn test_compressed_pubkey() {
-    let prevout_pk_script = "0x76a9147fbff43f08b409a03febae114cf0885c37ffd7c488ac";
+    let prevout_pk_script =
+        "0x2103203b768951584fe9af6d9d9e6ff26a5f76e453212f19ba163774182ab8057f3eac";
     let prev_out = UTXO {
-        amount: 3000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 606376
+        amount: 2700, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 606376
     };
     let raw_transaction_hex =
-        "0x010000000135655162f2df3af5e5f12b5b4b545e9069ed61897974622888b9c47e0f55e105000000006b483045022100bdd3796f6a6bb7f8ca42a70438a3150501f9ec760195b4d3314b1b4b21aac29402202f8479c9384a737bb323cd8600d9e3c5a379334a55acf7c3f4a4ca1eaaabe97e012103e49d61c45a729c427038b967df38459a2579a2c37057cf6a2efb2c3048f676aaffffffff018c0a000000000000232103203b768951584fe9af6d9d9e6ff26a5f76e453212f19ba163774182ab8057f3eac00000000";
+        "0x0100000001475948774538830c533ad43cd5cd9a241a72569679e5f0474e670f466c81b83d00000000494830450221009c31a8561a3e422211e72242170d63d5d420398629475b48925720b4ba5b064202201b72633207c17b6129b9fee23247f48a11eb656c1ca4c50c828e4fdbf881be6301ffffffff0160090000000000001976a91474d03dbb59f75ff54ee97dadf221d74a48c3b52288ac00000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     let utxo_hints = array![prev_out];
@@ -27,7 +28,7 @@ fn test_block_181_tx_mainnet() {
     let prevout_pk_script =
         "0x410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
     let prev_out = UTXO {
-        amount: 3000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 170
+        amount: 4000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 170
     };
     let raw_transaction_hex =
         "0x0100000001169e1e83e930853391bc6f35f605c6754cfead57cf8387639d3b4096c54f18f40100000048473044022027542a94d6646c51240f23a76d33088d3dd8815b25e9ea18cac67d1171a3212e02203baf203c6e7b80ebd3e588628466ea28be572fe1aaa3f30947da4763dd3b3d2b01ffffffff0200ca9a3b00000000434104b5abd412d4341b45056d3e376cd446eca43fa871b51961330deebd84423e740daa520690e1d9e074654c59ff87b408db903649623e86f1ca5412786f61ade2bfac005ed0b20000000043410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac00000000";
@@ -45,7 +46,7 @@ fn test_block_182_tx_mainnet() {
     let prevout_pk_script =
         "0x410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
     let prev_out = UTXO {
-        amount: 3000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 170
+        amount: 3000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 181
     };
     let raw_transaction_hex =
         "0x0100000001be141eb442fbc446218b708f40caeb7507affe8acff58ed992eb5ddde43c6fa1010000004847304402201f27e51caeb9a0988a1e50799ff0af94a3902403c3ad4068b063e7b4d1b0a76702206713f69bd344058b0dee55a9798759092d0916dbbc3e592fee43060005ddc17401ffffffff0200e1f5050000000043410401518fa1d1e1e3e162852d68d9be1c0abad5e3d6297ec95f1f91b909dc1afe616d6876f92918451ca387c4387609ae1a895007096195a824baf9c38ea98c09c3ac007ddaac0000000043410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac00000000";
