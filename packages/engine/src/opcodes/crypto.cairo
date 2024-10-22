@@ -7,7 +7,6 @@ use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
 use starknet::secp256_trait::{is_valid_signature};
-use core::num::traits::OverflowingAdd;
 use crate::signature::signature::{
     BaseSigVerifierTrait, BaseSegwitSigVerifierTrait, TaprootSigVerifierTrait
 };
