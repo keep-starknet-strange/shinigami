@@ -92,3 +92,21 @@ fn test_block_770000_p2pkh_transaction() {
     let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
+
+#[test]
+fn test_block_770002_p2pkh_transaction() {
+    // tx: faf2987fd2240d9c46575cc35c354eeca71b794c482f3cc49fba1a5f9a80808c
+    let raw_transaction_hex =
+        "0x0200000001cc8e9c87148eae3bc918c94b13c0971d7959474e37d040c777aab7d8f621bfa2000000006a47304402204321dc44fa1207aa353ce1b0270887910c10825b284cfc5dc1e5451da43defd002204b0cab71575f765d11f52b1f03bdc3d11b00a6d94e1f2185530c6f82bdae2e7d012102e9698e55e8b3bca5aa108e094e4b0b42ce0dd697268c77ccc14ef54bd336088efeffffff02404b4c00000000001976a9148ca7043a7bf78518c3dfc9c756f3af8fef4ce6db88acc9a30a08020000001976a914b8b5866bc6828bb1e9c9ddc132fe42965355c19b88acd1bf0b00";
+    let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
+
+    let prevout_pk_script = "0x76a9149ee1cd0c085b88bd7b22e44abe52734e0a61c94288ac";
+    let prevout = UTXO {
+        amount: 8729850284, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 769998
+    };
+    let utxo_hints = array![prevout];
+
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
+    assert!(res.is_ok(), "Transaction validation failed");
+}

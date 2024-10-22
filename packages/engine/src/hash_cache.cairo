@@ -1,7 +1,7 @@
 use crate::transaction::{
     EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
-use shinigami_utils::bytecode::int_size_in_bytes;
+use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::hash::double_sha256;
 
 #[derive(Clone, Copy, Drop)]
@@ -49,11 +49,7 @@ pub impl SigHashMidstateImpl<
         let outputs = transaction.get_transaction_outputs();
         for output in outputs {
             outputs_v0_bytes.append_word_rev(output.get_value().into(), 8);
-            outputs_v0_bytes
-                .append_word_rev(
-                    output.get_publickey_script().len().into(),
-                    int_size_in_bytes(output.get_publickey_script().len())
-                );
+            write_var_int(ref outputs_v0_bytes, output.get_publickey_script().len().into());
             outputs_v0_bytes.append(output.get_publickey_script());
         };
         SegwitSigHashMidstate {
