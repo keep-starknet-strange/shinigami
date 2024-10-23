@@ -4,6 +4,7 @@ pub mod stack;
 pub mod cond_stack;
 pub mod witness;
 pub mod hash_cache;
+pub mod hash_tag;
 pub mod errors;
 pub mod opcodes {
     pub mod opcodes;
