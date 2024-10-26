@@ -48,12 +48,13 @@ scarb build
 ./scripts/run_script.sh <quoted-script>
 ```
 
-**Example ( Basic addition script )
+**Example ( Basic addition script )**
 ```bash
 ./scripts/run_script.sh "OP_1 OP_2 OP_ADD OP_3 OP_EQUAL"
 ```
 
 **Other commands**
+
 Check out [this file](https://github.com/keep-starknet-strange/shinigami/blob/main/packages/cmds/src/main.cairo) to see other types of commands you can use with Shinigami!
 
 ### Building
