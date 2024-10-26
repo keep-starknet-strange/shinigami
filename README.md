@@ -151,6 +151,7 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/stevencartavia"><img src="https://avatars.githubusercontent.com/u/112043913?v=4?s=100" width="100px;" alt="Steven"/><br /><sub><b>Steven</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=stevencartavia" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/RedVelvetZip"><img src="https://avatars.githubusercontent.com/u/48105289?v=4?s=100" width="100px;" alt="Red"/><br /><sub><b>Red</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=RedVelvetZip" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/chachaleo"><img src="https://avatars.githubusercontent.com/u/49371958?v=4?s=100" width="100px;" alt="Charlotte"/><br /><sub><b>Charlotte</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=chachaleo" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Mystic-Nayy"><img src="https://avatars.githubusercontent.com/u/149405096?v=4?s=100" width="100px;" alt="Na'omi-Gift"/><br /><sub><b>Na'omi-Gift</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=Mystic-Nayy" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
