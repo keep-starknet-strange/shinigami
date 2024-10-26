@@ -31,29 +31,33 @@ Key features :
 
 ### Running
 
-**Execute Mainnet Transaction**
+#### Execute Mainnet Transaction
+
 ```bash
 scarb build
 ./scripts/run_bitcoin_transaction.sh <tx-id>
 ```
 
-**Example ( 1st Bitcoin Transaction )**
+#### Example ( 1st Bitcoin Transaction )
+
 ```bash
 scarb build
 ./scripts/run_bitcoin_transaction.sh f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
 ```
 
-**Execute custom script**
+#### Execute custom script
+
 ```bash
 ./scripts/run_script.sh <quoted-script>
 ```
 
-**Example ( Basic addition script )**
+#### Example ( Basic addition script )
+
 ```bash
 ./scripts/run_script.sh "OP_1 OP_2 OP_ADD OP_3 OP_EQUAL"
 ```
 
-**Other commands**
+#### Other commands
 
 Check out [this file](https://github.com/keep-starknet-strange/shinigami/blob/main/packages/cmds/src/main.cairo) to see other types of commands you can use with Shinigami!
 
@@ -76,6 +80,7 @@ This will run the test-suite for all opcodes, integration, and testing Scripts.
 ### Dependencies
 
 The following are required to use / run shinigami :
+
 - [scarb](https://docs.swmansion.com/scarb/)
 
 ## References
