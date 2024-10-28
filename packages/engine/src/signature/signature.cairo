@@ -390,8 +390,7 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
 
 pub fn parse_schnorr_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     if pk_bytes.len() == 0 || pk_bytes.len() != 32 {
-        // TODO
-        panic!("invalid schnorr pubkey length");
+        return Result::Err('Invalid schnorr pubkey length');
     }
 
     let mut key_compressed: ByteArray = "\02";
@@ -456,6 +455,28 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
         return Result::Err('invalid sig: bad final length');
     }
     return Result::Ok(Signature { r: r_sig, s: s_sig, y_parity: false, });
+}
+
+pub fn schnorr_parse_signature(sig_bytes: @ByteArray) -> Result<(Signature, u32), felt252> {
+    let sig_bytes_len = sig_bytes.len();
+    let mut hash_type: u32 = 0;
+    if sig_bytes_len == SCHNORR_SIGNATURE_LEN {
+        hash_type = constants::SIG_HASH_DEFAULT;
+    } else if sig_bytes_len == SCHNORR_SIGNATURE_LEN + 1 && sig_bytes[64] != 0 {
+        hash_type = sig_bytes[64].into();
+    } else {
+        return Result::Err('Invalid taproot signature len');
+    }
+    Result::Ok(
+        (
+            Signature {
+                r: u256_from_byte_array_with_offset(sig_bytes, 0, 32),
+                s: u256_from_byte_array_with_offset(sig_bytes, 32, 32),
+                y_parity: false, // Schnorr signatures don't use y_parity
+            },
+            hash_type
+        )
+    )
 }
 
 // Parses the public key and signature byte arrays based on consensus rules.
@@ -579,13 +600,18 @@ pub struct TaprootSigVerifier {
 }
 
 pub trait TaprootSigVerifierTrait<T> {
+    fn empty() -> TaprootSigVerifier;
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
     ) -> Result<TaprootSigVerifier, felt252>;
-    fn new_base(sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> Result<TaprootSigVerifier, felt252>;
+    fn new_base(
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
+    ) -> Result<TaprootSigVerifier, felt252>;
     fn verify(ref self: TaprootSigVerifier) -> bool;
     fn verify_base(ref self: TaprootSigVerifier) -> bool;
 }
+
+pub const SCHNORR_SIGNATURE_LEN: usize = 64;
 
 pub impl TaprootSigVerifierImpl<
     T,
@@ -600,18 +626,44 @@ pub impl TaprootSigVerifierImpl<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
 > of TaprootSigVerifierTrait<T> {
+    fn empty() -> TaprootSigVerifier {
+        TaprootSigVerifier {
+            pub_key: Secp256Trait::<Secp256k1Point>::get_generator_point(),
+            sig: Signature { r: 0, s: 0, y_parity: false },
+            sig_bytes: @"",
+            pk_bytes: @"",
+            hash_type: 0,
+            annex: @""
+        }
+    }
+
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
     ) -> Result<TaprootSigVerifier, felt252> {
-        // TODO
-        return Result::Err('TaprootSig not implemented');
+        let pub_key = parse_schnorr_pub_key(pk_bytes)?;
+        let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
+
+        Result::Ok(
+            TaprootSigVerifier {
+                pub_key, sig, sig_bytes: sig_bytes, pk_bytes: pk_bytes, hash_type, annex,
+            }
+        )
     }
 
     fn new_base(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
     ) -> Result<TaprootSigVerifier, felt252> {
-        // TODO
-        return Result::Err('TaprootSig not implemented');
+        let pk_bytes_len = pk_bytes.len();
+        if pk_bytes_len == 0 {
+            return Result::Err('Taproot empty public key');
+        } else if pk_bytes_len == 32 {
+            return Self::new(sig_bytes, pk_bytes, engine.taproot_context.annex);
+        } else {
+            if engine.has_flag(ScriptFlags::ScriptVerifyDiscourageUpgradeablePubkeyType) {
+                return Result::Err('Unknown pub key type');
+            }
+            return Result::Ok(Self::empty());
+        }
     }
 
     fn verify(ref self: TaprootSigVerifier) -> bool {

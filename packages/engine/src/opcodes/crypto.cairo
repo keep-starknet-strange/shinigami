@@ -115,7 +115,9 @@ pub fn opcode_checksig<
         }
 
         // TODO: Errors or false?
-        let mut verifier = TaprootSigVerifierTrait::<T>::new_base(@full_sig_bytes, @pk_bytes)?;
+        let mut verifier = TaprootSigVerifierTrait::<
+            T
+        >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
         is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
     }
 
