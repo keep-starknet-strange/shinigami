@@ -467,11 +467,16 @@ pub fn schnorr_parse_signature(sig_bytes: @ByteArray) -> Result<(Signature, u32)
     } else {
         return Result::Err('Invalid taproot signature len');
     }
-    Result::Ok((Signature {
-        r: u256_from_byte_array_with_offset(sig_bytes, 0, 32),
-        s: u256_from_byte_array_with_offset(sig_bytes, 32, 32),
-        y_parity: false, // Schnorr signatures don't use y_parity
-    }, hash_type))
+    Result::Ok(
+        (
+            Signature {
+                r: u256_from_byte_array_with_offset(sig_bytes, 0, 32),
+                s: u256_from_byte_array_with_offset(sig_bytes, 32, 32),
+                y_parity: false, // Schnorr signatures don't use y_parity
+            },
+            hash_type
+        )
+    )
 }
 
 // Parses the public key and signature byte arrays based on consensus rules.
@@ -599,7 +604,9 @@ pub trait TaprootSigVerifierTrait<T> {
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
     ) -> Result<TaprootSigVerifier, felt252>;
-    fn new_base(sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>) -> Result<TaprootSigVerifier, felt252>;
+    fn new_base(
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
+    ) -> Result<TaprootSigVerifier, felt252>;
     fn verify(ref self: TaprootSigVerifier) -> bool;
     fn verify_base(ref self: TaprootSigVerifier) -> bool;
 }
@@ -622,7 +629,7 @@ pub impl TaprootSigVerifierImpl<
     fn empty() -> TaprootSigVerifier {
         TaprootSigVerifier {
             pub_key: Secp256Trait::<Secp256k1Point>::get_generator_point(),
-            sig: Signature{ r: 0, s: 0, y_parity: false },
+            sig: Signature { r: 0, s: 0, y_parity: false },
             sig_bytes: @"",
             pk_bytes: @"",
             hash_type: 0,
