@@ -1,5 +1,7 @@
 use crate::errors::Error;
-use crate::transaction::{EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait};
+use crate::transaction::{
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+};
 use crate::signature::signature::parse_schnorr_pub_key;
 use crate::signature::signature::{TaprootSigVerifierImpl};
 use starknet::secp256k1::{Secp256k1Point};
@@ -158,9 +160,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
             annex = witness[witness.len() - 1];
         }
 
-        let mut verifier = TaprootSigVerifierImpl::<
-            T
-        >::new(raw_sig, witness_program, annex)?;
+        let mut verifier = TaprootSigVerifierImpl::<T>::new(raw_sig, witness_program, annex)?;
         let is_valid = TaprootSigVerifierImpl::<T>::verify(ref verifier);
         if !is_valid {
             return Result::Err(Error::TAPROOT_INVALID_SIG);

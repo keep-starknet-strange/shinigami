@@ -6,7 +6,9 @@ use crate::stack::ScriptStackTrait;
 use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
-use crate::signature::signature::{BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait};
+use crate::signature::signature::{
+    BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait
+};
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
@@ -287,7 +289,9 @@ pub fn opcode_codeseparator<
     +Drop<T>,
     +Drop<I>,
     +Drop<O>,
->(ref engine: Engine<T>) -> Result<(), felt252> {
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     engine.last_code_sep = engine.opcode_idx;
 
     if !engine.use_taproot {
