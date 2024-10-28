@@ -44,8 +44,3 @@ pub const WITNESS_V0_PUB_KEY_HASH_LEN: usize = 22;
 
 pub const MAX_U128: u128 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 pub const MAX_U32: u32 = 0xFFFFFFFF;
-
-pub const SCHNORR_SIGNATURE_LEN: usize = 64;
-
-pub const PUB_KEY_BYTES_LEN: usize = 32;
-pub const PUB_KEY_BYTES_LEN_COMPRESSED: usize = 33;
