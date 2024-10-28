@@ -25,6 +25,13 @@ pub mod Error {
     pub const MINIMAL_IF: felt252 = 'If conditional must be 0 or 1';
     pub const DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM: felt252 = 'Upgradable witness program';
     pub const WITNESS_PROGRAM_INVALID: felt252 = 'Invalid witness program';
+    pub const WITNESS_PROGRAM_MISMATCH: felt252 = 'Witness program mismatch';
+    pub const WITNESS_UNEXPECTED: felt252 = 'Unexpected witness data';
+    pub const WITNESS_MALLEATED: felt252 = 'Witness program with sig script';
+    pub const WITNESS_MALLEATED_P2SH: felt252 = 'Signature script for p2sh wit';
+    pub const WITNESS_PUBKEYTYPE: felt252 = 'Non-compressed key post-segwit';
+    pub const WITNESS_PROGRAM_WRONG_LENGTH: felt252 = 'Witness program wrong length';
+    pub const WITNESS_PROGRAM_EMPTY: felt252 = 'Empty witness program';
     pub const SCRIPT_TOO_LARGE: felt252 = 'Script is too large';
     pub const CODESEPARATOR_NON_SEGWIT: felt252 = 'CODESEPARATOR in non-segwit';
     pub const TAPROOT_MULTISIG: felt252 = 'Multisig in taproot script';
@@ -36,6 +43,9 @@ pub mod Error {
     pub const DISCOURAGE_OP_SUCCESS: felt252 = 'OP_SUCCESS is discouraged';
     pub const DISCOURAGE_UPGRADABLE_TAPROOT_VERSION: felt252 = 'Upgradable taproot version';
     pub const TAPROOT_SIGOPS_EXCEEDED: felt252 = 'Taproot sigops exceeded';
+    pub const INVALID_P2MS: felt252 = 'Invalid P2MS transaction';
+    pub const SCRIPT_UNFINISHED: felt252 = 'Script unfinished';
+    pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {

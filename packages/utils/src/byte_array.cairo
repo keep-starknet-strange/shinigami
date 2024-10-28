@@ -31,7 +31,8 @@ pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: us
     let byte_shift = 256;
     let mut value = 0;
     let mut i = offset;
-    while i != offset + len {
+    let end = offset + len;
+    while i != end {
         value = value * byte_shift + byte_array[i].into();
         i += 1;
     };
@@ -59,7 +60,8 @@ pub fn byte_array_value_at_le(
 pub fn sub_byte_array(byte_array: @ByteArray, ref offset: usize, len: usize) -> ByteArray {
     let mut sub_byte_array = "";
     let mut i = offset;
-    while i != offset + len {
+    let end = offset + len;
+    while i != end {
         sub_byte_array.append_byte(byte_array[i]);
         i += 1;
     };
@@ -116,7 +118,8 @@ pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usi
 pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
     let mut i = 0;
     let mut ret_bool = false;
-    while i < bytes.len() {
+    let byte_array_len = bytes.len();
+    while i != byte_array_len {
         if bytes.at(i).unwrap() != 0 {
             // Can be negative zero
             if i == bytes.len() - 1 && bytes.at(i).unwrap() == 0x80 {

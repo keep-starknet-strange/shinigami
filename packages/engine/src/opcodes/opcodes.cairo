@@ -1,7 +1,6 @@
-use shinigami_utils::byte_array::byte_array_to_felt252_le;
-
 pub mod Opcode {
     pub const OP_0: u8 = 0;
+    pub const OP_FALSE: u8 = 0;
     pub const OP_DATA_1: u8 = 1;
     pub const OP_DATA_2: u8 = 2;
     pub const OP_DATA_3: u8 = 3;
@@ -179,7 +178,9 @@ pub mod Opcode {
     pub const OP_CHECKMULTISIG: u8 = 174;
     pub const OP_CHECKMULTISIGVERIFY: u8 = 175;
     pub const OP_NOP1: u8 = 176;
+    pub const OP_NOP2: u8 = 177;
     pub const OP_CHECKLOCKTIMEVERIFY: u8 = 177;
+    pub const OP_NOP3: u8 = 178;
     pub const OP_CHECKSEQUENCEVERIFY: u8 = 178;
     pub const OP_NOP4: u8 = 179;
     pub const OP_NOP5: u8 = 180;
@@ -470,42 +471,11 @@ pub mod Opcode {
         return true;
     }
 
-    use crate::errors::Error;
-    pub fn data_at(idx: usize, len: usize, script: @ByteArray) -> Result<ByteArray, felt252> {
-        let mut data = "";
-        let mut i = idx;
-        let mut end = i + len;
-        if end > script.len() {
-            return Result::Err(Error::SCRIPT_INVALID);
+    pub fn is_branching_opcode(opcode: u8) -> bool {
+        if opcode == OP_IF || opcode == OP_NOTIF || opcode == OP_ELSE || opcode == OP_ENDIF {
+            return true;
         }
-        while i != end {
-            data.append_byte(script[i]);
-            i += 1;
-        };
-        return Result::Ok(data);
-    }
-
-    pub fn data_len(idx: u32, script: @ByteArray) -> Result<usize, felt252> {
-        let opcode: u8 = script[idx];
-        if is_data_opcode(opcode) {
-            return Result::Ok(opcode.into());
-        }
-        let mut push_data_len = 0;
-        if opcode == OP_PUSHDATA1 {
-            push_data_len = 1;
-        } else if opcode == OP_PUSHDATA2 {
-            push_data_len = 2;
-        } else if opcode == OP_PUSHDATA4 {
-            push_data_len = 4;
-        } else {
-            return Result::Ok(0);
-        }
-        return Result::Ok(
-            super::byte_array_to_felt252_le(@data_at(idx + 1, push_data_len, script)?)
-                .try_into()
-                .unwrap()
-                + push_data_len
-        );
+        return false;
     }
 
     pub fn is_success_opcode(opcode: u8) -> bool {
@@ -536,20 +506,5 @@ pub mod Opcode {
             return true;
         }
         return false;
-    }
-
-    pub fn has_success_opcode(script: @ByteArray) -> bool {
-        let mut i = 0;
-        let mut result = false;
-        while i < script.len() {
-            let opcode = script[i];
-            if is_success_opcode(opcode) {
-                result = true;
-                break;
-            }
-            let data_len = data_len(i, script).unwrap();
-            i += data_len + 1;
-        };
-        return result;
     }
 }

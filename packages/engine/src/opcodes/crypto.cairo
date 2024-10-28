@@ -1,14 +1,14 @@
-use crate::engine::{Engine, EngineExtrasTrait};
+use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
 };
 use crate::stack::ScriptStackTrait;
-use crate::scriptflags::ScriptFlags;
+use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
-use crate::signature::signature::{BaseSigVerifierTrait, TaprootSigVerifierTrait};
+use crate::signature::signature::{BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait};
 use starknet::secp256_trait::{is_valid_signature};
-use core::sha256::compute_sha256_byte_array;
+use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
@@ -19,48 +19,23 @@ const BASE_SEGWIT_VERSION: i64 = 0;
 
 pub fn opcode_sha256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;
-    let res = compute_sha256_byte_array(arr).span();
-    let mut res_bytes: ByteArray = "";
-    let mut i: usize = 0;
-    while i != res.len() {
-        res_bytes.append_word((*res[i]).into(), 4);
-        i += 1;
-    };
-    engine.dstack.push_byte_array(res_bytes);
+    let res = sha256_byte_array(arr);
+    engine.dstack.push_byte_array(res);
     return Result::Ok(());
 }
 
 pub fn opcode_hash160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let m = engine.dstack.pop_byte_array()?;
-    let res = compute_sha256_byte_array(@m).span();
-    let mut res_bytes: ByteArray = "";
-    let mut i: usize = 0;
-    while i != res.len() {
-        res_bytes.append_word((*res[i]).into(), 4);
-        i += 1;
-    };
-    let h: ByteArray = ripemd160::ripemd160_hash(@res_bytes).into();
+    let res = sha256_byte_array(@m);
+    let h: ByteArray = ripemd160::ripemd160_hash(@res).into();
     engine.dstack.push_byte_array(h);
     return Result::Ok(());
 }
 
 pub fn opcode_hash256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let m = engine.dstack.pop_byte_array()?;
-    let res = compute_sha256_byte_array(@m).span();
-    let mut res_bytes: ByteArray = "";
-    let mut i: usize = 0;
-    while i != res.len() {
-        res_bytes.append_word((*res[i]).into(), 4);
-        i += 1;
-    };
-    let res2 = compute_sha256_byte_array(@res_bytes).span();
-    let mut res2_bytes: ByteArray = "";
-    let mut j: usize = 0;
-    while j != res2.len() {
-        res2_bytes.append_word((*res2[j]).into(), 4);
-        j += 1;
-    };
-    engine.dstack.push_byte_array(res2_bytes);
+    let res = double_sha256_bytearray(@m);
+    engine.dstack.push_byte_array(res.into());
     return Result::Ok(());
 }
 
@@ -94,28 +69,50 @@ pub fn opcode_checksig<
         return Result::Ok(());
     }
 
-    // TODO: add witness context inside engine to check if witness is active
-    //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
     if engine.witness_program.len() == 0 {
+        // Base Signature Verification
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
         if res.is_err() {
-            // TODO: Some errors can return an error code instead of pushing false?
+            let err = res.unwrap_err();
+            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::WITNESS_PUBKEYTYPE {
+                return Result::Err(err);
+            };
             engine.dstack.push_bool(false);
             return Result::Ok(());
         }
-        let mut sig_verifier = res.unwrap();
 
-        is_valid = sig_verifier.verify(ref engine);
+        let mut sig_verifier = res.unwrap();
+        if BaseSigVerifierTrait::verify(ref sig_verifier, ref engine) {
+            is_valid = true;
+        } else {
+            is_valid = false;
+        }
     } else if engine.is_witness_active(BASE_SEGWIT_VERSION) {
-        // TODO: Implement
-        is_valid = false;
+        // Witness Signature Verification
+        let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
+        if res.is_err() {
+            let err = res.unwrap_err();
+            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::WITNESS_PUBKEYTYPE {
+                return Result::Err(err);
+            };
+            engine.dstack.push_bool(false);
+            return Result::Ok(());
+        }
+
+        let mut sig_verifier = res.unwrap();
+        if BaseSegwitSigVerifierTrait::verify(ref sig_verifier, ref engine) {
+            is_valid = true;
+        } else {
+            is_valid = false;
+        }
     } else if engine.use_taproot {
         engine.taproot_context.use_ops_budget()?;
         if pk_bytes.len() == 0 {
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
+        // TODO: Errors or false?
         let mut verifier = TaprootSigVerifierTrait::<T>::new_base(@full_sig_bytes, @pk_bytes)?;
         is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
     }
@@ -150,6 +147,7 @@ pub fn opcode_checkmultisig<
         return Result::Err(Error::TAPROOT_MULTISIG);
     }
 
+    let verify_der = engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
     let mut num_pub_keys: i64 = ScriptNum::to_int32(num_keys).into();
@@ -209,10 +207,10 @@ pub fn opcode_checkmultisig<
 
     let mut script = engine.sub_script();
 
-    // TODO: add witness context inside engine to check if witness is active
     let mut s: u32 = 0;
-    while s != sigs.len() {
-        script = signature::remove_signature(script, sigs.at(s));
+    let end = sigs.len();
+    while s != end {
+        script = signature::remove_signature(@script, sigs.at(s)).clone();
         s += 1;
     };
 
@@ -234,36 +232,42 @@ pub fn opcode_checkmultisig<
         if sig.len() == 0 {
             continue;
         }
-
         let res = signature::parse_base_sig_and_pk(ref engine, pub_key, sig);
         if res.is_err() {
             success = false;
             err = res.unwrap_err();
             break;
         }
+
         let (parsed_pub_key, parsed_sig, hash_type) = res.unwrap();
         let sig_hash: u256 = sighash::calc_signature_hash(
-            @script, hash_type, ref engine.transaction, engine.tx_idx
+            @script, hash_type, engine.transaction, engine.tx_idx
         );
+
         if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
             sig_idx += 1;
             num_sigs -= 1;
         }
     };
+
     if err != 0 {
         return Result::Err(err);
     }
 
-    if !success && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
-        let mut err = '';
-        for s in sigs {
-            if s.len() > 0 {
-                err = Error::SIG_NULLFAIL;
-                break;
+    if !success {
+        if engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
+            let mut err = '';
+            for s in sigs {
+                if s.len() > 0 {
+                    err = Error::SIG_NULLFAIL;
+                    break;
+                }
+            };
+            if err != '' {
+                return Result::Err(err);
             }
-        };
-        if err != '' {
-            return Result::Err(err);
+        } else if verify_der {
+            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
         }
     }
 
@@ -271,7 +275,19 @@ pub fn opcode_checkmultisig<
     Result::Ok(())
 }
 
-pub fn opcode_codeseparator<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_codeseparator<
+    T,
+    I,
+    O,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >,
+    +Drop<T>,
+    +Drop<I>,
+    +Drop<O>,
+>(ref engine: Engine<T>) -> Result<(), felt252> {
     engine.last_code_sep = engine.opcode_idx;
 
     if !engine.use_taproot {
@@ -334,16 +350,16 @@ pub fn opcode_sha1<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
 
 pub fn opcode_checksigadd<
     T,
-    +Drop<T>,
     I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
-    +Drop<O>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+    >,
+    +Drop<T>,
+    +Drop<I>,
+    +Drop<O>,
 >(
     ref engine: Engine<T>
 ) -> Result<(), felt252> {
