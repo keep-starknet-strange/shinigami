@@ -388,6 +388,17 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     }
 }
 
+pub fn parse_schnorr_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
+    if pk_bytes.len() == 0 || pk_bytes.len() != 32 {
+        // TODO
+        panic!("invalid schnorr pubkey length");
+    }
+
+    let mut key_compressed: ByteArray = "\02";
+    key_compressed.append(pk_bytes);
+    return parse_pub_key(@key_compressed);
+}
+
 // Parses a DER-encoded ECDSA signature byte array into a `Signature` struct.
 //
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
@@ -549,4 +560,67 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
     };
 
     @processed_script
+}
+
+#[derive(Drop)]
+pub struct TaprootSigVerifier {
+    // public key as a point on the secp256k1 curve, used to verify the signature
+    pub_key: Secp256k1Point,
+    // ECDSA signature
+    sig: Signature,
+    // raw byte array of the signature
+    sig_bytes: @ByteArray,
+    // raw byte array of the public key
+    pk_bytes: @ByteArray,
+    // specifies how the transaction was hashed for signing
+    hash_type: u32,
+    // annex data used for taproot verification
+    annex: @ByteArray,
+}
+
+pub trait TaprootSigVerifierTrait<T> {
+    fn new(
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
+    ) -> Result<TaprootSigVerifier, felt252>;
+    fn new_base(sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> Result<TaprootSigVerifier, felt252>;
+    fn verify(ref self: TaprootSigVerifier) -> bool;
+    fn verify_base(ref self: TaprootSigVerifier) -> bool;
+}
+
+pub impl TaprootSigVerifierImpl<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+> of TaprootSigVerifierTrait<T> {
+    fn new(
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
+    ) -> Result<TaprootSigVerifier, felt252> {
+        // TODO
+        return Result::Err('TaprootSig not implemented');
+    }
+
+    fn new_base(
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray
+    ) -> Result<TaprootSigVerifier, felt252> {
+        // TODO
+        return Result::Err('TaprootSig not implemented');
+    }
+
+    fn verify(ref self: TaprootSigVerifier) -> bool {
+        // TODO: implement taproot verification
+        return false;
+    }
+
+    fn verify_base(ref self: TaprootSigVerifier) -> bool {
+        // TODO: implement taproot verification
+        return false;
+    }
 }
