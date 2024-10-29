@@ -153,8 +153,6 @@ pub fn validate_p2ms(
 pub fn validate_p2sh(
     tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>, indx: u32
 ) -> Result<(), felt252> {
-    println!("Running  P2SH validation:");
-
     if tx.transaction_inputs.len() == 0 {
         return Result::Err('P2SH: No inputs');
     }
@@ -207,10 +205,8 @@ pub fn validate_p2sh(
 
     if res.is_err() {
         let err = res.unwrap_err();
-        println!("Error validation:{:?}", err);
         Result::Err(err)
     } else {
-        println!("Validation sucess!");
         Result::Ok(())
     }
 }
