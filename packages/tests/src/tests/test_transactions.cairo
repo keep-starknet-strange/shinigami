@@ -125,18 +125,18 @@ fn test_deserialize_first_p2pkh_transaction() {
 fn test_deserialize_first_p2sh_transaction() {
     //https://learnmeabitcoin.com/explorer/tx/a0f1aaa2fb4582c89e0511df0374a5a2833bf95f7314f4a51b55b7b71e90ce0f
     let raw_transaction_hex =
-    "0x01000000014ce7153d92e3b24d9eea31f8cf391c3fb4c39f7742b341b2d36c6367e7546474000000006c493046022100c554360535b2ad3b1cb1b966a87807f7a7e45fa485348d662a1e7413dced8471022100d6bcfc4385b7ac41ca3968a73c4a28e38879192c3db1286b36e59ec9fce52bbd012103c96e3a9e63986801269d5f278246ed7cdc2d392595d0a25b102e04598f4b4fa9ffffffff02cb871a00000000001976a914c02ebae82202119f23f330781ff26b303edb7dbd88ac809698000000000017a914748284390f9e263a4b766a75d0633c50426eb8758700000000";
+        "0x01000000014ce7153d92e3b24d9eea31f8cf391c3fb4c39f7742b341b2d36c6367e7546474000000006c493046022100c554360535b2ad3b1cb1b966a87807f7a7e45fa485348d662a1e7413dced8471022100d6bcfc4385b7ac41ca3968a73c4a28e38879192c3db1286b36e59ec9fce52bbd012103c96e3a9e63986801269d5f278246ed7cdc2d392595d0a25b102e04598f4b4fa9ffffffff02cb871a00000000001976a914c02ebae82202119f23f330781ff26b303edb7dbd88ac809698000000000017a914748284390f9e263a4b766a75d0633c50426eb8758700000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert_eq!(transaction.version, 1, "Version is not correct");
     assert_eq!(transaction.transaction_inputs.len(), 1, "Transaction inputs length is not correct");
-    let input0 = transaction.transaction_inputs[0];    
+    let input0 = transaction.transaction_inputs[0];
 
     let expected_txid_hex = "0x4ce7153d92e3b24d9eea31f8cf391c3fb4c39f7742b341b2d36c6367e7546474";
     let expected_txid = hex_to_bytecode(@expected_txid_hex);
 
     let expected_sig_script_hex =
-    "0x493046022100c554360535b2ad3b1cb1b966a87807f7a7e45fa485348d662a1e7413dced8471022100d6bcfc4385b7ac41ca3968a73c4a28e38879192c3db1286b36e59ec9fce52bbd012103c96e3a9e63986801269d5f278246ed7cdc2d392595d0a25b102e04598f4b4fa9";
+        "0x493046022100c554360535b2ad3b1cb1b966a87807f7a7e45fa485348d662a1e7413dced8471022100d6bcfc4385b7ac41ca3968a73c4a28e38879192c3db1286b36e59ec9fce52bbd012103c96e3a9e63986801269d5f278246ed7cdc2d392595d0a25b102e04598f4b4fa9";
     let expected_sig_script = hex_to_bytecode(@expected_sig_script_hex);
 
     assert_eq!(
@@ -147,22 +147,25 @@ fn test_deserialize_first_p2sh_transaction() {
     assert_eq!(
         input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct"
     );
-    
-    
+
     let output0 = transaction.transaction_outputs[0];
     let expected_pk_script_hex_0 = "0x76a914c02ebae82202119f23f330781ff26b303edb7dbd88ac";
     let expected_pk_script_0 = hex_to_bytecode(@expected_pk_script_hex_0);
 
     assert_eq!(output0.value, @1738699, "Output 1 value is not correct");
-    assert_eq!(output0.publickey_script, @expected_pk_script_0, "Output 1 pk_script is not correct");
-    
+    assert_eq!(
+        output0.publickey_script, @expected_pk_script_0, "Output 1 pk_script is not correct"
+    );
+
     let output1 = transaction.transaction_outputs[1];
     let expected_pk_script_hex_1 = "0xa914748284390f9e263a4b766a75d0633c50426eb87587";
     let expected_pk_script_1 = hex_to_bytecode(@expected_pk_script_hex_1);
-    
+
     assert_eq!(output1.value, @10000000, "Output 2 value is not correct");
-    assert_eq!(output1.publickey_script, @expected_pk_script_1, "Output 2 pk_script is not correct");
-    
+    assert_eq!(
+        output1.publickey_script, @expected_pk_script_1, "Output 2 pk_script is not correct"
+    );
+
     assert_eq!(transaction.locktime, 0, "Lock time is not correct");
 }
 

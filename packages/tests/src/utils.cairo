@@ -251,17 +251,17 @@ pub fn mock_transaction_legacy_sequence_v2(
 }
 
 //find last push_data opcode in a bytearray
-pub fn find_last_index(sig:ByteArray)->u32{
-    let mut i=sig.len()-1;
-    loop{
-        if 1<sig[i] && sig[i]<75{
+pub fn find_last_index(sig: ByteArray) -> u32 {
+    let mut i = sig.len() - 1;
+    loop {
+        if 1 < sig[i] && sig[i] < 75 {
             break;
         }
-        i-=1;
+        i -= 1;
 
-        if(i==0){
+        if (i == 0) {
             break;
         }
     };
-    return i+1;
+    return i + 1;
 }
