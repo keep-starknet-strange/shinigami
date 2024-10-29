@@ -6,14 +6,18 @@ use crate::stack::ScriptStackTrait;
 use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
-use crate::signature::signature::{BaseSigVerifierTrait, BaseSegwitSigVerifierTrait};
+use crate::signature::signature::{
+    BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait
+};
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
+use crate::taproot::TaprootContextTrait;
 
 const MAX_KEYS_PER_MULTISIG: i64 = 20;
+const BASE_SEGWIT_VERSION: i64 = 0;
 
 pub fn opcode_sha256<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let arr = @engine.dstack.pop_byte_array()?;
@@ -89,7 +93,7 @@ pub fn opcode_checksig<
         } else {
             is_valid = false;
         }
-    } else if engine.is_witness_active(0) {
+    } else if engine.is_witness_active(BASE_SEGWIT_VERSION) {
         // Witness Signature Verification
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
         if res.is_err() {
@@ -107,8 +111,22 @@ pub fn opcode_checksig<
         } else {
             is_valid = false;
         }
-    } // TODO: Add Taproot verification
+    } else if engine.use_taproot {
+        engine.taproot_context.use_ops_budget()?;
+        if pk_bytes.len() == 0 {
+            return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
+        }
 
+        // TODO: Errors or false?
+        let mut verifier = TaprootSigVerifierTrait::<
+            T
+        >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
+        is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
+    }
+
+    if !is_valid && @engine.use_taproot == @true {
+        return Result::Err(Error::SIG_NULLFAIL);
+    }
     if !is_valid && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) && full_sig_bytes.len() > 0 {
         return Result::Err(Error::SIG_NULLFAIL);
     }
@@ -132,7 +150,9 @@ pub fn opcode_checkmultisig<
 >(
     ref engine: Engine<T>
 ) -> Result<(), felt252> {
-    // TODO Error on taproot exec
+    if engine.use_taproot {
+        return Result::Err(Error::TAPROOT_MULTISIG);
+    }
 
     let verify_der = engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     let strict_encoding = engine.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
@@ -269,15 +289,30 @@ pub fn opcode_checkmultisig<
     Result::Ok(())
 }
 
-pub fn opcode_codeseparator<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
+pub fn opcode_codeseparator<
+    T,
+    I,
+    O,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >,
+    +Drop<T>,
+    +Drop<I>,
+    +Drop<O>,
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
     engine.last_code_sep = engine.opcode_idx;
 
-    // TODO Disable OP_CODESEPARATOR for non-segwit scripts.
-    // if engine.witness_program.len() == 0 &&
-    // engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
-
-    // return Result::Err('opcode_codeseparator:non-segwit');
-    // }
+    if !engine.use_taproot {
+        // TODO: Check if this is correct
+        engine.taproot_context.code_sep = engine.opcode_idx;
+    } else if engine.witness_program.len() == 0
+        && engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) {
+        return Result::Err(Error::CODESEPARATOR_NON_SEGWIT);
+    }
 
     Result::Ok(())
 }
@@ -327,4 +362,51 @@ pub fn opcode_sha1<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
     let h: ByteArray = sha1::sha1_hash(@m).into();
     engine.dstack.push_byte_array(h);
     return Result::Ok(());
+}
+
+pub fn opcode_checksigadd<
+    T,
+    I,
+    O,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >,
+    +Drop<T>,
+    +Drop<I>,
+    +Drop<O>,
+>(
+    ref engine: Engine<T>
+) -> Result<(), felt252> {
+    if !engine.use_taproot {
+        return Result::Err(Error::OPCODE_RESERVED);
+    }
+
+    let pk_bytes: ByteArray = engine.dstack.pop_byte_array()?;
+    let n: i64 = engine.dstack.pop_int()?;
+    let sig_bytes: ByteArray = engine.dstack.pop_byte_array()?;
+
+    if sig_bytes.len() != 0 {
+        engine.taproot_context.use_ops_budget()?;
+    }
+
+    if pk_bytes.len() == 0 {
+        return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
+    }
+
+    if sig_bytes.len() == 0 {
+        engine.dstack.push_int(n);
+        return Result::Ok(());
+    }
+
+    let mut verifier = TaprootSigVerifierTrait::<
+        T
+    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
+    if !(TaprootSigVerifierTrait::<T>::verify(ref verifier)) {
+        return Result::Err(Error::TAPROOT_INVALID_SIG);
+    }
+
+    engine.dstack.push_int(n + 1);
+    Result::Ok(())
 }

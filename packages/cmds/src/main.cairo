@@ -86,8 +86,17 @@ fn run(input: InputData) -> Result<(), felt252> {
     let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone());
     let hash_cache = HashCacheImpl::new(@tx);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, 0, 0, @hash_cache)?;
-    let _ = engine.execute()?;
-    Result::Ok(())
+    let res = engine.execute();
+    match res {
+        Result::Ok(_) => {
+            println!("Execution successful");
+            Result::Ok(())
+        },
+        Result::Err(e) => {
+            println!("Execution failed: {}", felt252_to_byte_array(e));
+            Result::Err(e)
+        }
+    }
 }
 
 fn run_with_json(input: InputData) -> Result<(), felt252> {
