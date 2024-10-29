@@ -249,3 +249,19 @@ pub fn mock_transaction_legacy_sequence_v2(
     let outputs = ArrayTrait::<EngineTransactionOutput>::new();
     return mock_transaction_with(2, inputs, outputs, 0);
 }
+
+//find last push_data opcode in a bytearray
+pub fn find_last_index(sig: ByteArray) -> u32 {
+    let mut i = sig.len() - 1;
+    loop {
+        if 1 < sig[i] && sig[i] < 75 {
+            break;
+        }
+        i -= 1;
+
+        if (i == 0) {
+            break;
+        }
+    };
+    return i + 1;
+}
