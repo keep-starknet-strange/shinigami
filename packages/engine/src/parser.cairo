@@ -1,5 +1,5 @@
 use shinigami_utils::byte_array::byte_array_to_felt252_le;
-use crate::opcodes::{opcodes::Opcode};
+use crate::opcodes::opcodes::{Opcode, Opcode::is_success_opcode};
 use crate::errors::Error;
 
 // Returns true if the script is a script hash
@@ -94,3 +94,20 @@ pub fn next(script: @ByteArray, idx: usize) -> Result<usize, felt252> {
     let data_len = data_len(script, idx)?;
     return Result::Ok(idx + data_len + 1);
 }
+
+pub fn has_success_opcode(script: @ByteArray) -> bool {
+    let mut i = 0;
+    let mut result = false;
+    let script_len = script.len();
+    while i < script_len {
+        let opcode = script[i];
+        if is_success_opcode(opcode) {
+            result = true;
+            break;
+        }
+        let data_len = data_len(script, i).unwrap();
+        i += data_len + 1;
+    };
+    return result;
+}
+

@@ -3,6 +3,7 @@ pub mod parser;
 pub mod stack;
 pub mod cond_stack;
 pub mod witness;
+pub mod taproot;
 pub mod hash_cache;
 pub mod errors;
 pub mod opcodes {

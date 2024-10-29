@@ -9,6 +9,8 @@ use crate::transaction::{
 };
 use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
+use crate::taproot;
+use crate::taproot::{TaprootContext, TaprootContextImpl, ControlBlockImpl};
 use shinigami_utils::byte_array::byte_array_to_bool;
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::hash::sha256_byte_array;
@@ -17,6 +19,13 @@ pub const MAX_STACK_SIZE: u32 = 1000;
 pub const MAX_SCRIPT_SIZE: u32 = 10000;
 pub const MAX_OPS_PER_SCRIPT: u32 = 201;
 pub const MAX_SCRIPT_ELEMENT_SIZE: u32 = 520;
+
+const BASE_SEGWIT_WITNESS_VERSION: i64 = 0;
+const TAPROOT_WITNESS_VERSION: i64 = 1;
+
+const PAY_TO_WITNESS_PUBKEY_HASH_SIZE: u32 = 20;
+const PAY_TO_WITNESS_SCRIPT_HASH_SIZE: u32 = 32;
+const PAY_TO_TAPROOT_DATA_SIZE: u32 = 32;
 
 // Represents the VM that executes Bitcoin scripts
 #[derive(Destruct)]
@@ -41,6 +50,10 @@ pub struct Engine<T> {
     pub witness_program: ByteArray,
     // The witness version
     pub witness_version: i64,
+    // The taproot context for exection
+    pub taproot_context: TaprootContext,
+    // Whether to use taproot
+    pub use_taproot: bool,
     // Primary data stack
     pub dstack: ScriptStack,
     // Alternate data stack
@@ -125,6 +138,8 @@ pub impl EngineImpl<
             opcode_idx: 0,
             witness_program: "",
             witness_version: 0,
+            taproot_context: TaprootContextImpl::empty(),
+            use_taproot: false,
             dstack: ScriptStackImpl::new(),
             astack: ScriptStackImpl::new(),
             cond_stack: ConditionalStackImpl::new(),
@@ -310,7 +325,7 @@ pub impl EngineImpl<
                     break;
                 }
 
-                if opcode > Opcode::OP_16 {
+                if !self.use_taproot && opcode > Opcode::OP_16 {
                     self.num_ops += 1;
                     if self.num_ops > MAX_OPS_PER_SCRIPT {
                         err = Error::SCRIPT_TOO_MANY_OPERATIONS;
@@ -423,6 +438,9 @@ pub trait EngineInternalTrait<
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>,
     +HashCacheTrait<I, O, T>,
+    +Drop<I>,
+    +Drop<O>,
+    +Drop<T>,
 > {
     // Pulls the next len bytes from the script and advances the program counter
     fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252>;
@@ -461,6 +479,8 @@ pub impl EngineInternalImpl<
     impl IEngineTransaction: EngineTransactionTrait<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput
     >,
+    +Drop<I>,
+    +Drop<O>,
     +Drop<T>,
 > of EngineInternalTrait<I, O, T> {
     fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252> {
@@ -475,7 +495,9 @@ pub impl EngineInternalImpl<
     }
 
     fn pop_if_bool(ref self: Engine<T>) -> Result<bool, felt252> {
-        if !self.is_witness_active(0) || !self.has_flag(ScriptFlags::ScriptVerifyMinimalIf) {
+        if !self.is_witness_active(TAPROOT_WITNESS_VERSION)
+            && (!self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION)
+                || !self.has_flag(ScriptFlags::ScriptVerifyMinimalIf)) {
             return self.dstack.pop_bool();
         }
         let top = self.dstack.pop_byte_array()?;
@@ -570,9 +592,10 @@ pub impl EngineInternalImpl<
     }
 
     fn verify_witness(ref self: Engine<T>, witness: Span<ByteArray>) -> Result<(), felt252> {
-        if self.is_witness_active(0) {
+        let witness_prog_len = self.witness_program.len();
+        if self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION) {
             // Verify a base witness (segwit) program, ie P2WSH || P2WPKH
-            if self.witness_program.len() == 20 {
+            if witness_prog_len == PAY_TO_WITNESS_PUBKEY_HASH_SIZE {
                 // P2WPKH
                 if witness.len() != 2 {
                     return Result::Err(Error::WITNESS_PROGRAM_MISMATCH);
@@ -584,7 +607,7 @@ pub impl EngineInternalImpl<
 
                 self.scripts.append(@pk_script);
                 self.dstack.set_stack(witness, 0, witness.len());
-            } else if self.witness_program.len() == 32 {
+            } else if witness_prog_len == PAY_TO_WITNESS_SCRIPT_HASH_SIZE {
                 // P2WSH
                 if witness.len() == 0 {
                     return Result::Err(Error::WITNESS_PROGRAM_EMPTY);
@@ -603,6 +626,76 @@ pub impl EngineInternalImpl<
             } else {
                 return Result::Err(Error::WITNESS_PROGRAM_WRONG_LENGTH);
             }
+        } else if self.is_witness_active(TAPROOT_WITNESS_VERSION)
+            && witness_prog_len == PAY_TO_TAPROOT_DATA_SIZE
+            && !self.bip16.clone() {
+            // Verify a taproot witness program
+            if !self.has_flag(ScriptFlags::ScriptVerifyTaproot) {
+                return Result::Ok(());
+            }
+
+            if witness.len() == 0 {
+                return Result::Err(Error::WITNESS_PROGRAM_INVALID);
+            }
+
+            self.use_taproot = true;
+            self
+                .taproot_context =
+                    TaprootContextImpl::new(witness::serialized_witness_size(witness));
+            let mut witness_len = witness.len();
+            if taproot::is_annexed_witness(witness, witness_len) {
+                self.taproot_context.annex = witness[witness_len - 1];
+                witness_len -= 1; // Remove annex
+            }
+
+            if witness_len == 1 {
+                TaprootContextImpl::verify_taproot_spend(
+                    @self.witness_program, witness[0], self.transaction, self.tx_idx
+                )?;
+                self.taproot_context.must_succeed = true;
+                return Result::Ok(());
+            } else {
+                let control_block = taproot::parse_control_block(witness[witness_len - 1])?;
+                let witness_script = witness[witness_len - 2];
+                control_block.verify_taproot_leaf(@self.witness_program, witness_script)?;
+
+                if parser::has_success_opcode(witness_script) {
+                    if self.has_flag(ScriptFlags::ScriptVerifyDiscourageOpSuccess) {
+                        return Result::Err(Error::DISCOURAGE_OP_SUCCESS);
+                    }
+
+                    self.taproot_context.must_succeed = true;
+                    return Result::Ok(());
+                }
+
+                if control_block.leaf_version != taproot::BASE_LEAF_VERSION {
+                    if self.has_flag(ScriptFlags::ScriptVerifyDiscourageUpgradeableTaprootVersion) {
+                        return Result::Err(Error::DISCOURAGE_UPGRADABLE_TAPROOT_VERSION);
+                    } else {
+                        self.taproot_context.must_succeed = true;
+                        return Result::Ok(());
+                    }
+                }
+
+                self
+                    .taproot_context
+                    .tapleaf_hash = taproot::tap_hash(witness_script, taproot::BASE_LEAF_VERSION);
+                self.scripts.append(witness_script);
+                self.dstack.set_stack(witness, 0, witness_len - 2);
+            }
+        } else if self.has_flag(ScriptFlags::ScriptVerifyDiscourageUpgradeableWitnessProgram) {
+            return Result::Err(Error::DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM);
+        } else {
+            self.witness_program = "";
+        }
+
+        if self.is_witness_active(TAPROOT_WITNESS_VERSION) {
+            if self.dstack.len() > MAX_STACK_SIZE {
+                return Result::Err(Error::STACK_OVERFLOW);
+            }
+        }
+        if self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION)
+            || self.is_witness_active(TAPROOT_WITNESS_VERSION) {
             // Sanity checks
             let mut err = '';
             for w in self
@@ -616,16 +709,7 @@ pub impl EngineInternalImpl<
             if err != '' {
                 return Result::Err(err);
             }
-        } else if self.is_witness_active(1) {
-            // Verify a taproot witness program
-            // TODO: Implement
-            return Result::Err('Taproot not implemented');
-        } else if self.has_flag(ScriptFlags::ScriptVerifyDiscourageUpgradeableWitnessProgram) {
-            return Result::Err(Error::DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM);
-        } else {
-            self.witness_program = "";
         }
-
         return Result::Ok(());
     }
 
@@ -636,7 +720,7 @@ pub impl EngineInternalImpl<
         }
 
         // Check if witness stack is clean
-        if final && self.is_witness_active(0) && self.dstack.len() != 1 { // TODO: Hardcoded 0
+        if final && self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION) && self.dstack.len() != 1 {
             return Result::Err(Error::SCRIPT_NON_CLEAN_STACK);
         }
         if final && self.has_flag(ScriptFlags::ScriptVerifyCleanStack) && self.dstack.len() != 1 {

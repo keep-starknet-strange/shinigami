@@ -56,3 +56,25 @@ pub fn parse_witness_input(input: ByteArray) -> Array<ByteArray> {
 
     witness_data
 }
+
+pub fn serialized_int_size(val: u64) -> i32 {
+    if val < 0xfd {
+        return 1;
+    }
+    if val <= 0xFFFF {
+        return 3;
+    }
+    if val <= 0xFFFFFFFF {
+        return 5;
+    }
+    return 9;
+}
+
+pub fn serialized_witness_size(witness: Span<ByteArray>) -> i32 {
+    let mut size = serialized_int_size(witness.len().into());
+    for w in witness {
+        size += serialized_int_size(w.len().into());
+        size += w.len().try_into().unwrap();
+    };
+    size
+}
