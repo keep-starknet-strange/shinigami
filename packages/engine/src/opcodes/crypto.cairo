@@ -77,7 +77,10 @@ pub fn opcode_checksig<
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
         if res.is_err() {
             let err = res.unwrap_err();
-            if err == Error::SCRIPT_ERR_SIG_DER || err == Error::WITNESS_PUBKEYTYPE {
+            if err == Error::SCRIPT_ERR_SIG_DER
+                || err == Error::PUBKEYTYPE
+                || err == Error::SIG_HASHTYPE
+                || err == Error::SIG_HIGH_S {
                 return Result::Err(err);
             };
             engine.dstack.push_bool(false);
@@ -152,6 +155,7 @@ pub fn opcode_checkmultisig<
     }
 
     let verify_der = engine.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
+    let strict_encoding = engine.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
     // Get number of public keys and construct array
     let num_keys = engine.dstack.pop_int()?;
     let mut num_pub_keys: i64 = ScriptNum::to_int32(num_keys).into();
@@ -201,7 +205,6 @@ pub fn opcode_checkmultisig<
     if err != 0 {
         return Result::Err(err);
     }
-
     // Historical bug
     let dummy = engine.dstack.pop_byte_array()?;
 
@@ -211,12 +214,14 @@ pub fn opcode_checkmultisig<
 
     let mut script = engine.sub_script();
 
-    let mut s: u32 = 0;
-    let end = sigs.len();
-    while s != end {
-        script = signature::remove_signature(@script, sigs.at(s)).clone();
-        s += 1;
-    };
+    if (engine.is_witness_active(0)) {
+        let mut s: u32 = 0;
+        let end = sigs.len();
+        while s != end {
+            script = signature::remove_signature(@script, sigs.at(s)).clone();
+            s += 1;
+        };
+    }
 
     let mut success = true;
     num_pub_keys += 1; // Offset due to decrementing it in the loop
@@ -236,6 +241,7 @@ pub fn opcode_checkmultisig<
         if sig.len() == 0 {
             continue;
         }
+
         let res = signature::parse_base_sig_and_pk(ref engine, pub_key, sig);
         if res.is_err() {
             success = false;
@@ -254,10 +260,6 @@ pub fn opcode_checkmultisig<
         }
     };
 
-    if err != 0 {
-        return Result::Err(err);
-    }
-
     if !success {
         if engine.has_flag(ScriptFlags::ScriptVerifyNullFail) {
             let mut err = '';
@@ -270,8 +272,16 @@ pub fn opcode_checkmultisig<
             if err != '' {
                 return Result::Err(err);
             }
-        } else if verify_der {
-            return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+        } else if verify_der || strict_encoding {
+            if err == 'invalid sig fmt: S padding' {
+                return Result::Err(Error::SCRIPT_ERR_SIG_DER);
+            } else if err != '' {
+                if err != Error::INVALID_PUBKEY_LEN {
+                    return Result::Err(err);
+                }
+            }
+        } else if err == Error::SIG_HIGH_S {
+            return Result::Err(err);
         }
     }
 

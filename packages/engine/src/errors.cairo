@@ -46,6 +46,10 @@ pub mod Error {
     pub const INVALID_P2MS: felt252 = 'Invalid P2MS transaction';
     pub const SCRIPT_UNFINISHED: felt252 = 'Script unfinished';
     pub const SCRIPT_ERR_SIG_DER: felt252 = 'Signature DER error';
+    pub const PUBKEYTYPE: felt252 = 'Unsupported public key type';
+    pub const SIG_HIGH_S: felt252 = 'Sig not canonical high S value';
+    pub const SIG_HASHTYPE: felt252 = 'invalid hash type';
+    pub const INVALID_PUBKEY_LEN: felt252 = 'Invalid public key length';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
