@@ -33,9 +33,6 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
       - name: Cache Rust dependencies
         uses: actions/cache@v3
-
-        with:
-          components: rustfmt, clippy
       - name: Install cairo-lint
         run: cargo install scarb-cairo-lint --git https://github.com/keep-starknet-strange/cairo-lint
 
