@@ -38,7 +38,7 @@ jobs:
       - name: Cache Rust dependencies
         uses: actions/cache@v3
       - name: Install cairo-lint
-        run: cargo install scarb-cairo-lint --git https://github.com/keep-starknet-strange/cairo-lint -rev ${{ env.CAIRO_LINT_REF }}
+        run: cargo install scarb-cairo-lint --git https://github.com/keep-starknet-strange/cairo-lint --rev ${{ env.CAIRO_LINT_REF }}
  
       - uses: asdf-vm/actions/install@v3
       - name: Run cairo-lint and check for warnings
