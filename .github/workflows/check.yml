@@ -31,6 +31,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Rust nightly
         uses: dtolnay/rust-toolchain@nightly
+      - name: Cache Rust dependencies
+        uses: actions/cache@v3
+
         with:
           components: rustfmt, clippy
       - name: Install cairo-lint
@@ -40,7 +43,7 @@ jobs:
       - name: Run cairo-lint and check for warnings
         run: |
           scarb cairo-lint > lint_output.txt 2>&1
-          if grep -qi "warning:" lint_output.txt; then
+          if grep -qi "warning" lint_output.txt; then
             echo "Linting failed due to warnings"
             exit 1
           fi
