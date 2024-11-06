@@ -15,6 +15,7 @@ use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
 use crate::taproot::TaprootContextTrait;
+use crate::hash_cache::SigHashMidstateTrait;
 
 const MAX_KEYS_PER_MULTISIG: i64 = 20;
 const BASE_SEGWIT_VERSION: i64 = 0;
@@ -213,8 +214,7 @@ pub fn opcode_checkmultisig<
     }
 
     let mut script = engine.sub_script();
-
-    if (engine.is_witness_active(0)) {
+    if (engine.is_witness_active(BASE_SEGWIT_VERSION)) {
         let mut s: u32 = 0;
         let end = sigs.len();
         while s != end {
@@ -250,9 +250,21 @@ pub fn opcode_checkmultisig<
         }
 
         let (parsed_pub_key, parsed_sig, hash_type) = res.unwrap();
-        let sig_hash: u256 = sighash::calc_signature_hash(
-            @script, hash_type, engine.transaction, engine.tx_idx
-        );
+        let mut sig_hash: u256 = 0;
+
+        let transaction = engine.transaction;
+        let tx_idx = engine.tx_idx;
+        let amount = engine.amount;
+
+        if engine.is_witness_active(BASE_SEGWIT_VERSION) {
+            let sig_hashes = SigHashMidstateTrait::new(transaction);
+            sig_hash =
+                sighash::calc_witness_signature_hash(
+                    @script, @sig_hashes, hash_type, transaction, tx_idx, amount
+                );
+        } else {
+            sig_hash = sighash::calc_signature_hash(@script, hash_type, transaction, tx_idx);
+        };
 
         if is_valid_signature(sig_hash, parsed_sig.r, parsed_sig.s, parsed_pub_key) {
             sig_idx += 1;
