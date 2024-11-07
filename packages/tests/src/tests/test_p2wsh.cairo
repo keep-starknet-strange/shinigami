@@ -8,7 +8,6 @@ use shinigami_utils::bytecode::hex_to_bytecode;
 
 // P2WSH with P2MS
 // https://learnmeabitcoin.com/explorer/tx/b38a88b073743bcc84170071cff4b68dec6fb5dc0bc8ffcb3d4ca632c2c78255
-#[ignore]
 #[test]
 fn test_learnmeabitcoin_usage() {
     let prevout_pk_script =
