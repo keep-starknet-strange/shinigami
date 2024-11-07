@@ -24,7 +24,7 @@ RPC_API="https://bitcoin-mainnet.public.blastapi.io"
 #    pub amount: i64,
 #    pub pubkey_script: ByteArray,
 #    pub block_height: i32,
-#    // TODO: flags?
+#    pub flags: ByteArray,
 #}
 
 # Fetch the transaction
@@ -104,7 +104,6 @@ echo "Script flags: $FLAGS"
 echo "UTXO construction: $UTXOS"
 
 AMOUNT=0 # TODO?
-UTXOS=""
 if [ "$IS_COINBASE" = true ]; then
     echo "Setting up empty UTXO list for coinbase transaction"
     # Leave UTXOS empty for coinbase transactions
