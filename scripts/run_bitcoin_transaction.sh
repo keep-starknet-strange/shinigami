@@ -24,7 +24,6 @@ RPC_API="https://bitcoin-mainnet.public.blastapi.io"
 #    pub amount: i64,
 #    pub pubkey_script: ByteArray,
 #    pub block_height: i32,
-#    pub is_coinbase: bool,
 #    // TODO: flags?
 #}
 
