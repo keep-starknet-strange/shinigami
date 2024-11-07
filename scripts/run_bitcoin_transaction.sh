@@ -13,15 +13,6 @@ BIP_112_BLOCK_HEIGHT=419328 # CHECKSEQUENCEVERIFY
 BIP_141_BLOCK_HEIGHT=481824 # SegWit
 BIP_341_BLOCK_HEIGHT=709632 # Taproot
 
-# Script flags values
-SCRIPT_BIP16=0x1
-SCRIPT_STRICT_MULTISIG=0x2
-SCRIPT_VERIFY_DER_SIG=0x40
-SCRIPT_VERIFY_CLTV=0x8
-SCRIPT_VERIFY_CSV=0x10
-SCRIPT_VERIFY_WITNESS=0x1000
-SCRIPT_VERIFY_TAPROOT=0x10000
-
 TXID=$1
 
 RPC_API="https://bitcoin-mainnet.public.blastapi.io"
@@ -66,46 +57,51 @@ VIN_TXID=$(echo $RES | jq -r '.result.vin[0].txid')
 if [ "$VIN_TXID" = "null" ] || [ "$VIN_TXID" = "0000000000000000000000000000000000000000000000000000000000000000" ]; then
     IS_COINBASE=true
     echo "Detected coinbase transaction"
-    SCRIPT_FLAGS=0  # No script verification needed for coinbase
+    FLAGS=""  # Empty flags for coinbase
 else
-    # Calculate script flags based on block height and version for normal transactions
-    SCRIPT_FLAGS=0
+    # Initialize empty flags string
+    FLAGS=""
 
     # BIP16 (P2SH)
     if [ $BLOCK_HEIGHT -ge $BIP_16_BLOCK_HEIGHT ]; then
-        SCRIPT_FLAGS=$((SCRIPT_FLAGS | SCRIPT_BIP16))
+        FLAGS="P2SH"
     fi
 
     # BIP66 (Strict DER signatures)
     if [ $BLOCK_VERSION -ge 3 ] && [ $BLOCK_HEIGHT -ge $BIP_66_BLOCK_HEIGHT ]; then
-        SCRIPT_FLAGS=$((SCRIPT_FLAGS | SCRIPT_VERIFY_DER_SIG))
+        [ -n "$FLAGS" ] && FLAGS="$FLAGS,"
+        FLAGS="${FLAGS}DERSIG"
     fi
 
     # BIP65 (CHECKLOCKTIMEVERIFY)
     if [ $BLOCK_VERSION -ge 4 ] && [ $BLOCK_HEIGHT -ge $BIP_65_BLOCK_HEIGHT ]; then
-        SCRIPT_FLAGS=$((SCRIPT_FLAGS | SCRIPT_VERIFY_CLTV))
+        [ -n "$FLAGS" ] && FLAGS="$FLAGS,"
+        FLAGS="${FLAGS}CHECKLOCKTIMEVERIFY"
     fi
 
     # BIP112 (CHECKSEQUENCEVERIFY)
     if [ $BLOCK_HEIGHT -ge $BIP_112_BLOCK_HEIGHT ]; then
-        SCRIPT_FLAGS=$((SCRIPT_FLAGS | SCRIPT_VERIFY_CSV))
+        [ -n "$FLAGS" ] && FLAGS="$FLAGS,"
+        FLAGS="${FLAGS}CHECKSEQUENCEVERIFY"
     fi
 
     # BIP141 (SegWit)
     if [ $BLOCK_HEIGHT -ge $BIP_141_BLOCK_HEIGHT ]; then
-        SCRIPT_FLAGS=$((SCRIPT_FLAGS | SCRIPT_VERIFY_WITNESS))
-        SCRIPT_FLAGS=$((SCRIPT_FLAGS | SCRIPT_STRICT_MULTISIG))
+        [ -n "$FLAGS" ] && FLAGS="$FLAGS,"
+        FLAGS="${FLAGS}WITNESS"
+        FLAGS="${FLAGS},NULLDUMMY"
     fi
 
     # BIP341 (Taproot)
     if [ $BLOCK_HEIGHT -ge $BIP_341_BLOCK_HEIGHT ]; then
-        SCRIPT_FLAGS=$((SCRIPT_FLAGS | SCRIPT_VERIFY_TAPROOT))
+        [ -n "$FLAGS" ] && FLAGS="$FLAGS,"
+        FLAGS="${FLAGS}TAPROOT"
     fi
 fi
 
 echo "Transaction type: $([ "$IS_COINBASE" = true ] && echo 'Coinbase' || echo 'Regular')"
 echo "Block height: $BLOCK_HEIGHT"
-echo "Script flags: $SCRIPT_FLAGS"
+echo "Script flags: $FLAGS"
 echo "UTXO construction: $UTXOS"
 
 AMOUNT=0 # TODO?
@@ -139,7 +135,10 @@ else
     UTXOS=$(sed 's/,$//' <<< $UTXOS)
 fi
 
-JOINED_INPUT="[$RAW_TX_INPUT,[$UTXOS]]"
+FLAGS_TEXT=$($SCRIPT_DIR/text_to_byte_array.sh "$FLAGS")
+FLAGS_INPUT=$(sed 's/^\[\(.*\)\]$/\1/' <<< $FLAGS_TEXT)
+
+JOINED_INPUT="[$RAW_TX_INPUT,[$UTXOS],$FLAGS_INPUT]"
 # echo "JOINED_INPUT: $JOINED_INPUT"
 
 echo "scarb cairo-run --package shinigami_cmds --function run_raw_transaction \"$JOINED_INPUT\""
