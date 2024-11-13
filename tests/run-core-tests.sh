@@ -247,6 +247,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="WITNESS_PUBKEYTYPE"
         elif echo "$RESULT" | grep -q "$SIG_DER"; then
             SCRIPT_RESULT="SIG_DER"
+        elif echo "$RESULT" | grep -q "$SIG_HIGH_S"; then
+            SCRIPT_RESULT="SIG_HIGH_S"
         else
             SCRIPT_RESULT="FAIL"
         fi
