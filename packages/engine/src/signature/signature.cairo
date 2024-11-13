@@ -536,7 +536,16 @@ pub fn parse_base_sig_and_pk<
             Result::Err('empty signature')
         };
     }
-    // TODO: strct encoding
+
+    if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes) {
+        return if strict_encoding {
+            Result::Err(Error::SCRIPT_ERR_SIG_DER)
+        } else {
+            Result::Err(e)
+        };
+    }
+
+    // TODO: strict encoding
     let hash_type_offset: usize = sig_bytes.len() - 1;
     let hash_type: u32 = sig_bytes[hash_type_offset].into();
 
@@ -548,14 +557,6 @@ pub fn parse_base_sig_and_pk<
                 Result::Err(e)
             };
         }
-    }
-
-    if let Result::Err(e) = check_signature_encoding(ref vm, sig_bytes) {
-        return if strict_encoding {
-            Result::Err(Error::SCRIPT_ERR_SIG_DER)
-        } else {
-            Result::Err(e)
-        };
     }
 
     if let Result::Err(e) = check_pub_key_encoding(ref vm, pk_bytes) {
