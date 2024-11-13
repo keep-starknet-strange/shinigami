@@ -203,14 +203,27 @@ fn backend_debug(input: InputData) -> u8 {
 #[derive(Drop)]
 struct ValidateRawInput {
     raw_transaction: ByteArray,
-    utxo_hints: Array<UTXO>
+    utxo_hints: Array<UTXO>,
+    flags: ByteArray,
 }
 
 fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
     println!("Running Bitcoin Script with raw transaction: '{}'", input.raw_transaction);
     let raw_transaction = hex_to_bytecode(@input.raw_transaction);
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
+
+    // Parse the flags
+    let script_flags = flags::parse_flags(input.flags);
+    println!("Script flags: {}", script_flags);
+
+    // For coinbase transactions, we expect no UTXO hints since it creates new coins
+    if input.utxo_hints.is_empty() {
+        println!("Potential coinbase transaction detected - skipping validation");
+        return 1;
+    }
+
     let mut utxo_hints = array![];
+
     for hint in input
         .utxo_hints
         .span() {
@@ -225,7 +238,8 @@ fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
                     }
                 );
         };
-    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, script_flags, utxo_hints);
     match res {
         Result::Ok(_) => {
             println!("Execution successful");
