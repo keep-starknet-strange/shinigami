@@ -137,7 +137,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         MINIMAL_DATA="Execution failed: Opcode represents non-minimal"
         INVALID_WITNESS="Execution failed: Invalid witness program"
         SIG_DER="Execution failed: Signature DER error"
-        SIG_HIGH_S="Execution failed: Sig not canonical high S value"
+        SIG_HIGH_S="Execution failed: Sig not canonical high S value",
+        DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM="Execution failed: Upgradable witness program",
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -208,6 +209,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="SIG_DER"
         elif echo "$RESULT" | grep -q "$SIG_HIGH_S"; then
             SCRIPT_RESULT="SIG_HIGH_S"
+        elif echo "$RESULT" | grep -q "$DISCOURAGE_UPGRADABLE_WITNESS"; then
+            SCRIPT_RESULT="DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM"
         else
             SCRIPT_RESULT="FAIL"
         fi
