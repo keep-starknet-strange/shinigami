@@ -161,6 +161,7 @@ Also, thanks goes to these wonderful people. Follow the [contributors guide](htt
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/JoE11-y"><img src="https://avatars.githubusercontent.com/u/55321462?v=4?s=100" width="100px;" alt="BlockyJ"/><br /><sub><b>BlockyJ</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=JoE11-y" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/SoarinSkySagar"><img src="https://avatars.githubusercontent.com/u/117727361?v=4?s=100" width="100px;" alt="Sagar Rana"/><br /><sub><b>Sagar Rana</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/shinigami/commits?author=SoarinSkySagar" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
