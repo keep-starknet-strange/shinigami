@@ -85,7 +85,7 @@ pub fn felt252_to_byte_array(value: felt252) -> ByteArray {
 pub fn u256_from_byte_array_with_offset(arr: @ByteArray, offset: usize, len: usize) -> u256 {
     let total_bytes = arr.len();
     // Return 0 if offset out of bound or len greater than 32 bytes
-    if offset >= total_bytes || len > 33 {
+    if offset >= total_bytes || len > 32 {
         return u256 { high: 0, low: 0 };
     }
 

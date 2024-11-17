@@ -285,7 +285,12 @@ pub fn check_signature_encoding<
 
     // If the "low S" rule is enforced, check that the `S` value is below the threshold.
     if low_s {
-        let s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset, s_len);
+        let mut s_value = 0;
+        if s_len == 33 {
+            s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset+1, 32);
+        } else {
+            s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset, s_len);
+        }
         let mut half_order = Secp256Trait::<Secp256k1Point>::get_curve_size();
 
         let (half_order_high_upper, half_order_high_lower) = DivRem::div_rem(half_order.high, 2);
