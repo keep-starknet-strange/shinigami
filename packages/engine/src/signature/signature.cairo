@@ -287,7 +287,7 @@ pub fn check_signature_encoding<
     if low_s {
         let mut s_value = 0;
         if s_len == 33 {
-            s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset+1, 32);
+            s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset + 1, 32);
         } else {
             s_value = u256_from_byte_array_with_offset(sig_bytes, s_offset, s_len);
         }
