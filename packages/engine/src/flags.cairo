@@ -1,5 +1,3 @@
-use shinigami_utils::byte_array::byte_array_to_felt252_be;
-
 #[derive(Copy, Drop)]
 pub enum ScriptFlags {
     // ScriptBip16, allows P2SH transactions.
@@ -74,38 +72,38 @@ impl ScriptFlagsIntoU32 of Into<ScriptFlags, u32> {
     }
 }
 
-fn flag_from_string(flag: felt252) -> u32 {
+fn flag_from_string(flag: ByteArray) -> u32 {
     // TODO: To map and remaining flags
-    if flag == 'P2SH' {
+    if flag == "P2SH" {
         return ScriptFlags::ScriptBip16.into();
-    } else if flag == 'STRICTENC' {
+    } else if flag == "STRICTENC" {
         return ScriptFlags::ScriptVerifyStrictEncoding.into();
-    } else if flag == 'MINIMALDATA' {
+    } else if flag == "MINIMALDATA" {
         return ScriptFlags::ScriptVerifyMinimalData.into();
-    } else if flag == 'DISCOURAGE_UPGRADABLE_NOPS' {
+    } else if flag == "DISCOURAGE_UPGRADABLE_NOPS" {
         return ScriptFlags::ScriptDiscourageUpgradableNops.into();
-    } else if flag == 'DERSIG' {
+    } else if flag == "DERSIG" {
         return ScriptFlags::ScriptVerifyDERSignatures.into();
-    } else if flag == 'WITNESS' {
+    } else if flag == "WITNESS" {
         return ScriptFlags::ScriptVerifyWitness.into();
-    } else if flag == 'LOW_S' {
+    } else if flag == "LOW_S" {
         return ScriptFlags::ScriptVerifyLowS.into();
-    } else if flag == 'NULLDUMMY' {
+    } else if flag == "NULLDUMMY" {
         // TODO: Double check this
         return ScriptFlags::ScriptStrictMultiSig.into();
-    } else if flag == 'NULLFAIL' {
+    } else if flag == "NULLFAIL" {
         return ScriptFlags::ScriptVerifyNullFail.into();
-    } else if flag == 'SIGPUSHONLY' {
+    } else if flag == "SIGPUSHONLY" {
         return ScriptFlags::ScriptVerifySigPushOnly.into();
-    } else if flag == 'CLEANSTACK' {
+    } else if flag == "CLEANSTACK" {
         return ScriptFlags::ScriptVerifyCleanStack.into();
-    } else if flag == 'DISCOURAGE_UPGRADABLE_WITNESS' {
+    } else if flag == "DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM" {
         return ScriptFlags::ScriptVerifyDiscourageUpgradeableWitnessProgram.into();
-    } else if flag == 'WITNESS_PUBKEYTYPE' {
+    } else if flag == "WITNESS_PUBKEYTYPE" {
         return ScriptFlags::ScriptVerifyWitnessPubKeyType.into();
-    } else if flag == 'MINIMALIF' {
+    } else if flag == "MINIMALIF" {
         return ScriptFlags::ScriptVerifyMinimalIf.into();
-    } else if flag == 'CHECKSEQUENCEVERIFY' {
+    } else if flag == "CHECKSEQUENCEVERIFY" {
         return ScriptFlags::ScriptVerifyCheckSequenceVerify.into();
     } else {
         return 0;
@@ -145,7 +143,7 @@ pub fn parse_flags(flags: ByteArray) -> u32 {
     let flags_len = split_flags.len();
     while i != flags_len {
         let flag = split_flags.at(i);
-        let flag_value = flag_from_string(byte_array_to_felt252_be(flag));
+        let flag_value = flag_from_string(flag.clone());
         script_flags += flag_value;
         i += 1;
     };
