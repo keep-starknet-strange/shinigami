@@ -107,15 +107,7 @@ pub fn opcode_checksequenceverify<
     )?;
 
     if stack_sequence < 0 {
-        return Result::Err(Error::UNSATISFIED_LOCKTIME);
-    }
-
-    // Redefine 'stack_sequence' to perform bitwise operation easily
-    let stack_sequence_u32: u32 = stack_sequence.try_into().unwrap();
-
-    // Disabled bit set in 'stack_sequence' result as OP_NOP behavior
-    if stack_sequence_u32 & SEQUENCE_LOCKTIME_DISABLED != 0 {
-        return Result::Ok(());
+        return Result::Err(Error::NEGATIVE_LOCKTIME);
     }
 
     let transaction_input = EngineTransactionTrait::<
@@ -127,6 +119,14 @@ pub fn opcode_checksequenceverify<
     // Disabled bit set in 'tx_sequence' result is an error
     if tx_sequence & SEQUENCE_LOCKTIME_DISABLED != 0 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
+    }
+
+    // Redefine 'stack_sequence' to perform bitwise operation easily
+    let stack_sequence_u32: u32 = stack_sequence.try_into().unwrap();
+
+    // Disabled bit set in 'stack_sequence' result as OP_NOP behavior
+    if stack_sequence_u32 & SEQUENCE_LOCKTIME_DISABLED != 0 {
+        return Result::Ok(());
     }
 
     // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
