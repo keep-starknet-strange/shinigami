@@ -8,7 +8,7 @@ use crate::signature::utils::{
 };
 use crate::hash_cache::SegwitSigHashMidstate;
 use shinigami_utils::bytecode::write_var_int;
-use shinigami_utils::hash::double_sha256;
+use shinigami_utils::hash::{sha256_byte_array, double_sha256};
 use crate::opcodes::opcodes::Opcode;
 
 // Calculates the signature hash for specified transaction data and hash type.
@@ -151,3 +151,102 @@ pub fn calc_witness_signature_hash<
 
     double_sha256(@sig_hash_bytes)
 }
+
+// SighashExtFlag represent the sig hash extension flag as defined in BIP-341.
+pub type SighashExtFlag = u8;
+
+// Base extension flag. Sighash digest message doesn't change. Used for Segwit v1 spends (aka
+// tapscript keyspend path).
+pub const BASE_SIGHASH_EXT_FLAG: SighashExtFlag = 0;
+// Tapscript extesion flag. Used for tapscript base leaf version spend as defined in BIP-342.
+pub const TAPSCRIPT_SIGHASH_EXT_FLAG: SighashExtFlag = 1;
+
+// TaprootSighashOptions houses options who modify how the sighash digest is computed.
+#[derive(Drop)]
+pub struct TaprootSighashOptions {
+    // Denotes the current message digest extension being used.
+    ext_flag: SighashExtFlag,
+    // Sha256 of the annix with a compact size lenght prefix.
+    // sha256(compactsize(annex) || annex)
+    annex_hash: @ByteArray,
+    // Hash of the tapscript leaf as defined in BIP-341.
+    // h_tapleaf(version || compactsize(script) || script)
+    tap_leaf_hash: @ByteArray,
+    // Key version as defined in BIP-341. Actually always 0.
+    key_version: u8,
+    // Position of the last opcode separator. Used for BIP-342 sighash message extension.
+    code_sep_pos: u32
+}
+
+#[generate_trait()]
+pub impl TaprootSighashOptionsImpl of TaprootSighashOptionsTrait {
+    fn new_default() -> TaprootSighashOptions {
+        TaprootSighashOptions {
+            ext_flag: BASE_SIGHASH_EXT_FLAG,
+            annex_hash: @"",
+            tap_leaf_hash: @"",
+            key_version: 0,
+            code_sep_pos: 0
+        }
+    }
+
+    fn new_with_annex(annex: @ByteArray) -> TaprootSighashOptions {
+        TaprootSighashOptions {
+            ext_flag: BASE_SIGHASH_EXT_FLAG,
+            annex_hash: @sha256_byte_array(annex),
+            tap_leaf_hash: @"",
+            key_version: 0,
+            code_sep_pos: 0
+        }
+    }
+
+    fn new_with_tapscript_version(
+        code_sep_pos: u32, tap_leaf_hash: @ByteArray
+    ) -> TaprootSighashOptions {
+        TaprootSighashOptions {
+            ext_flag: TAPSCRIPT_SIGHASH_EXT_FLAG,
+            annex_hash: @"",
+            tap_leaf_hash: tap_leaf_hash,
+            key_version: 0,
+            code_sep_pos: code_sep_pos
+        }
+    }
+
+    // Write in msg the sihash message extension defined by the current active flag.
+    fn write_digest_extensions(ref self: TaprootSighashOptions, ref msg: ByteArray) {
+        // Base extension doesn'nt modify the digest at all.
+        if self.ext_flag == BASE_SIGHASH_EXT_FLAG {
+            return;
+            // Tapscript base leaf version extension adds leaf hash, key version and code separator.
+        } else if self.ext_flag == TAPSCRIPT_SIGHASH_EXT_FLAG {
+            msg.append(self.tap_leaf_hash);
+            msg.append_byte(self.key_version);
+            msg.append_word(self.code_sep_pos.into(), 4);
+        }
+        return;
+    }
+}
+
+// Return true if `taproot_sighash` is valid.
+fn is_valid_taproot_sighash(hash_type: u32) -> bool {
+    if hash_type == constants::SIG_HASH_DEFAULT
+        || hash_type == constants::SIG_HASH_ALL
+        || hash_type == constants::SIG_HASH_NONE
+        || hash_type == constants::SIG_HASH_SINGLE
+        || hash_type == 0x81
+        || hash_type == 0x82
+        || hash_type == 0x83 {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+fn calc_taproot_signature_hash() -> u256 {
+    0 // TODO
+}
+
+fn calc_tapscript_signature_hash() -> u256 {
+    0 // TODO
+}
+
