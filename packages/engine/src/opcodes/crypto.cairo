@@ -292,7 +292,7 @@ pub fn opcode_checkmultisig<
                     return Result::Err(err);
                 }
             }
-        } else if err == Error::SIG_HIGH_S {
+        } else if err == Error::SIG_HIGH_S || err == Error::WITNESS_PUBKEYTYPE {
             return Result::Err(err);
         }
     }
