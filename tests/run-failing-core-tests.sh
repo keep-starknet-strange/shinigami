@@ -140,6 +140,7 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         SIG_DER="Execution failed: Signature DER error"
         SIG_HIGH_S="Execution failed: Sig not canonical high S value"
         DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM="Execution failed: Upgradable witness program"
+        WITNESS_PUBKEYTYPE="Execution failed: Non-compressed key post-segwit"
         if echo "$RESULT" | grep -q "$EVAL_FALSE_RES"; then
             SCRIPT_RESULT="EVAL_FALSE"
         elif echo "$RESULT" | grep -q "$EMPTY_STACK_RES"; then
@@ -214,6 +215,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="SIG_HIGH_S"
         elif echo "$RESULT" | grep -q "$DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM"; then
             SCRIPT_RESULT="DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM"
+        elif echo "$RESULT" | grep -q "$WITNESS_PUBKEYTYPE"; then
+            SCRIPT_RESULT="WITNESS_PUBKEYTYPE"
         else
             SCRIPT_RESULT="FAIL"
         fi
