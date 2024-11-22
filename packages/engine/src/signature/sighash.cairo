@@ -229,12 +229,11 @@ pub impl TaprootSighashOptionsImpl of TaprootSighashOptionsTrait {
 
 // Return true if `taproot_sighash` is valid.
 fn is_valid_taproot_sighash(hash_type: u32) -> bool {
-    // Does nothing but it is in BTCD impl.
     if hash_type == constants::SIG_HASH_DEFAULT
         || hash_type == constants::SIG_HASH_ALL
         || hash_type == constants::SIG_HASH_NONE
-        || hash_type == constants::SIG_HASH_SINGLE {}
-    if hash_type == 0x81 || hash_type == 0x82 || hash_type == 0x83 {
+        || hash_type == constants::SIG_HASH_SINGLE
+        || hash_type == 0x81 || hash_type == 0x82 || hash_type == 0x83 {
         return true;
     } else {
         return false;
