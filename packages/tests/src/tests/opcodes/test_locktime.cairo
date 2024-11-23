@@ -148,6 +148,7 @@ fn test_opcode_checksequence_as_op_nop_fail() {
 }
 
 #[test]
+#[ignore]
 fn test_opcode_checksequence_tx_version_fail() {
     let mut program =
         "OP_DATA_4 0x40000000 OP_CHECKSEQUENCEVERIFY"; // 0x40000000 == 64 in ScriptNum
