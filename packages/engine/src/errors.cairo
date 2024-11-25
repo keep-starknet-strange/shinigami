@@ -17,7 +17,6 @@ pub mod Error {
     pub const UNSATISFIED_LOCKTIME: felt252 = 'Unsatisfied locktime';
     pub const SCRIPT_STRICT_MULTISIG: felt252 = 'OP_CHECKMULTISIG invalid dummy';
     pub const FINALIZED_TX_CLTV: felt252 = 'Finalized tx in OP_CLTV';
-    pub const INVALID_TX_VERSION: felt252 = 'Invalid transaction version';
     pub const SCRIPT_INVALID: felt252 = 'Invalid script data';
     pub const INVALID_COINBASE: felt252 = 'Invalid coinbase transaction';
     pub const SIG_NULLFAIL: felt252 = 'Sig non-zero on failed checksig';

@@ -148,7 +148,6 @@ fn test_opcode_checksequence_as_op_nop_fail() {
 }
 
 #[test]
-#[ignore]
 fn test_opcode_checksequence_tx_version_fail() {
     let mut program =
         "OP_DATA_4 0x40000000 OP_CHECKSEQUENCEVERIFY"; // 0x40000000 == 64 in ScriptNum
@@ -157,7 +156,7 @@ fn test_opcode_checksequence_tx_version_fail() {
     // Running with tx v1
     let flags: u32 = ScriptFlags::ScriptVerifyCheckSequenceVerify.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::INVALID_TX_VERSION
+        program, tx, flags, Error::UNSATISFIED_LOCKTIME
     );
     utils::check_dstack_size(ref engine, 1);
 }

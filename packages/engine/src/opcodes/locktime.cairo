@@ -118,6 +118,14 @@ pub fn opcode_checksequenceverify<
         return Result::Ok(());
     }
 
+    // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
+    let version = EngineTransactionTrait::<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >::get_version(engine.transaction);
+    if version < 2 {
+        return Result::Err(Error::UNSATISFIED_LOCKTIME);
+    }
+
     let transaction_input = EngineTransactionTrait::<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >::get_transaction_inputs(engine.transaction)
@@ -127,14 +135,6 @@ pub fn opcode_checksequenceverify<
     // Disabled bit set in 'tx_sequence' result is an error
     if tx_sequence & SEQUENCE_LOCKTIME_DISABLED != 0 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
-    }
-
-    // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
-    let version = EngineTransactionTrait::<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >::get_version(engine.transaction);
-    if version < 2 {
-        return Result::Err(Error::INVALID_TX_VERSION);
     }
 
     // Mask off non-consensus bits before comparisons
