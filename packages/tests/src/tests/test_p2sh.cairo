@@ -66,8 +66,7 @@ fn test_p2sh_transaction_3() {
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
 
-// TODO: Fix this test
-#[ignore]
+
 #[test]
 fn test_p2sh_transaction_4() {
     //https://learnmeabitcoin.com/explorer/tx/cc11ca9e9dc188663c41eb23b15370f68eded56b7ec54dd5bc4f2d2ae93addb2
@@ -84,7 +83,7 @@ fn test_p2sh_transaction_4() {
 
     let utxo_hints = array![prev_out];
 
-    let res = validate_p2sh(@transaction, 0, utxo_hints, 0);
+    let res = validate_p2sh(@transaction, 1, utxo_hints, 0);
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
 

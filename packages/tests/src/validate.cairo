@@ -164,14 +164,21 @@ pub fn validate_p2sh(
     let mut redeem_script_size = 0;
     if scriptSig_bytes[0] == 0 || scriptSig_bytes[0] == 1 || scriptSig_bytes[0] == 2 {
         //OP_0 OP_PushData <Sig> OP_PushData <RedeemScript>  Standard locking scripts
-        redeem_Script_start_index = (2 + scriptSig_bytes[1] + 1).into();
+        if(flags==0){
+            redeem_Script_start_index = (2 + scriptSig_bytes[1] + 1).into();
+        }else if(flags==1){
+
+            redeem_Script_start_index = (1+1 + scriptSig_bytes[1] + 1+ 
+                scriptSig_bytes[(1+1 + scriptSig_bytes[1]).into()]+ 
+                scriptSig_bytes[(1+1 + scriptSig_bytes[1]+scriptSig_bytes[(1+1 + scriptSig_bytes[1]).into()]).into()]+1).into();
+        }
         redeem_script_size = (scriptSig_bytes.len()) - redeem_Script_start_index;
     } else {
         // non-standard locking script containing a mathematical puzzle
         redeem_Script_start_index = find_last_index(scriptSig_bytes.clone());
         redeem_script_size = (scriptSig_bytes.len()) - redeem_Script_start_index;
     }
-
+    
     let redeem_script = sub_byte_array(
         @scriptSig_bytes, ref redeem_Script_start_index, redeem_script_size
     );
@@ -181,11 +188,11 @@ pub fn validate_p2sh(
     if redeem_script.len() > 520 {
         return Result::Err('P2SH: Redeem Script size > 520');
     }
-
+    
     let hashed_redeem_script: ByteArray = ripemd160::ripemd160_hash(
         @sha256_byte_array(@redeem_script)
     )
-        .into();
+    .into();
 
     let script_pubkey = utxo_hints[0].pubkey_script;
     let mut script_hash_start_index = 2;
