@@ -107,14 +107,14 @@ pub fn opcode_checksequenceverify<
     )?;
 
     if stack_sequence < 0 {
-        return Result::Err(Error::UNSATISFIED_LOCKTIME);
+        return Result::Err(Error::NEGATIVE_LOCKTIME);
     }
 
     // Redefine 'stack_sequence' to perform bitwise operation easily
-    let stack_sequence_u32: u32 = stack_sequence.try_into().unwrap();
+    let stack_sequence_u64: u64 = stack_sequence.try_into().unwrap();
 
     // Disabled bit set in 'stack_sequence' result as OP_NOP behavior
-    if stack_sequence_u32 & SEQUENCE_LOCKTIME_DISABLED != 0 {
+    if stack_sequence_u64 & SEQUENCE_LOCKTIME_DISABLED.into() != 0 {
         return Result::Ok(());
     }
 
@@ -123,7 +123,7 @@ pub fn opcode_checksequenceverify<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >::get_version(engine.transaction);
     if version < 2 {
-        return Result::Err(Error::INVALID_TX_VERSION);
+        return Result::Err(Error::UNSATISFIED_LOCKTIME);
     }
 
     let transaction_input = EngineTransactionTrait::<
@@ -142,6 +142,6 @@ pub fn opcode_checksequenceverify<
     verify_locktime(
         (tx_sequence & locktime_mask).into(),
         SEQUENCE_LOCKTIME_IS_SECOND.into(),
-        (stack_sequence_u32 & locktime_mask).into()
+        (stack_sequence_u64 & locktime_mask.into()).try_into().unwrap()
     )
 }

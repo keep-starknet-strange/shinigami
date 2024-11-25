@@ -1,3 +1,1 @@
-[
-["0","CHECKSEQUENCEVERIFY","CHECKSEQUENCEVERIFY","UNSATISFIED_LOCKTIME","CSV fails if stack top bit 1 << 31 is set and the tx version < 2"],
-["0x050000000001","CHECKSEQUENCEVERIFY","CHECKSEQUENCEVERIFY","UNSATISFIED_LOCKTIME","CSV fails if stack top bit 1 << 31 is not set, and tx version < 2"]]
+[]

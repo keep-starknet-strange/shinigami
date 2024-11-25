@@ -146,7 +146,8 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
         PUBKEYTYPE="Execution failed: Unsupported public key type"
         INVALID_SIG_FMT="Execution failed: invalid sig fmt: too short"
         INVALID_HASH_TYPE="Execution failed: invalid hash type"
-        INVALID_LOCKTIME="Execution failed: Unsatisfied locktime"
+        NEGATIVE_LOCKTIME="Execution failed: Stack top is negative"
+        UNSATISFIED_LOCKTIME="Execution failed: Unsatisfied locktime"
         SCRIPT_SIZE="Execution failed: Engine::new: script too large"
         CLEAN_STACK="Execution failed: Non-clean stack after execute"
         MINIMAL_DATA="Execution failed: Opcode represents non-minimal"
@@ -220,8 +221,10 @@ jq -c '.[]' $SCRIPT_TESTS_JSON | {
             SCRIPT_RESULT="PUSH_SIZE"
         elif echo "$RESULT" | grep -q "$OP_COUNT"; then
             SCRIPT_RESULT="OP_COUNT"
-        elif echo "$RESULT" | grep -q "$INVALID_LOCKTIME"; then
+        elif echo "$RESULT" | grep -q "$NEGATIVE_LOCKTIME"; then
             SCRIPT_RESULT="NEGATIVE_LOCKTIME"
+        elif echo "$RESULT" | grep -q "$UNSATISFIED_LOCKTIME"; then
+            SCRIPT_RESULT="UNSATISFIED_LOCKTIME"
         elif echo "$RESULT" | grep -q "$SCRIPT_SIZE"; then
             SCRIPT_RESULT="SCRIPT_SIZE"
         elif echo "$RESULT" | grep -q "$CLEAN_STACK"; then

@@ -156,7 +156,7 @@ fn test_opcode_checksequence_tx_version_fail() {
     // Running with tx v1
     let flags: u32 = ScriptFlags::ScriptVerifyCheckSequenceVerify.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::INVALID_TX_VERSION
+        program, tx, flags, Error::UNSATISFIED_LOCKTIME
     );
     utils::check_dstack_size(ref engine, 1);
 }
