@@ -1,0 +1,16 @@
+[package]
+name = "shinigami_cmds"
+version = "0.1.0"
+edition = "2024_07"
+
+[dependencies]
+shinigami_compiler = { path = "../compiler" }
+shinigami_engine = { path = "../engine" }
+shinigami_tests = { path = "../tests" }
+shinigami_utils = { path = "../utils" }
+
+[dev-dependencies]
+cairo_test.workspace = true
+
+[scripts]
+lint = "scarb fmt"

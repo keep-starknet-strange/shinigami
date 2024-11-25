@@ -1,9 +1,17 @@
-[package]
+[workspace]
+members = ["packages/*"]
+
+[workspace.package]
 name = "shinigami"
+description = "Bitcoin Script Engine"
 version = "0.1.0"
-edition = "2023_11"
+cairo-version = "2.8.2"
+edition = "2024_07"
+readme = "README.md"
+license-file = "LICENSE"
+repository = "https://github.com/keep-starknet-strange/shinigami.git"
 
-# See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest.html
-
-[dependencies]
-starknet = "2.6.3"
+[workspace.dependencies]
+ripemd160 = { git = "https://github.com/j1mbo64/ripemd160_cairo.git" }
+sha1 = { git = "https://github.com/j1mbo64/sha1_cairo.git" }
+cairo_test = "2.8.2"

@@ -1,0 +1,15 @@
+[package]
+name = "shinigami_engine"
+version = "0.1.0"
+edition = "2024_07"
+
+[dependencies]
+ripemd160.workspace = true
+sha1.workspace = true
+shinigami_utils = { path = "../utils" }
+
+[dev-dependencies]
+cairo_test.workspace = true
+
+[scripts]
+lint = "scarb fmt"

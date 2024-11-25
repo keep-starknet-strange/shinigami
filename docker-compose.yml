@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  backend:
+    build:
+      dockerfile: backend/Dockerfile
+      context: .
+    ports:
+      - 8080:8080
+    restart: always
+  frontend:
+    build:
+      dockerfile: frontend/Dockerfile
+      context: .
+    ports:
+      - 3000:3000
+    links:
+      - backend
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
+    volumes:
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/package-lock.json:/app/package-lock.json
+      - ./frontend/public/:/app/public
+      - ./frontend/src:/app/src
