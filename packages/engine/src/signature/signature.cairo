@@ -6,12 +6,13 @@ use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
-use crate::hash_cache::SigHashMidstateTrait;
+use crate::hash_cache::{SigHashMidstateTrait, TaprootSigHashMidState};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
 use crate::errors::Error;
 use shinigami_utils::byte_array::{sub_byte_array};
 use crate::parser;
+use crate::transaction::{EngineTransaction, EngineTransactionInput, EngineTransactionOutput};
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -636,6 +637,11 @@ pub struct TaprootSigVerifier {
     pk_bytes: @ByteArray,
     // specifies how the transaction was hashed for signing
     hash_type: u32,
+    tx: @EngineTransaction,
+    inputIndex: u32,
+    prevOuts: EngineTransactionOutput,
+    // sigCache: SigCache TODO?
+    hashCache: TaprootSigHashMidState,
     // annex data used for taproot verification
     annex: @ByteArray,
 }
@@ -643,7 +649,7 @@ pub struct TaprootSigVerifier {
 pub trait TaprootSigVerifierTrait<T> {
     fn empty() -> TaprootSigVerifier;
     fn new(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
     ) -> Result<TaprootSigVerifier, felt252>;
     fn new_base(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
@@ -674,19 +680,43 @@ pub impl TaprootSigVerifierImpl<
             sig_bytes: @"",
             pk_bytes: @"",
             hash_type: 0,
+            tx: @Default::<EngineTransaction>::default(),
+            inputIndex: 0,
+            prevOuts: Default::<EngineTransactionOutput>::default(),
+            hashCache: Default::<TaprootSigHashMidState>::default(),
             annex: @""
         }
     }
 
     fn new(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
     ) -> Result<TaprootSigVerifier, felt252> {
         let pub_key = parse_schnorr_pub_key(pk_bytes)?;
         let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
 
+        let truc = EngineTransactionOutput {
+            value: engine.amount, publickey_script: engine.scripts[1],
+        };
+
+        let tx: EngineTransaction = EngineTransaction {
+            version: engine.transaction.get_version(),
+            transaction_inputs: engine.transaction.get_transaction_inputs().into(),
+            transaction_outputs: engine.transaction.get_transaction_outputs().into(),
+            locktime: engine.transaction.get_locktime(),
+        };
+
         Result::Ok(
             TaprootSigVerifier {
-                pub_key, sig, sig_bytes: sig_bytes, pk_bytes: pk_bytes, hash_type, annex,
+                pub_key,
+                sig,
+                sig_bytes,
+                pk_bytes,
+                hash_type,
+                tx: @tx,
+                inputIndex: engine.tx_idx,
+                prevOuts: truc,
+                hashCache: engine.hash_cache,
+                annex
             }
         )
     }

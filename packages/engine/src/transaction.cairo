@@ -19,7 +19,7 @@ pub struct EngineTransactionInput {
     pub sequence: u32,
 }
 
-#[derive(Drop, Clone)]
+#[derive(Drop, Clone, Default)]
 pub struct EngineTransactionOutput {
     pub value: i64,
     pub publickey_script: ByteArray,

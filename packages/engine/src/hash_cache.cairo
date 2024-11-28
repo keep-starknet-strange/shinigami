@@ -11,6 +11,15 @@ pub struct SegwitSigHashMidstate {
     pub hash_outputs_v0: u256
 }
 
+#[derive(Clone, Copy, Drop, Default)]
+pub struct TaprootSigHashMidState {
+    pub hash_prevouts_v1: u256,
+    pub hash_sequence_v1: u256,
+    pub hash_outputs_v1: u256,
+    pub hash_input_scripts_v1: u256,
+    pub hash_input_amounts_v1: u256
+}
+
 pub trait SigHashMidstateTrait<
     I,
     O,
@@ -70,7 +79,7 @@ pub trait SigCacheTrait<S> {
 }
 
 // TODO
-#[derive(Drop)]
+#[derive(Drop, Default)]
 pub struct HashCache<T> {}
 
 // HashCache caches the midstate of segwit v0 and v1 sighashes
