@@ -401,16 +401,6 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     }
 }
 
-pub fn parse_schnorr_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
-    if pk_bytes.len() == 0 || pk_bytes.len() != 32 {
-        return Result::Err('Invalid schnorr pubkey length');
-    }
-
-    let mut key_compressed: ByteArray = "\02";
-    key_compressed.append(pk_bytes);
-    return parse_pub_key(@key_compressed);
-}
-
 // Parses a DER-encoded ECDSA signature byte array into a `Signature` struct.
 //
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
@@ -492,27 +482,6 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
     return Result::Ok(Signature { r: r_sig, s: s_sig, y_parity: false, });
 }
 
-pub fn schnorr_parse_signature(sig_bytes: @ByteArray) -> Result<(Signature, u32), felt252> {
-    let sig_bytes_len = sig_bytes.len();
-    let mut hash_type: u32 = 0;
-    if sig_bytes_len == SCHNORR_SIGNATURE_LEN {
-        hash_type = constants::SIG_HASH_DEFAULT;
-    } else if sig_bytes_len == SCHNORR_SIGNATURE_LEN + 1 && sig_bytes[64] != 0 {
-        hash_type = sig_bytes[64].into();
-    } else {
-        return Result::Err('Invalid taproot signature len');
-    }
-    Result::Ok(
-        (
-            Signature {
-                r: u256_from_byte_array_with_offset(sig_bytes, 0, 32),
-                s: u256_from_byte_array_with_offset(sig_bytes, 32, 32),
-                y_parity: false, // Schnorr signatures don't use y_parity
-            },
-            hash_type
-        )
-    )
-}
 
 // Parses the public key and signature byte arrays based on consensus rules.
 // Returning a tuple containing the parsed public key, signature, and hash type.
@@ -625,125 +594,4 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
     @processed_script
 }
 
-#[derive(Drop)]
-pub struct TaprootSigVerifier {
-    // public key as a point on the secp256k1 curve, used to verify the signature
-    pub_key: Secp256k1Point,
-    // ECDSA signature
-    sig: Signature,
-    // raw byte array of the signature
-    sig_bytes: @ByteArray,
-    // raw byte array of the public key
-    pk_bytes: @ByteArray,
-    // specifies how the transaction was hashed for signing
-    hash_type: u32,
-    tx: @EngineTransaction,
-    inputIndex: u32,
-    prevOuts: EngineTransactionOutput,
-    // sigCache: SigCache TODO?
-    hashCache: TaprootSigHashMidState,
-    // annex data used for taproot verification
-    annex: @ByteArray,
-}
-
-pub trait TaprootSigVerifierTrait<T> {
-    fn empty() -> TaprootSigVerifier;
-    fn new(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
-    ) -> Result<TaprootSigVerifier, felt252>;
-    fn new_base(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
-    ) -> Result<TaprootSigVerifier, felt252>;
-    fn verify(ref self: TaprootSigVerifier) -> bool;
-    fn verify_base(ref self: TaprootSigVerifier) -> bool;
-}
-
 pub const SCHNORR_SIGNATURE_LEN: usize = 64;
-
-pub impl TaprootSigVerifierImpl<
-    T,
-    +Drop<T>,
-    I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
-    O,
-    +Drop<O>,
-    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
-    impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
-> of TaprootSigVerifierTrait<T> {
-    fn empty() -> TaprootSigVerifier {
-        TaprootSigVerifier {
-            pub_key: Secp256Trait::<Secp256k1Point>::get_generator_point(),
-            sig: Signature { r: 0, s: 0, y_parity: false },
-            sig_bytes: @"",
-            pk_bytes: @"",
-            hash_type: 0,
-            tx: @Default::<EngineTransaction>::default(),
-            inputIndex: 0,
-            prevOuts: Default::<EngineTransactionOutput>::default(),
-            hashCache: Default::<TaprootSigHashMidState>::default(),
-            annex: @""
-        }
-    }
-
-    fn new(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
-    ) -> Result<TaprootSigVerifier, felt252> {
-        let pub_key = parse_schnorr_pub_key(pk_bytes)?;
-        let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
-
-        let truc = EngineTransactionOutput {
-            value: engine.amount, publickey_script: engine.scripts[1],
-        };
-
-        let tx: EngineTransaction = EngineTransaction {
-            version: engine.transaction.get_version(),
-            transaction_inputs: engine.transaction.get_transaction_inputs().into(),
-            transaction_outputs: engine.transaction.get_transaction_outputs().into(),
-            locktime: engine.transaction.get_locktime(),
-        };
-
-        Result::Ok(
-            TaprootSigVerifier {
-                pub_key,
-                sig,
-                sig_bytes,
-                pk_bytes,
-                hash_type,
-                tx: @tx,
-                inputIndex: engine.tx_idx,
-                prevOuts: truc,
-                hashCache: engine.hash_cache,
-                annex
-            }
-        )
-    }
-
-    fn new_base(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
-    ) -> Result<TaprootSigVerifier, felt252> {
-        let pk_bytes_len = pk_bytes.len();
-        if pk_bytes_len == 0 {
-            return Result::Err('Taproot empty public key');
-        } else if pk_bytes_len == 32 {
-            return Self::new(sig_bytes, pk_bytes, engine.taproot_context.annex);
-        } else {
-            if engine.has_flag(ScriptFlags::ScriptVerifyDiscourageUpgradeablePubkeyType) {
-                return Result::Err('Unknown pub key type');
-            }
-            return Result::Ok(Self::empty());
-        }
-    }
-
-    fn verify(ref self: TaprootSigVerifier) -> bool {
-        // TODO: implement taproot verification
-        return false;
-    }
-
-    fn verify_base(ref self: TaprootSigVerifier) -> bool {
-        // TODO: implement taproot verification
-        return false;
-    }
-}
