@@ -27,7 +27,7 @@ pub struct EngineTransactionOutput {
 
 // TODO: Move these EngineTransaction structs to the testing dir after
 // signature::transaction_procedure cleanup
-#[derive(Drop, Clone, Default)]
+#[derive(Drop, Clone)]
 pub struct EngineTransaction {
     pub version: i32,
     pub transaction_inputs: Array<EngineTransactionInput>,

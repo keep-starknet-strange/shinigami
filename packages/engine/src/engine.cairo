@@ -106,6 +106,7 @@ pub impl EngineImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
+    +Default<T>,
 > of EngineTrait<I, O, T> {
     // Create a new Engine with the given script
     fn new(
@@ -484,6 +485,7 @@ pub impl EngineInternalImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
+    +Default<T>,
 > of EngineInternalTrait<I, O, T> {
     fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252> {
         let script = *(self.scripts[self.script_idx]);
@@ -652,7 +654,7 @@ pub impl EngineInternalImpl<
 
             if witness_len == 1 {
                 TaprootContextImpl::verify_taproot_spend(
-                    @self.witness_program, witness[0], self.transaction, self.tx_idx
+                    ref self, @self.witness_program, witness[0], self.transaction, self.tx_idx
                 )?;
                 self.taproot_context.must_succeed = true;
                 return Result::Ok(());

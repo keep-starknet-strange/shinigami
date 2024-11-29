@@ -2,11 +2,9 @@ use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
     EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
-use starknet::SyscallResultTrait;
-use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
+use starknet::secp256_trait::{Secp256Trait, Signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
-use crate::hash_cache::{SigHashMidstateTrait, TaprootSigHashMidState};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants, signature::parse_pub_key};
 use crate::errors::Error;
@@ -75,54 +73,15 @@ pub struct TaprootSigVerifier<T> {
     annex: @ByteArray,
 }
 
-pub impl TaprootSigVerifierDefault<
-    T,
-    +Drop<T>,
-    +Default<T>,
-    // I,
-    // +Default<I>,
-    // +Drop<I>,
-    // impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
-    // O,
-    // +Drop<O>,
-    // +Default<O>,
-    // impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
-    // impl IEngineTransactionTrait: EngineTransactionTrait<
-    //     T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    // >
-> of Default<TaprootSigVerifier<T>> {
-    fn default() -> TaprootSigVerifier<T> {
-        TaprootSigVerifier {
-            pub_key: Secp256Trait::<Secp256k1Point>::get_generator_point(),
-            sig: Signature { r: 0, s: 0, y_parity: false },
-            sig_bytes: @"",
-            pk_bytes: @"",
-            hash_type: 0,
-            tx: @Default::<T>::default(),
-            inputIndex: 0,
-            prevOuts: Default::<EngineTransactionOutput>::default(),
-            // hashCache: Default::<TaprootSigHashMidState>::default(),
-            annex: @""
-        }
-    }
-}
-
 pub trait TaprootSigVerifierTrait<
-    T,
-    +Drop<T>,
-    +Default<T>,
     I,
-    +Drop<I>,
-    +Default<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
-    +Drop<O>,
-    +Default<O>,
-    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
-    impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+    T,
+    +EngineTransactionInputTrait<I>,
+    +EngineTransactionOutputTrait<O>,
+    +EngineTransactionTrait<T, I, O>
 > {
+    fn empty() -> TaprootSigVerifier<T>;
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
     ) -> Result<TaprootSigVerifier<T>, felt252>;
@@ -139,16 +98,32 @@ pub impl TaprootSigVerifierImpl<
     +Default<T>,
     I,
     +Drop<I>,
-    +Default<I>,
+    // +Default<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
     +Drop<O>,
-    +Default<O>,
+    // +Default<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >
-> of TaprootSigVerifierTrait<T, I, O> {
+> of TaprootSigVerifierTrait<I, O, T> {
+    fn empty() -> TaprootSigVerifier<T> {
+        TaprootSigVerifier {
+            pub_key: Secp256Trait::<Secp256k1Point>::get_generator_point(),
+            sig: Signature { r: 0, s: 0, y_parity: false },
+            sig_bytes: @"",
+            pk_bytes: @"",
+            hash_type: 0,
+            // tx: @Default::<T>::default(),
+            tx: @Default::default(),
+            inputIndex: 0,
+            prevOuts: Default::<EngineTransactionOutput>::default(),
+            // hashCache: Default::<TaprootSigHashMidState>::default(),
+            annex: @""
+        }
+    }
+
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
     ) -> Result<TaprootSigVerifier<T>, felt252> {
@@ -191,7 +166,7 @@ pub impl TaprootSigVerifierImpl<
             if engine.has_flag(ScriptFlags::ScriptVerifyDiscourageUpgradeablePubkeyType) {
                 return Result::Err('Unknown pub key type');
             }
-            return Result::Ok(Default::<TaprootSigVerifier<T>>::default());
+            return Result::Ok(Self::empty());
         }
     }
 
