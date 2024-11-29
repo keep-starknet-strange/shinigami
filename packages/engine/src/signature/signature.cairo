@@ -6,13 +6,12 @@ use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
-use crate::hash_cache::{SigHashMidstateTrait, TaprootSigHashMidState};
+use crate::hash_cache::{SigHashMidstateTrait};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
 use crate::errors::Error;
 use shinigami_utils::byte_array::{sub_byte_array};
 use crate::parser;
-use crate::transaction::{EngineTransaction, EngineTransactionInput, EngineTransactionOutput};
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -106,7 +105,7 @@ impl BaseSegwitSigVerifierImpl<
         let sig_hashes = SigHashMidstateTrait::new(vm.transaction);
         let sig_hash: u256 = sighash::calc_witness_signature_hash::<
             I, O, T
-        >(@self.sub_script, @sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
+        >(@self.sub_script, sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }

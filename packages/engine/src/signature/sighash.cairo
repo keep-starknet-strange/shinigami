@@ -6,10 +6,10 @@ use crate::signature::constants;
 use crate::signature::utils::{
     remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
 };
-use crate::hash_cache::SegwitSigHashMidstate;
 use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::hash::{sha256_byte_array, double_sha256};
 use crate::opcodes::opcodes::Opcode;
+use crate::hash_cache::{TxSigHashes, SegwitSigHashMidstate};
 
 // Calculates the signature hash for specified transaction data and hash type.
 pub fn calc_signature_hash<
@@ -66,14 +66,20 @@ pub fn calc_witness_signature_hash<
     +Drop<T>
 >(
     sub_script: @ByteArray,
-    sig_hashes: @SegwitSigHashMidstate,
+    sig_hashes_enum: TxSigHashes,
     hash_type: u32,
     transaction: @T,
     tx_idx: u32,
     amount: i64
 ) -> u256 {
-    // TODO: Bounds check?
+    let mut sig_hashes: @SegwitSigHashMidstate = Default::default();
+    match sig_hashes_enum {
+        TxSigHashes::Segwit(segwit_midstate) => { sig_hashes = segwit_midstate; },
+        // Handle error ?
+        _ => { return 0; }
+    }
 
+    // TODO: Bounds check?
     let mut sig_hash_bytes: ByteArray = "";
     sig_hash_bytes.append_word_rev(transaction.get_version().into(), 4);
 

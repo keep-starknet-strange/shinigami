@@ -5,12 +5,9 @@ use crate::transaction::{
 use starknet::secp256_trait::{Secp256Trait, Signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
+use crate::signature::{constants, signature::parse_pub_key};
+use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
-use crate::signature::{sighash, constants, signature::parse_pub_key};
-use crate::errors::Error;
-use shinigami_utils::byte_array::{sub_byte_array};
-use crate::parser;
-use crate::transaction::{EngineTransaction, EngineTransactionInput, EngineTransactionOutput};
 
 pub const SCHNORR_SIGNATURE_LEN: usize = 64;
 
@@ -115,7 +112,6 @@ pub impl TaprootSigVerifierImpl<
             sig_bytes: @"",
             pk_bytes: @"",
             hash_type: 0,
-            // tx: @Default::<T>::default(),
             tx: @Default::default(),
             inputIndex: 0,
             prevOuts: Default::<EngineTransactionOutput>::default(),
@@ -130,13 +126,11 @@ pub impl TaprootSigVerifierImpl<
         let pub_key = parse_schnorr_pub_key(pk_bytes)?;
         let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
 
-        // let prevOutput = EngineTransactionOutput {
-        //     value: engine.amount, publickey_script: engine.scripts[1],
-        // };
-
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
         };
+
+        // let sig_hashes = SigHashMidstateTrait::new(transaction);
 
         Result::Ok(
             TaprootSigVerifier {

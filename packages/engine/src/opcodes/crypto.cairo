@@ -8,7 +8,7 @@ use crate::signature::signature;
 use crate::signature::sighash;
 use crate::signature::{
     signature::{BaseSigVerifierTrait, BaseSegwitSigVerifierTrait},
-    taproot_signature::{TaprootSigVerifierTrait, TaprootSigVerifierImpl, TaprootSigVerifier}
+    taproot_signature::{TaprootSigVerifierTrait, TaprootSigVerifierImpl}
 };
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
@@ -263,7 +263,7 @@ pub fn opcode_checkmultisig<
             let sig_hashes = SigHashMidstateTrait::new(transaction);
             sig_hash =
                 sighash::calc_witness_signature_hash(
-                    @script, @sig_hashes, hash_type, transaction, tx_idx, amount
+                    @script, sig_hashes, hash_type, transaction, tx_idx, amount
                 );
         } else {
             sig_hash = sighash::calc_signature_hash(@script, hash_type, transaction, tx_idx);
