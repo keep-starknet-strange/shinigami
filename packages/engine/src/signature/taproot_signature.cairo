@@ -5,7 +5,8 @@ use crate::transaction::{
 use starknet::secp256_trait::{Secp256Trait, Signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
-use crate::signature::{constants, signature::parse_pub_key, sighash};
+use crate::signature::{constants, signature::parse_pub_key};
+use crate::signature::{sighash, sighash::{TaprootSighashOptions, TaprootSighashOptionsTrait}};
 use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::hash_cache::{TxSigHashes};
@@ -164,9 +165,14 @@ pub impl TaprootSigVerifierImpl<
     }
 
     fn verify(self: TaprootSigVerifier<T>) -> bool {
+        let mut opts = TaprootSighashOptionsTrait::new_with_annex(self.annex);
+        // if self.annex.len() != 0 {
+        //     opts.append(TaprootSighashOptionsTrait::new_with_annex(self.annex));
+        // }
+
         let sig_hash: u256 = sighash::calc_taproot_signature_hash::<
             T
-        >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts);
+        >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts);
 
         is_valid_schnorr_signature(sig_hash, self.sig, self.pub_key)
     }
