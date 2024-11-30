@@ -6,7 +6,7 @@ use starknet::secp256_trait::{Secp256Trait, Signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
 use crate::signature::{constants, signature::parse_pub_key};
-use crate::signature::{sighash, sighash::{TaprootSighashOptions, TaprootSighashOptionsTrait}};
+use crate::signature::{sighash, sighash::{TaprootSighashOptionsTrait}};
 use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::hash_cache::{TxSigHashes};
@@ -87,7 +87,7 @@ pub trait TaprootSigVerifierTrait<
     fn new_base(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
     ) -> Result<TaprootSigVerifier<T>, felt252>;
-    fn verify(self: TaprootSigVerifier<T>) -> bool;
+    fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252>;
     fn verify_base(ref self: TaprootSigVerifier<T>) -> bool;
 }
 
@@ -164,17 +164,14 @@ pub impl TaprootSigVerifierImpl<
         }
     }
 
-    fn verify(self: TaprootSigVerifier<T>) -> bool {
+    fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252> {
         let mut opts = TaprootSighashOptionsTrait::new_with_annex(self.annex);
-        // if self.annex.len() != 0 {
-        //     opts.append(TaprootSighashOptionsTrait::new_with_annex(self.annex));
-        // }
-
-        let sig_hash: u256 = sighash::calc_taproot_signature_hash::<
+        let sig_hash = sighash::calc_taproot_signature_hash::<
             T
-        >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts);
+        >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts)?;
 
-        is_valid_schnorr_signature(sig_hash, self.sig, self.pub_key)
+        is_valid_schnorr_signature(sig_hash, self.sig, self.pub_key)?;
+        Result::Ok(())
     }
 
     fn verify_base(ref self: TaprootSigVerifier<T>) -> bool {
@@ -187,6 +184,6 @@ pub fn is_valid_schnorr_signature<
     Secp256Point, +Drop<Secp256Point>, impl Secp256Impl: Secp256Trait<Secp256Point>,
 >(
     msg_hash: u256, sig: Signature, public_key: Secp256Point
-) -> bool {
-    return false;
+) -> Result<(), felt252> {
+    return Result::Ok(());
 }

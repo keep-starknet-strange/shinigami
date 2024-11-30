@@ -167,7 +167,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
             T
         >::new(raw_sig, witness_program, annex, ref engine)?;
         let is_valid = TaprootSigVerifierImpl::<T>::verify(verifier);
-        if !is_valid {
+        if is_valid.is_err() {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
         }
         Result::Ok(())

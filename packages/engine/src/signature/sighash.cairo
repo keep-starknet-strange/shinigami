@@ -12,6 +12,7 @@ use shinigami_utils::hash::{sha256_byte_array, simple_sha256, double_sha256};
 use crate::opcodes::opcodes::Opcode;
 use crate::hash_cache::{TxSigHashes, SegwitSigHashMidstate, TaprootSigHashMidState};
 use crate::hash_tag::{HashTag, tagged_hash};
+use crate::errors::Error;
 
 // Calculates the signature hash for specified transaction data and hash type.
 pub fn calc_signature_hash<
@@ -269,18 +270,16 @@ pub fn calc_taproot_signature_hash<
     input_idx: u32,
     prev_output: EngineTransactionOutput,
     ref opts: TaprootSighashOptions,
-) -> u256 {
+) -> Result<u256, felt252> {
     //check options
 
     if !is_valid_taproot_sighash(h_type) {
-        // Handle error ? ("invalid taproot sighash type: %v", hType)
-        return 0;
+        return Result::Err(Error::TAPROOT_INVALID_SIGHASH_TYPE);
     }
 
     // Check if the input index is valid
     if input_idx > (transaction.get_transaction_inputs().len() - 1) {
-        // Handle error ? ("idx %d but %d txins", idx, len(tx.TxIn))
-        return 0;
+        return Result::Err(Error::INVALID_INDEX_INPUTS);
     }
 
     let mut sig_msg: ByteArray = Default::default();
@@ -293,9 +292,9 @@ pub fn calc_taproot_signature_hash<
     let mut sig_hashes: @TaprootSigHashMidState = Default::default();
     match sig_hashes_enum {
         TxSigHashes::Taproot(midstate) => { sig_hashes = midstate; },
-        // Handle error ?
-        _ => { return 0; }
+        _ => { return Result::Err(Error::TAPROOT_INVALID_SIGHASH_MIDSTATE); }
     }
+
     if (h_type & constants::SIG_HASH_ANYONECANPAY) != constants::SIG_HASH_ANYONECANPAY {
         let hash_prevouts_v1: u256 = *sig_hashes.hash_prevouts_v1;
         sig_msg.append_word(hash_prevouts_v1.high.into(), 16);
@@ -356,13 +355,12 @@ pub fn calc_taproot_signature_hash<
     // If sighash single, include the output information
     if (h_type & constants::SIG_HASH_MASK) == constants::SIG_HASH_SINGLE {
         if input_idx >= transaction.get_transaction_outputs().len() {
-            // return Result::Err('Invalid sighash type for input');
-            return 0;
+            return Result::Err(Error::INVALID_INDEX_INPUTS);
         }
         let output = transaction.get_transaction_outputs().at(input_idx);
 
         // Serialize the output
-        let mut output_bytes: ByteArray = "";
+        let mut output_bytes: ByteArray = Default::default();
         output_bytes.append_word_rev(output.get_value().into(), 8);
         write_var_int(ref output_bytes, output.get_publickey_script().len().into());
         output_bytes.append(output.get_publickey_script());
@@ -377,7 +375,7 @@ pub fn calc_taproot_signature_hash<
     opts.write_digest_extensions(ref sig_msg);
 
     // The final sighash is computed as: hash_TagSigHash(0x00 || sigMsg).
-    tagged_hash(HashTag::TapSighash, @sig_msg)
+    Result::Ok(tagged_hash(HashTag::TapSighash, @sig_msg))
 }
 
 fn calc_tapscript_signature_hash() -> u256 {

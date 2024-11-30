@@ -120,11 +120,10 @@ pub fn opcode_checksig<
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
-        // TODO: Errors or false?
-        let mut verifier = TaprootSigVerifierTrait::<
+        let verifier = TaprootSigVerifierTrait::<
             I, O, T
         >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
-        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier);
+        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier).is_ok();
     }
 
     if !is_valid && @engine.use_taproot == @true {
@@ -422,9 +421,7 @@ pub fn opcode_checksigadd<
     let mut verifier = TaprootSigVerifierTrait::<
         I, O, T
     >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
-    if !(TaprootSigVerifierTrait::<I, O, T>::verify(verifier)) {
-        return Result::Err(Error::TAPROOT_INVALID_SIG);
-    }
+    TaprootSigVerifierTrait::<I, O, T>::verify(verifier)?;
 
     engine.dstack.push_int(n + 1);
     Result::Ok(())
