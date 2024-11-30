@@ -6,6 +6,7 @@ use crate::signature::constants;
 use crate::signature::utils::{
     remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
 };
+use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::hash::{sha256_byte_array, double_sha256};
 use crate::opcodes::opcodes::Opcode;
@@ -248,9 +249,29 @@ fn is_valid_taproot_sighash(hash_type: u32) -> bool {
     }
 }
 
-fn calc_taproot_signature_hash() -> u256 {
-    0 // TODO
+pub fn calc_taproot_signature_hash<
+    T,
+    +Drop<T>,
+    I,
+    +Drop<I>,
+    O,
+    +Drop<O>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
+    impl IEngineTransactionTrait: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+    >
+>(
+    sigHashes: TxSigHashes,
+    h_type: u32,
+    transaction: @T,
+    idx: u32,
+    prev_output: EngineTransactionOutput,
+    // sig_hash_opts: TaprootSigHashOpts
+) -> u256 {
+    1
 }
+
 
 fn calc_tapscript_signature_hash() -> u256 {
     0 // TODO

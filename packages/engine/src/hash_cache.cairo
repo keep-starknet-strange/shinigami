@@ -6,6 +6,7 @@ use shinigami_utils::{
 };
 use core::sha256::compute_sha256_byte_array;
 use crate::signature::utils::is_witness_v1_pub_key_hash;
+use crate::engine::Engine;
 
 #[derive(Clone, Copy, Drop, Default)]
 pub struct SegwitSigHashMidstate {
@@ -31,7 +32,7 @@ pub trait SigHashMidstateTrait<
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>
 > {
-    fn new(transaction: @T) -> TxSigHashes;
+    fn new(transaction: @T, engine: @Engine<T>) -> TxSigHashes;
 }
 
 
@@ -58,7 +59,7 @@ pub impl SigHashMidstateImpl<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput
     >
 > of SigHashMidstateTrait<I, O, T> {
-    fn new(transaction: @T) -> TxSigHashes {
+    fn new(transaction: @T, engine: @Engine<T>) -> TxSigHashes {
         let mut hasV0Inputs = false;
         let mut hasV1Inputs = false;
 

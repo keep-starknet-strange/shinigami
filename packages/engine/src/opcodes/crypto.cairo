@@ -124,7 +124,7 @@ pub fn opcode_checksig<
         let mut verifier = TaprootSigVerifierTrait::<
             I, O, T
         >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
-        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier);
+        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier);
     }
 
     if !is_valid && @engine.use_taproot == @true {
@@ -260,7 +260,7 @@ pub fn opcode_checkmultisig<
         let amount = engine.amount;
 
         if engine.is_witness_active(BASE_SEGWIT_VERSION) {
-            let sig_hashes = SigHashMidstateTrait::new(transaction);
+            let sig_hashes = SigHashMidstateTrait::new(transaction, @engine);
             sig_hash =
                 sighash::calc_witness_signature_hash(
                     @script, sig_hashes, hash_type, transaction, tx_idx, amount
@@ -422,7 +422,7 @@ pub fn opcode_checksigadd<
     let mut verifier = TaprootSigVerifierTrait::<
         I, O, T
     >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
-    if !(TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier)) {
+    if !(TaprootSigVerifierTrait::<I, O, T>::verify(verifier)) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
 

@@ -5,10 +5,11 @@ use crate::transaction::{
 use starknet::secp256_trait::{Secp256Trait, Signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
-use crate::signature::{constants, signature::parse_pub_key};
+use crate::signature::{constants, signature::parse_pub_key, sighash};
 use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::hash_cache::{TxSigHashes};
+use crate::hash_cache::{SigHashMidstateTrait};
 
 pub const SCHNORR_SIGNATURE_LEN: usize = 64;
 
@@ -85,7 +86,7 @@ pub trait TaprootSigVerifierTrait<
     fn new_base(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
     ) -> Result<TaprootSigVerifier<T>, felt252>;
-    fn verify(ref self: TaprootSigVerifier<T>) -> bool;
+    fn verify(self: TaprootSigVerifier<T>) -> bool;
     fn verify_base(ref self: TaprootSigVerifier<T>) -> bool;
 }
 
@@ -125,12 +126,10 @@ pub impl TaprootSigVerifierImpl<
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let pub_key = parse_schnorr_pub_key(pk_bytes)?;
         let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
-
+        let sig_hashes = SigHashMidstateTrait::new(engine.transaction, @engine);
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
         };
-
-        // let sig_hashes = SigHashMidstateTrait::new(transaction);
 
         Result::Ok(
             TaprootSigVerifier {
@@ -142,8 +141,7 @@ pub impl TaprootSigVerifierImpl<
                 tx: engine.transaction,
                 inputIndex: engine.tx_idx,
                 prevOuts: prevOutput,
-                // hashCache: engine.hash_cache,
-                hashCache: Default::default(),
+                hashCache: sig_hashes,
                 annex
             }
         )
@@ -165,13 +163,24 @@ pub impl TaprootSigVerifierImpl<
         }
     }
 
-    fn verify(ref self: TaprootSigVerifier<T>) -> bool {
-        // TODO: implement taproot verification
-        return false;
+    fn verify(self: TaprootSigVerifier<T>) -> bool {
+        let sig_hash: u256 = sighash::calc_taproot_signature_hash::<
+            T
+        >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts);
+
+        is_valid_schnorr_signature(sig_hash, self.sig, self.pub_key)
     }
 
     fn verify_base(ref self: TaprootSigVerifier<T>) -> bool {
         // TODO: implement taproot verification
         return false;
     }
+}
+
+pub fn is_valid_schnorr_signature<
+    Secp256Point, +Drop<Secp256Point>, impl Secp256Impl: Secp256Trait<Secp256Point>,
+>(
+    msg_hash: u256, sig: Signature, public_key: Secp256Point
+) -> bool {
+    return false;
 }
