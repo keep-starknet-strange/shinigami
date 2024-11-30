@@ -66,6 +66,7 @@ pub struct Engine<T> {
     pub last_code_sep: u32,
     // Count number of non-push opcodes
     pub num_ops: u32,
+    //
     pub hash_cache: @HashCache<T>,
 }
 

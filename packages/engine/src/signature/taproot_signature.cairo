@@ -8,6 +8,7 @@ use crate::flags::ScriptFlags;
 use crate::signature::{constants, signature::parse_pub_key};
 use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
+use crate::hash_cache::{TxSigHashes};
 
 pub const SCHNORR_SIGNATURE_LEN: usize = 64;
 
@@ -43,7 +44,6 @@ pub fn schnorr_parse_signature(sig_bytes: @ByteArray) -> Result<(Signature, u32)
     )
 }
 
-
 #[derive(Drop)]
 pub struct TaprootSigVerifier<T> {
     // public key as a point on the secp256k1 curve, used to verify the signature
@@ -65,7 +65,7 @@ pub struct TaprootSigVerifier<T> {
     //
     // sigCache: SigCache TODO?
     //
-    // hashCache: TaprootSigHashMidState,
+    hashCache: TxSigHashes,
     // annex data used for taproot verification
     annex: @ByteArray,
 }
@@ -115,7 +115,7 @@ pub impl TaprootSigVerifierImpl<
             tx: @Default::default(),
             inputIndex: 0,
             prevOuts: Default::<EngineTransactionOutput>::default(),
-            // hashCache: Default::<TaprootSigHashMidState>::default(),
+            hashCache: Default::default(),
             annex: @""
         }
     }
@@ -143,6 +143,7 @@ pub impl TaprootSigVerifierImpl<
                 inputIndex: engine.tx_idx,
                 prevOuts: prevOutput,
                 // hashCache: engine.hash_cache,
+                hashCache: Default::default(),
                 annex
             }
         )

@@ -41,6 +41,8 @@ pub const HASH_TYPE_LEN: usize = 1;
 //including the version byte and the public key hash, ensuring correct data formatting and inclusion
 //in SegWit transactions.
 pub const WITNESS_V0_PUB_KEY_HASH_LEN: usize = 22;
+//
+pub const WITNESS_V1_PUB_KEY_HASH_LEN: usize = 34;
 
 pub const MAX_U128: u128 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 pub const MAX_U32: u32 = 0xFFFFFFFF;
