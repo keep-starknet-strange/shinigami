@@ -4,7 +4,6 @@ use crate::transaction::{
 use shinigami_utils::{bytecode::{write_var_int}, hash::{hash_to_u256, sha256_u256, simple_sha256},};
 use core::sha256::compute_sha256_byte_array;
 use crate::signature::utils::is_witness_v1_pub_key_hash;
-use crate::engine::Engine;
 use core::dict::Felt252Dict;
 
 // SegwitSigHashMidstate is the sighash midstate used in the base segwit
@@ -35,7 +34,7 @@ pub trait SigHashMidstateTrait<
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>
 > {
-    fn new(transaction: @T, engine: @Engine<T>) -> TxSigHashes;
+    fn new(transaction: @T) -> TxSigHashes;
     fn calc_hash_inputs_amount(transaction: @T) -> u256;
     fn calc_hash_input_scripts(transaction: @T) -> u256;
 }
@@ -58,7 +57,7 @@ pub impl SigHashMidstateImpl<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput
     >
 > of SigHashMidstateTrait<I, O, T> {
-    fn new(transaction: @T, engine: @Engine<T>) -> TxSigHashes {
+    fn new(transaction: @T) -> TxSigHashes {
         let mut hasV0Inputs = false;
         let mut hasV1Inputs = false;
 

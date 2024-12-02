@@ -125,7 +125,7 @@ pub impl TaprootSigVerifierImpl<
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let pub_key = parse_schnorr_pub_key(pk_bytes)?;
         let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
-        let sig_hashes = SigHashMidstateTrait::new(engine.transaction, @engine);
+        let sig_hashes = SigHashMidstateTrait::new(engine.transaction);
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
         };
