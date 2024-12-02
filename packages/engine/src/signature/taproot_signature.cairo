@@ -97,11 +97,9 @@ pub impl TaprootSigVerifierImpl<
     +Default<T>,
     I,
     +Drop<I>,
-    // +Default<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
     +Drop<O>,
-    // +Default<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
