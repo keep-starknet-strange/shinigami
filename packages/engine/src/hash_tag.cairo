@@ -1,5 +1,5 @@
 use shinigami_utils::bytecode::hex_to_bytecode;
-use shinigami_utils::hash::sha256_byte_array;
+use shinigami_utils::hash::{simple_sha256, sha256_byte_array};
 
 #[derive(Drop)]
 pub enum HashTag {
@@ -29,7 +29,7 @@ pub enum HashTag {
 // TaggedHash implements the tagged hash scheme described in BIP-340. We use
 // sha-256 to bind a message hash to a specific context using a tag:
 // sha256(sha256(tag) || sha256(tag) || msg).
-pub fn tagged_hash(tag: HashTag, msg: @ByteArray) -> ByteArray {
+pub fn tagged_hash(tag: HashTag, msg: @ByteArray) -> u256 {
     // Check if we have precomputed tag to avoid an extra sha256
     let mut sha_tag: ByteArray = "";
     match tag {
@@ -82,5 +82,5 @@ pub fn tagged_hash(tag: HashTag, msg: @ByteArray) -> ByteArray {
     let mut h: ByteArray = sha_tag.clone();
     h.append(@sha_tag);
     h.append(msg);
-    return sha256_byte_array(@h);
+    return simple_sha256(@h);
 }

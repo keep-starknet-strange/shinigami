@@ -6,8 +6,9 @@ use crate::stack::ScriptStackTrait;
 use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
-use crate::signature::signature::{
-    BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait
+use crate::signature::{
+    signature::{BaseSigVerifierTrait, BaseSegwitSigVerifierTrait},
+    taproot_signature::{TaprootSigVerifierTrait, TaprootSigVerifierImpl}
 };
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
@@ -52,6 +53,7 @@ pub fn opcode_ripemd160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt25
 pub fn opcode_checksig<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -118,11 +120,10 @@ pub fn opcode_checksig<
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
-        // TODO: Errors or false?
-        let mut verifier = TaprootSigVerifierTrait::<
-            T
+        let verifier = TaprootSigVerifierTrait::<
+            I, O, T
         >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
-        is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
+        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier).is_ok();
     }
 
     if !is_valid && @engine.use_taproot == @true {
@@ -139,11 +140,12 @@ pub fn opcode_checksig<
 pub fn opcode_checkmultisig<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     O,
     +Drop<O>,
+    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
@@ -260,7 +262,7 @@ pub fn opcode_checkmultisig<
             let sig_hashes = SigHashMidstateTrait::new(transaction);
             sig_hash =
                 sighash::calc_witness_signature_hash(
-                    @script, @sig_hashes, hash_type, transaction, tx_idx, amount
+                    @script, sig_hashes, hash_type, transaction, tx_idx, amount
                 );
         } else {
             sig_hash = sighash::calc_signature_hash(@script, hash_type, transaction, tx_idx);
@@ -311,6 +313,7 @@ pub fn opcode_codeseparator<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >,
     +Drop<T>,
+    +Default<T>,
     +Drop<I>,
     +Drop<O>,
 >(
@@ -332,6 +335,7 @@ pub fn opcode_codeseparator<
 pub fn opcode_checksigverify<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -352,6 +356,7 @@ pub fn opcode_checksigverify<
 pub fn opcode_checkmultisigverify<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -386,6 +391,7 @@ pub fn opcode_checksigadd<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
     >,
     +Drop<T>,
+    +Default<T>,
     +Drop<I>,
     +Drop<O>,
 >(
@@ -413,11 +419,9 @@ pub fn opcode_checksigadd<
     }
 
     let mut verifier = TaprootSigVerifierTrait::<
-        T
-    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
-    if !(TaprootSigVerifierTrait::<T>::verify(ref verifier)) {
-        return Result::Err(Error::TAPROOT_INVALID_SIG);
-    }
+        I, O, T
+    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
+    TaprootSigVerifierTrait::<I, O, T>::verify(verifier)?;
 
     engine.dstack.push_int(n + 1);
     Result::Ok(())

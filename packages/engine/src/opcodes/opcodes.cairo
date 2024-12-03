@@ -201,6 +201,7 @@ pub mod Opcode {
     pub fn execute<
         T,
         +Drop<T>,
+        +Default<T>,
         I,
         +Drop<I>,
         impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,

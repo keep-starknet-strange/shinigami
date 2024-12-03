@@ -25,6 +25,7 @@ pub use scriptnum::ScriptNum;
 pub mod flags;
 pub mod signature {
     pub mod signature;
+    pub mod taproot_signature;
     pub mod sighash;
     pub mod constants;
     pub mod utils;

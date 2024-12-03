@@ -5,13 +5,13 @@ use shinigami_utils::bit_shifts::shr;
 use shinigami_utils::hash::double_sha256;
 
 // Tracks previous transaction outputs
-#[derive(Drop, Copy)]
+#[derive(Drop, Copy, Default)]
 pub struct EngineOutPoint {
     pub txid: u256,
     pub vout: u32,
 }
 
-#[derive(Drop, Clone)]
+#[derive(Drop, Clone, Default)]
 pub struct EngineTransactionInput {
     pub previous_outpoint: EngineOutPoint,
     pub signature_script: ByteArray,
@@ -19,7 +19,7 @@ pub struct EngineTransactionInput {
     pub sequence: u32,
 }
 
-#[derive(Drop, Clone)]
+#[derive(Drop, Clone, Default)]
 pub struct EngineTransactionOutput {
     pub value: i64,
     pub publickey_script: ByteArray,

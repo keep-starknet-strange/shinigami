@@ -41,7 +41,7 @@ pub struct Engine<T> {
     // Amount of the input being spent
     pub amount: i64,
     // The script to execute
-    scripts: Array<@ByteArray>,
+    pub scripts: Array<@ByteArray>,
     // Index of the current script being executed
     script_idx: usize,
     // Program counter within the current script
@@ -66,6 +66,8 @@ pub struct Engine<T> {
     pub last_code_sep: u32,
     // Count number of non-push opcodes
     pub num_ops: u32,
+    //
+    pub hash_cache: @HashCache<T>,
 }
 
 // TODO: SigCache
@@ -105,6 +107,7 @@ pub impl EngineImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
+    +Default<T>,
 > of EngineTrait<I, O, T> {
     // Create a new Engine with the given script
     fn new(
@@ -146,6 +149,7 @@ pub impl EngineImpl<
             saved_first_stack: array![].span(),
             last_code_sep: 0,
             num_ops: 0,
+            hash_cache: hash_cache,
         };
 
         if engine.has_flag(ScriptFlags::ScriptVerifyCleanStack)
@@ -482,6 +486,7 @@ pub impl EngineInternalImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
+    +Default<T>,
 > of EngineInternalTrait<I, O, T> {
     fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252> {
         let script = *(self.scripts[self.script_idx]);
@@ -650,7 +655,7 @@ pub impl EngineInternalImpl<
 
             if witness_len == 1 {
                 TaprootContextImpl::verify_taproot_spend(
-                    @self.witness_program, witness[0], self.transaction, self.tx_idx
+                    ref self, @self.witness_program, witness[0], self.transaction, self.tx_idx
                 )?;
                 self.taproot_context.must_succeed = true;
                 return Result::Ok(());
