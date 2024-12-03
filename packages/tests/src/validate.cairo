@@ -164,7 +164,23 @@ pub fn validate_p2sh(
     let mut redeem_script_size = 0;
     if scriptSig_bytes[0] == 0 || scriptSig_bytes[0] == 1 || scriptSig_bytes[0] == 2 {
         //OP_0 OP_PushData <Sig> OP_PushData <RedeemScript>  Standard locking scripts
-        redeem_Script_start_index = (2 + scriptSig_bytes[1] + 1).into();
+        if (flags == 0) {
+            redeem_Script_start_index = (2 + scriptSig_bytes[1] + 1).into();
+        } else if (flags == 1) {
+            redeem_Script_start_index =
+                (1
+                    + 1
+                    + scriptSig_bytes[1]
+                    + 1
+                    + scriptSig_bytes[(1 + 1 + scriptSig_bytes[1]).into()]
+                    + scriptSig_bytes[(1
+                        + 1
+                        + scriptSig_bytes[1]
+                        + scriptSig_bytes[(1 + 1 + scriptSig_bytes[1]).into()])
+                        .into()]
+                    + 1)
+                .into();
+        }
         redeem_script_size = (scriptSig_bytes.len()) - redeem_Script_start_index;
     } else {
         // non-standard locking script containing a mathematical puzzle
