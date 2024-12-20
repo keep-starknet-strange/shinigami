@@ -34,7 +34,7 @@ pub trait SigHashMidstateTrait<
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>
 > {
-    fn new(transaction: @T) -> TxSigHashes;
+    fn new(transaction: @T, tx_idx: u32) -> TxSigHashes;
     fn calc_hash_inputs_amount(transaction: @T) -> u256;
     fn calc_hash_input_scripts(transaction: @T) -> u256;
 }
@@ -57,11 +57,11 @@ pub impl SigHashMidstateImpl<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput
     >
 > of SigHashMidstateTrait<I, O, T> {
-    fn new(transaction: @T) -> TxSigHashes {
+    fn new(transaction: @T, tx_idx: u32) -> TxSigHashes {
         let mut hasV0Inputs = false;
         let mut hasV1Inputs = false;
 
-        let prevout: ByteArray = Default::default();
+        let prevout: ByteArray = transaction.get_input_utxo(tx_idx).pubkey_script;
         for _ in transaction
             .get_transaction_inputs() {
                 if is_witness_v1_pub_key_hash(@prevout) {
@@ -124,22 +124,26 @@ pub impl SigHashMidstateImpl<
         }
     }
 
+    // calcHashInputAmounts computes a hash digest of the input amounts of all
+    // inputs referenced in the passed transaction.
     fn calc_hash_inputs_amount(transaction: @T) -> u256 {
         let mut buffer: ByteArray = "";
-        let inputs = transaction.get_transaction_inputs();
-
-        // TODO: need prevoutput amount from cache;
-        for _input in inputs {};
-
+        for utxo in transaction
+            .get_transaction_utxos() {
+                buffer.append_word_rev(utxo.amount.into(), 8);
+            };
         return simple_sha256(@buffer);
     }
 
+    // calcHashInputScript computes the hash digest of all the previous input scripts
+    // referenced by the passed transaction.
     fn calc_hash_input_scripts(transaction: @T) -> u256 {
         let mut buffer: ByteArray = "";
-        let inputs = transaction.get_transaction_inputs();
-
-        // TODO need prevoutput script from cache
-        for _input in inputs {};
+        for utxo in transaction
+            .get_transaction_utxos() {
+                write_var_int(ref buffer, utxo.pubkey_script.len().into());
+                buffer.append(@utxo.pubkey_script);
+            };
 
         return simple_sha256(@buffer);
     }

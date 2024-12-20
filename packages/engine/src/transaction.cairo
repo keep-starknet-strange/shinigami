@@ -34,7 +34,7 @@ pub struct EngineTransaction {
     pub transaction_inputs: Array<EngineTransactionInput>,
     pub transaction_outputs: Array<EngineTransactionOutput>,
     pub locktime: u32,
-    pub utxos: Array<UTXO>
+    pub utxos: Array<UTXO> //Option for coinbase ?
 }
 
 pub trait EngineInternalTransactionTrait {
@@ -509,7 +509,8 @@ pub trait EngineTransactionTrait<
     fn get_transaction_inputs(self: @T) -> Span<I>;
     fn get_transaction_outputs(self: @T) -> Span<O>;
     fn get_locktime(self: @T) -> u32;
-    fn get_utxos(self: @T) -> Array<UTXO>; //Span?
+    fn get_transaction_utxos(self: @T) -> Array<UTXO>; //Span?
+    fn get_input_utxo(self: @T, input_index: u32) -> UTXO;
 }
 
 pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
@@ -535,7 +536,11 @@ pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
         *self.locktime
     }
 
-    fn get_utxos(self: @EngineTransaction) -> Array<UTXO> {
+    fn get_transaction_utxos(self: @EngineTransaction) -> Array<UTXO> {
         self.utxos.clone()
+    }
+
+    fn get_input_utxo(self: @EngineTransaction, input_index: u32) -> UTXO {
+        self.get_transaction_utxos().at(input_index).clone()
     }
 }
