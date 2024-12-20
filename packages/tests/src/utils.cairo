@@ -155,6 +155,7 @@ pub fn mock_transaction_with(
         transaction_inputs: tx_inputs,
         transaction_outputs: tx_outputs,
         locktime: locktime,
+        utxos: array![],
     }
 }
 
@@ -225,6 +226,7 @@ pub fn mock_witness_transaction() -> EngineTransaction {
         transaction_inputs: transaction_inputs,
         transaction_outputs: transaction_outputs,
         locktime: 0,
+        utxos: array![],
     }
 }
 

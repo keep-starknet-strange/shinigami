@@ -83,7 +83,8 @@ pub fn transaction_procedure<
         version: transaction.get_version(),
         transaction_inputs: transaction_inputs_clone,
         transaction_outputs: transaction_outputs_clone,
-        locktime: transaction.get_locktime()
+        locktime: transaction.get_locktime(),
+        utxos: transaction.get_utxos()
     };
     let mut i: usize = 0;
     let mut transaction_input: Array<EngineTransactionInput> = transaction_copy.transaction_inputs;

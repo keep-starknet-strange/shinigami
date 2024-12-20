@@ -1,7 +1,7 @@
 use crate::transaction::{
     EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
 };
-use shinigami_utils::{bytecode::{write_var_int}, hash::{hash_to_u256, sha256_u256, simple_sha256},};
+use shinigami_utils::{bytecode::{write_var_int}, hash::{hash_to_u256, sha256_u256, simple_sha256}};
 use core::sha256::compute_sha256_byte_array;
 use crate::signature::utils::is_witness_v1_pub_key_hash;
 use core::dict::Felt252Dict;
@@ -172,7 +172,8 @@ pub trait HashCacheTrait<
     +EngineTransactionTrait<T, I, O>
 > {
     fn new(transaction: @T) -> HashCache<T>;
-    // fn addSigHashes?
+    // fn add_sig_hashes(ref self: HashCache<T>, tx: @T);
+    // fn get_sig_hashes(ref self: HashCache<T>, tx_hash: felt252) -> Option<TxSigHashes>;
 
     // v0 represents sighash midstate used in the base segwit signatures BIP-143
     fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256;
@@ -199,6 +200,18 @@ pub impl HashCacheImpl<
     fn new(transaction: @T) -> HashCache<T> {
         HashCache { sigHashes: Default::default() }
     }
+
+    // Add sighashes for a transaction
+    // fn add_sig_hashes(ref self: HashCache<T>, tx: @T) {
+    //     self
+    //         .sigHashes
+    //         .insert(tx.get_prevout_txid(), NullableTrait::new(SigHashMidstateTrait::new(tx)));
+    // }
+
+    // Get sighashes for a transaction
+    // fn get_sig_hashes(ref self: HashCache, tx_hash: felt252) -> Option<TxSigHashes> {
+    //     self.sig_hashes.get(tx_hash)
+    // }
 
     fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256 {
         0

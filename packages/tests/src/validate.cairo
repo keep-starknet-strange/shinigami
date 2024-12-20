@@ -2,7 +2,7 @@ use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
 use shinigami_engine::transaction::EngineTransaction;
 use shinigami_engine::opcodes::Opcode;
-use crate::utxo::UTXO;
+use shinigami_engine::utxo::{UTXO};
 use crate::utils::find_last_index;
 use shinigami_utils::hash::sha256_byte_array;
 use shinigami_utils::bytecode::bytecode_to_hex;
@@ -13,18 +13,17 @@ use shinigami_utils::byte_array::sub_byte_array;
 
 // TODO: Remove hints?
 // utxo_hints: Set of existing utxos that are being spent by this transaction
-pub fn validate_transaction(
-    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>
-) -> Result<(), felt252> {
+pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), felt252> {
     let input_count = tx.transaction_inputs.len();
-    if input_count != utxo_hints.len() {
+    let utxo_count = tx.utxos.len();
+    if input_count != utxo_count {
         return Result::Err('Invalid number of utxo hints');
     }
 
     let mut i = 0;
     let mut err = '';
     while i != input_count {
-        let utxo = utxo_hints[i];
+        let utxo = tx.utxos.at(i);
         let hash_cache = HashCacheImpl::new(tx);
         // TODO: Error handling
         let mut engine = EngineImpl::new(
@@ -150,9 +149,7 @@ pub fn validate_p2ms(
 }
 
 
-pub fn validate_p2sh(
-    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>, indx: u32
-) -> Result<(), felt252> {
+pub fn validate_p2sh(tx: @EngineTransaction, flags: u32, indx: u32) -> Result<(), felt252> {
     if tx.transaction_inputs.len() == 0 {
         return Result::Err('P2SH: No inputs');
     }
@@ -187,7 +184,7 @@ pub fn validate_p2sh(
     )
         .into();
 
-    let script_pubkey = utxo_hints[0].pubkey_script;
+    let script_pubkey = tx.utxos[0].pubkey_script;
     let mut script_hash_start_index = 2;
     let script_hash: ByteArray = sub_byte_array(script_pubkey, ref script_hash_start_index, 20);
 
@@ -197,7 +194,7 @@ pub fn validate_p2sh(
 
     let hash_cache = HashCacheImpl::new(tx);
     let mut engine = EngineImpl::new(
-        script_pubkey, tx, indx, flags, *utxo_hints[0].amount, @hash_cache
+        script_pubkey, tx, indx, flags, *tx.utxos[0].amount, @hash_cache
     )
         .unwrap();
 

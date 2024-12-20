@@ -32,6 +32,8 @@ pub mod signature {
     pub use signature::{BaseSigVerifier, BaseSigVerifierTrait};
 }
 pub mod transaction;
+pub mod utxo;
+
 #[cfg(test)]
 mod tests {
     mod test_scriptnum;

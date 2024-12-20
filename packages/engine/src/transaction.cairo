@@ -3,6 +3,7 @@ use shinigami_utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be
 use shinigami_utils::bytecode::{bytecode_to_hex, read_var_int, write_var_int};
 use shinigami_utils::bit_shifts::shr;
 use shinigami_utils::hash::double_sha256;
+use shinigami_engine::utxo::{UTXO};
 
 // Tracks previous transaction outputs
 #[derive(Drop, Copy, Default)]
@@ -33,6 +34,7 @@ pub struct EngineTransaction {
     pub transaction_inputs: Array<EngineTransactionInput>,
     pub transaction_outputs: Array<EngineTransactionOutput>,
     pub locktime: u32,
+    pub utxos: Array<UTXO>
 }
 
 pub trait EngineInternalTransactionTrait {
@@ -40,15 +42,22 @@ pub trait EngineInternalTransactionTrait {
         version: i32,
         transaction_inputs: Array<EngineTransactionInput>,
         transaction_outputs: Array<EngineTransactionOutput>,
-        locktime: u32
+        locktime: u32,
+        utxos: Array<UTXO>
     ) -> EngineTransaction;
-    fn new_signed(script_sig: ByteArray, pubkey_script: ByteArray) -> EngineTransaction;
+    fn new_signed(
+        script_sig: ByteArray, pubkey_script: ByteArray, utxos: Array<UTXO>
+    ) -> EngineTransaction;
     fn new_signed_witness(
-        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64
+        script_sig: ByteArray,
+        pubkey_script: ByteArray,
+        witness: Array<ByteArray>,
+        value: i64,
+        utxos: Array<UTXO>
     ) -> EngineTransaction;
-    fn btc_decode(raw: ByteArray, encoding: u32) -> EngineTransaction;
-    fn deserialize(raw: ByteArray) -> EngineTransaction;
-    fn deserialize_no_witness(raw: ByteArray) -> EngineTransaction;
+    fn btc_decode(raw: ByteArray, encoding: u32, utxos: Array<UTXO>) -> EngineTransaction;
+    fn deserialize(raw: ByteArray, utxos: Array<UTXO>) -> EngineTransaction;
+    fn deserialize_no_witness(raw: ByteArray, utxos: Array<UTXO>) -> EngineTransaction;
     fn btc_encode(self: EngineTransaction, encoding: u32) -> ByteArray;
     fn serialize(self: EngineTransaction) -> ByteArray;
     fn serialize_no_witness(self: EngineTransaction) -> ByteArray;
@@ -68,17 +77,21 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
         version: i32,
         transaction_inputs: Array<EngineTransactionInput>,
         transaction_outputs: Array<EngineTransactionOutput>,
-        locktime: u32
+        locktime: u32,
+        utxos: Array<UTXO>
     ) -> EngineTransaction {
         EngineTransaction {
             version: version,
             transaction_inputs: transaction_inputs,
             transaction_outputs: transaction_outputs,
             locktime: locktime,
+            utxos: utxos
         }
     }
 
-    fn new_signed(script_sig: ByteArray, pubkey_script: ByteArray) -> EngineTransaction {
+    fn new_signed(
+        script_sig: ByteArray, pubkey_script: ByteArray, utxos: Array<UTXO>
+    ) -> EngineTransaction {
         let coinbase_tx_inputs = array![
             EngineTransactionInput {
                 previous_outpoint: EngineOutPoint { txid: 0x0, vout: 0xffffffff, },
@@ -95,6 +108,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             transaction_inputs: coinbase_tx_inputs,
             transaction_outputs: coinbase_tx_outputs,
             locktime: 0,
+            utxos: Default::default(),
         };
         let coinbase_bytes = coinbase_tx.serialize_no_witness();
         let coinbase_txid = double_sha256(@coinbase_bytes);
@@ -112,6 +126,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
                 EngineTransactionOutput { value: 0, publickey_script: "", }
             ],
             locktime: 0,
+            utxos: utxos
         };
         // let transaction = EngineTransaction {
         //     version: 1,
@@ -130,7 +145,11 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
     }
 
     fn new_signed_witness(
-        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64
+        script_sig: ByteArray,
+        pubkey_script: ByteArray,
+        witness: Array<ByteArray>,
+        value: i64,
+        utxos: Array<UTXO>
     ) -> EngineTransaction {
         let coinbase_tx_inputs = array![
             EngineTransactionInput {
@@ -148,6 +167,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             transaction_inputs: coinbase_tx_inputs,
             transaction_outputs: coinbase_tx_outputs,
             locktime: 0,
+            utxos: Default::default(),
         };
         let coinbase_bytes = coinbase_tx.serialize_no_witness();
         let coinbase_txid = double_sha256(@coinbase_bytes);
@@ -165,12 +185,13 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
                 EngineTransactionOutput { value: value, publickey_script: "", }
             ],
             locktime: 0,
+            utxos: utxos
         };
         transaction
     }
 
     // Deserialize a transaction from a byte array.
-    fn btc_decode(raw: ByteArray, encoding: u32) -> EngineTransaction {
+    fn btc_decode(raw: ByteArray, encoding: u32, utxos: Array<UTXO>) -> EngineTransaction {
         let mut offset: usize = 0;
         let version: i32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
         if encoding == WITNESS_ENCODING {
@@ -245,6 +266,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
                 transaction_inputs: inputs_with_witness,
                 transaction_outputs: outputs,
                 locktime: locktime,
+                utxos: utxos,
             }
         } else {
             EngineTransaction {
@@ -252,23 +274,24 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
                 transaction_inputs: inputs,
                 transaction_outputs: outputs,
                 locktime: locktime,
+                utxos: utxos,
             }
         }
     }
 
-    fn deserialize(raw: ByteArray) -> EngineTransaction {
+    fn deserialize(raw: ByteArray, utxos: Array<UTXO>) -> EngineTransaction {
         let mut offset: usize = 0;
         let _version: i32 = byte_array_value_at_le(@raw, ref offset, 4).try_into().unwrap();
         let flags: u16 = byte_array_value_at_le(@raw, ref offset, 2).try_into().unwrap();
         if flags == 0x100 {
-            Self::btc_decode(raw, WITNESS_ENCODING)
+            Self::btc_decode(raw, WITNESS_ENCODING, utxos)
         } else {
-            Self::btc_decode(raw, BASE_ENCODING)
+            Self::btc_decode(raw, BASE_ENCODING, utxos)
         }
     }
 
-    fn deserialize_no_witness(raw: ByteArray) -> EngineTransaction {
-        Self::btc_decode(raw, BASE_ENCODING)
+    fn deserialize_no_witness(raw: ByteArray, utxos: Array<UTXO>) -> EngineTransaction {
+        Self::btc_decode(raw, BASE_ENCODING, utxos)
     }
 
     // Serialize the transaction data for hashing based on encoding used.
@@ -424,6 +447,7 @@ impl TransactionDefault of Default<EngineTransaction> {
             transaction_inputs: array![default_txin],
             transaction_outputs: array![],
             locktime: 0,
+            utxos: Default::default(),
         };
         transaction
     }
@@ -485,6 +509,7 @@ pub trait EngineTransactionTrait<
     fn get_transaction_inputs(self: @T) -> Span<I>;
     fn get_transaction_outputs(self: @T) -> Span<O>;
     fn get_locktime(self: @T) -> u32;
+    fn get_utxos(self: @T) -> Array<UTXO>; //Span?
 }
 
 pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
@@ -508,5 +533,9 @@ pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
 
     fn get_locktime(self: @EngineTransaction) -> u32 {
         *self.locktime
+    }
+
+    fn get_utxos(self: @EngineTransaction) -> Array<UTXO> {
+        self.utxos.clone()
     }
 }

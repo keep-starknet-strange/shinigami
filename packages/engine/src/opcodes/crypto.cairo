@@ -418,10 +418,10 @@ pub fn opcode_checksigadd<
         return Result::Ok(());
     }
 
-    let mut verifier = TaprootSigVerifierTrait::<
+    TaprootSigVerifierTrait::<
         I, O, T
-    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
-    TaprootSigVerifierTrait::<I, O, T>::verify(verifier)?;
+    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?
+        .verify()?;
 
     engine.dstack.push_int(n + 1);
     Result::Ok(())
