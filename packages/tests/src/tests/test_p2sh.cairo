@@ -2,9 +2,9 @@ use shinigami_engine::transaction::EngineInternalTransactionTrait;
 use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
 use shinigami_engine::utxo::{UTXO};
-use crate::validate::validate_p2sh;
+use shinigami_engine::flags::ScriptFlags;
+use crate::validate;
 use shinigami_utils::bytecode::hex_to_bytecode;
-
 
 #[test]
 fn test_p2sh_transaction_1() {
@@ -14,17 +14,20 @@ fn test_p2sh_transaction_1() {
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
 
     let prevout_pubkey = "0xa914748284390f9e263a4b766a75d0633c50426eb87587";
+    // why this one works 0xa914748284390f9e263a4b766a75d0633c50426eb87588
+
+    // correct name ?
     let prev_out_1of2_invalid = UTXO {
-        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 177625
+        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 177625,
     };
 
-    let utxo_hints = array![prev_out_1of2_invalid];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    // set utxo directly in validate_at
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
+    let flags: u32 = ScriptFlags::ScriptBip16.into();
 
-    let res = validate_p2sh(@transaction, 0, 2);
+    let res = validate::validate_transaction_at(@transaction, flags, prev_out_1of2_invalid, 2);
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
-
 #[test]
 fn test_p2sh_transaction_2() {
     //https://learnmeabitcoin.com/explorer/tx/7edb32d4ffd7a385b763c7a8e56b6358bcd729e747290624e18acdbe6209fc45
@@ -35,16 +38,16 @@ fn test_p2sh_transaction_2() {
     let prevout_pubkey = "0xa914e9c3dd0c07aac76179ebc76a6c78d4d67c6c160a87";
 
     let prev_out_1of2_invalid = UTXO {
-        amount: 990000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 272295
+        amount: 990000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 272295,
     };
 
     let utxo_hints = array![prev_out_1of2_invalid];
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate_p2sh(@transaction, 0, 0);
+    let flags: u32 = ScriptFlags::ScriptBip16.into();
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
-
 
 #[test]
 fn test_p2sh_transaction_3() {
@@ -56,18 +59,16 @@ fn test_p2sh_transaction_3() {
     let prevout_pubkey = "0xa914748284390f9e263a4b766a75d0633c50426eb87587";
 
     let prev_out = UTXO {
-        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 183729
+        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 183729,
     };
 
-    let utxo_hints = array![prev_out];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
+    let flags: u32 = ScriptFlags::ScriptBip16.into();
 
-    let res = validate_p2sh(@transaction, 0, 11);
+    let res = validate::validate_transaction_at(@transaction, flags, prev_out, 11);
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
 
-// TODO: Fix this test
-#[ignore]
 #[test]
 fn test_p2sh_transaction_4() {
     //https://learnmeabitcoin.com/explorer/tx/cc11ca9e9dc188663c41eb23b15370f68eded56b7ec54dd5bc4f2d2ae93addb2
@@ -78,13 +79,14 @@ fn test_p2sh_transaction_4() {
     let prevout_pubkey = "0xa914b4acb9d78d6a6256964a60484c95de490eaaae7587";
 
     let prev_out = UTXO {
-        amount: 9980000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 232593
+        amount: 9980000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 232593,
     };
 
     let utxo_hints = array![prev_out];
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let flags: u32 = ScriptFlags::ScriptBip16.into();
 
-    let res = validate_p2sh(@transaction, 0, 0);
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
 
@@ -98,13 +100,16 @@ fn test_p2sh_transaction_5() {
     let prevout_pubkey = "0xa914da5a92e670a66538be1c550af352646000b2367d87";
 
     let prev_out = UTXO {
-        amount: 10000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 384639
+        amount: 10000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 384639,
     };
 
     let utxo_hints = array![prev_out];
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate_p2sh(@transaction, 0, 0);
+    // let res = validate_p2sh(@transaction, 0, 0);
+
+    let flags: u32 = ScriptFlags::ScriptBip16.into();
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
 
@@ -118,12 +123,12 @@ fn test_p2sh_transaction_6() {
 
     let prevout_pubkey = "0xa9144266fc6f2c2861d7fe229b279a79803afca7ba3487";
     let prev_out = UTXO {
-        amount: 100000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 257797
+        amount: 100000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 257797,
     };
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
 
-    let utxo_hints = array![prev_out];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
-
-    let res = validate_p2sh(@transaction, 0, 0);
+    let flags: u32 = ScriptFlags::ScriptBip16.into();
+    let res = validate::validate_transaction_at(@transaction, flags, prev_out, 4);
     assert!(res.is_ok(), "P2SH failed!:{:?}", res.unwrap_err());
 }
+
