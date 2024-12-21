@@ -192,10 +192,10 @@ pub mod Opcode {
 
     use crate::engine::Engine;
     use crate::transaction::{
-        EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+        EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
     };
     use crate::opcodes::{
-        constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils
+        constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils,
     };
 
     pub fn execute<
@@ -209,10 +209,10 @@ pub mod Opcode {
         +Drop<O>,
         impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
         impl IEngineTransactionTrait: EngineTransactionTrait<
-            T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-        >
+            T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+        >,
     >(
-        opcode: u8, ref engine: Engine<T>
+        opcode: u8, ref engine: Engine<T>,
     ) -> Result<(), felt252> {
         match opcode {
             0 => constants::opcode_false(ref engine),
@@ -401,12 +401,12 @@ pub mod Opcode {
             183 => flow::opcode_nop(ref engine, 183),
             184 => flow::opcode_nop(ref engine, 184),
             185 => flow::opcode_nop(ref engine, 185),
-            _ => utils::not_implemented(ref engine)
+            _ => utils::not_implemented(ref engine),
         }
     }
 
     pub fn is_opcode_disabled<T, +Drop<T>>(
-        opcode: u8, ref engine: Engine<T>
+        opcode: u8, ref engine: Engine<T>,
     ) -> Result<(), felt252> {
         if opcode == OP_CAT
             || opcode == OP_SUBSTR
@@ -430,7 +430,7 @@ pub mod Opcode {
     }
 
     pub fn is_opcode_always_illegal<T, +Drop<T>>(
-        opcode: u8, ref engine: Engine<T>
+        opcode: u8, ref engine: Engine<T>,
     ) -> Result<(), felt252> {
         if opcode == OP_VERIF {
             return utils::opcode_reserved("verif", ref engine);

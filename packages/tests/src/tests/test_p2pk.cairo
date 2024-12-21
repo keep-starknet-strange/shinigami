@@ -10,7 +10,7 @@ fn test_compressed_pubkey() {
     let prevout_pk_script =
         "0x2103203b768951584fe9af6d9d9e6ff26a5f76e453212f19ba163774182ab8057f3eac";
     let prev_out = UTXO {
-        amount: 2700, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 606376
+        amount: 2700, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 606376,
     };
     let raw_transaction_hex =
         "0x0100000001475948774538830c533ad43cd5cd9a241a72569679e5f0474e670f466c81b83d00000000494830450221009c31a8561a3e422211e72242170d63d5d420398629475b48925720b4ba5b064202201b72633207c17b6129b9fee23247f48a11eb656c1ca4c50c828e4fdbf881be6301ffffffff0160090000000000001976a91474d03dbb59f75ff54ee97dadf221d74a48c3b52288ac00000000";
@@ -28,7 +28,7 @@ fn test_block_181_tx_mainnet() {
     let prevout_pk_script =
         "0x410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
     let prev_out = UTXO {
-        amount: 4000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 170
+        amount: 4000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 170,
     };
     let raw_transaction_hex =
         "0x0100000001169e1e83e930853391bc6f35f605c6754cfead57cf8387639d3b4096c54f18f40100000048473044022027542a94d6646c51240f23a76d33088d3dd8815b25e9ea18cac67d1171a3212e02203baf203c6e7b80ebd3e588628466ea28be572fe1aaa3f30947da4763dd3b3d2b01ffffffff0200ca9a3b00000000434104b5abd412d4341b45056d3e376cd446eca43fa871b51961330deebd84423e740daa520690e1d9e074654c59ff87b408db903649623e86f1ca5412786f61ade2bfac005ed0b20000000043410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac00000000";
@@ -46,7 +46,7 @@ fn test_block_182_tx_mainnet() {
     let prevout_pk_script =
         "0x410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
     let prev_out = UTXO {
-        amount: 3000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 181
+        amount: 3000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 181,
     };
     let raw_transaction_hex =
         "0x0100000001be141eb442fbc446218b708f40caeb7507affe8acff58ed992eb5ddde43c6fa1010000004847304402201f27e51caeb9a0988a1e50799ff0af94a3902403c3ad4068b063e7b4d1b0a76702206713f69bd344058b0dee55a9798759092d0916dbbc3e592fee43060005ddc17401ffffffff0200e1f5050000000043410401518fa1d1e1e3e162852d68d9be1c0abad5e3d6297ec95f1f91b909dc1afe616d6876f92918451ca387c4387609ae1a895007096195a824baf9c38ea98c09c3ac007ddaac0000000043410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac00000000";
@@ -68,13 +68,13 @@ fn test_block_496_tx_mainnet() {
     let prevout_pk_script_3 =
         "0x4104bed827d37474beffb37efe533701ac1f7c600957a4487be8b371346f016826ee6f57ba30d88a472a0e4ecd2f07599a795f1f01de78d791b382e65ee1c58b4508ac";
     let prev_out = UTXO {
-        amount: 5000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 360
+        amount: 5000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 360,
     };
     let prev_out2 = UTXO {
-        amount: 1000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script_2), block_height: 187
+        amount: 1000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script_2), block_height: 187,
     };
     let prev_out3 = UTXO {
-        amount: 100000000, pubkey_script: hex_to_bytecode(@prevout_pk_script_3), block_height: 248
+        amount: 100000000, pubkey_script: hex_to_bytecode(@prevout_pk_script_3), block_height: 248,
     };
 
     let raw_transaction_hex =

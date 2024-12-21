@@ -11,7 +11,7 @@ fn test_p2ms_1_of_2() {
     let prevout_pk_script =
         "0x514104cc71eb30d653c0c3163990c47b976f3fb3f37cccdcbedb169a1dfef58bbfbfaff7d8a473e7e2e6d317b87bafe8bde97e3cf8f065dec022b51d11fcdd0d348ac4410461cbdcc5409fb4b4d42b51d33381354d80e550078cb532a34bfa2fcfdeb7d76519aecc62770f5b0e4ef8551946d8a540911abe3e7854a26f39f58b25c15342af52ae";
     let prev_out = UTXO {
-        amount: 1000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 164467
+        amount: 1000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 164467,
     };
 
     let raw_transaction_hex =
@@ -34,7 +34,7 @@ fn test_p2ms_2_of_3() {
     let prevout_pk_script =
         "0x52410496ec45f878b62c46c4be8e336dff7cc58df9b502178cc240eb3d31b1266f69f5767071aa3e017d1b82a0bb28dab5e27d4d8e9725b3e68ed5f8a2d45c730621e34104cc71eb30d653c0c3163990c47b976f3fb3f37cccdcbedb169a1dfef58bbfbfaff7d8a473e7e2e6d317b87bafe8bde97e3cf8f065dec022b51d11fcdd0d348ac4410461cbdcc5409fb4b4d42b51d33381354d80e550078cb532a34bfa2fcfdeb7d76519aecc62770f5b0e4ef8551946d8a540911abe3e7854a26f39f58b25c15342af53ae";
     let prev_out = UTXO {
-        amount: 1000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 165227
+        amount: 1000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 165227,
     };
 
     let raw_transaction_hex =
@@ -54,7 +54,7 @@ fn test_p2ms_3_of_3() {
     let prevout_pk_script =
         "0x534104c46d6462f67f990211d3a7077f005e67154f5f785b3edc06af3de62649a15bad35905fa7af9f272f80379a41525ad57a2245c2edc4807e3e49f43eb1c1b119794104cc71eb30d653c0c3163990c47b976f3fb3f37cccdcbedb169a1dfef58bbfbfaff7d8a473e7e2e6d317b87bafe8bde97e3cf8f065dec022b51d11fcdd0d348ac4410461cbdcc5409fb4b4d42b51d33381354d80e550078cb532a34bfa2fcfdeb7d76519aecc62770f5b0e4ef8551946d8a540911abe3e7854a26f39f58b25c15342af53ae";
     let prev_out = UTXO {
-        amount: 50000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 165224
+        amount: 50000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 165224,
     };
 
     let raw_transaction_hex =
@@ -76,7 +76,7 @@ fn test_p2ms_1of2_invalid_pubkey() {
     let prev_out_1of2_invalid = UTXO {
         amount: 92750000,
         pubkey_script: hex_to_bytecode(@prevout_pk_script_1of2_invalid),
-        block_height: 229517
+        block_height: 229517,
     };
 
     let raw_transaction_hex =
@@ -96,7 +96,7 @@ fn test_p2ms_2_of_3_random() {
     let prevout_pk_script =
         "0x524104d81fd577272bbe73308c93009eec5dc9fc319fc1ee2e7066e17220a5d47a18314578be2faea34b9f1f8ca078f8621acd4bc22897b03daa422b9bf56646b342a24104ec3afff0b2b66e8152e9018fe3be3fc92b30bf886b3487a525997d00fd9da2d012dce5d5275854adc3106572a5d1e12d4211b228429f5a7b2f7ba92eb0475bb14104b49b496684b02855bc32f5daefa2e2e406db4418f3b86bca5195600951c7d918cdbe5e6d3736ec2abf2dd7610995c3086976b2c0c7b4e459d10b34a316d5a5e753ae";
     let prev_out = UTXO {
-        amount: 1690000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 442241
+        amount: 1690000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 442241,
     };
 
     let raw_transaction_hex =
@@ -116,7 +116,7 @@ fn test_p2ms_1_of_1() {
     let prevout_pk_script =
         "0x51210281feb90c058c3436f8bc361930ae99fcfb530a699cdad141d7244bfcad521a1f51ae";
     let prev_out = UTXO {
-        amount: 20000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 431077
+        amount: 20000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 431077,
     };
 
     let raw_transaction_hex =
@@ -136,7 +136,7 @@ fn test_p2ms_20_of_20() {
     let prevout_pk_script =
         "0x0114410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455410478d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc34550114ae";
     let prev_out = UTXO {
-        amount: 2201000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 284029
+        amount: 2201000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 284029,
     };
 
     let raw_transaction_hex =
@@ -144,7 +144,7 @@ fn test_p2ms_20_of_20() {
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
 
     let transaction = EngineInternalTransactionTrait::deserialize(
-        raw_transaction, array![prev_out]
+        raw_transaction, array![prev_out],
     );
 
     let res = validate::validate_transaction(@transaction, 0);

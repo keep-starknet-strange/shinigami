@@ -14,12 +14,14 @@ fn test_p2pkh_transaction() {
     let prevout_pk_script_1 =
         "0x4104c9560dc538db21476083a5c65a34c7cc219960b1e6f27a87571cd91edfd00dac16dca4b4a7c4ab536f85bc263b3035b762c5576dc6772492b8fb54af23abff6dac";
     let prevout_1 = UTXO {
-        amount: 5000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script_1), block_height: 509
+        amount: 5000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script_1), block_height: 509,
     };
     let prevout_pk_script_2 =
         "0x41043987a76015929873f06823f4e8d93abaaf7bcf55c6a564bed5b7f6e728e6c4cb4e2c420fe14d976f7e641d8b791c652dfeee9da584305ae544eafa4f7be6f777ac";
     let prevout_2 = UTXO {
-        amount: 50000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script_2), block_height: 357
+        amount: 50000000000,
+        pubkey_script: hex_to_bytecode(@prevout_pk_script_2),
+        block_height: 357,
     };
     let utxo_hints = array![prevout_1, prevout_2];
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
@@ -45,19 +47,19 @@ fn test_p2pkh_transaction_spend() {
     let prev_out0 = UTXO {
         amount: 5003000000,
         pubkey_script: hex_to_bytecode(@prevout_pk_script_0),
-        block_height: 12983
+        block_height: 12983,
     };
 
     let prev_out1 = UTXO {
         amount: 10000000000,
         pubkey_script: hex_to_bytecode(@prevout_pkh_script_1),
-        block_height: 728
+        block_height: 728,
     };
 
     let prev_out2 = UTXO {
         amount: 5000000000,
         pubkey_script: hex_to_bytecode(@prevout_pk_script_2),
-        block_height: 17233
+        block_height: 17233,
     };
 
     let utxo_hints = array![prev_out0, prev_out1, prev_out2];
@@ -84,7 +86,9 @@ fn test_block_770000_p2pkh_transaction() {
 
     let prevout_pk_script = "0x76a9140900bb14c7cb6a52fd8a22fd68a5986eb193c9f588ac";
     let prevout = UTXO {
-        amount: 8734850959, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 769998
+        amount: 8734850959,
+        pubkey_script: hex_to_bytecode(@prevout_pk_script),
+        block_height: 769998,
     };
     let utxo_hints = array![prevout];
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
@@ -102,7 +106,9 @@ fn test_block_770002_p2pkh_transaction() {
 
     let prevout_pk_script = "0x76a9149ee1cd0c085b88bd7b22e44abe52734e0a61c94288ac";
     let prevout = UTXO {
-        amount: 8729850284, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 769998
+        amount: 8729850284,
+        pubkey_script: hex_to_bytecode(@prevout_pk_script),
+        block_height: 769998,
     };
     let utxo_hints = array![prevout];
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);

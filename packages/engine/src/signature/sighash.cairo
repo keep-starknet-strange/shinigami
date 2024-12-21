@@ -1,10 +1,10 @@
 use crate::transaction::{
     EngineTransaction, EngineTransactionTrait, EngineInternalTransactionImpl,
-    EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
 use crate::signature::constants;
 use crate::signature::utils::{
-    remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash
+    remove_opcodeseparator, transaction_procedure, is_witness_pub_key_hash,
 };
 use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::bytecode::write_var_int;
@@ -22,13 +22,13 @@ pub fn calc_signature_hash<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
     +Drop<I>,
     +Drop<O>,
-    +Drop<T>
+    +Drop<T>,
 >(
-    sub_script: @ByteArray, hash_type: u32, transaction: @T, tx_idx: u32
+    sub_script: @ByteArray, hash_type: u32, transaction: @T, tx_idx: u32,
 ) -> u256 {
     let transaction_outputs_len: usize = transaction.get_transaction_outputs().len();
     // `SIG_HASH_SINGLE` only signs corresponding input/output pair.
@@ -44,7 +44,7 @@ pub fn calc_signature_hash<
     let mut signature_script: @ByteArray = remove_opcodeseparator(sub_script);
     // Create a modified copy of the transaction according to the hash type.
     let transaction_copy: EngineTransaction = transaction_procedure(
-        transaction, tx_idx, signature_script.clone(), hash_type
+        transaction, tx_idx, signature_script.clone(), hash_type,
     );
 
     let mut sig_hash_bytes: ByteArray = transaction_copy.serialize_no_witness();
@@ -62,24 +62,24 @@ pub fn calc_witness_signature_hash<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
     +Drop<I>,
     +Drop<O>,
-    +Drop<T>
+    +Drop<T>,
 >(
     sub_script: @ByteArray,
     sig_hashes_enum: TxSigHashes,
     hash_type: u32,
     transaction: @T,
     tx_idx: u32,
-    amount: i64
+    amount: i64,
 ) -> u256 {
     let mut sig_hashes: @SegwitSigHashMidstate = Default::default();
     match sig_hashes_enum {
         TxSigHashes::Segwit(segwit_midstate) => { sig_hashes = segwit_midstate; },
         // Handle error ?
-        _ => { return 0; }
+        _ => { return 0; },
     }
 
     // TODO: Bounds check?
@@ -184,7 +184,7 @@ pub struct TaprootSighashOptions {
     // Key version as defined in BIP-341. Actually always 0.
     key_version: u8,
     // Position of the last opcode separator. Used for BIP-342 sighash message extension.
-    code_sep_pos: u32
+    code_sep_pos: u32,
 }
 
 #[generate_trait()]
@@ -195,7 +195,7 @@ pub impl TaprootSighashOptionsImpl of TaprootSighashOptionsTrait {
             annex_hash: @"",
             tap_leaf_hash: @"",
             key_version: 0,
-            code_sep_pos: 0
+            code_sep_pos: 0,
         }
     }
 
@@ -205,19 +205,19 @@ pub impl TaprootSighashOptionsImpl of TaprootSighashOptionsTrait {
             annex_hash: @sha256_byte_array(annex),
             tap_leaf_hash: @"",
             key_version: 0,
-            code_sep_pos: 0
+            code_sep_pos: 0,
         }
     }
 
     fn new_with_tapscript_version(
-        code_sep_pos: u32, tap_leaf_hash: @ByteArray
+        code_sep_pos: u32, tap_leaf_hash: @ByteArray,
     ) -> TaprootSighashOptions {
         TaprootSighashOptions {
             ext_flag: TAPSCRIPT_SIGHASH_EXT_FLAG,
             annex_hash: @"",
             tap_leaf_hash: tap_leaf_hash,
             key_version: 0,
-            code_sep_pos: code_sep_pos
+            code_sep_pos: code_sep_pos,
         }
     }
 
@@ -261,8 +261,8 @@ pub fn calc_taproot_signature_hash<
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
     sig_hashes_enum: TxSigHashes,
     h_type: u32,
@@ -292,7 +292,7 @@ pub fn calc_taproot_signature_hash<
     let mut sig_hashes: @TaprootSigHashMidState = Default::default();
     match sig_hashes_enum {
         TxSigHashes::Taproot(midstate) => { sig_hashes = midstate; },
-        _ => { return Result::Err(Error::TAPROOT_INVALID_SIGHASH_MIDSTATE); }
+        _ => { return Result::Err(Error::TAPROOT_INVALID_SIGHASH_MIDSTATE); },
     }
 
     if (h_type & constants::SIG_HASH_ANYONECANPAY) != constants::SIG_HASH_ANYONECANPAY {

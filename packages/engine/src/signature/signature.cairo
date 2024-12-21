@@ -1,6 +1,6 @@
 use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
-    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait,
 };
 use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
@@ -36,10 +36,10 @@ pub trait BaseSigVerifierTrait<
     T,
     +EngineTransactionInputTrait<I>,
     +EngineTransactionOutputTrait<O>,
-    +EngineTransactionTrait<T, I, O>
+    +EngineTransactionTrait<T, I, O>,
 > {
     fn new(
-        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
+        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray,
     ) -> Result<BaseSigVerifier, felt252>;
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool;
 }
@@ -51,7 +51,7 @@ impl BaseSigVerifierImpl<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
     +Drop<I>,
     +Drop<O>,
@@ -59,7 +59,7 @@ impl BaseSigVerifierImpl<
     +Default<T>,
 > of BaseSigVerifierTrait<I, O, T> {
     fn new(
-        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray
+        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray,
     ) -> Result<BaseSigVerifier, felt252> {
         let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
         let sub_script = vm.sub_script();
@@ -70,7 +70,7 @@ impl BaseSigVerifierImpl<
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool {
         let sub_script = remove_signature(@self.sub_script, self.sig_bytes);
         let sig_hash: u256 = sighash::calc_signature_hash::<
-            I, O, T
+            I, O, T,
         >(sub_script, self.hash_type, vm.transaction, vm.tx_idx);
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
@@ -83,7 +83,7 @@ pub trait BaseSegwitSigVerifierTrait<
     T,
     +EngineTransactionInputTrait<I>,
     +EngineTransactionOutputTrait<O>,
-    +EngineTransactionTrait<T, I, O>
+    +EngineTransactionTrait<T, I, O>,
 > {
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool;
 }
@@ -95,16 +95,16 @@ impl BaseSegwitSigVerifierImpl<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
     +Drop<I>,
     +Drop<O>,
-    +Drop<T>
+    +Drop<T>,
 > of BaseSegwitSigVerifierTrait<I, O, T> {
     fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool {
         let sig_hashes = SigHashMidstateTrait::new(vm.transaction, vm.tx_idx);
         let sig_hash: u256 = sighash::calc_witness_signature_hash::<
-            I, O, T
+            I, O, T,
         >(@self.sub_script, sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
@@ -145,10 +145,10 @@ pub fn check_hash_type_encoding<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref vm: Engine<T>, mut hash_type: u32
+    ref vm: Engine<T>, mut hash_type: u32,
 ) -> Result<(), felt252> {
     if !vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding) {
         return Result::Ok(());
@@ -186,10 +186,10 @@ pub fn check_signature_encoding<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref vm: Engine<T>, sig_bytes: @ByteArray
+    ref vm: Engine<T>, sig_bytes: @ByteArray,
 ) -> Result<(), felt252> {
     // https://github.com/btcsuite/btcd/blob/master/txscript/engine.go#L1221
     let low_s = vm.has_flag(ScriptFlags::ScriptVerifyLowS);
@@ -342,10 +342,10 @@ pub fn check_pub_key_encoding<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref vm: Engine<T>, pk_bytes: @ByteArray
+    ref vm: Engine<T>, pk_bytes: @ByteArray,
 ) -> Result<(), felt252> {
     if vm.has_flag(ScriptFlags::ScriptVerifyWitnessPubKeyType)
         && vm.is_witness_active(0)
@@ -386,7 +386,7 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
         return Result::Ok(
             Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
                 .unwrap_syscall()
-                .expect('Secp256k1Point: Invalid point.')
+                .expect('Secp256k1Point: Invalid point.'),
         );
     } else {
         // Extract X coordinate and determine parity from last byte.
@@ -399,7 +399,7 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
         return Result::Ok(
             Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
                 .unwrap_syscall()
-                .expect('Secp256k1Point: Invalid point.')
+                .expect('Secp256k1Point: Invalid point.'),
         );
     }
 }
@@ -482,7 +482,7 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
         return Result::Err('invalid sig: bad final length');
     }
 
-    return Result::Ok(Signature { r: r_sig, s: s_sig, y_parity: false, });
+    return Result::Ok(Signature { r: r_sig, s: s_sig, y_parity: false });
 }
 
 
@@ -499,10 +499,10 @@ pub fn parse_base_sig_and_pk<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray
+    ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray,
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
     let verify_der = vm.has_flag(ScriptFlags::ScriptVerifyDERSignatures);
     let verify_strict_encoding = vm.has_flag(ScriptFlags::ScriptVerifyStrictEncoding);
@@ -563,7 +563,7 @@ pub fn parse_base_sig_and_pk<
 
     let pub_key = match parse_pub_key(pk_bytes) {
         Result::Ok(key) => key,
-        Result::Err(e) => { return Result::Err(e); }
+        Result::Err(e) => { return Result::Err(e); },
     };
     Result::Ok((pub_key, sig, hash_type))
 }

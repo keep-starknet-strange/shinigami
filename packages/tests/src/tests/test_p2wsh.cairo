@@ -85,7 +85,7 @@ fn test_custom_hash_puzzle() {
     let prevout_pk_script =
         "0x0020ee4fd29ce2f9ca8411778f8e94687d5e75ec3e86cc530ca9ad1787e5208cc996";
     let prev_out = UTXO {
-        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087
+        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087,
     };
 
     let raw_transaction_hex =
@@ -106,7 +106,7 @@ fn test_custom_hash_puzzle_invalid_unlock_code() {
     let prevout_pk_script =
         "0x0020ee4fd29ce2f9ca8411778f8e94687d5e75ec3e86cc530ca9ad1787e5208cc996";
     let prev_out = UTXO {
-        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087
+        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087,
     };
 
     // replace unlock code 1234 by 2345
@@ -130,7 +130,7 @@ fn test_custom_hash_puzzle_wrong_hash_script_in_pubkey_script() {
     let prevout_pk_script =
         "0x0020fe4fd29ce2f9ca8411778f8e94687d5e75ec3e86cc530ca9ad1787e5208cc996";
     let prev_out = UTXO {
-        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087
+        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087,
     };
 
     let raw_transaction_hex =
@@ -152,7 +152,7 @@ fn test_custom_hash_puzzle_different_witness_script_from_hash() {
     let prevout_pk_script =
         "0x0020ee4fd29ce2f9ca8411778f8e94687d5e75ec3e86cc530ca9ad1787e5208cc996";
     let prev_out = UTXO {
-        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087
+        amount: 30000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 802087,
     };
 
     // original witness script

@@ -1,6 +1,6 @@
 use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
-    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait,
 };
 use starknet::secp256_trait::{Secp256Trait, Signature};
 use starknet::secp256k1::{Secp256k1Point};
@@ -39,10 +39,10 @@ pub fn schnorr_parse_signature(sig_bytes: @ByteArray) -> Result<(Signature, u32)
             Signature {
                 r: u256_from_byte_array_with_offset(sig_bytes, 0, 32),
                 s: u256_from_byte_array_with_offset(sig_bytes, 32, 32),
-                y_parity: false, // Schnorr signatures don't use y_parity
+                y_parity: false // Schnorr signatures don't use y_parity
             },
-            hash_type
-        )
+            hash_type,
+        ),
     )
 }
 
@@ -78,14 +78,14 @@ pub trait TaprootSigVerifierTrait<
     T,
     +EngineTransactionInputTrait<I>,
     +EngineTransactionOutputTrait<O>,
-    +EngineTransactionTrait<T, I, O>
+    +EngineTransactionTrait<T, I, O>,
 > {
     fn empty() -> TaprootSigVerifier<T>;
     fn new(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252>;
     fn new_base(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252>;
     fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252>;
     fn verify_base(ref self: TaprootSigVerifier<T>) -> bool;
@@ -102,8 +102,8 @@ pub impl TaprootSigVerifierImpl<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 > of TaprootSigVerifierTrait<I, O, T> {
     fn empty() -> TaprootSigVerifier<T> {
         TaprootSigVerifier {
@@ -116,12 +116,12 @@ pub impl TaprootSigVerifierImpl<
             inputIndex: 0,
             prevOuts: Default::<EngineTransactionOutput>::default(),
             hashCache: Default::default(),
-            annex: @""
+            annex: @"",
         }
     }
 
     fn new(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let pub_key = parse_schnorr_pub_key(pk_bytes)?;
         let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
@@ -141,13 +141,13 @@ pub impl TaprootSigVerifierImpl<
                 inputIndex: engine.tx_idx,
                 prevOuts: prevOutput,
                 hashCache: sig_hashes,
-                annex
-            }
+                annex,
+            },
         )
     }
 
     fn new_base(
-        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>
+        sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let pk_bytes_len = pk_bytes.len();
         if pk_bytes_len == 0 {
@@ -165,7 +165,7 @@ pub impl TaprootSigVerifierImpl<
     fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252> {
         let mut opts = TaprootSighashOptionsTrait::new_with_annex(self.annex);
         let sig_hash = sighash::calc_taproot_signature_hash::<
-            T
+            T,
         >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts)?;
 
         is_valid_schnorr_signature(sig_hash, self.sig, self.pub_key)?;
@@ -181,7 +181,7 @@ pub impl TaprootSigVerifierImpl<
 pub fn is_valid_schnorr_signature<
     Secp256Point, +Drop<Secp256Point>, impl Secp256Impl: Secp256Trait<Secp256Point>,
 >(
-    msg_hash: u256, sig: Signature, public_key: Secp256Point
+    msg_hash: u256, sig: Signature, public_key: Secp256Point,
 ) -> Result<(), felt252> {
     return Result::Ok(());
 }

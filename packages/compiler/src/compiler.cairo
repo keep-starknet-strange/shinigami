@@ -9,7 +9,7 @@ use crate::utils::{is_hex, is_number, is_string};
 #[derive(Destruct)]
 pub struct Compiler {
     // Dict containing opcode names to their bytecode representation
-    opcodes: Felt252Dict<Nullable<u8>>
+    opcodes: Felt252Dict<Nullable<u8>>,
 }
 
 pub trait CompilerTrait {

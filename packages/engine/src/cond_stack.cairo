@@ -9,7 +9,7 @@ pub struct ConditionalStack {
 #[generate_trait()]
 pub impl ConditionalStackImpl of ConditionalStackTrait {
     fn new() -> ConditionalStack {
-        ConditionalStack { stack: Default::default(), len: 0, }
+        ConditionalStack { stack: Default::default(), len: 0 }
     }
 
     fn push(ref self: ConditionalStack, value: u8) {
@@ -43,7 +43,7 @@ pub impl ConditionalStackImpl of ConditionalStackTrait {
             0 => self.stack.insert(cond_idx.into(), 1),
             1 => self.stack.insert(cond_idx.into(), 0),
             2 => self.stack.insert(cond_idx.into(), 2),
-            _ => panic!("Invalid condition")
+            _ => panic!("Invalid condition"),
         }
     }
 }

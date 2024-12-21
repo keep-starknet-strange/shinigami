@@ -1,6 +1,6 @@
 use crate::errors::Error;
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
 use crate::signature::taproot_signature::parse_schnorr_pub_key;
 use crate::signature::taproot_signature::{TaprootSigVerifierImpl};
@@ -14,7 +14,7 @@ pub struct TaprootContext {
     pub code_sep: u32,
     pub tapleaf_hash: u256,
     sig_ops_budget: i32,
-    pub must_succeed: bool
+    pub must_succeed: bool,
 }
 
 #[derive(Drop)]
@@ -22,7 +22,7 @@ pub struct ControlBlock {
     internal_pubkey: Secp256k1Point,
     output_key_y_is_odd: bool,
     pub leaf_version: u8,
-    control_block: @ByteArray
+    control_block: @ByteArray,
 }
 
 pub fn serialize_pub_key(pub_key: Secp256k1Point) -> @ByteArray {
@@ -73,13 +73,13 @@ pub impl ControlBlockImpl of ControlBlockTrait {
         internal_pubkey: Secp256k1Point,
         output_key_y_is_odd: bool,
         leaf_version: u8,
-        control_block: @ByteArray
+        control_block: @ByteArray,
     ) -> ControlBlock {
         ControlBlock {
             internal_pubkey: internal_pubkey,
             output_key_y_is_odd: output_key_y_is_odd,
             leaf_version: leaf_version,
-            control_block: control_block
+            control_block: control_block,
         }
     }
 
@@ -89,7 +89,7 @@ pub impl ControlBlockImpl of ControlBlockTrait {
     }
 
     fn verify_taproot_leaf(
-        self: @ControlBlock, witness_program: @ByteArray, script: @ByteArray
+        self: @ControlBlock, witness_program: @ByteArray, script: @ByteArray,
     ) -> Result<(), felt252> {
         let root_hash = self.root_hash(script);
         let taproot_key = compute_taproot_output_key(self.internal_pubkey, @root_hash);
@@ -127,7 +127,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
             code_sep: BASE_CODE_SEP,
             tapleaf_hash: 0,
             sig_ops_budget: SIG_OPS_DELTA + witness_size,
-            must_succeed: false
+            must_succeed: false,
         }
     }
 
@@ -137,7 +137,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
             code_sep: BASE_CODE_SEP,
             tapleaf_hash: 0,
             sig_ops_budget: SIG_OPS_DELTA,
-            must_succeed: false
+            must_succeed: false,
         }
     }
 
@@ -148,14 +148,18 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
         impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
         impl IEngineTransactionTrait: EngineTransactionTrait<
-            T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+            T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
         >,
         +Drop<T>,
         +Drop<I>,
         +Drop<O>,
-        +Default<T>
+        +Default<T>,
     >(
-        ref engine: Engine<T>, witness_program: @ByteArray, raw_sig: @ByteArray, tx: @T, tx_idx: u32
+        ref engine: Engine<T>,
+        witness_program: @ByteArray,
+        raw_sig: @ByteArray,
+        tx: @T,
+        tx_idx: u32,
     ) -> Result<(), felt252> {
         let witness: Span<ByteArray> = tx.get_transaction_inputs()[tx_idx].get_witness();
         let mut annex = @"";
@@ -164,7 +168,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         }
 
         let mut verifier = TaprootSigVerifierImpl::<
-            T
+            T,
         >::new(raw_sig, witness_program, annex, ref engine)?;
         let is_valid = TaprootSigVerifierImpl::<T>::verify(verifier);
         if is_valid.is_err() {
@@ -208,8 +212,8 @@ pub fn parse_control_block(control_block: @ByteArray) -> Result<ControlBlock, fe
             internal_pubkey: pubkey,
             output_key_y_is_odd: output_key_y_is_odd,
             leaf_version: leaf_version,
-            control_block: control_block
-        }
+            control_block: control_block,
+        },
     );
 }
 

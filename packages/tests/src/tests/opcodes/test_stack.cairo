@@ -119,7 +119,7 @@ fn test_op_swap_mid() {
         ScriptNum::wrap(3),
         ScriptNum::wrap(2),
         ScriptNum::wrap(4),
-        ScriptNum::wrap(5)
+        ScriptNum::wrap(5),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
@@ -153,7 +153,7 @@ fn test_op_2dup() {
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 4);
     let expected_dstack = array![
-        ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(1), ScriptNum::wrap(2)
+        ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(1), ScriptNum::wrap(2),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
@@ -169,7 +169,7 @@ fn test_op_3dup() {
         ScriptNum::wrap(3),
         ScriptNum::wrap(1),
         ScriptNum::wrap(2),
-        ScriptNum::wrap(3)
+        ScriptNum::wrap(3),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
@@ -180,7 +180,7 @@ fn test_op_2swap() {
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 4);
     let expected_dstack = array![
-        ScriptNum::wrap(3), ScriptNum::wrap(4), ScriptNum::wrap(1), ScriptNum::wrap(2)
+        ScriptNum::wrap(3), ScriptNum::wrap(4), ScriptNum::wrap(1), ScriptNum::wrap(2),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
@@ -196,7 +196,7 @@ fn test_op_2swap_mid() {
         ScriptNum::wrap(1),
         ScriptNum::wrap(2),
         ScriptNum::wrap(5),
-        ScriptNum::wrap(6)
+        ScriptNum::wrap(6),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
@@ -231,7 +231,7 @@ fn test_op_pick_2() {
     let mut engine = utils::test_compile_and_run(program);
     utils::check_dstack_size(ref engine, 4);
     let expected_dstack = array![
-        ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(3), ScriptNum::wrap(1)
+        ScriptNum::wrap(1), ScriptNum::wrap(2), ScriptNum::wrap(3), ScriptNum::wrap(1),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
@@ -272,7 +272,7 @@ fn test_op_2rot() {
         ScriptNum::wrap(5),
         ScriptNum::wrap(6),
         ScriptNum::wrap(1),
-        ScriptNum::wrap(2)
+        ScriptNum::wrap(2),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
@@ -357,7 +357,7 @@ fn test_opcode_2over() {
         ScriptNum::wrap(3),
         ScriptNum::wrap(4),
         ScriptNum::wrap(1),
-        ScriptNum::wrap(2)
+        ScriptNum::wrap(2),
     ];
     utils::check_expected_dstack(ref engine, expected_dstack.span());
 }
