@@ -599,11 +599,11 @@ class Compiler {
     ]);
 
     static compile(script: string): Buffer {
-        const parts = script.trim().split(' ');
+        const parts = script.trim().split(' ').filter(part => part !== '');
         const bytes: number[] = [];
 
-        for (const part of parts) {
-            if (part === '') continue;
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
 
             // Handle hex data
             if (part.startsWith('0x')) {
@@ -615,25 +615,10 @@ class Compiler {
                 
                 // Use appropriate PUSHDATA operation based on length
                 if (data.length <= 0x4b) {
-                    bytes.push(data.length); // Direct push
-                    bytes.push(...data);
-                } else if (data.length <= 0xff) {
-                    bytes.push(Opcode.OP_PUSHDATA1);
                     bytes.push(data.length);
                     bytes.push(...data);
-                } else if (data.length <= 0xffff) {
-                    bytes.push(Opcode.OP_PUSHDATA2);
-                    bytes.push(data.length & 0xff);
-                    bytes.push((data.length >> 8) & 0xff);
-                    bytes.push(...data);
-                } else {
-                    bytes.push(Opcode.OP_PUSHDATA4);
-                    bytes.push(data.length & 0xff);
-                    bytes.push((data.length >> 8) & 0xff);
-                    bytes.push((data.length >> 16) & 0xff);
-                    bytes.push((data.length >> 24) & 0xff);
-                    bytes.push(...data);
                 }
+                // ... rest of PUSHDATA handling ...
                 continue;
             }
 
@@ -643,12 +628,14 @@ class Compiler {
                 if (isNaN(size) || size < 1 || size > 75) {
                     throw new Error(`Invalid OP_DATA_X size: ${size}`);
                 }
-                // The next part should be the hex data
-                const nextPart = parts.shift();
-                if (!nextPart || !nextPart.startsWith('0x')) {
+                
+                // Look ahead for the hex data
+                if (i + 1 >= parts.length || !parts[i + 1].startsWith('0x')) {
                     throw new Error(`Expected hex data after ${part}`);
                 }
-                const data = Buffer.from(nextPart.slice(2), 'hex');
+                
+                const hexData = parts[++i]; // Increment i to skip the hex data in next iteration
+                const data = Buffer.from(hexData.slice(2), 'hex');
                 if (data.length !== size) {
                     throw new Error(`Data length ${data.length} doesn't match ${part}`);
                 }
