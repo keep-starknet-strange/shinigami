@@ -1287,7 +1287,7 @@ const testScript: InputData = {
 };
 
 // Export all necessary components
-export type {
+export {
     Opcode,
     ScriptNum,
     Stack,
@@ -1295,7 +1295,7 @@ export type {
     Compiler,
     HashUtils,
     SignatureChecker,
-    InputData,
+    type InputData,
     backendRun,
     hexToBytes,
     bytesToHex,

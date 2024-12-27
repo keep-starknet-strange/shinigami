@@ -18,6 +18,7 @@ import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StackItem } from "../../types";
 import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-script";
+import { backendRun, InputData } from "@/utils/shinigami";
 
 const jura = Jura({ subsets: ["latin"] });
 
@@ -62,32 +63,31 @@ export default function ScriptEditor() {
     setIsLoading(true);
     setError(undefined);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      // Use local backendRun instead of making API calls
+      const input: InputData = {
+        ScriptSig: sig,
+        ScriptPubKey: pubKey
+      };
+      
+      const result = backendRun(input);
 
-      const response = await fetch(`${backendUrl}/${runType}`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        mode: 'cors',
-        body: JSON.stringify({ pub_key: pubKey, sig: sig })
-      });
-      const result = await response.json();
-      if (runType === "run-script" && result.message && result.message.length > 0) {
-        JSON.parse(result.message[0]).map((item: string, _: number) => {
-          stack.push({ value: item });
-        });
+      console.log(result);
+      
+      if (runType === "run-script") {
+        if (result === 1) {
+          // Success case
+          stack.push({ value: "1" });
+        } else {
+          // Failure case
+          stack.push({ value: "0" });
+        }
       }
-      else if (runType === "debug-script" && result.message && result.message.length > 0) {
+      else if (runType === "debug-script") {
         setHasFetchedDebugData(true);
         setIsDebugging(true);
-        let debuggingContent: StackItem[][] = [];
-        result.message.map((item: string, _: number) => {
-          let innerStack: StackItem[] = [];
-          JSON.parse(item).map((innerItem: string, _: number) => {
-            innerStack.push({ value: innerItem });
-          });
-          debuggingContent.push(innerStack);
-        });
-        setDebuggingContent(debuggingContent ? debuggingContent.slice(0, debuggingContent.length - 1) : debuggingContent);
+        // For debugging, we'll need to implement step-by-step execution
+        // This would require modifications to backendRun to support debugging
+        setDebuggingContent([[{ value: result.toString() }]]);
       }
       setStackContent(stack);
     } catch (err: any) {
@@ -261,7 +261,7 @@ export default function ScriptEditor() {
         }
       }
     }
-  }, [step, scriptPubKey, scriptSig, monacoOne, monacoTwo, split]);
+  }, [step, scriptPubKey, scriptSig, monacoOne, monacoTwo, split, currentDecorationsOne, currentDecorationsTwo]);
 
   // Helper function to find word position in a script
   const findWordPosition = (script: string, wordToHighlight: string, step: number) => {
