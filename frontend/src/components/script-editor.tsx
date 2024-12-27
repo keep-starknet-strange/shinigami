@@ -5,20 +5,16 @@ import StackVisualizer from "@/components/stack-visualizer";
 import { Editor } from "@monaco-editor/react";
 import Image from "next/image";
 
-import refreshImage from "@/images/refresh-icon.svg";
 import splitImage from "@/images/split.svg";
 import unsplitImage from "@/images/unsplit.svg";
 import next from "@/images/next.svg";
 import previous from "@/images/previous.svg";
 import stop from "@/images/stop.svg";
-import nextIcon from "@/images/next-icon.svg";
-import previousIcon from "@/images/previous-icon.svg";
-import stopIcon from "@/images/stop-icon.svg";
 import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StackItem } from "../../types";
 import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-script";
-import { backendRun, backendDebug, InputData, type DebugState } from "@/utils/shinigami";
+import { backendRun, backendDebug, InputData } from "@/utils/shinigami";
 
 const jura = Jura({ subsets: ["latin"] });
 
@@ -73,7 +69,20 @@ export default function ScriptEditor() {
         }
         else if (runType === "debug-script") {
             const debugStates = backendDebug(input);
-            console.log('Debug States:', debugStates);
+            
+            // Parse the debug states and convert to StackItem arrays
+            const debuggingContent: StackItem[][] = debugStates.map((state: string) => {
+                const stackArray = JSON.parse(state);
+                return stackArray.map((item: string) => ({ value: item }));
+            });
+
+            setDebuggingContent(debuggingContent);  // Set debugging content first
+            setStackContent(debuggingContent[0]);   // Set initial stack content
+            setStep(0);                             // Set initial step
+            setHasFetchedDebugData(true);
+            setIsDebugging(true);
+
+            console.log('debuggingContent: ', debuggingContent);
         }
     } catch (err: any) {
         setError(err.message || "An error occurred");
@@ -82,8 +91,15 @@ export default function ScriptEditor() {
     }
   };
 
-  const handleRunScript = () => runScript("run-script", setIsFetching, setRunError);
-  const handleDebugScript = () => runScript("debug-script", setDebugFetch, setDebugError);
+  const handleRunScript = () => {
+    runScript("run-script", setIsFetching, setRunError);
+    handleEditorDecorations();
+  };
+
+  const handleDebugScript = () => {
+    runScript("debug-script", setDebugFetch, setDebugError);
+    handleEditorDecorations();
+  };
 
   const [split, setSplit] = useState(false);
   const [monacoOne, setMonacoOne] = useState<any>();
@@ -150,103 +166,103 @@ export default function ScriptEditor() {
   const [currentDecorationsOne, setCurrentDecorationsOne] = useState<string[]>([]);
   const [currentDecorationsTwo, setCurrentDecorationsTwo] = useState<string[]>([]);
 
-  useEffect(() => {
+  // Move this outside the useEffect to prevent recreation on every render
+  const handleEditorDecorations = () => {
     const sigWords = scriptSig.trim() === "" ? [] : scriptSig.split(/\s+/);
     const pubKeyWords = scriptPubKey.split(/\s+/);
     const totalSigWords = sigWords.length;
     const totalPubKeyWords = pubKeyWords.length;
-
     const combinedLength = totalSigWords + totalPubKeyWords;
 
     if (split) {
-      // When the editor is split, handle scriptSig in the first editor and scriptPubKey in the second editor
       if (monacoOne) {
         const editor_one = monacoOne.editor.getModels()[0];
         if (editor_one) {
-          editor_one.deltaDecorations(currentDecorationsOne, []);
-          if (step >= 0 && step < totalSigWords) {
-            const wordToHighlight = sigWords[step];
-            let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptSig, wordToHighlight, step);
-            const range = {
-              startLineNumber: startLine,
-              startColumn: startColumn,
-              endLineNumber: endLine,
-              endColumn: endColumn
-            };
-            const newDecorations = editor_one.deltaDecorations(currentDecorationsOne, [
-              {
-                range,
-                options: {
-                  isWholeLine: false,
-                  inlineClassName: 'custom-highlight'
-                }
-              }
-            ]);
-            setCurrentDecorationsOne(newDecorations);
-          }
+          const newDecorations = updateEditorDecorations(
+            editor_one,
+            currentDecorationsOne,
+            scriptSig,
+            sigWords,
+            step,
+            0
+          );
+          setCurrentDecorationsOne(newDecorations);
         }
       }
 
       if (monacoTwo) {
         const editor_two = monacoTwo.editor.getModels()[1];
         if (editor_two) {
-          editor_two.deltaDecorations(currentDecorationsTwo, []);
-          if (step >= totalSigWords && step < combinedLength) {
-            const wordToHighlight = pubKeyWords[step - totalSigWords];
-            let { startLine, startColumn, endLine, endColumn } = findWordPosition(scriptPubKey, wordToHighlight, step - totalSigWords);
-            const range = {
-              startLineNumber: startLine,
-              startColumn: startColumn,
-              endLineNumber: endLine,
-              endColumn: endColumn
-            };
-            const newDecorations = editor_two.deltaDecorations(currentDecorationsTwo, [
-              {
-                range,
-                options: {
-                  isWholeLine: false,
-                  inlineClassName: 'custom-highlight'
-                }
-              }
-            ]);
-            setCurrentDecorationsTwo(newDecorations);
-          }
+          const newDecorations = updateEditorDecorations(
+            editor_two,
+            currentDecorationsTwo,
+            scriptPubKey,
+            pubKeyWords,
+            step,
+            totalSigWords
+          );
+          setCurrentDecorationsTwo(newDecorations);
         }
       }
     } else {
-      // When the editor is not split, treat both scripts as one combined script and highlight accordingly in monacoTwo
       if (monacoTwo) {
         const editor_two = monacoTwo.editor.getModels()[0];
         if (editor_two) {
           editor_two.deltaDecorations(currentDecorationsTwo, []);
           if (step >= 0 && step < combinedLength) {
-            // Highlight in the combined script, starting with scriptPubKey first
             const isInSig = step < totalSigWords;
             const script = isInSig ? scriptSig : scriptPubKey;
             const words = script.split(/\s+/);
             const wordToHighlight = words[isInSig ? step : step - totalSigWords];
-            let { startLine, startColumn, endLine, endColumn } = findWordPosition(script, wordToHighlight, isInSig ? step : step - totalSigWords);
-            const range = {
-              startLineNumber: startLine,
-              startColumn: startColumn,
-              endLineNumber: endLine,
-              endColumn: endColumn
-            };
-            const newDecorations = editor_two.deltaDecorations(currentDecorationsTwo, [
-              {
-                range,
-                options: {
-                  isWholeLine: false,
-                  inlineClassName: 'custom-highlight'
-                }
+            const { startLine, startColumn, endLine, endColumn } = findWordPosition(
+              script,
+              wordToHighlight,
+              isInSig ? step : step - totalSigWords
+            );
+            const newDecorations = editor_two.deltaDecorations(currentDecorationsTwo, [{
+              range: {
+                startLineNumber: startLine,
+                startColumn: startColumn,
+                endLineNumber: endLine,
+                endColumn: endColumn
+              },
+              options: {
+                isWholeLine: false,
+                inlineClassName: 'custom-highlight'
               }
-            ]);
+            }]);
             setCurrentDecorationsTwo(newDecorations);
           }
         }
       }
     }
-  }, [step, scriptPubKey, scriptSig, monacoOne, monacoTwo, split, currentDecorationsOne, currentDecorationsTwo]);
+  };
+
+  // Helper function to update editor decorations
+  const updateEditorDecorations = (editor: any, currentDecorations: string[], script: string, words: string[], step: number, offset: number) => {
+    editor.deltaDecorations(currentDecorations, []);
+    if (step >= offset && step < words.length + offset) {
+      const wordToHighlight = words[step - offset];
+      const { startLine, startColumn, endLine, endColumn } = findWordPosition(
+        script,
+        wordToHighlight,
+        step - offset
+      );
+      return editor.deltaDecorations(currentDecorations, [{
+        range: {
+          startLineNumber: startLine,
+          startColumn: startColumn,
+          endLineNumber: endLine,
+          endColumn: endColumn
+        },
+        options: {
+          isWholeLine: false,
+          inlineClassName: 'custom-highlight'
+        }
+      }]);
+    }
+    return [];
+  };
 
   // Helper function to find word position in a script
   const findWordPosition = (script: string, wordToHighlight: string, step: number) => {
@@ -312,15 +328,6 @@ export default function ScriptEditor() {
     </div>
   );
 
-  const fetchTxData = async (txID: string) => {
-    //the txID is the transaction hash
-    const response = await fetch(`https://blockchain.info/rawtx/${txID}`);
-    const result = await response.json()
-    return result;
-  }
-
-  fetchTxData("6949cd6f248b31d039039a1de3bcfe767c37023fd5ab6fcde400ae3ea1bfddd1");
-
   return (
     <div className="w-full h-full">
       <div className="flex flex-col space-y-0 md:space-y-0 md:flex-row items-start md:space-x-5 w-full">
@@ -334,6 +341,7 @@ export default function ScriptEditor() {
               onClick={() => {
                 setStep(-1);
                 setSplit(!split);
+                handleEditorDecorations();
               }}
             >
               <Image src={split ? unsplitImage : splitImage} alt="" unoptimized />
@@ -375,6 +383,7 @@ export default function ScriptEditor() {
                         let newStep = Math.max(step - 1, 0);
                         setStep(newStep);
                         setStackContent(debuggingContent[newStep]);
+                        handleEditorDecorations();
                       }}>
                         <Image src={previous} alt="" unoptimized />
                       </button>
@@ -383,6 +392,7 @@ export default function ScriptEditor() {
                       let newStep = Math.min(step + 1, debuggingContent.length - 1);
                       setStep(newStep);
                       setStackContent(debuggingContent[newStep]);
+                      handleEditorDecorations();
                     }}>
                       <Image src={next} alt="" unoptimized />
                     </button>
