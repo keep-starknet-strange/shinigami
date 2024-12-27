@@ -1471,7 +1471,7 @@ if (require.main === module) {
 }
 
 // Add backendDebug function
-function backendDebug(input: InputData): DebugState[] {
+function backendDebug(input: InputData): string[] {
     console.log(`Running Bitcoin Script with ScriptSig: '${input.ScriptSig}' and ScriptPubKey: '${input.ScriptPubKey}'`);
 
     try {
@@ -1480,20 +1480,15 @@ function backendDebug(input: InputData): DebugState[] {
         const combinedScript = Buffer.concat([scriptSig, scriptPubKey]);
         
         const engine = new ScriptEngine(combinedScript);
-        const states: DebugState[] = [];
+        const stackStates: string[] = [];
         
         while (true) {
             const state = engine.step();
-            // Format the stack values to match Cairo output
-            const formattedState = {
-                ...state,
-                stack: state.stack.map(buffer => `0x${buffer.toString('hex')}`),
-                altStack: state.altStack.map(buffer => `0x${buffer.toString('hex')}`)
-            };
-            states.push(formattedState as any);
-            
-            // Log the stack state in the same format as Cairo
-            console.log(JSON.stringify(formattedState.stack));
+            // Format the stack values to match Cairo output format
+            const stackState = JSON.stringify(
+                state.stack.map(buffer => `0x${buffer.toString('hex')}`)
+            );
+            stackStates.push(stackState);
             
             if (state.error || state.done) {
                 if (!state.error) {
@@ -1503,15 +1498,9 @@ function backendDebug(input: InputData): DebugState[] {
             }
         }
         
-        return states;
+        return stackStates;
     } catch (error: any) {
-        return [{
-            stack: [],
-            altStack: [],
-            opcode: -1,
-            pc: 0,
-            error: error.message,
-            done: true
-        }];
+        console.log(`Execution failed: ${error.message}`);
+        return [];
     }
 }
