@@ -169,6 +169,13 @@ const ERROR = {
     SCRIPT_ERR_PUBKEY_COUNT: "Public key count exceeded",
     SCRIPT_ERR_SIG_COUNT: "Signature count exceeded",
     SCRIPT_ERR_INVALID_OPERAND_SIZE: "Invalid operand size",
+    SCRIPT_ERR_OP_RETURN: "OP_RETURN encountered",
+    SCRIPT_ERR_DIV_BY_ZERO: "Division by zero",
+    SCRIPT_ERR_NEGATIVE_LOCKTIME: "Negative locktime",
+    SCRIPT_ERR_CHECKSIGVERIFY: "OP_CHECKSIGVERIFY failed",
+    SCRIPT_ERR_CHECKMULTISIGVERIFY: "OP_CHECKMULTISIGVERIFY failed",
+    SCRIPT_ERR_NUMEQUALVERIFY: "OP_NUMEQUALVERIFY failed",
+    SCRIPT_ERR_EQUALVERIFY: "OP_EQUALVERIFY failed",
 };
 
 // Script flags
@@ -590,6 +597,7 @@ class ScriptEngine {
     private opCount: number;
     private conditionalStack: boolean[];
     private hashCache: Map<string, Buffer>;
+    private lastCodeSeparator: number;
 
     constructor(script: Buffer) {
         this.stack = new Stack();
@@ -599,6 +607,7 @@ class ScriptEngine {
         this.opCount = 0;
         this.conditionalStack = [];
         this.hashCache = new Map();
+        this.lastCodeSeparator = 0;
     }
 
     private readBytes(n: number): Buffer {
@@ -1175,7 +1184,7 @@ class ScriptEngine {
             }
 
             default:
-                throw new Error(ERROR.SCRIPT_ERR_BAD_OPCODE);
+                throw new Error(ERROR.SCRIPT_ERR_INVALID_OPCODE);
         }
     }
 
@@ -1255,7 +1264,7 @@ function backendRun(input: InputData): number {
             console.log("Execution failed");
             return 0;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.log(`Execution failed: ${error.message}`);
         return 0;
     }
@@ -1278,7 +1287,7 @@ const testScript: InputData = {
 };
 
 // Export all necessary components
-export {
+export type {
     Opcode,
     ScriptNum,
     Stack,
