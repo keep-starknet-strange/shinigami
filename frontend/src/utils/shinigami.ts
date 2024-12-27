@@ -658,6 +658,15 @@ class Compiler {
 
 // shinigami.ts - Part 4
 
+interface DebugState {
+    stack: Buffer[];
+    altStack: Buffer[];
+    opcode: number;
+    pc: number;
+    error?: string;
+    done: boolean;
+}
+
 class ScriptEngine {
     private stack: Stack;
     private altStack: Stack;
@@ -1262,54 +1271,51 @@ class ScriptEngine {
         // based on the transaction data and current input
         return Buffer.alloc(32); // Placeholder
     }
-// shinigami.ts - Part 7 (completing the implementation)
 
-    // Main execution method in ScriptEngine class
-    public execute(): boolean {
-        try {
-            while (this.pc < this.script.length) {
-                const opcode = this.script[this.pc++];
-
-                // Handle OP_DATA_X operations (1-75 bytes)
-                if (opcode > 0x00 && opcode <= 0x4b) {
-                    const dataLength = opcode;
-                    const data = this.readBytes(dataLength);
-                    if (data.length !== dataLength) {
-                        throw new Error(ERROR.SCRIPT_ERR_INVALID_STACK_OPERATION);
-                    }
-                    this.stack.push(data);
-                    continue;
-                }
-
-                // Handle PUSHDATA operations
-                if (opcode === Opcode.OP_PUSHDATA1) {
-                    const length = this.script[this.pc++];
-                    this.stack.push(this.readBytes(length));
-                    continue;
-                }
-                if (opcode === Opcode.OP_PUSHDATA2) {
-                    const length = this.script.readUInt16LE(this.pc);
-                    this.pc += 2;
-                    this.stack.push(this.readBytes(length));
-                    continue;
-                }
-                if (opcode === Opcode.OP_PUSHDATA4) {
-                    const length = this.script.readUInt32LE(this.pc);
-                    this.pc += 4;
-                    this.stack.push(this.readBytes(length));
-                    continue;
-                }
-
-                // Execute the opcode
-                this.executeOpcode(opcode);
-            }
-
-            // Script succeeded if stack is not empty and top value is truthy
-            return this.stack.size() > 0 && this.popBool();
-        } catch (error) {
-            console.error('Script execution failed:', error);
-            return false;
+    // Add step method to ScriptEngine
+    public step(): DebugState {
+        if (this.pc >= this.script.length) {
+            return {
+                stack: this.stack.asArray(),
+                altStack: this.altStack.asArray(),
+                opcode: -1,
+                pc: this.pc,
+                done: true
+            };
         }
+
+        try {
+            const opcode = this.script[this.pc++];
+            this.executeOpcode(opcode);
+            
+            return {
+                stack: this.stack.asArray(),
+                altStack: this.altStack.asArray(),
+                opcode,
+                pc: this.pc,
+                done: false
+            };
+        } catch (error: any) {
+            return {
+                stack: this.stack.asArray(),
+                altStack: this.altStack.asArray(),
+                opcode: this.script[this.pc - 1],
+                pc: this.pc,
+                error: error.message,
+                done: true
+            };
+        }
+    }
+
+    // Add execute method that uses step
+    public execute(): boolean {
+        while (true) {
+            const state = this.step();
+            if (state.error || state.done) {
+                break;
+            }
+        }
+        return this.stack.size() > 0 && this.popBool();
     }
 }
 
@@ -1372,7 +1378,9 @@ export {
     hexToBytes,
     bytesToHex,
     ERROR,
-    ScriptFlags
+    ScriptFlags,
+    backendDebug,
+    type DebugState
 };
 
 // Usage example:
@@ -1460,4 +1468,50 @@ function runTests(): void {
 // If running directly (not imported as a module)
 if (require.main === module) {
     runTests();
+}
+
+// Add backendDebug function
+function backendDebug(input: InputData): DebugState[] {
+    console.log(`Running Bitcoin Script with ScriptSig: '${input.ScriptSig}' and ScriptPubKey: '${input.ScriptPubKey}'`);
+
+    try {
+        const scriptSig = Compiler.compile(input.ScriptSig);
+        const scriptPubKey = Compiler.compile(input.ScriptPubKey);
+        const combinedScript = Buffer.concat([scriptSig, scriptPubKey]);
+        
+        const engine = new ScriptEngine(combinedScript);
+        const states: DebugState[] = [];
+        
+        while (true) {
+            const state = engine.step();
+            // Format the stack values to match Cairo output
+            const formattedState = {
+                ...state,
+                stack: state.stack.map(buffer => `0x${buffer.toString('hex')}`),
+                altStack: state.altStack.map(buffer => `0x${buffer.toString('hex')}`)
+            };
+            states.push(formattedState as any);
+            
+            // Log the stack state in the same format as Cairo
+            console.log(JSON.stringify(formattedState.stack));
+            
+            if (state.error || state.done) {
+                if (!state.error) {
+                    console.log("Execution successful");
+                }
+                break;
+            }
+        }
+        
+        return states;
+    } catch (error: any) {
+        return [{
+            stack: [],
+            altStack: [],
+            opcode: -1,
+            pc: 0,
+            error: error.message,
+            done: true
+        }];
+    }
 }

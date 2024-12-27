@@ -18,7 +18,7 @@ import clsx from "@/utils/lib";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StackItem } from "../../types";
 import { bitcoinScriptLanguage, bitcoinScriptOpcodes } from "@/utils/bitcoin-script";
-import { backendRun, InputData } from "@/utils/shinigami";
+import { backendRun, backendDebug, InputData, type DebugState } from "@/utils/shinigami";
 
 const jura = Jura({ subsets: ["latin"] });
 
@@ -59,41 +59,26 @@ export default function ScriptEditor() {
       return;
     }
 
-    const stack: StackItem[] = [];
     setIsLoading(true);
     setError(undefined);
     try {
-      // Use local backendRun instead of making API calls
-      const input: InputData = {
-        ScriptSig: sig,
-        ScriptPubKey: pubKey
-      };
-      
-      const result = backendRun(input);
-
-      console.log(result);
-      
-      if (runType === "run-script") {
-        if (result === 1) {
-          // Success case
-          stack.push({ value: "1" });
-        } else {
-          // Failure case
-          stack.push({ value: "0" });
+        const input: InputData = {
+            ScriptSig: sig,
+            ScriptPubKey: pubKey
+        };
+        
+        if (runType === "run-script") {
+            const result = backendRun(input);
+            setStackContent([{ value: result === 1 ? "1" : "0" }]);
         }
-      }
-      else if (runType === "debug-script") {
-        setHasFetchedDebugData(true);
-        setIsDebugging(true);
-        // For debugging, we'll need to implement step-by-step execution
-        // This would require modifications to backendRun to support debugging
-        setDebuggingContent([[{ value: result.toString() }]]);
-      }
-      setStackContent(stack);
+        else if (runType === "debug-script") {
+            const debugStates = backendDebug(input);
+            console.log('Debug States:', debugStates);
+        }
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+        setError(err.message || "An error occurred");
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
 
