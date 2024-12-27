@@ -145,7 +145,84 @@ enum Opcode {
     OP_NOP8 = 0xb7,
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
-}
+
+    // Add these new opcodes after the existing constants
+    OP_DATA_1 = 0x01,
+    OP_DATA_2 = 0x02,
+    OP_DATA_3 = 0x03,
+    OP_DATA_4 = 0x04,
+    OP_DATA_5 = 0x05,
+    OP_DATA_6 = 0x06,
+    OP_DATA_7 = 0x07,
+    OP_DATA_8 = 0x08,
+    OP_DATA_9 = 0x09,
+    OP_DATA_10 = 0x0a,
+    OP_DATA_11 = 0x0b,
+    OP_DATA_12 = 0x0c,
+    OP_DATA_13 = 0x0d,
+    OP_DATA_14 = 0x0e,
+    OP_DATA_15 = 0x0f,
+    OP_DATA_16 = 0x10,
+    OP_DATA_17 = 0x11,
+    OP_DATA_18 = 0x12,
+    OP_DATA_19 = 0x13,
+    OP_DATA_20 = 0x14,
+    OP_DATA_21 = 0x15,
+    OP_DATA_22 = 0x16,
+    OP_DATA_23 = 0x17,
+    OP_DATA_24 = 0x18,
+    OP_DATA_25 = 0x19,
+    OP_DATA_26 = 0x1a,
+    OP_DATA_27 = 0x1b,
+    OP_DATA_28 = 0x1c,
+    OP_DATA_29 = 0x1d,
+    OP_DATA_30 = 0x1e,
+    OP_DATA_31 = 0x1f,
+    OP_DATA_32 = 0x20,
+    OP_DATA_33 = 0x21,
+    OP_DATA_34 = 0x22,
+    OP_DATA_35 = 0x23,
+    OP_DATA_36 = 0x24,
+    OP_DATA_37 = 0x25,
+    OP_DATA_38 = 0x26,
+    OP_DATA_39 = 0x27,
+    OP_DATA_40 = 0x28,
+    OP_DATA_41 = 0x29,
+    OP_DATA_42 = 0x2a,
+    OP_DATA_43 = 0x2b,
+    OP_DATA_44 = 0x2c,
+    OP_DATA_45 = 0x2d,
+    OP_DATA_46 = 0x2e,
+    OP_DATA_47 = 0x2f,
+    OP_DATA_48 = 0x30,
+    OP_DATA_49 = 0x31,
+    OP_DATA_50 = 0x32,
+    OP_DATA_51 = 0x33,
+    OP_DATA_52 = 0x34,
+    OP_DATA_53 = 0x35,
+    OP_DATA_54 = 0x36,
+    OP_DATA_55 = 0x37,
+    OP_DATA_56 = 0x38,
+    OP_DATA_57 = 0x39,
+    OP_DATA_58 = 0x3a,
+    OP_DATA_59 = 0x3b,
+    OP_DATA_60 = 0x3c,
+    OP_DATA_61 = 0x3d,
+    OP_DATA_62 = 0x3e,
+    OP_DATA_63 = 0x3f,
+    OP_DATA_64 = 0x40,
+    OP_DATA_65 = 0x41,
+    OP_DATA_66 = 0x42,
+    OP_DATA_67 = 0x43,
+    OP_DATA_68 = 0x44,
+    OP_DATA_69 = 0x45,
+    OP_DATA_70 = 0x46,
+    OP_DATA_71 = 0x47,
+    OP_DATA_72 = 0x48,
+    OP_DATA_73 = 0x49,
+    OP_DATA_74 = 0x4a,
+    OP_DATA_75 = 0x4b,
+};
 
 // Error messages
 const ERROR = {
@@ -536,42 +613,47 @@ class Compiler {
                 }
                 const data = Buffer.from(hex, 'hex');
                 
+                // Use appropriate PUSHDATA operation based on length
                 if (data.length <= 0x4b) {
-                    bytes.push(data.length);
+                    bytes.push(data.length); // Direct push
+                    bytes.push(...data);
                 } else if (data.length <= 0xff) {
                     bytes.push(Opcode.OP_PUSHDATA1);
                     bytes.push(data.length);
+                    bytes.push(...data);
                 } else if (data.length <= 0xffff) {
                     bytes.push(Opcode.OP_PUSHDATA2);
                     bytes.push(data.length & 0xff);
                     bytes.push((data.length >> 8) & 0xff);
+                    bytes.push(...data);
                 } else {
                     bytes.push(Opcode.OP_PUSHDATA4);
                     bytes.push(data.length & 0xff);
                     bytes.push((data.length >> 8) & 0xff);
                     bytes.push((data.length >> 16) & 0xff);
                     bytes.push((data.length >> 24) & 0xff);
+                    bytes.push(...data);
                 }
-                bytes.push(...data);
                 continue;
             }
 
-            // Handle decimal numbers
-            if (/^-?\d+$/.test(part)) {
-                const num = parseInt(part, 10);
-                const scriptNum = new ScriptNum(num);
-                const numBuffer = scriptNum.toBuffer();
-                
-                if (numBuffer.length === 0) {
-                    bytes.push(Opcode.OP_0);
-                } else if (numBuffer.length === 1 && num >= 1 && num <= 16) {
-                    bytes.push(Opcode.OP_1 + (num - 1));
-                } else if (numBuffer.length === 1 && num === -1) {
-                    bytes.push(Opcode.OP_1NEGATE);
-                } else {
-                    bytes.push(numBuffer.length);
-                    bytes.push(...numBuffer);
+            // Handle OP_DATA_X opcodes
+            if (part.startsWith('OP_DATA_')) {
+                const size = parseInt(part.slice(8), 10);
+                if (isNaN(size) || size < 1 || size > 75) {
+                    throw new Error(`Invalid OP_DATA_X size: ${size}`);
                 }
+                // The next part should be the hex data
+                const nextPart = parts.shift();
+                if (!nextPart || !nextPart.startsWith('0x')) {
+                    throw new Error(`Expected hex data after ${part}`);
+                }
+                const data = Buffer.from(nextPart.slice(2), 'hex');
+                if (data.length !== size) {
+                    throw new Error(`Data length ${data.length} doesn't match ${part}`);
+                }
+                bytes.push(size);
+                bytes.push(...data);
                 continue;
             }
 
@@ -1199,12 +1281,15 @@ class ScriptEngine {
     public execute(): boolean {
         try {
             while (this.pc < this.script.length) {
-                // Get the current opcode
                 const opcode = this.script[this.pc++];
 
-                // Handle push operations
-                if (opcode <= 0x4b) {
-                    const data = this.readBytes(opcode);
+                // Handle OP_DATA_X operations (1-75 bytes)
+                if (opcode > 0x00 && opcode <= 0x4b) {
+                    const dataLength = opcode;
+                    const data = this.readBytes(dataLength);
+                    if (data.length !== dataLength) {
+                        throw new Error(ERROR.SCRIPT_ERR_INVALID_STACK_OPERATION);
+                    }
                     this.stack.push(data);
                     continue;
                 }
