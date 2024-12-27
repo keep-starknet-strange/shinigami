@@ -1,8 +1,5 @@
-// shinigami.ts - Part 1
-
 // Constants
 const MAX_STACK_SIZE = 1000;
-const MAX_SCRIPT_SIZE = 10000;
 const MAX_OPS_PER_SCRIPT = 201;
 const MAX_SCRIPT_ELEMENT_SIZE = 520;
 const MAX_MULTISIG_PUBKEYS = 20;
@@ -146,7 +143,6 @@ enum Opcode {
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
 
-    // Add these new opcodes after the existing constants
     OP_DATA_1 = 0x01,
     OP_DATA_2 = 0x02,
     OP_DATA_3 = 0x03,
@@ -277,9 +273,6 @@ const ScriptFlags = {
     SCRIPT_VERIFY_CONST_SCRIPTCODE: (1 << 16),
 };
 
-// shinigami.ts - Part 2
-
-// ScriptNum implementation for handling Bitcoin script numbers
 class ScriptNum {
     private value: bigint;
     private static readonly MAX_NUM_SIZE = 4;
@@ -464,8 +457,6 @@ class SignatureChecker {
         return sigIndex === signatures.length;
     }
 }
-
-// shinigami.ts - Part 3
 
 // Compiler class for converting script text to bytecode
 class Compiler {
@@ -655,8 +646,6 @@ class Compiler {
         return Buffer.from(bytes);
     }
 }
-
-// shinigami.ts - Part 4
 
 interface DebugState {
     stack: Buffer[];
@@ -1319,7 +1308,6 @@ class ScriptEngine {
     }
 }
 
-// Main execution function that mirrors backend_run from lib.cairo
 function backendRun(input: InputData): number {
     console.log(`Running Bitcoin Script with ScriptSig: '${input.ScriptSig}' and ScriptPubKey: '${input.ScriptPubKey}'`);
 
@@ -1358,13 +1346,6 @@ function bytesToHex(bytes: Buffer): string {
     return '0x' + bytes.toString('hex');
 }
 
-// Example usage:
-const testScript: InputData = {
-    ScriptSig: "OP_1",
-    ScriptPubKey: "OP_DUP OP_1 OP_EQUAL"
-};
-
-// Export all necessary components
 export {
     Opcode,
     ScriptNum,
@@ -1383,94 +1364,6 @@ export {
     type DebugState
 };
 
-// Usage example:
-/*
-import { backendRun, InputData } from './shinigami';
-
-const script: InputData = {
-    ScriptSig: "OP_1 OP_2",  // Push 1 and 2 onto the stack
-    ScriptPubKey: "OP_ADD OP_3 OP_EQUAL"  // Add them and check if equal to 3
-};
-
-const result = backendRun(script);
-console.log(result); // 1 for success, 0 for failure
-*/
-
-// Additional helper functions for debugging
-function dumpStack(stack: Stack): void {
-    console.log("Stack:");
-    const items = stack.asArray();
-    for (let i = items.length - 1; i >= 0; i--) {
-        console.log(`${i}: ${bytesToHex(items[i])}`);
-    }
-}
-
-function parseScript(scriptHex: string): string[] {
-    const bytes = hexToBytes(scriptHex);
-    const ops: string[] = [];
-    let i = 0;
-    
-    while (i < bytes.length) {
-        const opcode = bytes[i++];
-        
-        if (opcode <= 0x4b) {
-            const data = bytes.slice(i, i + opcode);
-            i += opcode;
-            ops.push(bytesToHex(data));
-            continue;
-        }
-        
-        const opcodeName = Object.entries(Opcode)
-            .find(([_, value]) => value === opcode)?.[0] || `Unknown(${opcode})`;
-        ops.push(opcodeName);
-    }
-    
-    return ops;
-}
-
-// Add test suite
-function runTests(): void {
-    const tests: Array<[InputData, boolean]> = [
-        [
-            {
-                ScriptSig: "OP_1",
-                ScriptPubKey: "OP_1 OP_EQUAL"
-            },
-            true
-        ],
-        [
-            {
-                ScriptSig: "OP_1",
-                ScriptPubKey: "OP_2 OP_EQUAL"
-            },
-            false
-        ],
-        // Add more test cases here
-    ];
-
-    let passed = 0;
-    let failed = 0;
-
-    for (const [test, expected] of tests) {
-        const result = backendRun(test) === 1;
-        if (result === expected) {
-            passed++;
-        } else {
-            failed++;
-            console.log(`Test failed: ${JSON.stringify(test)}`);
-            console.log(`Expected: ${expected}, got: ${result}`);
-        }
-    }
-
-    console.log(`Tests complete: ${passed} passed, ${failed} failed`);
-}
-
-// If running directly (not imported as a module)
-if (require.main === module) {
-    runTests();
-}
-
-// Add backendDebug function
 function backendDebug(input: InputData): string[] {
     console.log(`Running Bitcoin Script with ScriptSig: '${input.ScriptSig}' and ScriptPubKey: '${input.ScriptPubKey}'`);
 
