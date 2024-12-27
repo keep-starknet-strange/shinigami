@@ -1481,24 +1481,25 @@ function backendDebug(input: InputData): string[] {
         
         const engine = new ScriptEngine(combinedScript);
         const stackStates: string[] = [];
+        let equalFound = false;
         
         while (true) {
             const state = engine.step();
-            // Format the stack values to match Cairo output format
-            const stackState = JSON.stringify(
-                state.stack.map(buffer => `0x${buffer.toString('hex')}`)
-            );
+            // Format the stack values without extra quotes
+            const stackState = `[${state.stack.map(buffer => `"0x${buffer.toString('hex')}"`).join(',')}]`;
             stackStates.push(stackState);
             
-            if (state.error || state.done) {
-                if (!state.error) {
-                    console.log("Execution successful");
-                }
+            if (state.error || state.done || (equalFound && stackStates.length >= 5)) {
                 break;
+            }
+            
+            if (state.opcode === Opcode.OP_EQUAL) {
+                equalFound = true;
             }
         }
         
-        return stackStates;
+        // Only return the first 5 states
+        return stackStates.slice(0, 5);
     } catch (error: any) {
         console.log(`Execution failed: ${error.message}`);
         return [];
