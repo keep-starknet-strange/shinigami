@@ -625,7 +625,6 @@ class Compiler {
           bytes.push(data.length);
           bytes.push(...data);
         }
-        // ... rest of PUSHDATA handling ...
         continue;
       }
 
