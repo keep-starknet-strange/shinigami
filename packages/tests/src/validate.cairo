@@ -3,11 +3,6 @@ use shinigami_engine::hash_cache::HashCacheImpl;
 use shinigami_engine::transaction::EngineTransaction;
 use shinigami_engine::opcodes::Opcode;
 use crate::utxo::UTXO;
-use crate::utils::find_last_index;
-use shinigami_utils::hash::sha256_byte_array;
-use shinigami_utils::bytecode::bytecode_to_hex;
-use shinigami_utils::bytecode::hex_to_bytecode;
-use shinigami_utils::byte_array::sub_byte_array;
 
 // TODO: Move validate coinbase here
 
@@ -143,68 +138,6 @@ pub fn validate_p2ms(
     };
 
     if err != '' {
-        Result::Err(err)
-    } else {
-        Result::Ok(())
-    }
-}
-
-
-pub fn validate_p2sh(
-    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>, indx: u32,
-) -> Result<(), felt252> {
-    if tx.transaction_inputs.len() == 0 {
-        return Result::Err('P2SH: No inputs');
-    }
-
-    let signature_script = bytecode_to_hex(tx.transaction_inputs[indx].signature_script);
-    let scriptSig_bytes = hex_to_bytecode(@signature_script);
-
-    let mut redeem_Script_start_index = 0;
-    let mut redeem_script_size = 0;
-    if scriptSig_bytes[0] == 0 || scriptSig_bytes[0] == 1 || scriptSig_bytes[0] == 2 {
-        //OP_0 OP_PushData <Sig> OP_PushData <RedeemScript>  Standard locking scripts
-        redeem_Script_start_index = (2 + scriptSig_bytes[1] + 1).into();
-        redeem_script_size = (scriptSig_bytes.len()) - redeem_Script_start_index;
-    } else {
-        // non-standard locking script containing a mathematical puzzle
-        redeem_Script_start_index = find_last_index(scriptSig_bytes.clone());
-        redeem_script_size = (scriptSig_bytes.len()) - redeem_Script_start_index;
-    }
-
-    let redeem_script = sub_byte_array(
-        @scriptSig_bytes, ref redeem_Script_start_index, redeem_script_size,
-    );
-    if redeem_script.len() == 0 {
-        return Result::Err('P2SH: Redeem Script size = 0');
-    }
-    if redeem_script.len() > 520 {
-        return Result::Err('P2SH: Redeem Script size > 520');
-    }
-
-    let hashed_redeem_script: ByteArray = ripemd160::ripemd160_hash(
-        @sha256_byte_array(@redeem_script),
-    )
-        .into();
-
-    let script_pubkey = utxo_hints[0].pubkey_script;
-    let mut script_hash_start_index = 2;
-    let script_hash: ByteArray = sub_byte_array(script_pubkey, ref script_hash_start_index, 20);
-
-    if hashed_redeem_script != script_hash {
-        return Result::Err('P2SH: Signature mismatch');
-    }
-
-    let hash_cache = HashCacheImpl::new(tx);
-    let mut engine = EngineImpl::new(
-        script_pubkey, tx, indx, flags, *utxo_hints[0].amount, @hash_cache,
-    )
-        .unwrap();
-
-    let res = engine.execute();
-
-    if res.is_err() {
-        let err = res.unwrap_err();
         Result::Err(err)
     } else {
         Result::Ok(())
