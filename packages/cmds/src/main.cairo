@@ -224,18 +224,20 @@ fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
 
     let mut utxo_hints = array![];
 
-    for hint in input.utxo_hints.span() {
-        println!("UTXO hint: 'amount: {}, script_pubkey: {}'", hint.amount, hint.pubkey_script);
-        let pubkey_script = hex_to_bytecode(hint.pubkey_script);
-        utxo_hints
-            .append(
-                UTXO {
-                    amount: *hint.amount,
-                    pubkey_script: pubkey_script,
-                    block_height: *hint.block_height,
-                },
-            );
-    };
+    for hint in input
+        .utxo_hints
+        .span() {
+            println!("UTXO hint: 'amount: {}, script_pubkey: {}'", hint.amount, hint.pubkey_script);
+            let pubkey_script = hex_to_bytecode(hint.pubkey_script);
+            utxo_hints
+                .append(
+                    UTXO {
+                        amount: *hint.amount,
+                        pubkey_script: pubkey_script,
+                        block_height: *hint.block_height,
+                    },
+                );
+        };
 
     let res = validate::validate_transaction(@transaction, script_flags, utxo_hints);
     match res {
