@@ -650,7 +650,7 @@ pub impl EngineInternalImpl<
 
             if witness_len == 1 {
                 TaprootContextImpl::verify_taproot_spend(
-                    @self.witness_program, witness[0], self.transaction, self.tx_idx
+                    ref self, @self.witness_program, witness[0], self.transaction, self.tx_idx
                 )?;
                 self.taproot_context.must_succeed = true;
                 return Result::Ok(());

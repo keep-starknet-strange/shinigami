@@ -113,16 +113,15 @@ pub fn opcode_checksig<
             is_valid = false;
         }
     } else if engine.use_taproot {
+        // Taproot Signature Verification
         engine.taproot_context.use_ops_budget()?;
         if pk_bytes.len() == 0 {
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
         // TODO: Errors or false?
-        let mut verifier = TaprootSigVerifierTrait::<
-            T
-        >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
-        is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
+        let mut verifier = TaprootSigVerifierTrait::<I, O, T>::new_base(ref engine, @full_sig_bytes, @pk_bytes)?;
+        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier);
     }
 
     if !is_valid && @engine.use_taproot == @true {
@@ -412,10 +411,8 @@ pub fn opcode_checksigadd<
         return Result::Ok(());
     }
 
-    let mut verifier = TaprootSigVerifierTrait::<
-        T
-    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
-    if !(TaprootSigVerifierTrait::<T>::verify(ref verifier)) {
+    let mut verifier = TaprootSigVerifierTrait::<I, O, T>::new(ref engine, @sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
+    if !(TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier)) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
 
