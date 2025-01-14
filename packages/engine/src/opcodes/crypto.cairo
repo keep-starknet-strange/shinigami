@@ -1,13 +1,13 @@
 use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
 use crate::stack::ScriptStackTrait;
 use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
 use crate::signature::signature::{
-    BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait
+    BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait,
 };
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
@@ -59,10 +59,10 @@ pub fn opcode_checksig<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
@@ -120,7 +120,9 @@ pub fn opcode_checksig<
         }
 
         // TODO: Errors or false?
-        let mut verifier = TaprootSigVerifierTrait::<I, O, T>::new_base(ref engine, @full_sig_bytes, @pk_bytes)?;
+        let mut verifier = TaprootSigVerifierTrait::<
+            I, O, T,
+        >::new_base(ref engine, @full_sig_bytes, @pk_bytes)?;
         is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier);
     }
 
@@ -145,10 +147,10 @@ pub fn opcode_checkmultisig<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     if engine.use_taproot {
         return Result::Err(Error::TAPROOT_MULTISIG);
@@ -175,7 +177,7 @@ pub fn opcode_checkmultisig<
     while i != num_pub_keys {
         match engine.dstack.pop_byte_array() {
             Result::Ok(pk) => pub_keys.append(pk),
-            Result::Err(e) => err = e
+            Result::Err(e) => err = e,
         };
         i += 1;
     };
@@ -198,7 +200,7 @@ pub fn opcode_checkmultisig<
     while i != num_sigs {
         match engine.dstack.pop_byte_array() {
             Result::Ok(s) => sigs.append(s),
-            Result::Err(e) => err = e
+            Result::Err(e) => err = e,
         };
         i += 1;
     };
@@ -259,7 +261,7 @@ pub fn opcode_checkmultisig<
             let sig_hashes = SigHashMidstateTrait::new(transaction);
             sig_hash =
                 sighash::calc_witness_signature_hash(
-                    @script, @sig_hashes, hash_type, transaction, tx_idx, amount
+                    @script, @sig_hashes, hash_type, transaction, tx_idx, amount,
                 );
         } else {
             sig_hash = sighash::calc_signature_hash(@script, hash_type, transaction, tx_idx);
@@ -307,13 +309,13 @@ pub fn opcode_codeseparator<
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >,
     +Drop<T>,
     +Drop<I>,
     +Drop<O>,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     engine.last_code_sep = engine.opcode_idx;
 
@@ -338,10 +340,10 @@ pub fn opcode_checksigverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     opcode_checksig(ref engine)?;
     utils::abstract_verify(ref engine)?;
@@ -358,10 +360,10 @@ pub fn opcode_checkmultisigverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     opcode_checkmultisig(ref engine)?;
     utils::abstract_verify(ref engine)?;
@@ -382,13 +384,13 @@ pub fn opcode_checksigadd<
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >,
     +Drop<T>,
     +Drop<I>,
     +Drop<O>,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     if !engine.use_taproot {
         return Result::Err(Error::OPCODE_RESERVED);
@@ -411,7 +413,9 @@ pub fn opcode_checksigadd<
         return Result::Ok(());
     }
 
-    let mut verifier = TaprootSigVerifierTrait::<I, O, T>::new(ref engine, @sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
+    let mut verifier = TaprootSigVerifierTrait::<
+        I, O, T,
+    >::new(ref engine, @sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
     if !(TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier)) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }

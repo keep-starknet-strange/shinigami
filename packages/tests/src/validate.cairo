@@ -14,7 +14,7 @@ use shinigami_utils::byte_array::sub_byte_array;
 // TODO: Remove hints?
 // utxo_hints: Set of existing utxos that are being spent by this transaction
 pub fn validate_transaction(
-    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>
+    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>,
 ) -> Result<(), felt252> {
     let input_count = tx.transaction_inputs.len();
     if input_count != utxo_hints.len() {
@@ -28,7 +28,7 @@ pub fn validate_transaction(
         let hash_cache = HashCacheImpl::new(tx);
         // TODO: Error handling
         let mut engine = EngineImpl::new(
-            utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache
+            utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache,
         )
             .unwrap();
         let res = engine.execute();
@@ -47,11 +47,11 @@ pub fn validate_transaction(
 }
 
 pub fn validate_transaction_at(
-    tx: @EngineTransaction, flags: u32, prevout: UTXO, at: u32
+    tx: @EngineTransaction, flags: u32, prevout: UTXO, at: u32,
 ) -> Result<(), felt252> {
     let hash_cache = HashCacheImpl::new(tx);
     let mut engine = EngineImpl::new(
-        @prevout.pubkey_script, tx, at, flags, prevout.amount, @hash_cache
+        @prevout.pubkey_script, tx, at, flags, prevout.amount, @hash_cache,
     )
         .unwrap();
     let res = engine.execute();
@@ -63,7 +63,7 @@ pub fn validate_transaction_at(
 }
 
 pub fn validate_p2ms(
-    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>
+    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>,
 ) -> Result<(), felt252> {
     // Check if the transaction has at least one input
     if tx.transaction_inputs.len() == 0 {
@@ -151,7 +151,7 @@ pub fn validate_p2ms(
 
 
 pub fn validate_p2sh(
-    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>, indx: u32
+    tx: @EngineTransaction, flags: u32, utxo_hints: Array<UTXO>, indx: u32,
 ) -> Result<(), felt252> {
     if tx.transaction_inputs.len() == 0 {
         return Result::Err('P2SH: No inputs');
@@ -173,7 +173,7 @@ pub fn validate_p2sh(
     }
 
     let redeem_script = sub_byte_array(
-        @scriptSig_bytes, ref redeem_Script_start_index, redeem_script_size
+        @scriptSig_bytes, ref redeem_Script_start_index, redeem_script_size,
     );
     if redeem_script.len() == 0 {
         return Result::Err('P2SH: Redeem Script size = 0');
@@ -183,7 +183,7 @@ pub fn validate_p2sh(
     }
 
     let hashed_redeem_script: ByteArray = ripemd160::ripemd160_hash(
-        @sha256_byte_array(@redeem_script)
+        @sha256_byte_array(@redeem_script),
     )
         .into();
 
@@ -197,7 +197,7 @@ pub fn validate_p2sh(
 
     let hash_cache = HashCacheImpl::new(tx);
     let mut engine = EngineImpl::new(
-        script_pubkey, tx, indx, flags, *utxo_hints[0].amount, @hash_cache
+        script_pubkey, tx, indx, flags, *utxo_hints[0].amount, @hash_cache,
     )
         .unwrap();
 

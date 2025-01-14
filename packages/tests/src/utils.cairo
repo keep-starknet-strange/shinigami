@@ -2,7 +2,7 @@ use shinigami_compiler::compiler::CompilerImpl;
 use shinigami_engine::engine::{Engine, EngineImpl, EngineInternalTrait};
 use shinigami_engine::hash_cache::HashCacheImpl;
 use shinigami_engine::transaction::{
-    EngineTransaction, EngineTransactionInput, EngineTransactionOutput, EngineOutPoint
+    EngineTransaction, EngineTransactionInput, EngineTransactionOutput, EngineOutPoint,
 };
 
 // Runs a basic bitcoin script as the script_pubkey with empty script_sig
@@ -19,7 +19,7 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine<EngineTransaction> {
 
 // Runs a bitcoin script `program` as script_pubkey with corresponding `transaction`
 pub fn test_compile_and_run_with_tx(
-    program: ByteArray, transaction: EngineTransaction
+    program: ByteArray, transaction: EngineTransaction,
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
@@ -32,7 +32,7 @@ pub fn test_compile_and_run_with_tx(
 
 // Runs a bitcoin script `program` as script_pubkey with corresponding `transaction` and 'flags'
 pub fn test_compile_and_run_with_tx_flags(
-    program: ByteArray, transaction: EngineTransaction, flags: u32
+    program: ByteArray, transaction: EngineTransaction, flags: u32,
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
@@ -45,7 +45,7 @@ pub fn test_compile_and_run_with_tx_flags(
 
 // Runs a bitcoin script `program` as script_pubkey with empty script_sig expecting an error
 pub fn test_compile_and_run_err(
-    program: ByteArray, expected_err: felt252
+    program: ByteArray, expected_err: felt252,
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program).unwrap();
@@ -61,7 +61,7 @@ pub fn test_compile_and_run_err(
 // Runs a bitcoin script `program` as script_pubkey with corresponding `transaction` expecting an
 // error
 pub fn test_compile_and_run_with_tx_err(
-    program: ByteArray, transaction: EngineTransaction, expected_err: felt252
+    program: ByteArray, transaction: EngineTransaction, expected_err: felt252,
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
@@ -77,7 +77,7 @@ pub fn test_compile_and_run_with_tx_err(
 // Runs a bitcoin script `program` as script_pubkey with corresponding `transaction` and 'flags'
 // expecting an error
 pub fn test_compile_and_run_with_tx_flags_err(
-    program: ByteArray, transaction: EngineTransaction, flags: u32, expected_err: felt252
+    program: ByteArray, transaction: EngineTransaction, flags: u32, expected_err: felt252,
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
@@ -111,7 +111,7 @@ pub fn check_expected_astack(ref engine: Engine<EngineTransaction>, expected: Sp
 }
 
 pub fn mock_transaction_input_with(
-    outpoint: EngineOutPoint, script_sig: ByteArray, witness: Array<ByteArray>, sequence: u32
+    outpoint: EngineOutPoint, script_sig: ByteArray, witness: Array<ByteArray>, sequence: u32,
 ) -> EngineTransactionInput {
     let mut compiler = CompilerImpl::new();
     let script_sig = compiler.compile(script_sig).unwrap();
@@ -119,19 +119,19 @@ pub fn mock_transaction_input_with(
         previous_outpoint: outpoint,
         signature_script: script_sig,
         witness: witness,
-        sequence: sequence
+        sequence: sequence,
     }
 }
 
 pub fn mock_transaction_input(script_sig: ByteArray) -> EngineTransactionInput {
     let outpoint: EngineOutPoint = EngineOutPoint {
-        txid: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, vout: 0
+        txid: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, vout: 0,
     };
     mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), 0xffffffff)
 }
 
 pub fn mock_transaction_output_with(
-    value: i64, script_pubkey: ByteArray
+    value: i64, script_pubkey: ByteArray,
 ) -> EngineTransactionOutput {
     EngineTransactionOutput { value: value, publickey_script: script_pubkey }
 }
@@ -148,7 +148,7 @@ pub fn mock_transaction_with(
     version: i32,
     tx_inputs: Array<EngineTransactionInput>,
     tx_outputs: Array<EngineTransactionOutput>,
-    locktime: u32
+    locktime: u32,
 ) -> EngineTransaction {
     EngineTransaction {
         version: version,
@@ -177,7 +177,7 @@ pub fn mock_transaction_legacy_p2pkh(script_sig: ByteArray) -> EngineTransaction
 // Legacy P2MS
 pub fn mock_transaction_legacy_p2ms(script_sig: ByteArray) -> EngineTransaction {
     let outpoint: EngineOutPoint = EngineOutPoint {
-        txid: 0x10a5fee9786a9d2d72c25525e52dd70cbd9035d5152fac83b62d3aa7e2301d58, vout: 0
+        txid: 0x10a5fee9786a9d2d72c25525e52dd70cbd9035d5152fac83b62d3aa7e2301d58, vout: 0,
     };
     let mut inputs = ArrayTrait::<EngineTransactionInput>::new();
     inputs.append(mock_transaction_input_with(outpoint, script_sig, ArrayTrait::new(), 0xffffffff));
@@ -194,16 +194,16 @@ pub fn mock_transaction_legacy_p2ms(script_sig: ByteArray) -> EngineTransaction 
 
 pub fn mock_witness_transaction() -> EngineTransaction {
     let outpoint_0: EngineOutPoint = EngineOutPoint {
-        txid: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, vout: 1
+        txid: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, vout: 1,
     };
     let transaction_input_0: EngineTransactionInput = EngineTransactionInput {
         previous_outpoint: outpoint_0,
         signature_script: "",
         witness: ArrayTrait::<ByteArray>::new(),
-        sequence: 0xffffffff
+        sequence: 0xffffffff,
     };
     let mut transaction_inputs: Array<EngineTransactionInput> = ArrayTrait::<
-        EngineTransactionInput
+        EngineTransactionInput,
     >::new();
     transaction_inputs.append(transaction_input_0);
     let script_u256: u256 = 0x76a914ce72abfd0e6d9354a660c18f2825eb392f060fdc88ac;
@@ -213,10 +213,10 @@ pub fn mock_witness_transaction() -> EngineTransaction {
     script_byte.append_word(script_u256.low.into(), 16);
 
     let output_0: EngineTransactionOutput = EngineTransactionOutput {
-        value: 15000, publickey_script: script_byte
+        value: 15000, publickey_script: script_byte,
     };
     let mut transaction_outputs: Array<EngineTransactionOutput> = ArrayTrait::<
-        EngineTransactionOutput
+        EngineTransactionOutput,
     >::new();
     transaction_outputs.append(output_0);
 
@@ -240,7 +240,7 @@ pub fn mock_transaction_legacy_locktime(script_sig: ByteArray, locktime: u32) ->
 
 // Mock transaction version 2 with the specified 'sequence'
 pub fn mock_transaction_legacy_sequence_v2(
-    script_sig: ByteArray, sequence: u32
+    script_sig: ByteArray, sequence: u32,
 ) -> EngineTransaction {
     let mut inputs = ArrayTrait::<EngineTransactionInput>::new();
     let outpoint = EngineOutPoint { txid: 0, vout: 0 };

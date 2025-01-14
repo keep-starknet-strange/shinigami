@@ -16,7 +16,7 @@ fn test_p2sh_transaction_1() {
 
     let prevout_pubkey = "0xa914748284390f9e263a4b766a75d0633c50426eb87587";
     let prev_out_1of2_invalid = UTXO {
-        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 177625
+        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 177625,
     };
 
     let utxo_hints = array![prev_out_1of2_invalid];
@@ -36,7 +36,7 @@ fn test_p2sh_transaction_2() {
     let prevout_pubkey = "0xa914e9c3dd0c07aac76179ebc76a6c78d4d67c6c160a87";
 
     let prev_out_1of2_invalid = UTXO {
-        amount: 990000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 272295
+        amount: 990000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 272295,
     };
 
     let utxo_hints = array![prev_out_1of2_invalid];
@@ -57,7 +57,7 @@ fn test_p2sh_transaction_3() {
     let prevout_pubkey = "0xa914748284390f9e263a4b766a75d0633c50426eb87587";
 
     let prev_out = UTXO {
-        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 183729
+        amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 183729,
     };
 
     let utxo_hints = array![prev_out];
@@ -79,7 +79,7 @@ fn test_p2sh_transaction_4() {
     let prevout_pubkey = "0xa914b4acb9d78d6a6256964a60484c95de490eaaae7587";
 
     let prev_out = UTXO {
-        amount: 9980000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 232593
+        amount: 9980000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 232593,
     };
 
     let utxo_hints = array![prev_out];
@@ -100,7 +100,7 @@ fn test_p2sh_transaction_5() {
     let prevout_pubkey = "0xa914da5a92e670a66538be1c550af352646000b2367d87";
 
     let prev_out = UTXO {
-        amount: 10000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 384639
+        amount: 10000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 384639,
     };
 
     let utxo_hints = array![prev_out];
@@ -120,7 +120,7 @@ fn test_p2sh_transaction_6() {
 
     let prevout_pubkey = "0xa9144266fc6f2c2861d7fe229b279a79803afca7ba3487";
     let prev_out = UTXO {
-        amount: 100000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 257797
+        amount: 100000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 257797,
     };
 
     let utxo_hints = array![prev_out];

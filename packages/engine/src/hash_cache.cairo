@@ -1,5 +1,5 @@
 use crate::transaction::{
-    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait,
 };
 use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::hash::double_sha256;
@@ -8,7 +8,7 @@ use shinigami_utils::hash::double_sha256;
 pub struct SegwitSigHashMidstate {
     pub hash_prevouts_v0: u256,
     pub hash_sequence_v0: u256,
-    pub hash_outputs_v0: u256
+    pub hash_outputs_v0: u256,
 }
 
 pub trait SigHashMidstateTrait<
@@ -17,7 +17,7 @@ pub trait SigHashMidstateTrait<
     T,
     +EngineTransactionInputTrait<I>,
     +EngineTransactionOutputTrait<O>,
-    +EngineTransactionTrait<T, I, O>
+    +EngineTransactionTrait<T, I, O>,
 > {
     fn new(transaction: @T) -> SegwitSigHashMidstate;
 }
@@ -29,8 +29,8 @@ pub impl SigHashMidstateImpl<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
-    >
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
+    >,
 > of SigHashMidstateTrait<I, O, T> {
     fn new(transaction: @T) -> SegwitSigHashMidstate {
         let mut prevouts_v0_bytes: ByteArray = "";
@@ -55,7 +55,7 @@ pub impl SigHashMidstateImpl<
         SegwitSigHashMidstate {
             hash_prevouts_v0: double_sha256(@prevouts_v0_bytes),
             hash_sequence_v0: double_sha256(@sequence_v0_bytes),
-            hash_outputs_v0: double_sha256(@outputs_v0_bytes)
+            hash_outputs_v0: double_sha256(@outputs_v0_bytes),
         }
     }
 }
@@ -80,7 +80,7 @@ pub trait HashCacheTrait<
     T,
     +EngineTransactionInputTrait<I>,
     +EngineTransactionOutputTrait<O>,
-    +EngineTransactionTrait<T, I, O>
+    +EngineTransactionTrait<T, I, O>,
 > {
     fn new(transaction: @T) -> HashCache<T>;
 
@@ -104,8 +104,8 @@ pub impl HashCacheImpl<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
-    >
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
+    >,
 > of HashCacheTrait<I, O, T> {
     fn new(transaction: @T) -> HashCache<T> {
         HashCache {}

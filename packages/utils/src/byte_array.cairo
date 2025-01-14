@@ -41,7 +41,7 @@ pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: us
 }
 
 pub fn byte_array_value_at_le(
-    byte_array: @ByteArray, ref offset: usize, len: usize
+    byte_array: @ByteArray, ref offset: usize, len: usize,
 ) -> felt252 { // TODO: Bounds check
     let byte_shift = 256;
     let mut value = 0;

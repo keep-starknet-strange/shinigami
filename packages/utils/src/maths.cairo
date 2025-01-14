@@ -18,7 +18,7 @@ pub fn fast_power<
     +Drop<U>,
     +PartialEq<U>,
 >(
-    base: T, exp: U
+    base: T, exp: U,
 ) -> T {
     if exp == Zero::zero() {
         return One::one();

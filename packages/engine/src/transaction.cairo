@@ -40,11 +40,11 @@ pub trait EngineInternalTransactionTrait {
         version: i32,
         transaction_inputs: Array<EngineTransactionInput>,
         transaction_outputs: Array<EngineTransactionOutput>,
-        locktime: u32
+        locktime: u32,
     ) -> EngineTransaction;
     fn new_signed(script_sig: ByteArray, pubkey_script: ByteArray) -> EngineTransaction;
     fn new_signed_witness(
-        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64
+        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64,
     ) -> EngineTransaction;
     fn btc_decode(raw: ByteArray, encoding: u32) -> EngineTransaction;
     fn deserialize(raw: ByteArray) -> EngineTransaction;
@@ -55,7 +55,7 @@ pub trait EngineInternalTransactionTrait {
     fn calculate_block_subsidy(block_height: u32) -> i64;
     fn is_coinbase(self: @EngineTransaction) -> bool;
     fn validate_coinbase(
-        self: EngineTransaction, block_height: u32, total_fees: i64
+        self: EngineTransaction, block_height: u32, total_fees: i64,
     ) -> Result<(), felt252>;
     fn print(self: @EngineTransaction);
 }
@@ -68,7 +68,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
         version: i32,
         transaction_inputs: Array<EngineTransactionInput>,
         transaction_outputs: Array<EngineTransactionOutput>,
-        locktime: u32
+        locktime: u32,
     ) -> EngineTransaction {
         EngineTransaction {
             version: version,
@@ -81,14 +81,14 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
     fn new_signed(script_sig: ByteArray, pubkey_script: ByteArray) -> EngineTransaction {
         let coinbase_tx_inputs = array![
             EngineTransactionInput {
-                previous_outpoint: EngineOutPoint { txid: 0x0, vout: 0xffffffff, },
+                previous_outpoint: EngineOutPoint { txid: 0x0, vout: 0xffffffff },
                 signature_script: "\x00\x00",
                 witness: array![],
                 sequence: 0xffffffff,
-            }
+            },
         ];
         let coinbase_tx_outputs = array![
-            EngineTransactionOutput { value: 0, publickey_script: pubkey_script, }
+            EngineTransactionOutput { value: 0, publickey_script: pubkey_script },
         ];
         let coinbase_tx = EngineTransaction {
             version: 1,
@@ -102,15 +102,13 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             version: 1,
             transaction_inputs: array![
                 EngineTransactionInput {
-                    previous_outpoint: EngineOutPoint { txid: coinbase_txid, vout: 0, },
+                    previous_outpoint: EngineOutPoint { txid: coinbase_txid, vout: 0 },
                     signature_script: script_sig,
                     witness: array![],
                     sequence: 0xffffffff,
-                }
+                },
             ],
-            transaction_outputs: array![
-                EngineTransactionOutput { value: 0, publickey_script: "", }
-            ],
+            transaction_outputs: array![EngineTransactionOutput { value: 0, publickey_script: "" }],
             locktime: 0,
         };
         // let transaction = EngineTransaction {
@@ -130,18 +128,18 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
     }
 
     fn new_signed_witness(
-        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64
+        script_sig: ByteArray, pubkey_script: ByteArray, witness: Array<ByteArray>, value: i64,
     ) -> EngineTransaction {
         let coinbase_tx_inputs = array![
             EngineTransactionInput {
-                previous_outpoint: EngineOutPoint { txid: 0x0, vout: 0xffffffff, },
+                previous_outpoint: EngineOutPoint { txid: 0x0, vout: 0xffffffff },
                 signature_script: "\x00\x00",
                 witness: array![],
                 sequence: 0xffffffff,
-            }
+            },
         ];
         let coinbase_tx_outputs = array![
-            EngineTransactionOutput { value: value, publickey_script: pubkey_script, }
+            EngineTransactionOutput { value: value, publickey_script: pubkey_script },
         ];
         let coinbase_tx = EngineTransaction {
             version: 1,
@@ -155,14 +153,14 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             version: 1,
             transaction_inputs: array![
                 EngineTransactionInput {
-                    previous_outpoint: EngineOutPoint { txid: coinbase_txid, vout: 0, },
+                    previous_outpoint: EngineOutPoint { txid: coinbase_txid, vout: 0 },
                     signature_script: script_sig,
                     witness: witness,
                     sequence: 0xffffffff,
-                }
+                },
             ],
             transaction_outputs: array![
-                EngineTransactionOutput { value: value, publickey_script: "", }
+                EngineTransactionOutput { value: value, publickey_script: "" },
             ],
             locktime: 0,
         };
@@ -209,7 +207,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
             let value: i64 = byte_array_value_at_le(@raw, ref offset, 8).try_into().unwrap();
             let script_len = read_var_int(@raw, ref offset).try_into().unwrap();
             let script = sub_byte_array(@raw, ref offset, script_len);
-            let output = EngineTransactionOutput { value: value, publickey_script: script, };
+            let output = EngineTransactionOutput { value: value, publickey_script: script };
             outputs.append(output);
             i += 1;
         };
@@ -347,7 +345,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
     }
 
     fn validate_coinbase(
-        self: EngineTransaction, block_height: u32, total_fees: i64
+        self: EngineTransaction, block_height: u32, total_fees: i64,
     ) -> Result<(), felt252> {
         if !self.is_coinbase() {
             return Result::Err(Error::INVALID_COINBASE);
@@ -385,7 +383,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
         while i != self.transaction_inputs.len() {
             let input = self.transaction_inputs.at(i);
             println!(
-                "  Input {}: {} {}", i, input.previous_outpoint.txid, input.previous_outpoint.vout
+                "  Input {}: {} {}", i, input.previous_outpoint.txid, input.previous_outpoint.vout,
             );
             println!("    Txid: {}", input.previous_outpoint.txid);
             println!("    Vout: {}", input.previous_outpoint.vout);
@@ -414,7 +412,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
 impl TransactionDefault of Default<EngineTransaction> {
     fn default() -> EngineTransaction {
         let default_txin = EngineTransactionInput {
-            previous_outpoint: EngineOutPoint { txid: 0, vout: 0, },
+            previous_outpoint: EngineOutPoint { txid: 0, vout: 0 },
             signature_script: "",
             witness: array![],
             sequence: 0xffffffff,
@@ -438,7 +436,7 @@ pub trait EngineTransactionInputTrait<I> {
 }
 
 pub impl EngineTransactionInputTraitInternalImpl of EngineTransactionInputTrait<
-    EngineTransactionInput
+    EngineTransactionInput,
 > {
     fn get_prevout_txid(self: @EngineTransactionInput) -> u256 {
         *self.previous_outpoint.txid
@@ -467,7 +465,7 @@ pub trait EngineTransactionOutputTrait<O> {
 }
 
 pub impl EngineTransactionOutputTraitInternalImpl of EngineTransactionOutputTrait<
-    EngineTransactionOutput
+    EngineTransactionOutput,
 > {
     fn get_publickey_script(self: @EngineTransactionOutput) -> @ByteArray {
         self.publickey_script
@@ -479,7 +477,7 @@ pub impl EngineTransactionOutputTraitInternalImpl of EngineTransactionOutputTrai
 }
 
 pub trait EngineTransactionTrait<
-    T, I, O, +EngineTransactionInputTrait<I>, +EngineTransactionOutputTrait<O>
+    T, I, O, +EngineTransactionInputTrait<I>, +EngineTransactionOutputTrait<O>,
 > {
     fn get_version(self: @T) -> i32;
     fn get_transaction_inputs(self: @T) -> Span<I>;
@@ -492,7 +490,7 @@ pub impl EngineTransactionTraitInternalImpl of EngineTransactionTrait<
     EngineTransactionInput,
     EngineTransactionOutput,
     EngineTransactionInputTraitInternalImpl,
-    EngineTransactionOutputTraitInternalImpl
+    EngineTransactionOutputTraitInternalImpl,
 > {
     fn get_version(self: @EngineTransaction) -> i32 {
         *self.version

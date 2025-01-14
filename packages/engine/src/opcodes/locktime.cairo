@@ -1,6 +1,6 @@
 use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
 use crate::errors::Error;
 use crate::flags::ScriptFlags;
@@ -38,10 +38,10 @@ pub fn opcode_checklocktimeverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     if !engine.has_flag(ScriptFlags::ScriptVerifyCheckLockTimeVerify) {
         if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
@@ -52,12 +52,12 @@ pub fn opcode_checklocktimeverify<
     }
 
     let tx_locktime: i64 = EngineTransactionTrait::<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >::get_locktime(engine.transaction)
         .into();
     // Get locktime as 5 byte integer because 'tx_locktime' is u32
     let stack_locktime: i64 = ScriptNum::try_into_num_n_bytes(
-        engine.dstack.peek_byte_array(0)?, 5, engine.dstack.verify_minimal_data
+        engine.dstack.peek_byte_array(0)?, 5, engine.dstack.verify_minimal_data,
     )?;
 
     if stack_locktime < 0 {
@@ -67,7 +67,7 @@ pub fn opcode_checklocktimeverify<
     // Check if tx sequence is not 'SEQUENCE_MAX' else if tx may be considered as finalized and the
     // behavior of OP_CHECKLOCKTIMEVERIFY can be bypassed
     let transaction_input = EngineTransactionTrait::<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >::get_transaction_inputs(engine.transaction)
         .at(engine.tx_idx);
     let sequence = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);
@@ -88,10 +88,10 @@ pub fn opcode_checksequenceverify<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     if !engine.has_flag(ScriptFlags::ScriptVerifyCheckSequenceVerify) {
         if engine.has_flag(ScriptFlags::ScriptDiscourageUpgradableNops) {
@@ -103,7 +103,7 @@ pub fn opcode_checksequenceverify<
 
     // Get sequence as 5 byte integer because 'sequence' is u32
     let stack_sequence: i64 = ScriptNum::try_into_num_n_bytes(
-        engine.dstack.peek_byte_array(0)?, 5, engine.dstack.verify_minimal_data
+        engine.dstack.peek_byte_array(0)?, 5, engine.dstack.verify_minimal_data,
     )?;
 
     if stack_sequence < 0 {
@@ -120,14 +120,14 @@ pub fn opcode_checksequenceverify<
 
     // Prevent trigger OP_CHECKSEQUENCEVERIFY before tx version 2
     let version = EngineTransactionTrait::<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >::get_version(engine.transaction);
     if version < 2 {
         return Result::Err(Error::UNSATISFIED_LOCKTIME);
     }
 
     let transaction_input = EngineTransactionTrait::<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >::get_transaction_inputs(engine.transaction)
         .at(engine.tx_idx);
     let tx_sequence: u32 = EngineTransactionInputTrait::<I>::get_sequence(transaction_input);
@@ -142,6 +142,6 @@ pub fn opcode_checksequenceverify<
     verify_locktime(
         (tx_sequence & locktime_mask).into(),
         SEQUENCE_LOCKTIME_IS_SECOND.into(),
-        (stack_sequence_u64 & locktime_mask.into()).try_into().unwrap()
+        (stack_sequence_u64 & locktime_mask.into()).try_into().unwrap(),
     )
 }
