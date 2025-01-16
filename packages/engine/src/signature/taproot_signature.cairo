@@ -32,7 +32,6 @@ pub fn parse_taproot_sig_and_pk<
 >(
     ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray,
 ) -> Result<(Secp256k1Point, Signature, u32), felt252> {
-    // Parse schnorr public key
     let pk = schnorr::parse_schnorr_pub_key(pk_bytes)?;
 
     // Check the size of the signature and if the `sighash byte` is set.
@@ -90,7 +89,7 @@ pub trait TaprootSigVerifierTrait<
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>,
 > {
-    fn empty() -> TaprootSigVerifier<T>;
+    // fn empty() -> TaprootSigVerifier<T>;
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252>;
@@ -115,20 +114,20 @@ pub impl TaprootSigVerifierImpl<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >,
 > of TaprootSigVerifierTrait<I, O, T> {
-    fn empty() -> TaprootSigVerifier<T> {
-        TaprootSigVerifier {
-            pub_key: Secp256Trait::<Secp256k1Point>::get_generator_point(),
-            sig: Signature { r: 0, s: 0, y_parity: false },
-            sig_bytes: @"",
-            pk_bytes: @"",
-            hash_type: 0,
-            tx: @Default::default(),
-            inputIndex: 0,
-            prevOuts: Default::<EngineTransactionOutput>::default(),
-            hashCache: Default::default(),
-            annex: @"",
-        }
-    }
+    // fn empty() -> TaprootSigVerifier<T> {
+    //     TaprootSigVerifier {
+    //         pub_key: Secp256Trait::<Secp256k1Point>::get_generator_point(),
+    //         sig: Signature { r: 0, s: 0, y_parity: false },
+    //         sig_bytes: @"",
+    //         pk_bytes: @"",
+    //         hash_type: 0,
+    //         tx: @Default::default(),
+    //         inputIndex: 0,
+    //         prevOuts: Default::<EngineTransactionOutput>::default(),
+    //         hashCache: Default::default(),
+    //         annex: @"",
+    //     }
+    // }
 
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
@@ -186,11 +185,11 @@ pub impl TaprootSigVerifierImpl<
                     sig_bytes,
                     pk_bytes,
                     hash_type: constants::SIG_HASH_DEFAULT,
-                    tx: @Default::default(),
-                    inputIndex: 0,
-                    prevOuts: Default::<EngineTransactionOutput>::default(),
-                    hashCache: Default::default(),
-                    annex: @"",
+                    tx: @Default::default(), // engine tx ?
+                    inputIndex: 0, // engine tx idx ?
+                    prevOuts: Default::<EngineTransactionOutput>::default(), // engine utxo ?
+                    hashCache: Default::default(), // engine sig hash ?
+                    annex: @"" // engine annex ?
                 },
             ));
             // return Result::Ok(Self::empty());
@@ -203,9 +202,7 @@ pub impl TaprootSigVerifierImpl<
             T,
         >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts)?;
 
-        let is_valid_sig = schnorr::verify_schnorr(self.sig, @sig_hash.into(), self.pk_bytes)
-            .is_ok();
-        if !is_valid_sig {
+        if !schnorr::verify_schnorr(self.sig, @sig_hash.into(), self.pk_bytes)? {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
         }
         Result::Ok(())
