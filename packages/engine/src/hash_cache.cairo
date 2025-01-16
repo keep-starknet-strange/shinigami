@@ -249,9 +249,6 @@ mod tests {
     use crate::transaction::{
         EngineTransactionOutput, EngineTransaction, EngineTransactionInput, EngineOutPoint,
     };
-    use crate::signature::{ // taproot_signature::{TaprootSigVerifier},
-        sighash::BASE_SIGHASH_EXT_FLAG,
-    };
     use shinigami_engine::utxo::{UTXO};
     use shinigami_utils::bytecode::hex_to_bytecode;
 

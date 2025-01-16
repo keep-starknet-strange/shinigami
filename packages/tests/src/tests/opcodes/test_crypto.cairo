@@ -572,3 +572,4 @@ fn test_op_checkmultisig_dummy_not_zero() {
 //     utils::check_expected_dstack(ref engine, expected_stack.span());
 // }
 
+
