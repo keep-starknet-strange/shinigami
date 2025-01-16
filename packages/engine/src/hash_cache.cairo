@@ -295,6 +295,8 @@ mod tests {
         let tx_idx = 0;
         let sig_hash = SigHashMidstateTrait::new(@transaction, tx_idx);
 
+        // TODO replace UTXO by EngineTransactionOutput
+
         // match sig_hash {
         //     TxSigHashes::Segwit(sig_hash) => {
         //         println!("Segwit sighash midstate");
