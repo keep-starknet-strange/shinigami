@@ -1,5 +1,10 @@
 use shinigami_utils::bytecode::hex_to_bytecode;
-use shinigami_utils::hash::{simple_sha256, sha256_byte_array};
+use shinigami_utils::hash::sha256_byte_array;
+use core::sha256::compute_sha256_byte_array;
+
+const TWO_POW_32: u128 = 0x100000000;
+const TWO_POW_64: u128 = 0x10000000000000000;
+const TWO_POW_96: u128 = 0x1000000000000000000000000;
 
 #[derive(Drop)]
 pub enum HashTag {
@@ -82,5 +87,9 @@ pub fn tagged_hash(tag: HashTag, msg: @ByteArray) -> u256 {
     let mut h: ByteArray = sha_tag.clone();
     h.append(@sha_tag);
     h.append(msg);
-    return simple_sha256(@h);
+    let [x0, x1, x2, x3, x4, x5, x6, x7] = compute_sha256_byte_array(@h);
+    u256 {
+        high: x0.into() * TWO_POW_96 + x1.into() * TWO_POW_64 + x2.into() * TWO_POW_32 + x3.into(),
+        low: x4.into() * TWO_POW_96 + x5.into() * TWO_POW_64 + x6.into() * TWO_POW_32 + x7.into(),
+    }
 }

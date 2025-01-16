@@ -43,6 +43,11 @@ pub const HASH_TYPE_LEN: usize = 1;
 pub const WITNESS_V0_PUB_KEY_HASH_LEN: usize = 22;
 //
 pub const WITNESS_V1_PUB_KEY_HASH_LEN: usize = 34;
+//SignatureSize is the size of an encoded Schnorr signature.
+pub const SCHNORR_SIG_SIZE: usize = 64;
+//Secp256 field value.
+pub const SECP256_FIELD_VAL: u256 =
+    0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f;
 
 pub const MAX_U128: u128 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 pub const MAX_U32: u32 = 0xFFFFFFFF;

@@ -10,6 +10,7 @@ use crate::signature::{
     signature::{BaseSigVerifierTrait, BaseSegwitSigVerifierTrait},
     taproot_signature::{TaprootSigVerifierTrait, TaprootSigVerifierImpl},
 };
+
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
@@ -115,6 +116,7 @@ pub fn opcode_checksig<
             is_valid = false;
         }
     } else if engine.use_taproot {
+        // Taproot Signature Verification
         engine.taproot_context.use_ops_budget()?;
         if pk_bytes.len() == 0 {
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
@@ -418,10 +420,13 @@ pub fn opcode_checksigadd<
         return Result::Ok(());
     }
 
-    TaprootSigVerifierTrait::<
+    let mut verifier = TaprootSigVerifierTrait::<
         I, O, T,
-    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?
-        .verify()?;
+    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
+
+    if (TaprootSigVerifierTrait::<I, O, T>::verify(verifier).is_err()) {
+        return Result::Err(Error::TAPROOT_INVALID_SIG);
+    }
 
     engine.dstack.push_int(n + 1);
     Result::Ok(())

@@ -2,10 +2,12 @@ use crate::errors::Error;
 use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
-use crate::signature::taproot_signature::parse_schnorr_pub_key;
 use crate::signature::taproot_signature::{TaprootSigVerifierImpl};
 use crate::engine::{Engine};
 
+// use crate::engine::Engine;
+use crate::signature::schnorr;
+// use crate::signature::signature::{TaprootSigVerifierImpl};
 use starknet::secp256k1::{Secp256k1Point};
 
 #[derive(Destruct)]
@@ -169,7 +171,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
 
         let mut verifier = TaprootSigVerifierImpl::<
             T,
-        >::new(raw_sig, witness_program, annex, ref engine)?;
+        >::new(raw_sig, witness_program, annex, ref engine)?; // mut ?
         let is_valid = TaprootSigVerifierImpl::<T>::verify(verifier);
         if is_valid.is_err() {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
@@ -206,7 +208,7 @@ pub fn parse_control_block(control_block: @ByteArray) -> Result<ControlBlock, fe
         raw_pubkey.append_byte(control_block[i]);
         i += 1;
     };
-    let pubkey = parse_schnorr_pub_key(@raw_pubkey)?;
+    let pubkey = schnorr::parse_schnorr_pub_key(@raw_pubkey)?;
     return Result::Ok(
         ControlBlock {
             internal_pubkey: pubkey,

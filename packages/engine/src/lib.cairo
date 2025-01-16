@@ -29,7 +29,9 @@ pub mod signature {
     pub mod sighash;
     pub mod constants;
     pub mod utils;
-    pub use signature::{BaseSigVerifier, BaseSigVerifierTrait};
+    pub mod schnorr;
+    // pub use signature::{BaseSigVerifier, BaseSigVerifierTrait, BaseSegwitSigVerifierTrait};
+// pub use signature;
 }
 pub mod transaction;
 pub mod utxo;
@@ -37,4 +39,5 @@ pub mod utxo;
 #[cfg(test)]
 mod tests {
     mod test_scriptnum;
+    mod test_schnorr;
 }

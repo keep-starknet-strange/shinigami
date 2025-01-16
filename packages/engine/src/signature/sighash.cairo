@@ -237,7 +237,7 @@ pub impl TaprootSighashOptionsImpl of TaprootSighashOptionsTrait {
 }
 
 // Return true if `taproot_sighash` is valid.
-fn is_valid_taproot_sighash(hash_type: u32) -> bool {
+pub fn is_valid_taproot_sighash(hash_type: u32) -> bool {
     if hash_type == constants::SIG_HASH_DEFAULT
         || hash_type == constants::SIG_HASH_ALL
         || hash_type == constants::SIG_HASH_NONE
@@ -376,7 +376,7 @@ pub fn calc_taproot_signature_hash<
     Result::Ok(tagged_hash(HashTag::TapSighash, @sig_msg))
 }
 
-fn calc_tapscript_signature_hash() -> u256 {
+pub fn calc_tapscript_signature_hash() -> u256 {
     0 // TODO
 }
 
