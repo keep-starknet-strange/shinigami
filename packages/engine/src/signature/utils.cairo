@@ -165,11 +165,12 @@ pub fn is_witness_pub_key_hash(script: @ByteArray) -> bool {
 }
 
 // Checks if the given script is a Pay-to-Taproot script.
+// OP_1 OP_DATA_32 <32-byte-hash>
 pub fn is_witness_v1_pub_key_hash(script: @ByteArray) -> bool {
     if script.len() == constants::WITNESS_V1_PUB_KEY_HASH_LEN
         && script[0] == Opcode::OP_1
         && script[1] == Opcode::OP_DATA_32 {
-        return true;
+        return true; // remove 2 first bytes ?
     }
     false
 }

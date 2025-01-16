@@ -242,3 +242,92 @@ pub impl HashCacheImpl<
         0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{SigHashMidstateTrait, TxSigHashes};
+    use crate::transaction::{
+        EngineTransactionOutput, EngineTransaction, EngineTransactionInput, EngineOutPoint,
+    };
+    use crate::signature::{ // taproot_signature::{TaprootSigVerifier},
+        sighash::BASE_SIGHASH_EXT_FLAG,
+    };
+    use shinigami_engine::utxo::{UTXO};
+    use shinigami_utils::bytecode::hex_to_bytecode;
+
+
+    #[test]
+    fn test_new_sigHashMidstate() {
+        // 091d2aaadc409298fd8353a4cd94c319481a0b4623fb00872fe240448e93fcbe input 0
+        let transaction = EngineTransaction {
+            version: 2,
+            transaction_inputs: array![
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xec9016580d98a93909faf9d2f431e74f781b438d81372bb6aab4db67725c11a7_u256, // le
+                        vout: 0,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0xffffffff,
+                    witness: array![
+                        hex_to_bytecode(
+                            @"0xb693a0797b24bae12ed0516a2f5ba765618dca89b75e498ba5b745b71644362298a45ca39230d10a02ee6290a91cebf9839600f7e35158a447ea182ea0e022ae01",
+                        ),
+                    ],
+                },
+            ],
+            transaction_outputs: array![
+                EngineTransactionOutput {
+                    value: 10000,
+                    publickey_script: hex_to_bytecode(
+                        @"0x00144e44ca792ce545acba99d41304460dd1f53be384",
+                    ),
+                },
+            ],
+            locktime: 0,
+            utxos: array![
+                UTXO {
+                    amount: 20000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x51200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667",
+                    ),
+                    block_height: 861957,
+                },
+            ],
+        };
+        let tx_idx = 0;
+        let sig_hash = SigHashMidstateTrait::new(@transaction, tx_idx);
+
+        // match sig_hash {
+        //     TxSigHashes::Segwit(sig_hash) => {
+        //         println!("Segwit sighash midstate");
+        //         println!("hash_prevouts_v0: {}", sig_hash.hash_prevouts_v0);
+        //         println!("hash_sequence_v0: {}", sig_hash.hash_sequence_v0);
+        //         println!("hash_outputs_v0: {}", sig_hash.hash_outputs_v0);
+        //         // assert_eq!(sig_hash.hash_prevouts_v0, @0x0_u256);
+        //     // assert_eq!(sig_hash.hash_sequence_v0, @0x0_u256);
+        //     // assert_eq!(sig_hash.hash_outputs_v0, @0x0_u256);
+        //     },
+        //     TxSigHashes::Taproot(sig_hash) => {
+        //         println!("Taproot sighash midstate");
+        //         println!("hash_prevouts_v1: {}", sig_hash.hash_prevouts_v1);
+        //         println!("hash_sequence_v1: {}", sig_hash.hash_sequence_v1);
+        //         println!("hash_outputs_v1: {}", sig_hash.hash_outputs_v1);
+        //         println!("hash_input_scripts_v1: {}", sig_hash.hash_input_scripts_v1);
+        //         println!("hash_input_amounts_v1: {}", sig_hash.hash_input_amounts_v1);
+        //         // assert_eq!(sig_hash.hash_prevouts_v1, @0x0_u256);
+        //     // assert_eq!(sig_hash.hash_sequence_v1, @0x0_u256);
+        //     // assert_eq!(sig_hash.hash_outputs_v1, @0x0_u256);
+        //     // assert_eq!(sig_hash.hash_input_scripts_v1, @0x0_u256);
+        //     // assert_eq!(sig_hash.hash_input_amounts_v1, @0x0_u256);
+        //     },
+        // }
+        assert_eq!(
+            match sig_hash {
+                TxSigHashes::Segwit(_) => false,
+                TxSigHashes::Taproot(_) => true,
+            },
+            true,
+        );
+    }
+}

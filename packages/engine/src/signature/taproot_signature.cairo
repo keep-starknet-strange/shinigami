@@ -49,27 +49,27 @@ pub fn schnorr_parse_signature(sig_bytes: @ByteArray) -> Result<(Signature, u32)
 #[derive(Drop)]
 pub struct TaprootSigVerifier<T> {
     // public key as a point on the secp256k1 curve, used to verify the signature
-    pub_key: Secp256k1Point,
+    pub pub_key: Secp256k1Point,
     // ECDSA signature
-    sig: Signature,
+    pub sig: Signature,
     // raw byte array of the signature
-    sig_bytes: @ByteArray,
+    pub sig_bytes: @ByteArray,
     // raw byte array of the public key
-    pk_bytes: @ByteArray,
+    pub pk_bytes: @ByteArray,
     // specifies how the transaction was hashed for signing
-    hash_type: u32,
+    pub hash_type: u32,
     // transaction being verified
-    tx: @T,
+    pub tx: @T,
     // index of the input being verified
-    inputIndex: u32,
+    pub inputIndex: u32,
     // output being spent
-    prevOuts: EngineTransactionOutput,
+    pub prevOuts: EngineTransactionOutput,
     //
     // sigCache: SigCache TODO?
     //
-    hashCache: TxSigHashes,
+    pub hashCache: TxSigHashes,
     // annex data used for taproot verification
-    annex: @ByteArray,
+    pub annex: @ByteArray,
 }
 
 pub trait TaprootSigVerifierTrait<
