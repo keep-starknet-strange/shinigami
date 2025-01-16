@@ -35,7 +35,9 @@ const MobileMenu: FC<MobileMenuProps> = ({ isOpen, onClose, onOpenModal }) => {
           <Link href="/">
             <div className="flex flex-row items-center justify-center space-x-0.5">
               <Image src={logo} width={35} height={35} alt="Shinigami Logo" />
-              <h6 className="uppercase text-white pl-2 text-lg">Shinigami Script Wizard</h6>
+              <h6 className="uppercase text-white pl-2 text-lg">
+                Shinigami Script Wizard
+              </h6>
             </div>
           </Link>
           <button className="block sm:hidden py-2.5" onClick={onClose}>

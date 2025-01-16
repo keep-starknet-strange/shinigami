@@ -18,8 +18,12 @@ export const AboutModal: FC<AboutModalProps> = ({ isOpen, onClose }) => (
     handler={onClose}
     className="bg-black w-full"
     nonce={undefined}
-    onResize={() => { }}
-    onResizeCapture={() => { }} placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+    onResize={() => {}}
+    onResizeCapture={() => {}}
+    placeholder={undefined}
+    onPointerEnterCapture={undefined}
+    onPointerLeaveCapture={undefined}
+  >
     <button
       className="p-1.5 border-2 border-[#00FF5E] rounded-md absolute right-0 bg-[#00FF5E]/10 z-20"
       onClick={onClose}
@@ -31,9 +35,9 @@ export const AboutModal: FC<AboutModalProps> = ({ isOpen, onClose }) => (
       <div className="w-full h-28 bg-[url('/banner.png')] bg-cover bg-no-repeat bg-center" />
       <div className="font-medium">
         <p className="text-white mb-4">
-          Shinigami is a Bitcoin Script library for generic Script VM execution in Cairo,
-          enabling the generation of STARK proofs for Bitcoin Script computation and
-          Bitcoin transaction execution.
+          Shinigami is a Bitcoin Script library for generic Script VM execution
+          in Cairo, enabling the generation of STARK proofs for Bitcoin Script
+          computation and Bitcoin transaction execution.
         </p>
         <ul className="list-disc text-white ml-4">
           <li>Bitcoin Script interpretation and execution</li>

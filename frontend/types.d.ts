@@ -1,7 +1,7 @@
 export interface StackItem {
-    value: string;
+  value: string;
 }
-  
+
 export interface StackVisualizerProps {
-    stackContent: StackItem[];
+  stackContent: StackItem[];
 }
