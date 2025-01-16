@@ -1,21 +1,17 @@
 use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
-    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait,
+    EngineTransactionOutput, EngineTransactionInputTrait, EngineTransactionOutputTrait,
+    EngineTransactionTrait,
 };
+use crate::flags::ScriptFlags;
+use crate::signature::{constants, schnorr, sighash, sighash::{TaprootSighashOptionsTrait}};
+use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait};
+use crate::errors::Error;
+
+use shinigami_utils::byte_array::{U256IntoByteArray, u256_from_byte_array_with_offset};
+use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature};
 use starknet::secp256k1::{Secp256k1Point};
-use crate::flags::ScriptFlags;
-use crate::signature::{constants, schnorr};
-use crate::signature::{sighash, sighash::{TaprootSighashOptionsTrait}};
-use crate::transaction::{EngineTransactionOutput};
-use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
-use crate::hash_cache::{TxSigHashes};
-use crate::hash_cache::{SigHashMidstateTrait};
-// use crate::signature::{sighash, constants, schnorr};
-use crate::errors::Error;
-// use crate::parser;
-use starknet::SyscallResultTrait;
-
 
 pub const SCHNORR_SIGNATURE_LEN: usize = 64;
 
@@ -59,38 +55,6 @@ pub fn parse_taproot_sig_and_pk<
 
     return Result::Ok((pk, sig, sighash_type));
 }
-
-// pub fn parse_schnorr_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
-//     if pk_bytes.len() == 0 || pk_bytes.len() != 32 {
-//         return Result::Err('Invalid schnorr pubkey length');
-//     }
-
-//     let mut key_compressed: ByteArray = "\02";
-//     key_compressed.append(pk_bytes);
-//     return parse_pub_key(@key_compressed);
-// }
-
-// pub fn schnorr_parse_signature(sig_bytes: @ByteArray) -> Result<(Signature, u32), felt252> {
-//     let sig_bytes_len = sig_bytes.len();
-//     let mut hash_type: u32 = 0;
-//     if sig_bytes_len == SCHNORR_SIGNATURE_LEN {
-//         hash_type = constants::SIG_HASH_DEFAULT;
-//     } else if sig_bytes_len == SCHNORR_SIGNATURE_LEN + 1 && sig_bytes[64] != 0 {
-//         hash_type = sig_bytes[64].into();
-//     } else {
-//         return Result::Err('Invalid taproot signature len');
-//     }
-//     Result::Ok(
-//         (
-//             Signature {
-//                 r: u256_from_byte_array_with_offset(sig_bytes, 0, 32),
-//                 s: u256_from_byte_array_with_offset(sig_bytes, 32, 32),
-//                 y_parity: false // Schnorr signatures don't use y_parity
-//             },
-//             hash_type,
-//         ),
-//     )
-// }
 
 #[derive(Drop)]
 pub struct TaprootSigVerifier<T> {
@@ -170,8 +134,6 @@ pub impl TaprootSigVerifierImpl<
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(ref engine, pk_bytes, sig_bytes)?;
-        // let pub_key = parse_schnorr_pub_key(pk_bytes)?;
-        // let (sig, hash_type) = schnorr_parse_signature(sig_bytes)?;
         let sig_hashes = SigHashMidstateTrait::new(engine.transaction, engine.tx_idx);
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
@@ -241,7 +203,11 @@ pub impl TaprootSigVerifierImpl<
             T,
         >(self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts)?;
 
-        is_valid_schnorr_signature(sig_hash, self.sig, self.pub_key)?;
+        let is_valid_sig = schnorr::verify_schnorr(self.sig, @sig_hash.into(), self.pk_bytes)
+            .is_ok();
+        if !is_valid_sig {
+            return Result::Err(Error::TAPROOT_INVALID_SIG);
+        }
         Result::Ok(())
     }
 
@@ -251,10 +217,3 @@ pub impl TaprootSigVerifierImpl<
     }
 }
 
-pub fn is_valid_schnorr_signature<
-    Secp256Point, +Drop<Secp256Point>, impl Secp256Impl: Secp256Trait<Secp256Point>,
->(
-    msg_hash: u256, sig: Signature, public_key: Secp256Point,
-) -> Result<(), felt252> {
-    return Result::Ok(());
-}

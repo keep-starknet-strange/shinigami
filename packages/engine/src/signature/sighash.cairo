@@ -380,7 +380,6 @@ pub fn calc_tapscript_signature_hash() -> u256 {
     0 // TODO
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::{calc_taproot_signature_hash, TxSigHashes, TaprootSighashOptions};
