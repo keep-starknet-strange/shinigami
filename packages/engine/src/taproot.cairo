@@ -176,6 +176,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         if is_valid.is_err() {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
         }
+        // if verify.sigvalid Ok() else error invalid sig
         Result::Ok(())
     }
 

@@ -69,8 +69,7 @@ pub fn opcode_checksig<
 ) -> Result<(), felt252> {
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
-
-    if full_sig_bytes.len() < 1 {
+    if !engine.use_taproot && full_sig_bytes.len() < 1 {
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
@@ -117,16 +116,36 @@ pub fn opcode_checksig<
         }
     } else if engine.use_taproot {
         // Taproot Signature Verification
-        engine.taproot_context.use_ops_budget()?;
-        if pk_bytes.len() == 0 {
+
+        let pk_bytes_len = pk_bytes.len();
+        if (pk_bytes_len > 0) {
+            engine.taproot_context.use_ops_budget()?;
+        }
+
+        if pk_bytes_len == 0 {
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
+        }
+
+        if (full_sig_bytes.len() == 0) {
+            engine.dstack.push_byte_array("");
+            return Result::Ok(());
         }
 
         let verifier = TaprootSigVerifierTrait::<
             I, O, T,
         >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
+
         is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier).is_ok();
     }
+
+    // TODO finish from here for taproot impl
+    // txscript opcode.go opcodeCheckSig l2080
+    // use struct validation sig
+
+    // if vm.hasFlag(ScriptVerifyConstScriptCode) && result.sigMatch {
+    // str := "non-const script code"
+    // return scriptError(ErrNonConstScriptCode, str)
+    // }
 
     if !is_valid && @engine.use_taproot == @true {
         return Result::Err(Error::SIG_NULLFAIL);
