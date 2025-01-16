@@ -26,11 +26,11 @@ fn test_deserialize_transaction() {
     assert_eq!(
         input0.previous_outpoint.txid,
         @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
-        "Outpoint txid on input 1 is not correct"
+        "Outpoint txid on input 1 is not correct",
     );
     assert_eq!(input0.previous_outpoint.vout, @0, "Outpoint vout on input 1 is not correct");
     assert_eq!(
-        input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct"
+        input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct",
     );
     assert_eq!(input0.sequence, @0xFFFFFFFF, "Sequence on input 1 is not correct");
 
@@ -43,11 +43,11 @@ fn test_deserialize_transaction() {
     assert_eq!(
         input1.previous_outpoint.txid,
         @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
-        "Outpoint txid on input 2 is not correct"
+        "Outpoint txid on input 2 is not correct",
     );
     assert_eq!(input1.previous_outpoint.vout, @0, "Outpoint vout on input 2 is not correct");
     assert_eq!(
-        input1.signature_script, @expected_sig_script, "Script sig on input 2 is not correct"
+        input1.signature_script, @expected_sig_script, "Script sig on input 2 is not correct",
     );
     assert_eq!(input1.sequence, @0xFFFFFFFF, "Sequence on input 2 is not correct");
 
@@ -87,11 +87,11 @@ fn test_deserialize_first_p2pkh_transaction() {
     assert_eq!(
         input0.previous_outpoint.txid,
         @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
-        "Outpoint txid on input 1 is not correct"
+        "Outpoint txid on input 1 is not correct",
     );
     assert_eq!(input0.previous_outpoint.vout, @0, "Outpoint vout on input 1 is not correct");
     assert_eq!(
-        input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct"
+        input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct",
     );
     assert_eq!(input0.sequence, @0xFFFFFFFF, "Sequence on input 1 is not correct");
 
@@ -104,11 +104,11 @@ fn test_deserialize_first_p2pkh_transaction() {
     assert_eq!(
         input1.previous_outpoint.txid,
         @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
-        "Outpoint txid on input 2 is not correct"
+        "Outpoint txid on input 2 is not correct",
     );
     assert_eq!(input1.previous_outpoint.vout, @0, "Outpoint vout on input 2 is not correct");
     assert_eq!(
-        input1.signature_script, @expected_sig_script, "Script sig on input 2 is not correct"
+        input1.signature_script, @expected_sig_script, "Script sig on input 2 is not correct",
     );
     assert_eq!(input1.sequence, @0xFFFFFFFF, "Sequence on input 2 is not correct");
 
@@ -142,10 +142,10 @@ fn test_deserialize_first_p2sh_transaction() {
     assert_eq!(
         input0.previous_outpoint.txid,
         @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
-        "Outpoint txid on input 2 is not correct"
+        "Outpoint txid on input 2 is not correct",
     );
     assert_eq!(
-        input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct"
+        input0.signature_script, @expected_sig_script, "Script sig on input 1 is not correct",
     );
 
     let output0 = transaction.transaction_outputs[0];
@@ -154,7 +154,7 @@ fn test_deserialize_first_p2sh_transaction() {
 
     assert_eq!(output0.value, @1738699, "Output 1 value is not correct");
     assert_eq!(
-        output0.publickey_script, @expected_pk_script_0, "Output 1 pk_script is not correct"
+        output0.publickey_script, @expected_pk_script_0, "Output 1 pk_script is not correct",
     );
 
     let output1 = transaction.transaction_outputs[1];
@@ -163,7 +163,7 @@ fn test_deserialize_first_p2sh_transaction() {
 
     assert_eq!(output1.value, @10000000, "Output 2 value is not correct");
     assert_eq!(
-        output1.publickey_script, @expected_pk_script_1, "Output 2 pk_script is not correct"
+        output1.publickey_script, @expected_pk_script_1, "Output 2 pk_script is not correct",
     );
 
     assert_eq!(transaction.locktime, 0, "Lock time is not correct");
@@ -192,7 +192,7 @@ fn test_deserialize_p2wsh_transaction() {
     assert_eq!(
         input0.previous_outpoint.txid,
         @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
-        "Outpoint txid on input 1 is not correct"
+        "Outpoint txid on input 1 is not correct",
     );
     assert_eq!(input0.signature_script.len(), 0, "Script sig on input 1 is not empty");
     assert_eq!(input0.witness.len(), 2, "Witness length on input 1 is not correct");
@@ -227,7 +227,7 @@ fn test_deserialize_p2wpkh_transaction() {
     assert_eq!(
         input0.previous_outpoint.txid,
         @u256_from_byte_array_with_offset(@expected_txid, 0, 32),
-        "Outpoint txid on input 0 is incorrect"
+        "Outpoint txid on input 0 is incorrect",
     );
     assert_eq!(input0.signature_script.len(), 0, "Signature script on input 0 should be empty");
 
@@ -278,7 +278,7 @@ fn test_validate_transaction() {
     let prevout_pk_script =
         "0x410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
     let prev_out = UTXO {
-        amount: 5000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 9
+        amount: 5000000000, pubkey_script: hex_to_bytecode(@prevout_pk_script), block_height: 9,
     };
     let utxo_hints = array![prev_out];
 

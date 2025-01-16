@@ -14,7 +14,7 @@ fn test_p2wpkh_create_transaction() {
 
     let prevout_script = "0x0014841b80d2cc75f5345c482af96294d04fdd66b2b7";
     let prevout = UTXO {
-        amount: 2595489, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 680226
+        amount: 2595489, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 680226,
     };
 
     let utxo_hints = array![prevout];
@@ -34,7 +34,7 @@ fn test_p2wpkh_unlock_transaction() {
 
     let prevout_script = "0x0014841b80d2cc75f5345c482af96294d04fdd66b2b7";
     let prevout = UTXO {
-        amount: 1083200, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 681995
+        amount: 1083200, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 681995,
     };
 
     let utxo_hints = array![prevout];
@@ -54,7 +54,7 @@ fn test_p2wpkh_first_transaction() {
 
     let prevout_script = "0xa914811ee2fb2d0c96b478992e1c07320b253ef3ee2687";
     let prevout = UTXO {
-        amount: 224000, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 481819
+        amount: 224000, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 481819,
     };
 
     let utxo_hints = array![prevout];
@@ -74,7 +74,7 @@ fn test_p2wpkh_first_witness_spend() {
 
     let prevout_script = "0x00148d7a0a3461e3891723e5fdf8129caa0075060cff";
     let prevout = UTXO {
-        amount: 194300, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 481824
+        amount: 194300, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 481824,
     };
     let utxo_hints = array![prevout];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
@@ -93,7 +93,7 @@ fn test_p2wpkh_uncompressed_key_scriptpubkey_validation() {
 
     let prevout_script = "0x76a9149acd0fbc308ea273b61bad6322a17c8a7694845d88ac";
     let prevout = UTXO {
-        amount: 100000, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 801368
+        amount: 100000, pubkey_script: hex_to_bytecode(@prevout_script), block_height: 801368,
     };
 
     let utxo_hints = array![prevout];

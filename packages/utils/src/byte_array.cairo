@@ -41,7 +41,7 @@ pub fn byte_array_value_at_be(byte_array: @ByteArray, ref offset: usize, len: us
 }
 
 pub fn byte_array_value_at_le(
-    byte_array: @ByteArray, ref offset: usize, len: usize
+    byte_array: @ByteArray, ref offset: usize, len: usize,
 ) -> felt252 { // TODO: Bounds check
     let byte_shift = 256;
     let mut value = 0;
@@ -132,4 +132,13 @@ pub fn byte_array_to_bool(bytes: @ByteArray) -> bool {
         i += 1;
     };
     ret_bool
+}
+
+pub impl U256IntoByteArray of Into<u256, ByteArray> {
+    fn into(self: u256) -> ByteArray {
+        let mut ba = Default::default();
+        ba.append_word(self.high.into(), 16);
+        ba.append_word(self.low.into(), 16);
+        ba
+    }
 }

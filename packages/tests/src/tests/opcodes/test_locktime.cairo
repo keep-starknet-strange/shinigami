@@ -21,7 +21,7 @@ fn test_opcode_checklocktime_unsatisfied_fail() {
 
     let flags: u32 = ScriptFlags::ScriptVerifyCheckLockTimeVerify.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::UNSATISFIED_LOCKTIME
+        program, tx, flags, Error::UNSATISFIED_LOCKTIME,
     );
     utils::check_dstack_size(ref engine, 1);
 }
@@ -62,7 +62,7 @@ fn test_opcode_checklocktime_as_op_nop_fail() {
     // 'ScriptDiscourageUpgradableNops' prevents to have OP_NOP behavior
     let flags: u32 = ScriptFlags::ScriptDiscourageUpgradableNops.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS
+        program, tx, flags, Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS,
     );
     utils::check_dstack_size(ref engine, 1);
 }
@@ -77,7 +77,7 @@ fn test_opcode_checklocktime_max_sequence_fail() {
 
     let flags: u32 = ScriptFlags::ScriptVerifyCheckLockTimeVerify.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::FINALIZED_TX_CLTV
+        program, tx, flags, Error::FINALIZED_TX_CLTV,
     );
     utils::check_dstack_size(ref engine, 1);
 }
@@ -112,7 +112,7 @@ fn test_opcode_checksequence_fail() {
 
     let flags: u32 = ScriptFlags::ScriptVerifyCheckSequenceVerify.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::UNSATISFIED_LOCKTIME
+        program, tx, flags, Error::UNSATISFIED_LOCKTIME,
     );
     utils::check_dstack_size(ref engine, 1);
 }
@@ -142,7 +142,7 @@ fn test_opcode_checksequence_as_op_nop_fail() {
     // 'ScriptDiscourageUpgradableNops' prevents to have OP_NOP behavior
     let flags: u32 = ScriptFlags::ScriptDiscourageUpgradableNops.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS
+        program, tx, flags, Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS,
     );
     utils::check_dstack_size(ref engine, 1);
 }
@@ -156,7 +156,7 @@ fn test_opcode_checksequence_tx_version_fail() {
     // Running with tx v1
     let flags: u32 = ScriptFlags::ScriptVerifyCheckSequenceVerify.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::UNSATISFIED_LOCKTIME
+        program, tx, flags, Error::UNSATISFIED_LOCKTIME,
     );
     utils::check_dstack_size(ref engine, 1);
 }
@@ -180,7 +180,7 @@ fn test_opcode_checksequence_disabled_bit_tx_fail() {
     // Run with tx v1
     let flags: u32 = ScriptFlags::ScriptVerifyCheckSequenceVerify.into();
     let mut engine = utils::test_compile_and_run_with_tx_flags_err(
-        program, tx, flags, Error::UNSATISFIED_LOCKTIME
+        program, tx, flags, Error::UNSATISFIED_LOCKTIME,
     );
     utils::check_dstack_size(ref engine, 1);
 }

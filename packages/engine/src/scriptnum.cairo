@@ -106,7 +106,7 @@ pub mod ScriptNum {
 
     // Unwrap 'n' byte of sign-magnitude encoded ByteArray.
     pub fn try_into_num_n_bytes(
-        input: ByteArray, n: usize, minimal_required: bool
+        input: ByteArray, n: usize, minimal_required: bool,
     ) -> Result<i64, felt252> {
         let mut result: i64 = 0;
         let mut i: u32 = 0;

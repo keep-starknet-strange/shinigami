@@ -29,7 +29,7 @@ fn test_op_code_disabled() {
     let disabled_opcodes_len = disabled_opcodes.len();
     while i != disabled_opcodes_len {
         let mut engine = utils::test_compile_and_run_err(
-            disabled_opcodes.at(i).clone(), Error::OPCODE_DISABLED
+            disabled_opcodes.at(i).clone(), Error::OPCODE_DISABLED,
         );
         utils::check_dstack_size(ref engine, 0);
         i += 1;
@@ -43,7 +43,7 @@ fn test_disabled_opcodes_if_block() {
     let disabled_opcodes_len = disabled_opcodes.len();
     while i != disabled_opcodes_len {
         let program = format!(
-            "OP_1 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone()
+            "OP_1 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone(),
         );
         let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
         utils::check_dstack_size(ref engine, 0);
@@ -58,7 +58,7 @@ fn test_disabled_opcodes_else_block() {
     let disabled_opcodes_len = disabled_opcodes.len();
     while i != disabled_opcodes_len {
         let program = format!(
-            "OP_0 OP_IF OP_DROP OP_ELSE {} OP_ENDIF", disabled_opcodes.at(i).clone()
+            "OP_0 OP_IF OP_DROP OP_ELSE {} OP_ENDIF", disabled_opcodes.at(i).clone(),
         );
         let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
         utils::check_dstack_size(ref engine, 0);
@@ -74,7 +74,7 @@ fn test_disabled_opcode_in_unexecd_if_block() {
     let disabled_opcodes_len = disabled_opcodes.len();
     while i != disabled_opcodes_len {
         let program = format!(
-            "OP_0 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone()
+            "OP_0 OP_IF {} OP_ELSE OP_DROP OP_ENDIF", disabled_opcodes.at(i).clone(),
         );
         let mut engine = utils::test_compile_and_run_err(program, Error::OPCODE_DISABLED);
         utils::check_dstack_size(ref engine, 0);

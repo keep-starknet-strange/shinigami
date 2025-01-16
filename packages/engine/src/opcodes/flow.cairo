@@ -1,6 +1,6 @@
 use crate::engine::{Engine, EngineInternalTrait};
 use crate::transaction::{
-    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait
+    EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
 use crate::flags::ScriptFlags;
 use crate::cond_stack::ConditionalStackTrait;
@@ -17,14 +17,14 @@ pub fn opcode_nop<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>, opcode: u8
+    ref engine: Engine<T>, opcode: u8,
 ) -> Result<(), felt252> {
     if opcode != Opcode::OP_NOP
         && EngineInternalTrait::<
-            I, O, T
+            I, O, T,
         >::has_flag(ref engine, ScriptFlags::ScriptDiscourageUpgradableNops) {
         return Result::Err(Error::SCRIPT_DISCOURAGE_UPGRADABLE_NOPS);
     }
@@ -45,10 +45,10 @@ pub fn opcode_if<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     // TODO: Pop if bool
@@ -74,10 +74,10 @@ pub fn opcode_notif<
     +Drop<O>,
     impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
     impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait
-    >
+        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
+    >,
 >(
-    ref engine: Engine<T>
+    ref engine: Engine<T>,
 ) -> Result<(), felt252> {
     let mut cond = op_cond_false;
     if engine.cond_stack.branch_executing() {

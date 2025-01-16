@@ -5,19 +5,19 @@ use shinigami_utils::bytecode::hex_to_bytecode;
 fn test_block_subsidy_calculation() {
     assert(
         EngineInternalTransactionTrait::calculate_block_subsidy(0) == 5000000000,
-        'Incorrect genesis subsidy'
+        'Incorrect genesis subsidy',
     );
     assert(
         EngineInternalTransactionTrait::calculate_block_subsidy(210000) == 2500000000,
-        'Incorrect halving subsidy'
+        'Incorrect halving subsidy',
     );
     assert(
         EngineInternalTransactionTrait::calculate_block_subsidy(420000) == 1250000000,
-        'Incorrect 2nd halving subsidy'
+        'Incorrect 2nd halving subsidy',
     );
     assert(
         EngineInternalTransactionTrait::calculate_block_subsidy(13440000) == 0,
-        'Should be 0 after 64 halvings'
+        'Should be 0 after 64 halvings',
     );
 }
 
@@ -30,7 +30,7 @@ fn test_validate_coinbase_block_0() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(0, 5000000000).is_ok(),
-        "Genesis block coinbase transaction invalid"
+        "Genesis block coinbase transaction invalid",
     );
 }
 
@@ -42,7 +42,8 @@ fn test_validate_coinbase_block_1() {
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
-        transaction.validate_coinbase(1, 5000000000).is_ok(), "Block 1 coinbase transaction invalid"
+        transaction.validate_coinbase(1, 5000000000).is_ok(),
+        "Block 1 coinbase transaction invalid",
     );
 }
 
@@ -55,7 +56,7 @@ fn test_validate_coinbase_block_150007() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(150007, 350000).is_ok(),
-        "Block 150007 coinbase transaction invalid"
+        "Block 150007 coinbase transaction invalid",
     );
 }
 
@@ -68,7 +69,7 @@ fn test_validate_coinbase_block_227835() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(227835, 6050010).is_ok(),
-        "Block 227835 coinbase transaction invalid"
+        "Block 227835 coinbase transaction invalid",
     );
 }
 
@@ -81,7 +82,7 @@ fn test_validate_coinbase_block_227836() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(227836, 6260000).is_ok(),
-        "Block 227836 coinbase transaction invalid"
+        "Block 227836 coinbase transaction invalid",
     );
 }
 
@@ -94,7 +95,7 @@ fn test_validate_coinbase_block_400021() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(400021, 1166059).is_ok(),
-        "Block 400021 coinbase transaction invalid"
+        "Block 400021 coinbase transaction invalid",
     );
 }
 
@@ -107,7 +108,7 @@ fn test_validate_coinbase_block_481823() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(481823, 311039505).is_ok(),
-        "Block 481823 coinbase transaction invalid"
+        "Block 481823 coinbase transaction invalid",
     );
 }
 
@@ -121,7 +122,7 @@ fn test_validate_coinbase_block_481824() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(481824, 212514269).is_ok(),
-        "Block 481824 coinbase transaction invalid"
+        "Block 481824 coinbase transaction invalid",
     );
 }
 
@@ -135,7 +136,7 @@ fn test_validate_coinbase_block_538403() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
     assert!(
         transaction.validate_coinbase(538403, 6517).is_ok(),
-        "Block 538403 coinbase transaction invalid"
+        "Block 538403 coinbase transaction invalid",
     );
 }
 // TODO: Test invalid coinbase

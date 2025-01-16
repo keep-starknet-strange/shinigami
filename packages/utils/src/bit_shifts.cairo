@@ -23,9 +23,9 @@ pub fn shr<
     +PartialOrd<U>,
     +PartialEq<U>,
     +BitSize<T>,
-    +Into<usize, U>
+    +Into<usize, U>,
 >(
-    self: T, shift: U
+    self: T, shift: U,
 ) -> T {
     if shift > BitSize::<T>::bits().try_into().unwrap() - One::one() {
         return Zero::zero();
@@ -56,7 +56,7 @@ pub fn shl<
     +PartialOrd<U>,
     +PartialEq<U>,
     +BitSize<T>,
-    +Into<usize, U>
+    +Into<usize, U>,
 >(
     self: T, shift: U,
 ) -> T {

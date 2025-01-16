@@ -66,7 +66,7 @@ pub fn data_len(script: @ByteArray, idx: usize) -> Result<usize, felt252> {
     }
     return Result::Ok(
         byte_array_to_felt252_le(@data_at(script, idx + 1, push_data_len)?).try_into().unwrap()
-            + push_data_len
+            + push_data_len,
     );
 }
 
@@ -85,7 +85,7 @@ pub fn push_data_len(script: @ByteArray, idx: usize) -> Result<usize, felt252> {
     }
 
     return Result::Ok(
-        byte_array_to_felt252_le(@data_at(script, idx + 1, len)?).try_into().unwrap()
+        byte_array_to_felt252_le(@data_at(script, idx + 1, len)?).try_into().unwrap(),
     );
 }
 

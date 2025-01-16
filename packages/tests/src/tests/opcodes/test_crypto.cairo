@@ -1,7 +1,7 @@
 use crate::utils::{
     test_compile_and_run, check_expected_dstack, check_dstack_size,
     test_compile_and_run_with_tx_flags_err, mock_transaction_legacy_p2ms,
-    test_compile_and_run_with_tx_err, test_compile_and_run_with_tx, mock_transaction_legacy_p2pkh
+    test_compile_and_run_with_tx_err, test_compile_and_run_with_tx, mock_transaction_legacy_p2pkh,
 };
 use shinigami_engine::errors::Error;
 use shinigami_engine::scriptnum::ScriptNum;
@@ -14,7 +14,7 @@ fn test_opcode_sha256_1() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-        @"0x4BF5122F344554C53BDE2EBB8CD2B7E3D1600AD631C385A5D7CCE23C7785459A"
+        @"0x4BF5122F344554C53BDE2EBB8CD2B7E3D1600AD631C385A5D7CCE23C7785459A",
     );
     let expected_dstack = array![hex_data];
     check_expected_dstack(ref engine, expected_dstack.span());
@@ -26,7 +26,7 @@ fn test_opcode_sha256_2() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-        @"0xDBC1B4C900FFE48D575B5DA5C638040125F65DB0FE3E24494B76EA986457D986"
+        @"0xDBC1B4C900FFE48D575B5DA5C638040125F65DB0FE3E24494B76EA986457D986",
     );
     let expected_dstack = array![hex_data];
     check_expected_dstack(ref engine, expected_dstack.span());
@@ -38,7 +38,7 @@ fn test_opcode_sha256_data_8() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-        @"0x66840DDA154E8A113C31DD0AD32F7F3A366A80E8136979D8F5A101D3D29D6F72"
+        @"0x66840DDA154E8A113C31DD0AD32F7F3A366A80E8136979D8F5A101D3D29D6F72",
     );
     let expected_dstack = array![hex_data];
     check_expected_dstack(ref engine, expected_dstack.span());
@@ -52,7 +52,7 @@ fn test_opcode_sha256_push_data_2() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-        @"0x40AFF2E9D2D8922E47AFD4648E6967497158785FBD1DA870E7110266BF944880"
+        @"0x40AFF2E9D2D8922E47AFD4648E6967497158785FBD1DA870E7110266BF944880",
     );
     let expected_dstack = array![hex_data];
     check_expected_dstack(ref engine, expected_dstack.span());
@@ -64,7 +64,7 @@ fn test_opcode_sha256_14_double_sha256() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-        @"0xD6CDF7C9478A78B29F16C7E6DDCC5612E827BEAF6F4AEF7C1BB6FEF56BBB9A0F"
+        @"0xD6CDF7C9478A78B29F16C7E6DDCC5612E827BEAF6F4AEF7C1BB6FEF56BBB9A0F",
     );
     let expected_dstack = array![hex_data];
     check_expected_dstack(ref engine, expected_dstack.span());
@@ -134,7 +134,7 @@ fn test_op_hash256() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let expected_stack = array![
-        hex_to_bytecode(@"0x39C02658ED1416713CF4098382E80D07786EED7004FC3FD89B38C7165FDABC80")
+        hex_to_bytecode(@"0x39C02658ED1416713CF4098382E80D07786EED7004FC3FD89B38C7165FDABC80"),
     ];
     check_expected_dstack(ref engine, expected_stack.span());
 }
@@ -145,7 +145,7 @@ fn test_op_hash256_1() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let expected_stack = array![
-        hex_to_bytecode(@"0x9C12CFDC04C74584D787AC3D23772132C18524BC7AB28DEC4219B8FC5B425F70")
+        hex_to_bytecode(@"0x9C12CFDC04C74584D787AC3D23772132C18524BC7AB28DEC4219B8FC5B425F70"),
     ];
     check_expected_dstack(ref engine, expected_stack.span());
 }
@@ -156,7 +156,7 @@ fn test_op_hash256_2() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let expected_stack = array![
-        hex_to_bytecode(@"0x1CC3ADEA40EBFD94433AC004777D68150CCE9DB4C771BC7DE1B297A7B795BBBA")
+        hex_to_bytecode(@"0x1CC3ADEA40EBFD94433AC004777D68150CCE9DB4C771BC7DE1B297A7B795BBBA"),
     ];
     check_expected_dstack(ref engine, expected_stack.span());
 }
@@ -167,7 +167,7 @@ fn test_op_hash256_data_8() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let expected_stack = array![
-        hex_to_bytecode(@"0x2502FA942289B144EDB4CD31C0313624C030885420A86363CE91589D78F8295A")
+        hex_to_bytecode(@"0x2502FA942289B144EDB4CD31C0313624C030885420A86363CE91589D78F8295A"),
     ];
     check_expected_dstack(ref engine, expected_stack.span());
 }
@@ -180,7 +180,7 @@ fn test_op_hash256_push_data_2() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-        @"0x60BD11C69262F84DDFEA5F0D116D40AF862C4DD8C2A92FB90E368B132E8FA89C"
+        @"0x60BD11C69262F84DDFEA5F0D116D40AF862C4DD8C2A92FB90E368B132E8FA89C",
     );
     let expected_dstack = array![hex_data];
     check_expected_dstack(ref engine, expected_dstack.span());
@@ -192,7 +192,7 @@ fn test_op_hash256_14_double_hash256() {
     let mut engine = test_compile_and_run(program);
     check_dstack_size(ref engine, 1);
     let hex_data: ByteArray = hex_to_bytecode(
-        @"0x26AA6C7A9B46E9C409F09C179F7DEFF54F7AF5571D38DE5E5D9BA3932B91F55B"
+        @"0x26AA6C7A9B46E9C409F09C179F7DEFF54F7AF5571D38DE5E5D9BA3932B91F55B",
     );
     let expected_dstack = array![hex_data];
     check_expected_dstack(ref engine, expected_dstack.span());
@@ -277,7 +277,7 @@ fn test_op_checksig_wrong_signature() {
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = test_compile_and_run_with_tx_err(
-        script_pubkey, transaction, Error::SCRIPT_FAILED
+        script_pubkey, transaction, Error::SCRIPT_FAILED,
     );
     check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
@@ -292,7 +292,7 @@ fn test_op_checksig_invalid_hash_type() {
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = test_compile_and_run_with_tx_err(
-        script_pubkey, transaction, Error::SCRIPT_FAILED
+        script_pubkey, transaction, Error::SCRIPT_FAILED,
     );
     check_dstack_size(ref engine, 1);
     let expected_stack = array![""];
@@ -307,7 +307,7 @@ fn test_op_checksig_empty_signature() {
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = test_compile_and_run_with_tx_err(
-        script_pubkey, transaction, Error::SCRIPT_FAILED
+        script_pubkey, transaction, Error::SCRIPT_FAILED,
     );
     check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
@@ -322,7 +322,7 @@ fn test_op_checksig_too_short_signature() {
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = test_compile_and_run_with_tx_err(
-        script_pubkey, transaction, Error::SCRIPT_FAILED
+        script_pubkey, transaction, Error::SCRIPT_FAILED,
     );
     check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
@@ -408,7 +408,7 @@ fn test_op_checkmultisig_wrong_signature() {
         "OP_2 OP_DATA_65 0x04D81FD577272BBE73308C93009EEC5DC9FC319FC1EE2E7066E17220A5D47A18314578BE2FAEA34B9F1F8CA078F8621ACD4BC22897B03DAA422B9BF56646B342A2 OP_DATA_65 0x04EC3AFFF0B2B66E8152E9018FE3BE3FC92B30BF886B3487A525997D00FD9DA2D012DCE5D5275854ADC3106572A5D1E12D4211B228429F5A7B2F7BA92EB0475BB1 OP_DATA_65 0x04B49B496684B02855BC32F5DAEFA2E2E406DB4418F3B86BCA5195600951C7D918CDBE5E6D3736EC2ABF2DD7610995C3086976B2C0C7B4E459D10B34A316D5A5E7 OP_3 OP_CHECKMULTISIG";
     let mut transaction = mock_transaction_legacy_p2ms(script_sig);
     let mut engine = test_compile_and_run_with_tx_err(
-        script_pubkey, transaction, Error::SCRIPT_FAILED
+        script_pubkey, transaction, Error::SCRIPT_FAILED,
     );
     check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
@@ -434,7 +434,7 @@ fn test_op_checkmultisig_bad_order() {
         "OP_2 OP_DATA_65 0x04D81FD577272BBE73308C93009EEC5DC9FC319FC1EE2E7066E17220A5D47A18314578BE2FAEA34B9F1F8CA078F8621ACD4BC22897B03DAA422B9BF56646B342A2 OP_DATA_65 0x04EC3AFFF0B2B66E8152E9018FE3BE3FC92B30BF886B3487A525997D00FD9DA2D012DCE5D5275854ADC3106572A5D1E12D4211B228429F5A7B2F7BA92EB0475BB1 OP_DATA_65 0x04B49B496684B02855BC32F5DAEFA2E2E406DB4418F3B86BCA5195600951C7D918CDBE5E6D3736EC2ABF2DD7610995C3086976B2C0C7B4E459D10B34A316D5A5E7 OP_3 OP_CHECKMULTISIG";
     let mut transaction = mock_transaction_legacy_p2ms(script_sig);
     let mut engine = test_compile_and_run_with_tx_err(
-        script_pubkey, transaction, Error::SCRIPT_FAILED
+        script_pubkey, transaction, Error::SCRIPT_FAILED,
     );
     check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(0)];
@@ -464,7 +464,7 @@ fn test_op_checkmultisig_dummy_not_zero() {
         script_pubkey,
         transaction,
         ScriptFlags::ScriptStrictMultiSig.into(),
-        Error::SCRIPT_STRICT_MULTISIG
+        Error::SCRIPT_STRICT_MULTISIG,
     );
     check_dstack_size(ref engine, 0);
 }

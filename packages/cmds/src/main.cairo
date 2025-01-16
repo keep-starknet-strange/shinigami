@@ -12,14 +12,14 @@ use shinigami_tests::validate;
 #[derive(Clone, Drop)]
 struct InputData {
     ScriptSig: ByteArray,
-    ScriptPubKey: ByteArray
+    ScriptPubKey: ByteArray,
 }
 
 #[derive(Clone, Drop)]
 struct InputDataWithFlags {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
-    Flags: ByteArray
+    Flags: ByteArray,
 }
 
 #[derive(Clone, Drop)]
@@ -27,7 +27,7 @@ struct InputDataWithWitness {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
     Flags: ByteArray,
-    Witness: ByteArray
+    Witness: ByteArray,
 }
 
 fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
@@ -35,7 +35,7 @@ fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
         "Running Bitcoin Script with ScriptSig: '{}', ScriptPubKey: '{}' and Flags: '{}'",
         input.ScriptSig,
         input.ScriptPubKey,
-        input.Flags
+        input.Flags,
     );
     let mut compiler = CompilerImpl::new();
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
@@ -55,7 +55,7 @@ fn run_with_witness(input: InputDataWithWitness) -> Result<(), felt252> {
         input.ScriptSig,
         input.ScriptPubKey,
         input.Flags,
-        input.Witness
+        input.Witness,
     );
     let mut compiler = CompilerImpl::new();
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
@@ -64,7 +64,7 @@ fn run_with_witness(input: InputDataWithWitness) -> Result<(), felt252> {
     let witness = witness::parse_witness_input(input.Witness);
     let value = 1; // TODO
     let tx = EngineInternalTransactionImpl::new_signed_witness(
-        script_sig, script_pubkey.clone(), witness, value
+        script_sig, script_pubkey.clone(), witness, value,
     );
     let flags = flags::parse_flags(input.Flags);
     let hash_cache = HashCacheImpl::new(@tx);
@@ -77,7 +77,7 @@ fn run(input: InputData) -> Result<(), felt252> {
     println!(
         "Running Bitcoin Script with ScriptSig: '{}' and ScriptPubKey: '{}'",
         input.ScriptSig,
-        input.ScriptPubKey
+        input.ScriptPubKey,
     );
     let mut compiler = CompilerImpl::new();
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
@@ -95,7 +95,7 @@ fn run(input: InputData) -> Result<(), felt252> {
         Result::Err(e) => {
             println!("Execution failed: {}", felt252_to_byte_array(e));
             Result::Err(e)
-        }
+        },
     }
 }
 
@@ -103,7 +103,7 @@ fn run_with_json(input: InputData) -> Result<(), felt252> {
     println!(
         "Running Bitcoin Script with ScriptSig: '{}' and ScriptPubKey: '{}'",
         input.ScriptSig,
-        input.ScriptPubKey
+        input.ScriptPubKey,
     );
     let mut compiler = CompilerImpl::new();
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
@@ -121,7 +121,7 @@ fn debug(input: InputData) -> Result<bool, felt252> {
     println!(
         "Running Bitcoin Script with ScriptSig: '{}' and ScriptPubKey: '{}'",
         input.ScriptSig,
-        input.ScriptPubKey
+        input.ScriptPubKey,
     );
     let mut compiler = CompilerImpl::new();
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
@@ -154,7 +154,7 @@ fn main(input: InputDataWithFlags) -> u8 {
         Result::Err(e) => {
             println!("Execution failed: {}", felt252_to_byte_array(e));
             0
-        }
+        },
     }
 }
 
@@ -168,7 +168,7 @@ fn main_with_witness(input: InputDataWithWitness) -> u8 {
         Result::Err(e) => {
             println!("Execution failed: {}", felt252_to_byte_array(e));
             0
-        }
+        },
     }
 }
 
@@ -182,7 +182,7 @@ fn backend_run(input: InputData) -> u8 {
         Result::Err(e) => {
             println!("Execution failed: {}", felt252_to_byte_array(e));
             0
-        }
+        },
     }
 }
 
@@ -196,7 +196,7 @@ fn backend_debug(input: InputData) -> u8 {
         Result::Err(e) => {
             println!("Execution failed: {}", felt252_to_byte_array(e));
             0
-        }
+        },
     }
 }
 
@@ -235,7 +235,7 @@ fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
                         amount: *hint.amount,
                         pubkey_script: pubkey_script,
                         block_height: *hint.block_height,
-                    }
+                    },
                 );
         };
 
@@ -248,6 +248,6 @@ fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
         Result::Err(e) => {
             println!("Execution failed: {}", felt252_to_byte_array(e));
             0
-        }
+        },
     }
 }

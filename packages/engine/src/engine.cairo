@@ -5,7 +5,7 @@ use crate::opcodes::opcodes::Opcode;
 use crate::flags::ScriptFlags;
 use crate::stack::{ScriptStack, ScriptStackImpl};
 use crate::transaction::{
-    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait
+    EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait,
 };
 use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
@@ -76,7 +76,7 @@ pub trait EngineTrait<
     +EngineTransactionInputTrait<I>,
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>,
-    +HashCacheTrait<I, O, T>
+    +HashCacheTrait<I, O, T>,
 > {
     // Create a new Engine with the given script
     fn new(
@@ -85,7 +85,7 @@ pub trait EngineTrait<
         tx_idx: u32,
         flags: u32,
         amount: i64,
-        hash_cache: @HashCache<T>
+        hash_cache: @HashCache<T>,
     ) -> Result<Engine<T>, felt252>;
     // Executes a single step of the script, returning true if more steps are needed
     fn step(ref self: Engine<T>) -> Result<bool, felt252>;
@@ -100,7 +100,7 @@ pub impl EngineImpl<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
     +Drop<I>,
     +Drop<O>,
@@ -113,7 +113,7 @@ pub impl EngineImpl<
         tx_idx: u32,
         flags: u32,
         amount: i64,
-        hash_cache: @HashCache<T>
+        hash_cache: @HashCache<T>,
     ) -> Result<Engine<T>, felt252> {
         let transaction_inputs = transaction.get_transaction_inputs();
         if tx_idx >= transaction_inputs.len() {
@@ -230,7 +230,7 @@ pub impl EngineImpl<
 
             if witness_program.len() != 0 {
                 let (witness_version, witness_program) = witness::parse_witness_program(
-                    @witness_program
+                    @witness_program,
                 )?;
                 engine.witness_version = witness_version;
                 engine.witness_program = witness_program;
@@ -477,7 +477,7 @@ pub impl EngineInternalImpl<
     impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
     impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
     impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
     +Drop<I>,
     +Drop<O>,
@@ -650,7 +650,7 @@ pub impl EngineInternalImpl<
 
             if witness_len == 1 {
                 TaprootContextImpl::verify_taproot_spend(
-                    @self.witness_program, witness[0], self.transaction, self.tx_idx
+                    ref self, @self.witness_program, witness[0], self.transaction, self.tx_idx,
                 )?;
                 self.taproot_context.must_succeed = true;
                 return Result::Ok(());
