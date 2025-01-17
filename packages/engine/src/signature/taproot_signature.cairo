@@ -8,9 +8,8 @@ use crate::signature::{constants, schnorr, sighash, sighash::{TaprootSighashOpti
 use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait};
 use crate::errors::Error;
 
-use shinigami_utils::byte_array::{U256IntoByteArray, u256_from_byte_array_with_offset};
-use starknet::SyscallResultTrait;
-use starknet::secp256_trait::{Secp256Trait, Signature};
+use shinigami_utils::byte_array::{U256IntoByteArray};
+use starknet::secp256_trait::{Signature};
 use starknet::secp256k1::{Secp256k1Point};
 
 pub const SCHNORR_SIGNATURE_LEN: usize = 64;
