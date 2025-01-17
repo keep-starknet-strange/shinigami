@@ -8,6 +8,10 @@ on:
   pull_request:
 permissions: read-all
 
+env:
+  CAIRO_LINT_REF: e6dbb895
+
+
 jobs:
   markdown:
     runs-on: ubuntu-latest
@@ -24,3 +28,23 @@ jobs:
       - uses: actions/checkout@v4
       - uses: asdf-vm/actions/install@v3
       - run: scarb test
+
+  cairo-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+      - name: Cache Rust dependencies
+        uses: actions/cache@v3
+      - name: Install cairo-lint
+        run: cargo install scarb-cairo-lint --git https://github.com/keep-starknet-strange/cairo-lint --rev ${{ env.CAIRO_LINT_REF }}
+ 
+      - uses: asdf-vm/actions/install@v3
+      - name: Run cairo-lint and check for warnings
+        run: |
+          scarb cairo-lint > lint_output.txt 2>&1
+          if grep -qi "warning" lint_output.txt; then
+            echo "Linting failed due to warnings"
+            exit 1
+          fi
