@@ -30,8 +30,6 @@ pub mod signature {
     pub mod constants;
     pub mod utils;
     pub mod schnorr;
-    // pub use signature::{BaseSigVerifier, BaseSigVerifierTrait, BaseSegwitSigVerifierTrait};
-// pub use signature;
 }
 pub mod transaction;
 pub mod utxo;

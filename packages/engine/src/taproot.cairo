@@ -2,12 +2,9 @@ use crate::errors::Error;
 use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
-use crate::signature::taproot_signature::{TaprootSigVerifierImpl};
-use crate::engine::{Engine};
+use crate::signature::{schnorr, taproot_signature::{TaprootSigVerifierImpl}};
+use crate::engine::Engine;
 
-// use crate::engine::Engine;
-use crate::signature::schnorr;
-// use crate::signature::signature::{TaprootSigVerifierImpl};
 use starknet::secp256k1::{Secp256k1Point};
 
 #[derive(Destruct)]
