@@ -34,7 +34,8 @@ pub struct EngineTransaction {
     pub transaction_inputs: Array<EngineTransactionInput>,
     pub transaction_outputs: Array<EngineTransactionOutput>,
     pub locktime: u32,
-    pub utxos: Array<UTXO> //Option for coinbase ?
+    // TODO replace UTXO by EngineTransactionOutput
+    pub utxos: Array<UTXO>,
 }
 
 pub trait EngineInternalTransactionTrait {
