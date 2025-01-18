@@ -127,7 +127,7 @@ pub fn opcode_checksig<
         }
 
         if (full_sig_bytes.len() == 0) {
-            engine.dstack.push_byte_array("");
+            engine.dstack.push_byte_array(""); // TODO verify this
             return Result::Ok(());
         }
 
@@ -138,10 +138,7 @@ pub fn opcode_checksig<
         is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier).is_ok();
     }
 
-    // TODO finish from here for taproot impl
-    // txscript opcode.go opcodeCheckSig l2080
-    // use struct validation sig
-
+    // TODO already handle ?
     // if vm.hasFlag(ScriptVerifyConstScriptCode) && result.sigMatch {
     // str := "non-const script code"
     // return scriptError(ErrNonConstScriptCode, str)

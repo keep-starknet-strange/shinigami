@@ -251,82 +251,205 @@ mod tests {
     };
     use shinigami_engine::utxo::{UTXO};
     use shinigami_utils::bytecode::hex_to_bytecode;
+    use shinigami_utils::byte_array::{U256IntoByteArray};
 
+    // TODO replace UTXO by EngineTransactionOutput
 
     #[test]
     fn test_new_sigHashMidstate() {
-        // 091d2aaadc409298fd8353a4cd94c319481a0b4623fb00872fe240448e93fcbe input 0
+        // https://github.com/bitcoin/bips/blob/master/bip-0341/wallet-test-vectors.json#l227
+        println!("test_new_sigHashMidstate2");
         let transaction = EngineTransaction {
             version: 2,
             transaction_inputs: array![
                 EngineTransactionInput {
                     previous_outpoint: EngineOutPoint {
-                        txid: 0xec9016580d98a93909faf9d2f431e74f781b438d81372bb6aab4db67725c11a7_u256, // le
+                        txid: 0x7de20cbff686da83a54981d2b9bab3586f4ca7e48f57f5b55963115f3b334e9c_u256,
+                        vout: 1,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0x0,
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xd7b7cab57b1393ace2d064f4d4a2cb8af6def61273e127517d44759b6dafdd99_u256,
                         vout: 0,
                     },
                     signature_script: Default::default(),
                     sequence: 0xffffffff,
-                    witness: array![
-                        hex_to_bytecode(
-                            @"0xb693a0797b24bae12ed0516a2f5ba765618dca89b75e498ba5b745b71644362298a45ca39230d10a02ee6290a91cebf9839600f7e35158a447ea182ea0e022ae01",
-                        ),
-                    ],
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xf8e1f583384333689228c5d28eac13366be082dc57441760d957275419a41842_u256,
+                        vout: 0,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0xffffffff,
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xf0689180aa63b30cb162a73c6d2a38b7eeda2a83ece74310fda0843ad604853b_u256,
+                        vout: 1,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0xfffffffe,
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xaa5202bdf6d8ccd2ee0f0202afbbb7461d9264a25e5bfd3c5a52ee1239e0ba6c_u256,
+                        vout: 0,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0xfffffffe,
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0x956149bdc66faa968eb2be2d2faa29718acbfe3941215893a2a3446d32acd050_u256,
+                        vout: 0,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0x0,
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xe664b9773b88c09c32cb70a2a3e4da0ced63b7ba3b22f848531bbb1d5d5f4c94_u256,
+                        vout: 1,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0x0,
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xe9aa6b8e6c9de67619e6a3924ae25696bb7b694bb677a632a74ef7eadfd4eabf_u256,
+                        vout: 0,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0xffffffff,
+                    witness: array![],
+                },
+                EngineTransactionInput {
+                    previous_outpoint: EngineOutPoint {
+                        txid: 0xa778eb6a263dc090464cd125c466b5a99667720b1c110468831d058aa1b82af1_u256,
+                        vout: 1,
+                    },
+                    signature_script: Default::default(),
+                    sequence: 0xffffffff,
+                    witness: array![],
                 },
             ],
             transaction_outputs: array![
                 EngineTransactionOutput {
-                    value: 10000,
+                    value: 0x000000003B9ACA00, // 10_00000000
                     publickey_script: hex_to_bytecode(
-                        @"0x00144e44ca792ce545acba99d41304460dd1f53be384",
+                        @"0x76a91406afd46bcdfd22ef94ac122aa11f241244a37ecc88ac",
+                    ),
+                },
+                EngineTransactionOutput {
+                    value: 0x00000000CB407880, //  34_10000000
+                    publickey_script: hex_to_bytecode(
+                        @"0xac9a87f5594be208f8532db38cff670c450ed2fea8fcdefcc9a663f78bab962b",
                     ),
                 },
             ],
-            locktime: 0,
+            locktime: 0x1DCD6500, //le
             utxos: array![
                 UTXO {
-                    amount: 20000,
+                    amount: 420000000,
                     pubkey_script: hex_to_bytecode(
-                        @"0x51200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667",
+                        @"0x512053a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343",
                     ),
-                    block_height: 861957,
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 462000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x5120147c9c57132f6e7ecddba9800bb0c4449251c92a1e60371ee77557b6620f3ea3",
+                    ),
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 294000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+                    ),
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 504000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x5120e4d810fd50586274face62b8a807eb9719cef49c04177cc6b76a9a4251d5450e",
+                    ),
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 630000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x512091b64d5324723a985170e4dc5a0f84c041804f2cd12660fa5dec09fc21783605",
+                    ),
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 378000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x00147dd65592d0ab2fe0d0257d571abf032cd9db93dc",
+                    ),
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 672000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x512075169f4001aa68f15bbed28b218df1d0a62cbbcf1188c6665110c293c907b831",
+                    ),
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 546000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x5120712447206d7a5238acc7ff53fbe94a3b64539ad291c7cdbc490b7577e4b17df5",
+                    ),
+                    block_height: Default::default(),
+                },
+                UTXO {
+                    amount: 588000000,
+                    pubkey_script: hex_to_bytecode(
+                        @"0x512077e30a5522dd9f894c3f8b8bd4c4b2cf82ca7da8a3ea6a239655c39c050ab220",
+                    ),
+                    block_height: Default::default(),
                 },
             ],
         };
         let tx_idx = 0;
         let sig_hash = SigHashMidstateTrait::new(@transaction, tx_idx);
 
-        // TODO replace UTXO by EngineTransactionOutput
+        let expected_hash_prevouts =
+            @0xe3b33bb4ef3a52ad1fffb555c0d82828eb22737036eaeb02a235d82b909c4c3f_u256;
+        let expected_hash_sequence =
+            @0x18959c7221ab5ce9e26c3cd67b22c24f8baa54bac281d8e6b05e400e6c3a957e_u256;
+        let expected_hash_outputs =
+            @0xa2e6dab7c1f0dcd297c8d61647fd17d821541ea69c3cc37dcbad7f90d4eb4bc5_u256;
 
-        // match sig_hash {
-        //     TxSigHashes::Segwit(sig_hash) => {
-        //         println!("Segwit sighash midstate");
-        //         println!("hash_prevouts_v0: {}", sig_hash.hash_prevouts_v0);
-        //         println!("hash_sequence_v0: {}", sig_hash.hash_sequence_v0);
-        //         println!("hash_outputs_v0: {}", sig_hash.hash_outputs_v0);
-        //         // assert_eq!(sig_hash.hash_prevouts_v0, @0x0_u256);
-        //     // assert_eq!(sig_hash.hash_sequence_v0, @0x0_u256);
-        //     // assert_eq!(sig_hash.hash_outputs_v0, @0x0_u256);
-        //     },
-        //     TxSigHashes::Taproot(sig_hash) => {
-        //         println!("Taproot sighash midstate");
-        //         println!("hash_prevouts_v1: {}", sig_hash.hash_prevouts_v1);
-        //         println!("hash_sequence_v1: {}", sig_hash.hash_sequence_v1);
-        //         println!("hash_outputs_v1: {}", sig_hash.hash_outputs_v1);
-        //         println!("hash_input_scripts_v1: {}", sig_hash.hash_input_scripts_v1);
-        //         println!("hash_input_amounts_v1: {}", sig_hash.hash_input_amounts_v1);
-        //         // assert_eq!(sig_hash.hash_prevouts_v1, @0x0_u256);
-        //     // assert_eq!(sig_hash.hash_sequence_v1, @0x0_u256);
-        //     // assert_eq!(sig_hash.hash_outputs_v1, @0x0_u256);
-        //     // assert_eq!(sig_hash.hash_input_scripts_v1, @0x0_u256);
-        //     // assert_eq!(sig_hash.hash_input_amounts_v1, @0x0_u256);
-        //     },
-        // }
-        assert_eq!(
-            match sig_hash {
-                TxSigHashes::Segwit(_) => false,
-                TxSigHashes::Taproot(_) => true,
+        let exepected_hash_amount =
+            @0x58a6964a4f5f8f0b642ded0a8a553be7622a719da71d1f5befcefcdee8e0fde6_u256;
+        let expected_hash_script_pubkeys =
+            @0x23ad0f61ad2bca5ba6a7693f50fce988e17c3780bf2b1e720cfbb38fbdd52e21_u256;
+
+        match sig_hash {
+            TxSigHashes::Taproot(sig_hash) => {
+                assert_eq!(sig_hash.hash_prevouts_v1, expected_hash_prevouts);
+                assert_eq!(sig_hash.hash_sequence_v1, expected_hash_sequence);
+                assert_eq!(sig_hash.hash_outputs_v1, expected_hash_outputs);
+
+                assert_eq!(sig_hash.hash_input_scripts_v1, expected_hash_script_pubkeys);
+                assert_eq!(sig_hash.hash_input_amounts_v1, exepected_hash_amount);
             },
-            true,
-        );
+            _ => panic!("unexpected sighash type midstate"),
+        }
     }
 }
