@@ -113,7 +113,6 @@ fn test_validate_coinbase_block_481823() {
 }
 
 #[test]
-#[ignore]
 fn test_validate_coinbase_block_481824() {
     // Test the first block after BIP141 segwit
     let raw_transaction_hex =
@@ -127,7 +126,6 @@ fn test_validate_coinbase_block_481824() {
 }
 
 #[test]
-#[ignore]
 fn test_validate_coinbase_block_538403() {
     // Test random block from learnmebitcoin
     let raw_transaction_hex =

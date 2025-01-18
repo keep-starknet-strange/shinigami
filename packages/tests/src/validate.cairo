@@ -1,8 +1,7 @@
 use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
-use shinigami_engine::transaction::EngineTransaction;
+use shinigami_engine::transaction::{EngineTransaction, UTXO};
 use shinigami_engine::opcodes::Opcode;
-use shinigami_engine::utxo::{UTXO};
 
 // TODO: Move validate coinbase here
 

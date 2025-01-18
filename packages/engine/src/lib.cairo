@@ -32,7 +32,6 @@ pub mod signature {
     pub mod schnorr;
 }
 pub mod transaction;
-pub mod utxo;
 
 #[cfg(test)]
 mod tests {

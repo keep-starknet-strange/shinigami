@@ -3,7 +3,14 @@ use shinigami_utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be
 use shinigami_utils::bytecode::{bytecode_to_hex, read_var_int, write_var_int};
 use shinigami_utils::bit_shifts::shr;
 use shinigami_utils::hash::double_sha256;
-use shinigami_engine::utxo::{UTXO};
+
+#[derive(Debug, Drop, Clone, Default)]
+pub struct UTXO {
+    pub amount: i64,
+    pub pubkey_script: ByteArray,
+    pub block_height: u32,
+    // TODO: flags?
+}
 
 // Tracks previous transaction outputs
 #[derive(Drop, Copy, Default)]

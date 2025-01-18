@@ -1,7 +1,6 @@
-use shinigami_engine::transaction::EngineInternalTransactionTrait;
-use shinigami_engine::utxo::{UTXO};
-use crate::validate;
+use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
 use shinigami_utils::bytecode::hex_to_bytecode;
+use crate::validate;
 
 #[test]
 fn test_p2pkh_transaction() {

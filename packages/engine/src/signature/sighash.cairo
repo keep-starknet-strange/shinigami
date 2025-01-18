@@ -221,6 +221,10 @@ pub impl TaprootSighashOptionsImpl of TaprootSighashOptionsTrait {
         }
     }
 
+    fn set_annex(ref self: TaprootSighashOptions, annex: @ByteArray) {
+        self.annex_hash = @sha256_byte_array(annex);
+    }
+
     // Write in msg the sihash message extension defined by the current active flag.
     fn write_digest_extensions(ref self: TaprootSighashOptions, ref msg: ByteArray) {
         // Base extension doesn'nt modify the digest at all.

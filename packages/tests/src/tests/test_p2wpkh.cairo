@@ -1,5 +1,4 @@
-use shinigami_engine::transaction::EngineInternalTransactionTrait;
-use shinigami_engine::utxo::{UTXO};
+use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
 use crate::validate;
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_engine::flags::ScriptFlags;

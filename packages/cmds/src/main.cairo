@@ -1,7 +1,8 @@
 use shinigami_compiler::compiler::CompilerImpl;
 use shinigami_engine::engine::{EngineImpl, EngineInternalImpl};
-use shinigami_engine::utxo::{UTXO};
-use shinigami_engine::transaction::{EngineInternalTransactionImpl, EngineInternalTransactionTrait};
+use shinigami_engine::transaction::{
+    EngineInternalTransactionImpl, EngineInternalTransactionTrait, UTXO,
+};
 use shinigami_engine::flags;
 use shinigami_engine::witness;
 use shinigami_engine::hash_cache::HashCacheImpl;

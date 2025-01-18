@@ -3,10 +3,10 @@ use crate::signature::sighash::{
     TAPSCRIPT_SIGHASH_EXT_FLAG,
 };
 use crate::transaction::{
-    EngineTransactionOutput, EngineTransaction, EngineTransactionInput, EngineOutPoint,
+    EngineTransactionOutput, EngineTransaction, EngineTransactionInput, EngineOutPoint, UTXO,
 };
 use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait};
-use shinigami_engine::utxo::{UTXO};
+use shinigami_engine::utxo::{};
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::byte_array::{U256IntoByteArray};
 

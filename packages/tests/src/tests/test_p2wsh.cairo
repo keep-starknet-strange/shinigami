@@ -1,9 +1,8 @@
-use shinigami_engine::transaction::EngineInternalTransactionTrait;
+use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
 use shinigami_engine::flags::ScriptFlags;
 use shinigami_engine::errors::Error;
 
 use crate::validate;
-use shinigami_engine::utxo::{UTXO};
 use shinigami_utils::bytecode::hex_to_bytecode;
 
 // P2WSH with P2MS

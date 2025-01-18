@@ -1,7 +1,6 @@
 use shinigami_engine::engine::{EngineImpl};
-use shinigami_engine::transaction::EngineInternalTransactionTrait;
+use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
 use crate::validate;
-use shinigami_engine::utxo::{UTXO};
 use shinigami_utils::bytecode::hex_to_bytecode;
 
 // https://learnmeabitcoin.com/explorer/tx/cda1f7d88232ff7e4fc1fcbf8a66b2cc3b8e19b5bc0ad22618453b8b75156740

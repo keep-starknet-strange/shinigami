@@ -1,5 +1,4 @@
-use shinigami_engine::transaction::EngineInternalTransactionTrait;
-use shinigami_engine::utxo::{UTXO};
+use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
 
 use crate::validate;
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
