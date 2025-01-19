@@ -4,9 +4,7 @@ use crate::transaction::{
     EngineTransactionTrait,
 };
 use crate::flags::ScriptFlags;
-use crate::signature::{
-    constants, schnorr, sighash, sighash::{TaprootSighashOptionsTrait, TaprootSighashOptions},
-};
+use crate::signature::{constants, schnorr, sighash, sighash::{TaprootSighashOptionsTrait}};
 use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait};
 use crate::errors::Error;
 
@@ -141,7 +139,7 @@ pub impl TaprootSigVerifierImpl<
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(ref engine, pk_bytes, sig_bytes)?;
-        let sig_hashes = SigHashMidstateTrait::new(engine.transaction, engine.tx_idx);
+        let sig_hashes = SigHashMidstateTrait::new(engine.transaction);
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
         };

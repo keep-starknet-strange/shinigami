@@ -16,7 +16,7 @@ fn test_p2wpkh_create_transaction() {
     };
 
     let utxo_hints = array![prevout];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction(@transaction, flags);
@@ -37,7 +37,7 @@ fn test_p2wpkh_unlock_transaction() {
     };
 
     let utxo_hints = array![prevout];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction(@transaction, flags);
@@ -58,7 +58,7 @@ fn test_p2wpkh_first_transaction() {
     };
 
     let utxo_hints = array![prevout];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction(@transaction, flags);
@@ -78,7 +78,7 @@ fn test_p2wpkh_first_witness_spend() {
     };
     let utxo_hints = array![prevout];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "P2WPKH first follow-up spend witness validation failed");
@@ -98,7 +98,7 @@ fn test_p2wpkh_uncompressed_key_scriptpubkey_validation() {
 
     let utxo_hints = array![prevout];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "P2WPKH uncompressed key ScriptPubKey validation failed");

@@ -23,7 +23,7 @@ fn test_p2pkh_transaction() {
         block_height: 357,
     };
     let utxo_hints = array![prevout_1, prevout_2];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, 0);
     assert!(res.is_ok(), "Transaction validation failed");
@@ -62,7 +62,7 @@ fn test_p2pkh_transaction_spend() {
     };
 
     let utxo_hints = array![prev_out0, prev_out1, prev_out2];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
 
     // Run Shinigami and validate the transaction execution
     let res = validate::validate_transaction(@transaction, 0);
@@ -90,7 +90,7 @@ fn test_block_770000_p2pkh_transaction() {
         block_height: 769998,
     };
     let utxo_hints = array![prevout];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, 0);
     assert!(res.is_ok(), "Transaction validation failed");
@@ -110,7 +110,7 @@ fn test_block_770002_p2pkh_transaction() {
         block_height: 769998,
     };
     let utxo_hints = array![prevout];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, 0);
     assert!(res.is_ok(), "Transaction validation failed");
