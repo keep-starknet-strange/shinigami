@@ -31,6 +31,7 @@ fn verify_locktime(tx_locktime: i64, threshold: i64, stack_locktime: i64) -> Res
 pub fn opcode_checklocktimeverify<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -81,6 +82,7 @@ pub fn opcode_checklocktimeverify<
 pub fn opcode_checksequenceverify<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,

@@ -28,17 +28,15 @@ pub fn parse_schnorr_signature(sig_bytes: @ByteArray) -> Result<Signature, felt2
 
     let mut r: u256 = 0;
     let mut s: u256 = 0;
-    for i in 0
-        ..sig_bytes
-            .len() {
-                if i < 32 {
-                    r *= 256;
-                    r += sig_bytes[i].into();
-                } else {
-                    s *= 256;
-                    s += sig_bytes[i].into();
-                }
-            };
+    for i in 0..sig_bytes.len() {
+        if i < 32 {
+            r *= 256;
+            r += sig_bytes[i].into();
+        } else {
+            s *= 256;
+            s += sig_bytes[i].into();
+        }
+    };
     if r >= constants::SECP256_FIELD_VAL {
         return Result::Err(Error::SCHNORR_INVALID_SIG_R_FIELD);
     }
@@ -59,12 +57,14 @@ pub fn parse_schnorr_signature(sig_bytes: @ByteArray) -> Result<Signature, felt2
 // 8. Fail if not hash_even_y(R)
 // 9. Fail is x(R) != r.
 // 10. Return success if failure did not occur before reaching this point.
-pub fn verify_schnorr(sig: Signature, hash: ByteArray, pubkey: ByteArray) -> Result<bool, felt252> {
+pub fn verify_schnorr(
+    sig: Signature, hash: @ByteArray, pubkey: @ByteArray,
+) -> Result<bool, felt252> {
     if hash.len() != 32 {
         return Result::Err(Error::SCHNORR_INVALID_MSG_SIZE);
     }
 
-    let P = parse_schnorr_pub_key(@pubkey)?;
+    let P = parse_schnorr_pub_key(pubkey)?;
 
     let n = Secp256Trait::<Secp256k1Point>::get_curve_size();
     if sig.r >= p {
@@ -76,8 +76,8 @@ pub fn verify_schnorr(sig: Signature, hash: ByteArray, pubkey: ByteArray) -> Res
     let mut msg: ByteArray = Default::default();
     msg.append_word(sig.r.high.into(), 16);
     msg.append_word(sig.r.low.into(), 16);
-    msg.append(@pubkey);
-    msg.append(@hash);
+    msg.append(pubkey);
+    msg.append(hash);
     let e = tagged_hash(HashTag::Bip0340Challenge, @msg);
 
     let G = Secp256Trait::<Secp256k1Point>::get_generator_point();

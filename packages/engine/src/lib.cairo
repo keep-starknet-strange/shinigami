@@ -25,18 +25,17 @@ pub use scriptnum::ScriptNum;
 pub mod flags;
 pub mod signature {
     pub mod signature;
+    pub mod taproot_signature;
     pub mod sighash;
     pub mod constants;
     pub mod utils;
     pub mod schnorr;
-    pub use signature::{
-        BaseSigVerifier, BaseSigVerifierTrait, BaseSegwitSigVerifierTrait, TaprootSigVerifier,
-        TaprootSigVerifierTrait,
-    };
 }
 pub mod transaction;
+
 #[cfg(test)]
 mod tests {
     mod test_scriptnum;
     mod test_schnorr;
+    mod test_taproot_hash;
 }

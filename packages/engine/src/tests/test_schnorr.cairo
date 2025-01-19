@@ -2,7 +2,6 @@ use crate::signature::schnorr::verify_schnorr;
 use crate::errors::Error;
 use starknet::secp256_trait::Signature;
 use shinigami_utils::byte_array::U256IntoByteArray;
-
 // Test data adapted from: https://github.com/bitcoin/bips/blob/master/bip-0340/test-vectors.csv
 
 #[test]
@@ -14,7 +13,7 @@ fn test_schnorr_verify_0() {
     };
     let pk: u256 = 0xf9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9;
     let m: u256 = 0x0;
-    assert!(verify_schnorr(sig, m.into(), pk.into()).unwrap());
+    assert!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap());
 }
 
 #[test]
@@ -26,7 +25,7 @@ fn test_schnorr_verify_1() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    assert!(verify_schnorr(sig, m.into(), pk.into()).unwrap());
+    assert!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap());
 }
 
 #[test]
@@ -38,7 +37,7 @@ fn test_schnorr_verify_2() {
     };
     let pk: u256 = 0xdd308afec5777e13121fa72b9cc1b7cc0139715309b086c960e18fd969774eb8;
     let m: u256 = 0x7e2d58d8b3bcdf1abadec7829054f90dda9805aab56c77333024b9d0a508b75c;
-    assert!(verify_schnorr(sig, m.into(), pk.into()).unwrap());
+    assert!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap());
 }
 
 #[test]
@@ -50,7 +49,7 @@ fn test_schnorr_verify_3() {
     };
     let pk: u256 = 0x25d1dff95105f5253c4022f628a996ad3a0d95fbf21d468a1b33f8c160d8f517;
     let m: u256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-    assert!(verify_schnorr(sig, m.into(), pk.into()).unwrap());
+    assert!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap());
 }
 
 #[test]
@@ -62,7 +61,7 @@ fn test_schnorr_verify_4() {
     };
     let pk: u256 = 0xd69c3509bb99e412e68b0fe8544e72837dfa30746d8be2aa65975f29d22dc7b9;
     let m: u256 = 0x4df3c3f68fcc83b27e9d42c90431a72499f17875c81a599b566c9889b9696703;
-    assert!(verify_schnorr(sig, m.into(), pk.into()).unwrap());
+    assert!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap());
 }
 
 #[test]
@@ -76,7 +75,7 @@ fn test_schnorr_verify_5() {
     };
     let pk: u256 = 0xeefdea4cdb677750a420fee807eacf21eb9898ae79b9768766e4faa04a2d4a34;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    verify_schnorr(sig, m.into(), pk.into()).unwrap_err();
+    verify_schnorr(sig, @m.into(), @pk.into()).unwrap_err();
 }
 
 #[test]
@@ -89,7 +88,7 @@ fn test_schnorr_verify_6() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    assert_eq!(verify_schnorr(sig, m.into(), pk.into()).unwrap(), false);
+    assert_eq!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap(), false);
 }
 
 #[test]
@@ -102,7 +101,7 @@ fn test_schnorr_verify_7() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    assert_eq!(verify_schnorr(sig, m.into(), pk.into()).unwrap(), false);
+    assert_eq!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap(), false);
 }
 
 #[test]
@@ -115,7 +114,7 @@ fn test_schnorr_verify_8() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    assert_eq!(verify_schnorr(sig, m.into(), pk.into()).unwrap(), false);
+    assert_eq!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap(), false);
 }
 
 #[test]
@@ -129,7 +128,7 @@ fn test_schnorr_verify_9() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    assert_eq!(verify_schnorr(sig, m.into(), pk.into()).unwrap(), false);
+    assert_eq!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap(), false);
 }
 
 #[test]
@@ -143,7 +142,7 @@ fn test_schnorr_verify_10() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    assert_eq!(verify_schnorr(sig, m.into(), pk.into()).unwrap(), false);
+    assert_eq!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap(), false);
 }
 
 #[test]
@@ -156,7 +155,7 @@ fn test_schnorr_verify_11() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    assert_eq!(verify_schnorr(sig, m.into(), pk.into()).unwrap(), false);
+    assert_eq!(verify_schnorr(sig, @m.into(), @pk.into()).unwrap(), false);
 }
 
 #[test]
@@ -169,7 +168,7 @@ fn test_schnorr_verify_12() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    let result = verify_schnorr(sig, m.into(), pk.into()).unwrap_err();
+    let result = verify_schnorr(sig, @m.into(), @pk.into()).unwrap_err();
     let expected = Error::SCHNORR_INVALID_SIG_R_FIELD;
     assert_eq!(result, expected);
 }
@@ -184,7 +183,7 @@ fn test_schnorr_verify_13() {
     };
     let pk: u256 = 0xdff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    let result = verify_schnorr(sig, m.into(), pk.into()).unwrap_err();
+    let result = verify_schnorr(sig, @m.into(), @pk.into()).unwrap_err();
     let expected = Error::SCHNORR_INVALID_SIG_SIZE;
     assert_eq!(result, expected);
 }
@@ -200,5 +199,5 @@ fn test_schnorr_verify_14() {
     };
     let pk: u256 = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc30;
     let m: u256 = 0x243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89;
-    verify_schnorr(sig, m.into(), pk.into()).unwrap_err();
+    verify_schnorr(sig, @m.into(), @pk.into()).unwrap_err();
 }

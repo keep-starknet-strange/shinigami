@@ -6,9 +6,9 @@ use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
-use crate::hash_cache::SigHashMidstateTrait;
+use crate::hash_cache::{SigHashMidstateTrait};
 use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
-use crate::signature::{sighash, constants, schnorr};
+use crate::signature::{sighash, constants};
 use crate::errors::Error;
 use shinigami_utils::byte_array::{sub_byte_array};
 use crate::parser;
@@ -56,6 +56,7 @@ impl BaseSigVerifierImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
+    +Default<T>,
 > of BaseSigVerifierTrait<I, O, T> {
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray,
@@ -104,7 +105,7 @@ impl BaseSegwitSigVerifierImpl<
         let sig_hashes = SigHashMidstateTrait::new(vm.transaction);
         let sig_hash: u256 = sighash::calc_witness_signature_hash::<
             I, O, T,
-        >(@self.sub_script, @sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
+        >(@self.sub_script, sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
@@ -136,6 +137,7 @@ pub fn compare_data(script: @ByteArray, sig_bytes: @ByteArray, i: u32, push_data
 pub fn check_hash_type_encoding<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -176,6 +178,7 @@ pub fn check_hash_type_encoding<
 pub fn check_signature_encoding<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -331,6 +334,7 @@ fn is_supported_pub_key_type(pk_bytes: @ByteArray) -> bool {
 pub fn check_pub_key_encoding<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -487,6 +491,7 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 pub fn parse_base_sig_and_pk<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -591,162 +596,4 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
     };
 
     @processed_script
-}
-
-// Parses the public key and signature for taproot spend.
-// Returning a tuple containing the parsed public key, signature, and hash type.
-pub fn parse_taproot_sig_and_pk<
-    T,
-    +Drop<T>,
-    I,
-    +Drop<I>,
-    impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
-    O,
-    +Drop<O>,
-    impl IEngineTransactionOutputTrait: EngineTransactionOutputTrait<O>,
-    impl IEngineTransactionTrait: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
-    >,
->(
-    ref vm: Engine<T>, pk_bytes: @ByteArray, sig_bytes: @ByteArray,
-) -> Result<(Secp256k1Point, Signature, u32), felt252> {
-    // Parse schnorr public key
-    let pk = schnorr::parse_schnorr_pub_key(pk_bytes)?;
-
-    // Check the size of the signature and if the `sighash byte` is set.
-    let sig_len = sig_bytes.len();
-    let (sig, sighash_type) = if sig_len == constants::SCHNORR_SIG_SIZE {
-        // Parse signature, `sighash_type` has default value
-        (schnorr::parse_schnorr_signature(sig_bytes)?, constants::SIG_HASH_DEFAULT)
-    } else if sig_len == constants::SCHNORR_SIG_SIZE + 1 && sig_bytes[64] != 0 {
-        // Extract `sighash_byte` and parse signature
-        let sighash_type = sig_bytes[64];
-        let mut sig_bytes_truncate: ByteArray = "";
-        for i in 0..constants::SCHNORR_SIG_SIZE {
-            sig_bytes_truncate.append_byte(sig_bytes[i]);
-        };
-        (schnorr::parse_schnorr_signature(@sig_bytes_truncate)?, sighash_type.into())
-    } else {
-        // Error on invalid signature size.
-        return Result::Err(Error::SCHNORR_INVALID_SIG_SIZE);
-    };
-
-    return Result::Ok((pk, sig, sighash_type));
-}
-
-#[derive(Drop)]
-pub struct TaprootSigVerifier {
-    // public key as a point on the secp256k1 curve, used to verify the signature
-    pub_key: Secp256k1Point,
-    // ECDSA signature
-    sig: Signature,
-    // raw byte array of the signature
-    sig_bytes: @ByteArray,
-    // raw byte array of the public key
-    pk_bytes: @ByteArray,
-    // specifies how the transaction was hashed for signing
-    hash_type: u32,
-    // annex data used for taproot verification
-    annex: @ByteArray,
-}
-
-pub trait TaprootSigVerifierTrait<
-    I,
-    O,
-    T,
-    +EngineTransactionInputTrait<I>,
-    +EngineTransactionOutputTrait<O>,
-    +EngineTransactionTrait<T, I, O>,
-> {
-    fn new(
-        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray,
-    ) -> Result<TaprootSigVerifier, felt252>;
-    fn new_base(
-        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray,
-    ) -> Result<TaprootSigVerifier, felt252>;
-    fn verify(ref self: TaprootSigVerifier) -> bool;
-    fn verify_base(ref self: TaprootSigVerifier) -> bool;
-}
-
-pub impl TaprootSigVerifierImpl<
-    I,
-    O,
-    T,
-    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
-    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
-    impl IEngineTransaction: EngineTransactionTrait<
-        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
-    >,
-    +Drop<O>,
-    +Drop<I>,
-    +Drop<T>,
-> of TaprootSigVerifierTrait<I, O, T> {
-    fn new(
-        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray,
-    ) -> Result<TaprootSigVerifier, felt252> {
-        let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
-        Result::Ok(
-            TaprootSigVerifier {
-                pub_key: pub_key, sig: sig, sig_bytes, pk_bytes, hash_type: hash_type, annex,
-            },
-        )
-    }
-
-    fn new_base(
-        ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray,
-    ) -> Result<TaprootSigVerifier, felt252> {
-        let pk_len = pk_bytes.len();
-        // Fail immediately if public key length is zero
-        if pk_len == 0 {
-            return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
-            // If key is 32 byte, parse as normal
-        } else if pk_len == 32 {
-            let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
-            return (Result::Ok(
-                TaprootSigVerifier {
-                    pub_key: pub_key,
-                    sig: sig,
-                    sig_bytes,
-                    pk_bytes,
-                    hash_type: hash_type,
-                    annex: vm.taproot_context.annex,
-                },
-            ));
-            // Otherwise, this is an unknown public key, assuming sig is valid
-        } else {
-            // However, return an error if the flags preventinf usage of unknown key type is set
-            if vm.has_flag(ScriptFlags::ScriptVerifyDiscourageUpgradeablePubkeyType) {
-                return Result::Err(Error::DISCOURAGE_UPGRADABLE_PUBKEY_TYPE);
-            }
-
-            let pub_key: u256 = u256_from_byte_array_with_offset(pk_bytes, 0, 32);
-            let pk = Secp256Trait::<
-                Secp256k1Point,
-            >::secp256_ec_get_point_from_x_syscall(pub_key, false)
-                .unwrap_syscall()
-                .expect(Error::SECP256K1_INVALID_POINT);
-            return (Result::Ok(
-                TaprootSigVerifier {
-                    pub_key: pk,
-                    sig: Signature { r: 0, s: 0, y_parity: false },
-                    sig_bytes,
-                    pk_bytes,
-                    hash_type: constants::SIG_HASH_DEFAULT,
-                    annex: @"",
-                },
-            ));
-        }
-    }
-
-    fn verify(ref self: TaprootSigVerifier) -> bool {
-        // let sig_hash = sighash::calc_taproot_signature_hash(); // TODO
-        // return schnorr::verify_schnorr();
-        false
-    }
-
-    fn verify_base(ref self: TaprootSigVerifier) -> bool {
-        // let sig_hash = sighash::calc_taproot_signature_hash(); // TODO
-        // return schnorr::verify_schnorr();
-        false
-    }
 }

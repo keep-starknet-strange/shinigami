@@ -41,6 +41,8 @@ pub const HASH_TYPE_LEN: usize = 1;
 //including the version byte and the public key hash, ensuring correct data formatting and inclusion
 //in SegWit transactions.
 pub const WITNESS_V0_PUB_KEY_HASH_LEN: usize = 22;
+//
+pub const WITNESS_V1_PUB_KEY_HASH_LEN: usize = 34;
 //SignatureSize is the size of an encoded Schnorr signature.
 pub const SCHNORR_SIG_SIZE: usize = 64;
 //Secp256 field value.

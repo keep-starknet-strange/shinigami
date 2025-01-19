@@ -59,31 +59,31 @@ pub fn transaction_procedure<
 ) -> EngineTransaction {
     let hash_type_masked = hash_type & constants::SIG_HASH_MASK;
     let mut transaction_inputs_clone = array![];
-    for input in transaction
-        .get_transaction_inputs() {
-            let new_transaction_input = EngineTransactionInput {
-                previous_outpoint: EngineOutPoint {
-                    txid: input.get_prevout_txid(), vout: input.get_prevout_vout(),
-                },
-                signature_script: input.get_signature_script().clone(),
-                witness: input.get_witness().into(),
-                sequence: input.get_sequence(),
-            };
-            transaction_inputs_clone.append(new_transaction_input);
+    for input in transaction.get_transaction_inputs() {
+        let new_transaction_input = EngineTransactionInput {
+            previous_outpoint: EngineOutPoint {
+                txid: input.get_prevout_txid(), vout: input.get_prevout_vout(),
+            },
+            signature_script: input.get_signature_script().clone(),
+            witness: input.get_witness().into(),
+            sequence: input.get_sequence(),
         };
+        transaction_inputs_clone.append(new_transaction_input);
+    };
     let mut transaction_outputs_clone = array![];
-    for output in transaction
-        .get_transaction_outputs() {
-            let new_transaction_output = EngineTransactionOutput {
-                value: output.get_value(), publickey_script: output.get_publickey_script().clone(),
-            };
-            transaction_outputs_clone.append(new_transaction_output);
+    for output in transaction.get_transaction_outputs() {
+        let new_transaction_output = EngineTransactionOutput {
+            value: output.get_value(), publickey_script: output.get_publickey_script().clone(),
         };
+        transaction_outputs_clone.append(new_transaction_output);
+    };
     let mut transaction_copy = EngineTransaction {
         version: transaction.get_version(),
         transaction_inputs: transaction_inputs_clone,
         transaction_outputs: transaction_outputs_clone,
         locktime: transaction.get_locktime(),
+        utxos: transaction.get_transaction_utxos(),
+        txid: transaction.get_txid(),
     };
     let mut i: usize = 0;
     let mut transaction_input: Array<EngineTransactionInput> = transaction_copy.transaction_inputs;
@@ -161,6 +161,17 @@ pub fn is_witness_pub_key_hash(script: @ByteArray) -> bool {
         && script[0] == Opcode::OP_0
         && script[1] == Opcode::OP_DATA_20 {
         return true;
+    }
+    false
+}
+
+// Checks if the given script is a Pay-to-Taproot script.
+// OP_1 OP_DATA_32 <32-byte-hash>
+pub fn is_witness_v1_pub_key_hash(script: @ByteArray) -> bool {
+    if script.len() == constants::WITNESS_V1_PUB_KEY_HASH_LEN
+        && script[0] == Opcode::OP_1
+        && script[1] == Opcode::OP_DATA_32 {
+        return true; // remove 2 first bytes ?
     }
     false
 }

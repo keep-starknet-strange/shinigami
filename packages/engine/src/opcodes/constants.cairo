@@ -13,6 +13,7 @@ pub fn opcode_false<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt252> {
 pub fn opcode_push_data<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -33,6 +34,7 @@ pub fn opcode_push_data<
 pub fn opcode_push_data_x<
     T,
     +Drop<T>,
+    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
