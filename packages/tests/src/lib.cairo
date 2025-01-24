@@ -1,5 +1,5 @@
 pub mod validate;
-pub mod utxo;
+// pub mod utxo;
 pub mod utils;
 #[cfg(test)]
 pub mod tests {

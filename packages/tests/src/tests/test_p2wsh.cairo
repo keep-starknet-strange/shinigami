@@ -1,9 +1,8 @@
-use shinigami_engine::transaction::EngineInternalTransactionTrait;
+use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
 use shinigami_engine::flags::ScriptFlags;
 use shinigami_engine::errors::Error;
 
 use crate::validate;
-use crate::utxo::UTXO;
 use shinigami_utils::bytecode::hex_to_bytecode;
 
 // P2WSH with P2MS
@@ -19,11 +18,12 @@ fn test_learnmeabitcoin_usage() {
     let raw_transaction_hex =
         "0x010000000001016542b657eea04a75b1582969b5b532b3110b392b4b553297435a11b064e2eb460100000000ffffffff02c454fd000000000017a9145e7be6ec3e2382c669aaf3c71da1056f47b9024d875b07330200000000220020ea166bf0492c6f908e45404932e0f39c0571a71007c22b872548cd20f19a92f504004730440220415899bbee08e42376d06e8f86c92b4987613c2816352fe09cd1479fd639f18c02200db57f508f69e266d76c23891708158bda18690c165a41b0aa88303b97609f780147304402203973de2303e8787767090dd25c8a4dc97ce1aa7eb4c0962f13952ed4e856ff8e02203f1bb425def789eea8be46407d10b3c8730407176aef4dc2c29865eb5e5542bf0169522103848e308569b644372a5eb26665f1a8c34ca393c130b376db2fae75c43500013c2103cec1ee615c17e06d4f4b0a08617dffb8e568936bdff18fb057832a58ad4d1b752103eed7ae80c34d70f5ba93f93965f69f3c691da0f4607f242f4fd6c7a48789233e53aeee9c0900";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
     let utxo_hints = array![prev_out];
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -41,11 +41,12 @@ fn test_learnmeabitcoin_usage_wrong_hash_in_pubkey_script() {
     let raw_transaction_hex =
         "0x010000000001016542b657eea04a75b1582969b5b532b3110b392b4b553297435a11b064e2eb460100000000ffffffff02c454fd000000000017a9145e7be6ec3e2382c669aaf3c71da1056f47b9024d875b07330200000000220020ea166bf0492c6f908e45404932e0f39c0571a71007c22b872548cd20f19a92f504004730440220415899bbee08e42376d06e8f86c92b4987613c2816352fe09cd1479fd639f18c02200db57f508f69e266d76c23891708158bda18690c165a41b0aa88303b97609f780147304402203973de2303e8787767090dd25c8a4dc97ce1aa7eb4c0962f13952ed4e856ff8e02203f1bb425def789eea8be46407d10b3c8730407176aef4dc2c29865eb5e5542bf0169522103848e308569b644372a5eb26665f1a8c34ca393c130b376db2fae75c43500013c2103cec1ee615c17e06d4f4b0a08617dffb8e568936bdff18fb057832a58ad4d1b752103eed7ae80c34d70f5ba93f93965f69f3c691da0f4607f242f4fd6c7a48789233e53aeee9c0900";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
     let utxo_hints = array![prev_out];
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
     assert!(res.unwrap_err() == Error::WITNESS_PROGRAM_MISMATCH, "Wrong error");
 }
@@ -66,11 +67,12 @@ fn test_learnmeabitcoin_usage_different_witness_script_from_hash() {
     let raw_transaction_hex =
         "0x010000000001016542b657eea04a75b1582969b5b532b3110b392b4b553297435a11b064e2eb460100000000ffffffff02c454fd000000000017a9145e7be6ec3e2382c669aaf3c71da1056f47b9024d875b07330200000000220020ea166bf0492c6f908e45404932e0f39c0571a71007c22b872548cd20f19a92f504004730440220415899bbee08e42376d06e8f86c92b4987613c2816352fe09cd1479fd639f18c02200db57f508f69e266d76c23891708158bda18690c165a41b0aa88303b97609f780147304402203973de2303e8787767090dd25c8a4dc97ce1aa7eb4c0962f13952ed4e856ff8e02203f1bb425def789eea8be46407d10b3c8730407176aef4dc2c29865eb5e5542bf0169522103f48e308569b644372a5eb26665f1a8c34ca393c130b376db2fae75c43500013c2103cec1ee615c17e06d4f4b0a08617dffb8e568936bdff18fb057832a58ad4d1b752103eed7ae80c34d70f5ba93f93965f69f3c691da0f4607f242f4fd6c7a48789233e53aeee9c0900";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
     assert!(res.unwrap_err() == Error::WITNESS_PROGRAM_MISMATCH, "Wrong error");
 }
@@ -88,11 +90,12 @@ fn test_custom_hash_puzzle() {
     let raw_transaction_hex =
         "0x020000000001018a39b5cdd48c7d45a31a89cd675a95f5de78aebeeda1e55ac35d7110c3bacfc60000000000ffffffff01204e0000000000001976a914ee63c8c790952de677d1f8019c9474d84098d6e188ac0202123423aa20a23421f2ba909c885a3077bb6f8eb4312487797693bbcfe7e311f797e3c5b8fa8700000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -109,11 +112,12 @@ fn test_custom_hash_puzzle_invalid_unlock_code() {
     let raw_transaction_hex =
         "0x020000000001018a39b5cdd48c7d45a31a89cd675a95f5de78aebeeda1e55ac35d7110c3bacfc60000000000ffffffff01204e0000000000001976a914ee63c8c790952de677d1f8019c9474d84098d6e188ac0202234523aa20a23421f2ba909c885a3077bb6f8eb4312487797693bbcfe7e311f797e3c5b8fa8700000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
     assert!(res.unwrap_err() == Error::SCRIPT_FAILED, "Wrong error");
 }
@@ -131,11 +135,12 @@ fn test_custom_hash_puzzle_wrong_hash_script_in_pubkey_script() {
     let raw_transaction_hex =
         "0x020000000001018a39b5cdd48c7d45a31a89cd675a95f5de78aebeeda1e55ac35d7110c3bacfc60000000000ffffffff01204e0000000000001976a914ee63c8c790952de677d1f8019c9474d84098d6e188ac0202123423aa20a23421f2ba909c885a3077bb6f8eb4312487797693bbcfe7e311f797e3c5b8fa8700000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
     assert!(res.unwrap_err() == Error::WITNESS_PROGRAM_MISMATCH, "Wrong error");
 }
@@ -156,11 +161,12 @@ fn test_custom_hash_puzzle_different_witness_script_from_hash() {
     let raw_transaction_hex =
         "0x020000000001018a39b5cdd48c7d45a31a89cd675a95f5de78aebeeda1e55ac35d7110c3bacfc60000000000ffffffff01204e0000000000001976a914ee63c8c790952de677d1f8019c9474d84098d6e188ac0202123423ba20a23421f2ba909c885a3077bb6f8eb4312487797693bbcfe7e311f797e3c5b8fa8700000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction);
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+
+    let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
     assert!(res.unwrap_err() == Error::WITNESS_PROGRAM_MISMATCH, "Wrong error");
 }

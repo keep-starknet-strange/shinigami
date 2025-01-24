@@ -40,6 +40,8 @@ pub mod Error {
     pub const TAPROOT_INVALID_PUBKEY_SIZE: felt252 = 'Bad pubkey size in tapscript';
     pub const TAPROOT_INVALID_CONTROL_BLOCK: felt252 = 'Invalid control block';
     pub const TAPROOT_INVALID_SIG: felt252 = 'Invalid signature in tap script';
+    pub const TAPROOT_INVALID_SIGHASH_TYPE: felt252 = 'Invalid taproot sighash type';
+    pub const TAPROOT_INVALID_SIGHASH_MIDSTATE: felt252 = 'Invalid taproot sighash midstat';
     pub const TAPROOT_PARITY_MISMATCH: felt252 = 'Parity mismatch in tap script';
     pub const TAPROOT_INVALID_MERKLE_PROOF: felt252 = 'Invalid taproot merkle proof';
     pub const SCHNORR_INVALID_SIG_SIZE: felt252 = 'Invalid schnorr sig size';
@@ -54,9 +56,10 @@ pub mod Error {
     pub const SECP256K1_INVALID_POINT: felt252 = 'Invalid secp256k1 point';
     pub const PUBKEYTYPE: felt252 = 'Unsupported public key type';
     pub const SIG_HIGH_S: felt252 = 'Sig not canonical high S value';
-    pub const SIG_HASHTYPE: felt252 = 'invalid hash type';
+    pub const SIG_HASHTYPE: felt252 = 'Invalid hash type';
     pub const INVALID_PUBKEY_LEN: felt252 = 'Invalid public key length';
     pub const NEGATIVE_LOCKTIME: felt252 = 'Stack top is negative';
+    pub const INVALID_INDEX_INPUTS: felt252 = 'Invalid index for inputs';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {
