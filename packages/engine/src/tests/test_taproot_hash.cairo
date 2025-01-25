@@ -82,7 +82,7 @@ fn test_new_sigHashMidstate() {
         },
     ];
 
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxos);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxos);
     let sig_hash = SigHashMidstateTrait::new(@transaction);
 
     let expected_hash_prevouts =
@@ -111,7 +111,6 @@ fn test_calc_taproot_signature_hash_key_path_spend() {
     // txid 091d2aaadc409298fd8353a4cd94c319481a0b4623fb00872fe240448e93fcbe input 0
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {
@@ -175,7 +174,6 @@ fn test_calc_taproot_signature_hash_script_path_spend_simple() {
     // txid 5ff05f74d385bd39e344329330461f74b390c1b5ead87c4f51b40c555b75719d input 1
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {
@@ -263,7 +261,6 @@ fn test_calc_taproot_signature_hash_script_path_spend_signature() {
     let input_idx: u32 = 0;
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {
@@ -335,7 +332,6 @@ fn test_calc_taproot_signature_hash_script_path_spend_tree() {
     let input_idx: u32 = 0;
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {

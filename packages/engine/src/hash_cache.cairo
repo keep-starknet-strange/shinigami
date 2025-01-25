@@ -156,7 +156,6 @@ pub trait SigCacheTrait<S> {
     // Adds a signature to the cache
     fn add(sig_hash: u256, signature: ByteArray, pub_key: ByteArray);
 }
-
 #[derive(Drop, Default, Copy)]
 pub struct TxSigHashes {
     pub segwit: SegwitSigHashMidstate,
@@ -176,37 +175,21 @@ impl TxSigHashesImpl of TxSigHashesTrait {
     fn set_v1_sighash(ref self: TxSigHashes, sighash: TaprootSigHashMidState) {
         self.taproot = sighash;
     }
+
+    fn get_hash_segwit_v0(self: @TxSigHashes) -> @SegwitSigHashMidstate {
+        self.segwit
+    }
+
+    fn get_hash_taproot_v1(self: @TxSigHashes) -> @TaprootSigHashMidState {
+        self.taproot
+    }
 }
 
-#[derive(Destruct, Default)]
+#[derive(Drop, Default)]
 pub struct HashCache<T> {
-    sigHashes: Felt252Dict<Nullable<TxSigHashes>>,
+    pub sigHashes: Option<TxSigHashes>,
 }
 
-// HashCache caches the midstate of segwit v0 and v1 sighashes
-// pub trait HashCacheTrait<
-//     I,
-//     O,
-//     T,
-//     +EngineTransactionInputTrait<I>,
-//     +EngineTransactionOutputTrait<O>,
-//     +EngineTransactionTrait<T, I, O>,
-// > {
-//     fn new(transaction: @T) -> HashCache<T>;
-//     // fn add_sig_hashes(ref self: HashCache<T>, tx: @T);
-//     // fn get_sig_hashes(ref self: HashCache<T>, tx_hash: felt252) -> Option<TxSigHashes>;
-
-//     // v0 represents sighash midstate used in the base segwit signatures BIP-143
-//     fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256;
-//     fn get_hash_sequence_v0(self: @HashCache<T>) -> u256;
-//     fn get_hash_outputs_v0(self: @HashCache<T>) -> u256;
-
-//     // v1 represents sighash midstate used to compute taproot signatures BIP-341
-//     fn get_hash_prevouts_v1(self: @HashCache<T>) -> u256;
-//     fn get_hash_sequence_v1(self: @HashCache<T>) -> u256;
-//     fn get_hash_outputs_v1(self: @HashCache<T>) -> u256;
-//     fn get_hash_input_scripts_v1(self: @HashCache<T>) -> u256;
-// }
 #[generate_trait]
 pub impl HashCacheImpl<
     I,
@@ -218,50 +201,42 @@ pub impl HashCacheImpl<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
 > of HashCacheTrait<I, O, T> {
-    fn new(transaction: @T) -> HashCache<T> {
-        HashCache { sigHashes: Default::default() }
+    fn new(tx: @T) -> HashCache<T> {
+        return HashCache { sigHashes: Default::default() };
+        // HashCache { sigHashes: SigHashMidstateTrait::new(tx) }
     }
+    // fn get_hash_v0(self: @HashCache<T>) -> @SegwitSigHashMidstate {
+//     self.sigHashes.unwrap().get_hash_segwit_v0()
+// }
 
-    // fn set_v0_sighash(self: @HashCache<T>, tx_hash: u256, sighash: SegwitSigHashMidstate) {
-    //     self.sigHashes.insert(tx_hash, NullableTrait::new(TxSigHashes::Segwit(@sighash)));
-    // }
+    // fn get_hash_v1(self: @HashCache<T>) -> @TaprootSigHashMidState {
+//     self.sigHashes.get_hash_taproot_v1()
+// }
+// fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256 {
+//     (*self.sigHashes.get_hash_segwit_v0()).hash_prevouts_v0
+// }
 
-    // Add sighashes for a transaction
-    // fn add_sig_hashes(ref self: HashCache<T>, tx: @T) {
-    //     let txid_hash = PoseidonTrait::new().update_with(tx.get_txid()).finalize();
-    //     self.sigHashes.insert(txid_hash, NullableTrait::new(SigHashMidstateTrait::new(tx)));
-    // }
+    // fn get_hash_sequence_v0(self: @HashCache<T>) -> u256 {
+//     (*self.sigHashes.get_hash_segwit_v0()).hash_sequence_v0
+// }
 
-    // Get sighashes for a transaction
-    // fn get_sig_hashes(ref self: HashCache, tx_hash: felt252) -> Option<TxSigHashes> {
-    //     self.sig_hashes.get(tx_hash)
-    // }
+    // fn get_hash_outputs_v0(self: @HashCache<T>) -> u256 {
+//     (*self.sigHashes.get_hash_segwit_v0()).hash_outputs_v0
+// }
 
-    fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256 {
-        0
-    }
+    // fn get_hash_prevouts_v1(self: @HashCache<T>) -> u256 {
+//     0
+// }
 
-    fn get_hash_sequence_v0(self: @HashCache<T>) -> u256 {
-        0
-    }
+    // fn get_hash_sequence_v1(self: @HashCache<T>) -> u256 {
+//     0
+// }
 
-    fn get_hash_outputs_v0(self: @HashCache<T>) -> u256 {
-        0
-    }
+    // fn get_hash_outputs_v1(self: @HashCache<T>) -> u256 {
+//     0
+// }
 
-    fn get_hash_prevouts_v1(self: @HashCache<T>) -> u256 {
-        0
-    }
-
-    fn get_hash_sequence_v1(self: @HashCache<T>) -> u256 {
-        0
-    }
-
-    fn get_hash_outputs_v1(self: @HashCache<T>) -> u256 {
-        0
-    }
-
-    fn get_hash_input_scripts_v1(self: @HashCache<T>) -> u256 {
-        0
-    }
+    // fn get_hash_input_scripts_v1(self: @HashCache<T>) -> u256 {
+//     0
+// }
 }

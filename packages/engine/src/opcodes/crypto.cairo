@@ -278,6 +278,7 @@ pub fn opcode_checkmultisig<
 
         if engine.is_witness_active(BASE_SEGWIT_VERSION) {
             let sig_hashes = SigHashMidstateTrait::new(transaction);
+            // TODO Add in cache here
             sig_hash =
                 sighash::calc_witness_signature_hash(
                     @script, sig_hashes, hash_type, transaction, tx_idx, amount,

@@ -20,7 +20,7 @@ fn test_p2sh_transaction_1() {
     };
 
     // set utxo directly in validate_at
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, array![]);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
     let flags: u32 = ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction_at(@transaction, flags, prev_out_1of2_invalid, 2);
@@ -40,7 +40,7 @@ fn test_p2sh_transaction_2() {
     };
 
     let utxo_hints = array![prev_out_1of2_invalid];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     let flags: u32 = ScriptFlags::ScriptBip16.into();
     let res = validate::validate_transaction(@transaction, flags);
@@ -60,7 +60,7 @@ fn test_p2sh_transaction_3() {
         amount: 10000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 183729,
     };
 
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, array![]);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
     let flags: u32 = ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction_at(@transaction, flags, prev_out, 11);
@@ -81,7 +81,7 @@ fn test_p2sh_transaction_4() {
     };
 
     let utxo_hints = array![prev_out];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction(@transaction, flags);
@@ -102,7 +102,7 @@ fn test_p2sh_transaction_5() {
     };
 
     let utxo_hints = array![prev_out];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     // let res = validate_p2sh(@transaction, 0, 0);
 
@@ -123,7 +123,7 @@ fn test_p2sh_transaction_6() {
     let prev_out = UTXO {
         amount: 100000000, pubkey_script: hex_to_bytecode(@prevout_pubkey), block_height: 257797,
     };
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, array![]);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
 
     let flags: u32 = ScriptFlags::ScriptBip16.into();
     let res = validate::validate_transaction_at(@transaction, flags, prev_out, 4);

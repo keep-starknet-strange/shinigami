@@ -14,7 +14,6 @@ use shinigami_tests::validate;
 struct InputData {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
-    txid: u256,
 }
 
 #[derive(Clone, Drop)]
@@ -22,7 +21,6 @@ struct InputDataWithFlags {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
     Flags: ByteArray,
-    txid: u256,
 }
 
 #[derive(Clone, Drop)]
@@ -31,7 +29,6 @@ struct InputDataWithWitness {
     ScriptPubKey: ByteArray,
     Flags: ByteArray,
     Witness: ByteArray,
-    txid: u256,
 }
 
 fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
@@ -45,9 +42,7 @@ fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
     let script_sig = compiler.compile(input.ScriptSig)?;
-    let tx = EngineInternalTransactionImpl::new_signed(
-        script_sig, script_pubkey.clone(), input.txid, array![],
-    );
+    let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
     let flags = flags::parse_flags(input.Flags);
     let hash_cache = HashCacheImpl::new(@tx);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, flags, 0, @hash_cache)?;
@@ -70,7 +65,7 @@ fn run_with_witness(input: InputDataWithWitness) -> Result<(), felt252> {
     let witness = witness::parse_witness_input(input.Witness);
     let value = 1; // TODO
     let tx = EngineInternalTransactionImpl::new_signed_witness(
-        script_sig, script_pubkey.clone(), witness, value, input.txid, array![],
+        script_sig, script_pubkey.clone(), witness, value, array![],
     );
     let flags = flags::parse_flags(input.Flags);
     let hash_cache = HashCacheImpl::new(@tx);
@@ -89,9 +84,7 @@ fn run(input: InputData) -> Result<(), felt252> {
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
     let script_sig = compiler.compile(input.ScriptSig)?;
-    let tx = EngineInternalTransactionImpl::new_signed(
-        script_sig, script_pubkey.clone(), input.txid, array![],
-    );
+    let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
     let hash_cache = HashCacheImpl::new(@tx);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, 0, 0, @hash_cache)?;
     let res = engine.execute();
@@ -117,9 +110,7 @@ fn run_with_json(input: InputData) -> Result<(), felt252> {
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
     let script_sig = compiler.compile(input.ScriptSig)?;
-    let tx = EngineInternalTransactionImpl::new_signed(
-        script_sig, script_pubkey.clone(), input.txid, array![],
-    );
+    let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
     let hash_cache = HashCacheImpl::new(@tx);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, 0, 0, @hash_cache)?;
     let _ = engine.execute()?;
@@ -137,9 +128,7 @@ fn debug(input: InputData) -> Result<bool, felt252> {
     let script_pubkey = compiler.compile(input.ScriptPubKey)?;
     let compiler = CompilerImpl::new();
     let script_sig = compiler.compile(input.ScriptSig)?;
-    let tx = EngineInternalTransactionImpl::new_signed(
-        script_sig, script_pubkey.clone(), input.txid, array![],
-    );
+    let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
     let hash_cache = HashCacheImpl::new(@tx);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, 0, 0, @hash_cache)?;
     let mut res = Result::Ok(true);
@@ -248,9 +237,7 @@ fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
             );
     };
 
-    let transaction = EngineInternalTransactionTrait::deserialize(
-        raw_transaction, input.txid, utxo_hints,
-    );
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
     // transaction.set_utxos(utxo_hints);
 
     let res = validate::validate_transaction(@transaction, script_flags);

@@ -20,7 +20,7 @@ fn test_learnmeabitcoin_usage() {
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
 
     let utxo_hints = array![prev_out];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction(@transaction, flags);
@@ -43,7 +43,7 @@ fn test_learnmeabitcoin_usage_wrong_hash_in_pubkey_script() {
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
 
     let utxo_hints = array![prev_out];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
 
     let res = validate::validate_transaction(@transaction, flags);
@@ -70,7 +70,7 @@ fn test_learnmeabitcoin_usage_different_witness_script_from_hash() {
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
@@ -93,7 +93,7 @@ fn test_custom_hash_puzzle() {
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "Transaction validation failed");
@@ -115,7 +115,7 @@ fn test_custom_hash_puzzle_invalid_unlock_code() {
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
@@ -138,7 +138,7 @@ fn test_custom_hash_puzzle_wrong_hash_script_in_pubkey_script() {
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
@@ -164,7 +164,7 @@ fn test_custom_hash_puzzle_different_witness_script_from_hash() {
 
     let utxo_hints = array![prev_out];
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into() | ScriptFlags::ScriptBip16.into();
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_err(), "Transaction validation should fail");
