@@ -82,7 +82,7 @@ pub struct TaprootSigVerifier<T> {
     //
     // sigCache: SigCache TODO?
     //
-    // pub hashCache: TxSigHashes,
+    pub hashCache: TxSigHashes,
     // annex data used for taproot verification
     pub annex: @ByteArray,
 }
@@ -139,7 +139,7 @@ pub impl TaprootSigVerifierImpl<
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(ref engine, pk_bytes, sig_bytes)?;
-        // let sig_hashes = SigHashMidstateTrait::new(engine.transaction);
+        let sig_hashes = SigHashMidstateTrait::new(engine.transaction);
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
         };
@@ -185,15 +185,15 @@ pub impl TaprootSigVerifierImpl<
     fn verify(self: TaprootSigVerifier<T>, ref engine: Engine<T>) -> Result<(), felt252> {
         let mut opts = TaprootSighashOptionsTrait::new_with_annex(self.annex);
         // let sig_hashes = SigHashMidstateTrait::new(engine.transaction);
-        let mut sig_hashes: TxSigHashes = Default::default();
+        // let mut sig_hashes: TxSigHashes = Default::default();
 
         // let hash_cahcee = engine.hash_cache.get_sig_hashes();
 
-        if engine.hash_cache.sigHashes.is_some() {
-            sig_hashes = engine.hash_cache.sigHashes.unwrap();
-        } else {
-            engine.hash_cache = SigHashMidstateTrait::new(engine.transaction);
-        }
+        // if engine.hash_cache.sigHashes.is_some() {
+        //     sig_hashes = engine.hash_cache.sigHashes.unwrap();
+        // } else {
+        //     engine.hash_cache = SigHashMidstateTrait::new(engine.transaction);
+        // }
         // engine.hash_cache
 
         let sig_hash = sighash::calc_taproot_signature_hash::<

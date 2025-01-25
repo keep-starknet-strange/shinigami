@@ -169,7 +169,7 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         let mut verifier = TaprootSigVerifierImpl::<
             T,
         >::new(raw_sig, witness_program, annex, ref engine)?; // mut ?
-        let is_valid = TaprootSigVerifierImpl::<T>::verify(verifier);
+        let is_valid = TaprootSigVerifierImpl::<T>::verify(verifier, ref engine);
         if is_valid.is_err() {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
         }

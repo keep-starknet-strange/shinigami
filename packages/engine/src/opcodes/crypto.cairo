@@ -135,7 +135,7 @@ pub fn opcode_checksig<
             I, O, T,
         >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
 
-        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier).is_ok();
+        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier, ref engine).is_ok();
     }
 
     // TODO already handle ?
@@ -441,9 +441,12 @@ pub fn opcode_checksigadd<
         I, O, T,
     >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
 
-    if (TaprootSigVerifierTrait::<I, O, T>::verify(verifier).is_err()) {
+    if (verifier.verify(ref engine).is_err()) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
+    // if (TaprootSigVerifierTrait::<I, O, T>::verify(verifier, ref engine).is_err()) {
+    //     return Result::Err(Error::TAPROOT_INVALID_SIG);
+    // }
 
     engine.dstack.push_int(n + 1);
     Result::Ok(())

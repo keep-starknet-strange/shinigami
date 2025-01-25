@@ -4,8 +4,7 @@ use crate::transaction::{
 use shinigami_utils::{bytecode::{write_var_int}, hash::{hash_to_u256, sha256_u256, simple_sha256}};
 use core::sha256::compute_sha256_byte_array;
 use crate::signature::utils::is_witness_v1_pub_key_hash;
-use core::dict::Felt252Dict;
-
+// use core::dict::Felt252Dict;
 // use core::poseidon::PoseidonTrait;
 // use core::hash::{HashStateTrait, HashStateExTrait};
 

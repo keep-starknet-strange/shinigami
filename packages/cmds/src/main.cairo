@@ -14,6 +14,7 @@ use shinigami_tests::validate;
 struct InputData {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
+    txid: u256,
 }
 
 #[derive(Clone, Drop)]
@@ -21,6 +22,7 @@ struct InputDataWithFlags {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
     Flags: ByteArray,
+    txid: u256,
 }
 
 #[derive(Clone, Drop)]
@@ -29,6 +31,7 @@ struct InputDataWithWitness {
     ScriptPubKey: ByteArray,
     Flags: ByteArray,
     Witness: ByteArray,
+    txid: u256,
 }
 
 fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
