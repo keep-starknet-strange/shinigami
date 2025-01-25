@@ -13,27 +13,33 @@ pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), fe
         return Result::Err('Invalid number of utxo hints');
     }
 
+    let mut inner_result = Result::Ok(());
+    let hash_cache = HashCacheImpl::new(tx, flags);
     let mut i = 0;
-    let mut err = '';
+
     while i != input_count {
         let utxo = tx.utxos.at(i);
-        let hash_cache = HashCacheImpl::new(tx);
-        // TODO: Error handling
-        let mut engine = EngineImpl::new(
-            utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache,
-        )
-            .unwrap();
 
-        let res = engine.execute();
-        if res.is_err() {
-            err = res.unwrap_err();
-            break;
-        }
-
+        let mut engine =
+            match EngineImpl::new(utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache) {
+            Result::Ok(engine) => engine,
+            Result::Err(err) => {
+                inner_result = Result::Err(err);
+                break;
+            },
+        };
+        match engine.execute() {
+            Result::Ok(res) => res,
+            Result::Err(err) => {
+                inner_result = Result::Err(err);
+                break;
+            },
+        };
         i += 1;
     };
-    if err != '' {
-        return Result::Err(err);
+
+    if (inner_result.is_err()) {
+        return Result::Err(inner_result.unwrap_err());
     }
 
     Result::Ok(())
@@ -42,7 +48,7 @@ pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), fe
 pub fn validate_transaction_at(
     tx: @EngineTransaction, flags: u32, prevout: UTXO, at: u32,
 ) -> Result<(), felt252> {
-    let hash_cache = HashCacheImpl::new(tx);
+    let hash_cache = HashCacheImpl::new(tx, 0);
     let mut engine = EngineImpl::new(
         @prevout.pubkey_script, tx, at, flags, prevout.amount, @hash_cache,
     )
@@ -123,7 +129,7 @@ pub fn validate_p2ms(
         }
 
         // Verify signatures using the EngineImpl
-        let hash_cache = HashCacheImpl::new(tx);
+        let hash_cache = HashCacheImpl::new(tx, 0);
         let mut engine = EngineImpl::new(redeem_script, tx, i, flags, *utxo.amount, @hash_cache)
             .unwrap();
 

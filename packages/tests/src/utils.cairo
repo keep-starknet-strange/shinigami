@@ -10,7 +10,7 @@ pub fn test_compile_and_run(program: ByteArray) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program).unwrap();
     // TODO: Nullable
-    let hash_cache = HashCacheImpl::new(Default::default());
+    let hash_cache = HashCacheImpl::new(Default::default(), 0);
     let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
@@ -23,7 +23,7 @@ pub fn test_compile_and_run_with_tx(
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let hash_cache = HashCacheImpl::new(@transaction);
+    let hash_cache = HashCacheImpl::new(@transaction, 0);
     let mut engine = EngineImpl::new(@bytecode, @transaction, 0, 0, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
@@ -36,7 +36,7 @@ pub fn test_compile_and_run_with_tx_flags(
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let hash_cache = HashCacheImpl::new(@transaction);
+    let hash_cache = HashCacheImpl::new(@transaction, flags);
     let mut engine = EngineImpl::new(@bytecode, @transaction, 0, flags, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_ok(), "Execution of the program failed");
@@ -49,7 +49,7 @@ pub fn test_compile_and_run_err(
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let bytecode = compiler.compile(program).unwrap();
-    let hash_cache = HashCacheImpl::new(Default::default());
+    let hash_cache = HashCacheImpl::new(Default::default(), 0);
     let mut engine = EngineImpl::new(@bytecode, Default::default(), 0, 0, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
@@ -65,7 +65,7 @@ pub fn test_compile_and_run_with_tx_err(
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let hash_cache = HashCacheImpl::new(@transaction);
+    let hash_cache = HashCacheImpl::new(@transaction, 0);
     let mut engine = EngineImpl::new(@bytecode, @transaction, 0, 0, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");
@@ -81,7 +81,7 @@ pub fn test_compile_and_run_with_tx_flags_err(
 ) -> Engine<EngineTransaction> {
     let mut compiler = CompilerImpl::new();
     let mut bytecode = compiler.compile(program).unwrap();
-    let hash_cache = HashCacheImpl::new(@transaction);
+    let hash_cache = HashCacheImpl::new(@transaction, flags);
     let mut engine = EngineImpl::new(@bytecode, @transaction, 0, flags, 0, @hash_cache).unwrap();
     let res = engine.execute();
     assert!(res.is_err(), "Execution of the program did not fail as expected");

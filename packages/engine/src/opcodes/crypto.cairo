@@ -17,7 +17,7 @@ use crate::opcodes::utils;
 use crate::scriptnum::ScriptNum;
 use crate::errors::Error;
 use crate::taproot::TaprootContextTrait;
-use crate::hash_cache::SigHashMidstateTrait;
+use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait, HashCacheTrait};
 
 const MAX_KEYS_PER_MULTISIG: i64 = 20;
 const BASE_SEGWIT_VERSION: i64 = 0;
@@ -233,8 +233,9 @@ pub fn opcode_checkmultisig<
         return Result::Err(Error::SCRIPT_STRICT_MULTISIG);
     }
 
+    let is_witness_V0_active = engine.is_witness_active(BASE_SEGWIT_VERSION);
     let mut script = engine.sub_script();
-    if (engine.is_witness_active(BASE_SEGWIT_VERSION)) {
+    if (is_witness_V0_active) {
         let mut s: u32 = 0;
         let end = sigs.len();
         while s != end {
@@ -276,9 +277,15 @@ pub fn opcode_checkmultisig<
         let tx_idx = engine.tx_idx;
         let amount = engine.amount;
 
-        if engine.is_witness_active(BASE_SEGWIT_VERSION) {
-            let sig_hashes = SigHashMidstateTrait::new(transaction);
-            // TODO Add in cache here
+        if is_witness_V0_active {
+            let sig_hashes: @TxSigHashes = match engine.hash_cache.get_sig_hashes() {
+                Option::Some(sig_hashes) => sig_hashes,
+                Option::None => {
+                    println!("should never append");
+                    SigHashMidstateTrait::new(transaction)
+                },
+            };
+
             sig_hash =
                 sighash::calc_witness_signature_hash(
                     @script, sig_hashes, hash_type, transaction, tx_idx, amount,

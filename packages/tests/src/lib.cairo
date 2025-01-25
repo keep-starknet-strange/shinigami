@@ -23,4 +23,5 @@ pub mod tests {
     mod test_p2wsh;
     mod test_p2ms;
     mod test_p2sh;
+    mod test_taproot_hash;
 }

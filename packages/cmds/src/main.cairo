@@ -47,7 +47,7 @@ fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
     let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
     let flags = flags::parse_flags(input.Flags);
-    let hash_cache = HashCacheImpl::new(@tx);
+    let hash_cache = HashCacheImpl::new(@tx, flags);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, flags, 0, @hash_cache)?;
     let _ = engine.execute()?;
     Result::Ok(())
@@ -71,7 +71,7 @@ fn run_with_witness(input: InputDataWithWitness) -> Result<(), felt252> {
         script_sig, script_pubkey.clone(), witness, value, array![],
     );
     let flags = flags::parse_flags(input.Flags);
-    let hash_cache = HashCacheImpl::new(@tx);
+    let hash_cache = HashCacheImpl::new(@tx, flags);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, flags, value, @hash_cache)?;
     let _ = engine.execute()?;
     Result::Ok(())
@@ -88,7 +88,7 @@ fn run(input: InputData) -> Result<(), felt252> {
     let compiler = CompilerImpl::new();
     let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
-    let hash_cache = HashCacheImpl::new(@tx);
+    let hash_cache = HashCacheImpl::new(@tx, 0);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, 0, 0, @hash_cache)?;
     let res = engine.execute();
     match res {
@@ -114,7 +114,7 @@ fn run_with_json(input: InputData) -> Result<(), felt252> {
     let compiler = CompilerImpl::new();
     let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
-    let hash_cache = HashCacheImpl::new(@tx);
+    let hash_cache = HashCacheImpl::new(@tx, 0);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, 0, 0, @hash_cache)?;
     let _ = engine.execute()?;
     engine.json();
@@ -132,7 +132,7 @@ fn debug(input: InputData) -> Result<bool, felt252> {
     let compiler = CompilerImpl::new();
     let script_sig = compiler.compile(input.ScriptSig)?;
     let tx = EngineInternalTransactionImpl::new_signed(script_sig, script_pubkey.clone(), array![]);
-    let hash_cache = HashCacheImpl::new(@tx);
+    let hash_cache = HashCacheImpl::new(@tx, 0);
     let mut engine = EngineImpl::new(@script_pubkey, @tx, 0, 0, 0, @hash_cache)?;
     let mut res = Result::Ok(true);
     while true {
@@ -241,7 +241,6 @@ fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
     };
 
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
-    // transaction.set_utxos(utxo_hints);
 
     let res = validate::validate_transaction(@transaction, script_flags);
     match res {

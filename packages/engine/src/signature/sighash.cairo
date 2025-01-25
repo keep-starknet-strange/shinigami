@@ -10,7 +10,7 @@ use crate::transaction::{EngineTransactionOutput};
 use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::hash::{sha256_byte_array, simple_sha256, double_sha256};
 use crate::opcodes::opcodes::Opcode;
-use crate::hash_cache::{TxSigHashes};
+use crate::hash_cache::{TxSigHashes, TxSigHashesTrait};
 use crate::hash_tag::{HashTag, tagged_hash};
 use crate::errors::Error;
 
@@ -69,26 +69,19 @@ pub fn calc_witness_signature_hash<
     +Drop<T>,
 >(
     sub_script: @ByteArray,
-    sig_hashes: TxSigHashes,
+    sig_hashes: @TxSigHashes,
     hash_type: u32,
     transaction: @T,
     tx_idx: u32,
     amount: i64,
 ) -> u256 {
-    // let mut sig_hashes: @SegwitSigHashMidstate = Default::default();
-    // match sig_hashes_enum {
-    //     TxSigHashes::Segwit(segwit_midstate) => { sig_hashes = segwit_midstate; },
-    //     // Handle error ?
-    //     _ => { return 0; },
-    // }
-
     // TODO: Bounds check?
     let mut sig_hash_bytes: ByteArray = "";
     sig_hash_bytes.append_word_rev(transaction.get_version().into(), 4);
 
     let zero: u256 = 0;
     if hash_type & constants::SIG_HASH_ANYONECANPAY == 0 {
-        let hash_prevouts_v0: u256 = sig_hashes.segwit.hash_prevouts_v0;
+        let hash_prevouts_v0: u256 = sig_hashes.get_hash_prevouts_v0();
         sig_hash_bytes.append_word(hash_prevouts_v0.high.into(), 16);
         sig_hash_bytes.append_word(hash_prevouts_v0.low.into(), 16);
     } else {
@@ -99,7 +92,7 @@ pub fn calc_witness_signature_hash<
     if hash_type & constants::SIG_HASH_ANYONECANPAY == 0
         && hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_SINGLE
         && hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_NONE {
-        let hash_sequence_v0: u256 = sig_hashes.segwit.hash_sequence_v0;
+        let hash_sequence_v0: u256 = sig_hashes.get_hash_sequence_v0();
         sig_hash_bytes.append_word(hash_sequence_v0.high.into(), 16);
         sig_hash_bytes.append_word(hash_sequence_v0.low.into(), 16);
     } else {
@@ -137,7 +130,7 @@ pub fn calc_witness_signature_hash<
 
     if hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_SINGLE
         && hash_type & constants::SIG_HASH_MASK != constants::SIG_HASH_NONE {
-        let hash_outputs_v0: u256 = sig_hashes.segwit.hash_outputs_v0;
+        let hash_outputs_v0: u256 = sig_hashes.get_hash_outputs_v0();
         sig_hash_bytes.append_word(hash_outputs_v0.high.into(), 16);
         sig_hash_bytes.append_word(hash_outputs_v0.low.into(), 16);
     } else if hash_type & constants::SIG_HASH_MASK == constants::SIG_HASH_SINGLE
@@ -268,7 +261,7 @@ pub fn calc_taproot_signature_hash<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >,
 >(
-    sig_hashes: TxSigHashes,
+    sig_hashes: @TxSigHashes,
     h_type: u32,
     transaction: @T,
     input_idx: u32,
@@ -291,26 +284,20 @@ pub fn calc_taproot_signature_hash<
     sig_msg.append_word_rev(transaction.get_version().into(), 4);
     sig_msg.append_word_rev(transaction.get_locktime().into(), 4);
 
-    // let mut sig_hashes: @TaprootSigHashMidState = Default::default();
-    // match sig_hashes_enum {
-    //     TxSigHashes::Taproot(midstate) => { sig_hashes = midstate; },
-    //     _ => { return Result::Err(Error::TAPROOT_INVALID_SIGHASH_MIDSTATE); },
-    // }
-
     if (h_type & constants::SIG_HASH_ANYONECANPAY) != constants::SIG_HASH_ANYONECANPAY {
-        let hash_prevouts_v1: u256 = sig_hashes.taproot.hash_prevouts_v1;
+        let hash_prevouts_v1: u256 = sig_hashes.get_hash_prevouts_v1();
         sig_msg.append_word(hash_prevouts_v1.high.into(), 16);
         sig_msg.append_word(hash_prevouts_v1.low.into(), 16);
 
-        let hash_input_amounts_v1: u256 = sig_hashes.taproot.hash_input_amounts_v1;
+        let hash_input_amounts_v1: u256 = sig_hashes.get_hash_input_amounts_v1();
         sig_msg.append_word(hash_input_amounts_v1.high.into(), 16);
         sig_msg.append_word(hash_input_amounts_v1.low.into(), 16);
 
-        let hash_input_scripts_v1: u256 = sig_hashes.taproot.hash_input_scripts_v1;
+        let hash_input_scripts_v1: u256 = sig_hashes.get_hash_input_scripts_v1();
         sig_msg.append_word(hash_input_scripts_v1.high.into(), 16);
         sig_msg.append_word(hash_input_scripts_v1.low.into(), 16);
 
-        let hash_sequence_v1: u256 = sig_hashes.taproot.hash_sequence_v1;
+        let hash_sequence_v1: u256 = sig_hashes.get_hash_sequence_v1();
         sig_msg.append_word(hash_sequence_v1.high.into(), 16);
         sig_msg.append_word(hash_sequence_v1.low.into(), 16);
     }
@@ -318,7 +305,7 @@ pub fn calc_taproot_signature_hash<
     // If SIGHASH_ALL or SIGHASH_DEFAULT, include all output digests
     if (h_type & constants::SIG_HASH_SINGLE) != constants::SIG_HASH_SINGLE
         && (h_type & constants::SIG_HASH_SINGLE) != constants::SIG_HASH_NONE {
-        let hash_outputs_v1: u256 = sig_hashes.taproot.hash_outputs_v1;
+        let hash_outputs_v1: u256 = sig_hashes.get_hash_outputs_v1();
         sig_msg.append_word(hash_outputs_v1.high.into(), 16);
         sig_msg.append_word(hash_outputs_v1.low.into(), 16);
     }

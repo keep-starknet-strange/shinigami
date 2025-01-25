@@ -3,6 +3,7 @@ use shinigami_utils::byte_array::{byte_array_value_at_le, byte_array_value_at_be
 use shinigami_utils::bytecode::{bytecode_to_hex, read_var_int, write_var_int};
 use shinigami_utils::bit_shifts::shr;
 use shinigami_utils::hash::double_sha256;
+// use shinigami_utils::hex::to_hex;
 
 #[derive(Debug, Drop, Clone, Default)]
 pub struct UTXO {
