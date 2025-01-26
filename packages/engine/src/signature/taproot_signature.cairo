@@ -5,7 +5,7 @@ use crate::transaction::{
 };
 use crate::flags::ScriptFlags;
 use crate::signature::{constants, schnorr, sighash, sighash::{TaprootSighashOptionsTrait}};
-use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait};
+use crate::hash_cache::{TxSigHashes, HashCacheTrait};
 use crate::errors::Error;
 
 use shinigami_utils::byte_array::{U256IntoByteArray};
@@ -82,7 +82,7 @@ pub struct TaprootSigVerifier<T> {
     //
     // sigCache: SigCache TODO?
     //
-    pub hashCache: TxSigHashes,
+    pub hashCache: @TxSigHashes,
     // annex data used for taproot verification
     pub annex: @ByteArray,
 }
@@ -102,7 +102,7 @@ pub trait TaprootSigVerifierTrait<
     fn new_base(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252>;
-    fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252>;
+    fn verify(self: TaprootSigVerifier<T>, ref engine: Engine<T>) -> Result<(), felt252>;
     fn verify_base(self: TaprootSigVerifier<T>, ref engine: Engine<T>) -> Result<(), felt252>;
 }
 
@@ -139,7 +139,6 @@ pub impl TaprootSigVerifierImpl<
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
     ) -> Result<TaprootSigVerifier<T>, felt252> {
         let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(ref engine, pk_bytes, sig_bytes)?;
-        let sig_hashes = SigHashMidstateTrait::new(engine.transaction);
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
         };
@@ -154,7 +153,7 @@ pub impl TaprootSigVerifierImpl<
                 tx: engine.transaction,
                 inputIndex: engine.tx_idx,
                 prevOuts: prevOutput,
-                hashCache: sig_hashes,
+                hashCache: engine.hash_cache.get_sig_hashes().unwrap_or(Default::default()),
                 annex,
             },
         )
@@ -181,8 +180,7 @@ pub impl TaprootSigVerifierImpl<
         }
     }
 
-
-    fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252> {
+    fn verify(self: TaprootSigVerifier<T>, ref engine: Engine<T>) -> Result<(), felt252> {
         let mut opts = TaprootSighashOptionsTrait::new_with_annex(self.annex);
         let sig_hash = sighash::calc_taproot_signature_hash::<
             T,

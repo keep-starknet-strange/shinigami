@@ -1,17 +1,17 @@
-use crate::signature::sighash::{
+use shinigami_engine::signature::sighash::{
     calc_taproot_signature_hash, TaprootSighashOptions, BASE_SIGHASH_EXT_FLAG,
     TAPSCRIPT_SIGHASH_EXT_FLAG,
 };
+// use shinigami_engine::flags::ScriptFlags;
 
-use crate::transaction::{
+use shinigami_engine::transaction::{
     EngineTransactionOutput, EngineTransaction, EngineTransactionInput, EngineOutPoint,
     EngineInternalTransactionTrait, UTXO,
 };
-use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait};
+use shinigami_engine::hash_cache::{TxSigHashes, SigHashMidstateTrait};
 use shinigami_engine::utxo::{};
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::byte_array::{U256IntoByteArray};
-
 
 #[test]
 fn test_new_sigHashMidstate() {
@@ -82,27 +82,30 @@ fn test_new_sigHashMidstate() {
         },
     ];
 
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxos);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxos);
     let sig_hash = SigHashMidstateTrait::new(@transaction);
 
-    let expected_hash_prevouts =
-        0xe3b33bb4ef3a52ad1fffb555c0d82828eb22737036eaeb02a235d82b909c4c3f_u256;
-    let expected_hash_sequence =
-        0x18959c7221ab5ce9e26c3cd67b22c24f8baa54bac281d8e6b05e400e6c3a957e_u256;
-    let expected_hash_outputs =
-        0xa2e6dab7c1f0dcd297c8d61647fd17d821541ea69c3cc37dcbad7f90d4eb4bc5_u256;
+    assert_eq!(
+        sig_hash.taproot.hash_prevouts_v1,
+        @0xe3b33bb4ef3a52ad1fffb555c0d82828eb22737036eaeb02a235d82b909c4c3f_u256,
+    );
+    assert_eq!(
+        sig_hash.taproot.hash_sequence_v1,
+        @0x18959c7221ab5ce9e26c3cd67b22c24f8baa54bac281d8e6b05e400e6c3a957e_u256,
+    );
+    assert_eq!(
+        sig_hash.taproot.hash_outputs_v1,
+        @0xa2e6dab7c1f0dcd297c8d61647fd17d821541ea69c3cc37dcbad7f90d4eb4bc5_u256,
+    );
 
-    let exepected_hash_amount =
-        0x58a6964a4f5f8f0b642ded0a8a553be7622a719da71d1f5befcefcdee8e0fde6_u256;
-    let expected_hash_script_pubkeys =
-        0x23ad0f61ad2bca5ba6a7693f50fce988e17c3780bf2b1e720cfbb38fbdd52e21_u256;
-
-    assert_eq!(sig_hash.taproot.hash_prevouts_v1, expected_hash_prevouts);
-    assert_eq!(sig_hash.taproot.hash_sequence_v1, expected_hash_sequence);
-    assert_eq!(sig_hash.taproot.hash_outputs_v1, expected_hash_outputs);
-
-    assert_eq!(sig_hash.taproot.hash_input_scripts_v1, expected_hash_script_pubkeys);
-    assert_eq!(sig_hash.taproot.hash_input_amounts_v1, exepected_hash_amount);
+    assert_eq!(
+        sig_hash.taproot.hash_input_amounts_v1,
+        @0x58a6964a4f5f8f0b642ded0a8a553be7622a719da71d1f5befcefcdee8e0fde6_u256,
+    );
+    assert_eq!(
+        sig_hash.taproot.hash_input_scripts_v1,
+        @0x23ad0f61ad2bca5ba6a7693f50fce988e17c3780bf2b1e720cfbb38fbdd52e21_u256,
+    );
 }
 
 #[test]
@@ -111,7 +114,6 @@ fn test_calc_taproot_signature_hash_key_path_spend() {
     // txid 091d2aaadc409298fd8353a4cd94c319481a0b4623fb00872fe240448e93fcbe input 0
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {
@@ -148,7 +150,7 @@ fn test_calc_taproot_signature_hash_key_path_spend() {
         ],
     };
 
-    let sig_hashes: TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
     let input_idx: u32 = 0;
     let prev_output: EngineTransactionOutput = Default::default();
 
@@ -175,7 +177,6 @@ fn test_calc_taproot_signature_hash_script_path_spend_simple() {
     // txid 5ff05f74d385bd39e344329330461f74b390c1b5ead87c4f51b40c555b75719d input 1
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {
@@ -236,7 +237,7 @@ fn test_calc_taproot_signature_hash_script_path_spend_simple() {
     };
 
     let input_idx: u32 = 1;
-    let sig_hashes: TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
     let prev_output: EngineTransactionOutput = Default::default();
 
     let mut opts = TaprootSighashOptions {
@@ -252,7 +253,6 @@ fn test_calc_taproot_signature_hash_script_path_spend_simple() {
     let result = calc_taproot_signature_hash(
         sig_hashes, h_type, @transaction, input_idx, prev_output, ref opts,
     );
-    // println!("result: {:x}", result.unwrap());
 
     assert_eq!(result.is_ok(), true);
 }
@@ -263,7 +263,6 @@ fn test_calc_taproot_signature_hash_script_path_spend_signature() {
     let input_idx: u32 = 0;
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {
@@ -306,7 +305,7 @@ fn test_calc_taproot_signature_hash_script_path_spend_signature() {
         ],
     };
 
-    let sig_hashes: TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
     let prev_output: EngineTransactionOutput = Default::default();
 
     let mut opts = TaprootSighashOptions {
@@ -335,7 +334,6 @@ fn test_calc_taproot_signature_hash_script_path_spend_tree() {
     let input_idx: u32 = 0;
     let h_type: u32 = 0x01; // SIGHASH_ALL
     let transaction = EngineTransaction {
-        txid: 0,
         version: 2,
         transaction_inputs: array![
             EngineTransactionInput {
@@ -374,7 +372,7 @@ fn test_calc_taproot_signature_hash_script_path_spend_tree() {
         ],
     };
 
-    let sig_hashes: TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
     let prev_output: EngineTransactionOutput = Default::default();
 
     let mut opts = TaprootSighashOptions {

@@ -188,7 +188,6 @@ pub impl EngineImpl<
         if !valid_sizes {
             return Result::Err('Engine::new: script too large');
         }
-
         if script_sig.len() == 0 {
             engine.script_idx = 1;
         }
@@ -312,6 +311,7 @@ pub impl EngineImpl<
         // TODO: Optimize with != instead of < and check for bounds errors within the loop
         while self.script_idx < self.scripts.len() {
             let script: @ByteArray = *self.scripts[self.script_idx];
+
             let script_len = script.len();
             if script_len == 0 {
                 self.script_idx += 1;
