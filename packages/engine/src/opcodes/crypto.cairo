@@ -451,9 +451,6 @@ pub fn opcode_checksigadd<
     if (verifier.verify(ref engine).is_err()) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
-    // if (TaprootSigVerifierTrait::<I, O, T>::verify(verifier, ref engine).is_err()) {
-    //     return Result::Err(Error::TAPROOT_INVALID_SIG);
-    // }
 
     engine.dstack.push_int(n + 1);
     Result::Ok(())

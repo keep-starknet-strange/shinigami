@@ -151,6 +151,7 @@ pub impl EngineImpl<
             num_ops: 0,
             hash_cache: hash_cache,
         };
+
         if engine.has_flag(ScriptFlags::ScriptVerifyCleanStack)
             && (!engine.has_flag(ScriptFlags::ScriptBip16)
                 && !engine.has_flag(ScriptFlags::ScriptVerifyWitness)) {
@@ -161,6 +162,7 @@ pub impl EngineImpl<
             && !parser::is_push_only(script_sig) {
             return Result::Err('Engine::new: not pushonly');
         }
+
         let mut bip16 = false;
         if engine.has_flag(ScriptFlags::ScriptBip16) && parser::is_script_hash(script_pubkey) {
             if !engine.has_flag(ScriptFlags::ScriptVerifySigPushOnly)
@@ -170,6 +172,7 @@ pub impl EngineImpl<
             engine.bip16 = true;
             bip16 = true;
         }
+
         let mut i = 0;
         let mut valid_sizes = true;
         let scripts_len = engine.scripts.len();
@@ -193,6 +196,7 @@ pub impl EngineImpl<
             engine.dstack.verify_minimal_data = true;
             engine.astack.verify_minimal_data = true;
         }
+
         if engine.has_flag(ScriptFlags::ScriptVerifyWitness) {
             if !engine.has_flag(ScriptFlags::ScriptBip16) {
                 return Result::Err('Engine::new: witness in nonp2sh');
@@ -226,6 +230,7 @@ pub impl EngineImpl<
                     return Result::Err(Error::WITNESS_MALLEATED_P2SH);
                 }
             }
+
             if witness_program.len() != 0 {
                 let (witness_version, witness_program) = witness::parse_witness_program(
                     @witness_program,

@@ -1,15 +1,11 @@
 use crate::transaction::{
     EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait,
 };
-// use crate::engine::{EngineInternalTrait, EngineTrait, Engine};
 use crate::flags::ScriptFlags;
 
 use shinigami_utils::{bytecode::{write_var_int}, hash::{hash_to_u256, sha256_u256, simple_sha256}};
 use core::sha256::compute_sha256_byte_array;
 use crate::signature::utils::is_witness_v1_pub_key_hash;
-// use core::dict::Felt252Dict;
-// use core::poseidon::PoseidonTrait;
-// use core::hash::{HashStateTrait, HashStateExTrait};
 
 // SegwitSigHashMidstate is the sighash midstate used in the base segwit
 // sighash calculation as defined in BIP 143.
@@ -235,9 +231,7 @@ pub trait HashCacheTrait<
     >,
 > {
     fn new(tx: @T, flags: u32) -> HashCache<T>;
-    // fn add_sig_hashes(ref self: HashCache<T>, tx: @T);
     fn get_sig_hashes(self: @HashCache<T>) -> Option<@TxSigHashes>;
-
     fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256;
     fn get_hash_sequence_v0(self: @HashCache<T>) -> u256;
     fn get_hash_outputs_v0(self: @HashCache<T>) -> u256;
@@ -262,9 +256,6 @@ pub impl HashCacheImpl<
     +Drop<T>,
 > of HashCacheTrait<I, O, T> {
     fn new(tx: @T, flags: u32) -> HashCache<T> {
-        // First determine if segwit is active according to the scriptFlags. If
-        // it isn't then we don't need to interact with the HashCache.
-        // segwitActive := flags&txscript.ScriptVerifyWitness == txscript.ScriptVerifyWitness
         let segwit_active = flags
             & ScriptFlags::ScriptVerifyWitness.into() == ScriptFlags::ScriptVerifyWitness.into();
 
@@ -276,19 +267,11 @@ pub impl HashCacheImpl<
             }
         };
 
-        // If the hashcache doesn't yet has the sighash midstate for this
-        // transaction, then we'll compute them now so we can re-use them
-        // amongst all worker validation goroutines.
         if (segwit_active && has_witness) {
             return HashCache { sigHashes: Option::Some(SigHashMidstateTrait::new(tx)) };
         }
-
         return HashCache { sigHashes: Default::default() };
     }
-
-    // fn add_sig_hashes(ref self: HashCache<T>, tx: @T) {
-    //     self.sigHashes = Option::Some(SigHashMidstateTrait::new(tx));
-    // }
 
     fn get_sig_hashes(self: @HashCache<T>) -> Option<@TxSigHashes> {
         *self.sigHashes
