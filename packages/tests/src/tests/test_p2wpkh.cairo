@@ -134,8 +134,6 @@ fn test_p2wpkh_witness_2_inputs() {
 fn test_p2wpkh_15_inputs_nested() { // d38c7541b88af8af648e780ce7f92ee7041d7b960b16faec84bd6689beb8aeed
 }
 
-//ok (gas usage est.: 3192030989)
-//ok (gas usage est.: 2146289982)
 #[test]
 fn test_p2wpkh_22inputs() {
     // https://learnmeabitcoin.com/explorer/tx/90789187c53b3802c7c2699e022cdef466d85e395bb5053c0f90432de6fa60ca

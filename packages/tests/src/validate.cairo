@@ -129,7 +129,7 @@ pub fn validate_p2ms(
         }
 
         // Verify signatures using the EngineImpl
-        let hash_cache = HashCacheImpl::new(tx, 0);
+        let hash_cache = HashCacheImpl::new(tx, flags);
         let mut engine = EngineImpl::new(redeem_script, tx, i, flags, *utxo.amount, @hash_cache)
             .unwrap();
 
