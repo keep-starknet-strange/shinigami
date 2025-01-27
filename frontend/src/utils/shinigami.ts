@@ -218,7 +218,7 @@ enum Opcode {
   OP_DATA_73 = 0x49,
   OP_DATA_74 = 0x4a,
   OP_DATA_75 = 0x4b,
-}
+};
 
 // Error messages
 const ERROR = {
@@ -645,7 +645,8 @@ class Compiler {
         if (data.length !== size) {
           throw new Error(`Data length ${data.length} doesn't match ${part}`);
         }
-        bytes.push(size);
+        // Just push the opcode (which is the size) and the data
+        bytes.push(size);  // The opcode value is the size itself (1-75)
         bytes.push(...data);
         continue;
       }
@@ -733,6 +734,37 @@ class ScriptEngine {
     }
 
     switch (opcode) {
+      // Handle OP_DATA_1 through OP_DATA_75 (opcodes 0x01-0x4b)
+      case opcode >= 0x01 && opcode <= 0x4b && opcode: {
+        const data = this.readBytes(opcode);
+        this.stack.push(data);
+        break;
+      }
+
+      // Handle OP_PUSHDATA1, OP_PUSHDATA2, OP_PUSHDATA4
+      case Opcode.OP_PUSHDATA1: {
+        const size = this.readBytes(1)[0];
+        const data = this.readBytes(size);
+        this.stack.push(data);
+        break;
+      }
+
+      case Opcode.OP_PUSHDATA2: {
+        const sizeBytes = this.readBytes(2);
+        const size = sizeBytes[0] | (sizeBytes[1] << 8);
+        const data = this.readBytes(size);
+        this.stack.push(data);
+        break;
+      }
+
+      case Opcode.OP_PUSHDATA4: {
+        const sizeBytes = this.readBytes(4);
+        const size = sizeBytes[0] | (sizeBytes[1] << 8) | (sizeBytes[2] << 16) | (sizeBytes[3] << 24);
+        const data = this.readBytes(size);
+        this.stack.push(data);
+        break;
+      }
+
       // Constants
       case Opcode.OP_0:
         this.stack.push(Buffer.alloc(0));
@@ -1425,8 +1457,7 @@ function backendDebug(input: InputData): string[] {
 
       if (
         state.error ||
-        state.done ||
-        (equalFound && stackStates.length >= 5)
+        state.done
       ) {
         break;
       }
@@ -1436,8 +1467,7 @@ function backendDebug(input: InputData): string[] {
       }
     }
 
-    // Only return the first 5 states
-    return stackStates.slice(0, 5);
+    return stackStates;
   } catch (error: any) {
     console.log(`Execution failed: ${error.message}`);
     return [];
