@@ -20,13 +20,15 @@ export default function StackVisualizer({
               </tr>
             </thead>
             <tbody>
-              {stackContent.length !== 0 && (
+              {stackContent.length !== 0 &&
                 stackContent.toReversed().map((item, idx) => (
-                  <tr key={idx} className="border-t border-[#2B2B2B] w-full max-h-2">
+                  <tr
+                    key={idx}
+                    className="border-t border-[#2B2B2B] w-full max-h-2"
+                  >
                     <td className="py-2.5 pl-4 text-white">{item.value}</td>
                   </tr>
-                ))
-              )}
+                ))}
               <tr>
                 <td className="w-full h-full" />
               </tr>
