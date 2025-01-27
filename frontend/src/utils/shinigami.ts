@@ -1451,8 +1451,8 @@ function backendDebug(input: InputData): string[] {
 
     while (true) {
       const state = engine.step();
-      // Format the stack values without extra quotes
-      const stackState = `[${state.stack.map((buffer) => `"0x${buffer.toString("hex")}"`).join(",")}]`;
+      // Format the stack values as simple hex strings
+      const stackState = `[${state.stack.map(buffer => `"0x${buffer.toString('hex')}"`).join(",")}]`;
       stackStates.push(stackState);
 
       if (
