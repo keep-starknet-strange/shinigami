@@ -39,6 +39,9 @@ pub mod Error {
     pub const TAPROOT_EMPTY_PUBKEY: felt252 = 'Empty pubkey in taproot script';
     pub const TAPROOT_INVALID_PUBKEY_SIZE: felt252 = 'Bad pubkey size in tapscript';
     pub const TAPROOT_INVALID_CONTROL_BLOCK: felt252 = 'Invalid control block';
+    pub const TAPROOT_INVALID_CONTROL_BLOCK_SIZE: felt252 = 'Invalid control block size';
+    pub const TAPROOT_INVALID_CONTROL_BLOCK_TOO_SMALL: felt252 = 'Control block too small';
+    pub const TAPROOT_INVALID_CONTROL_BLOCK_MAX_SIZE: felt252 = 'Control block too large';
     pub const TAPROOT_INVALID_SIG: felt252 = 'Invalid signature in tap script';
     pub const TAPROOT_INVALID_SIGHASH_TYPE: felt252 = 'Invalid taproot sighash type';
     pub const TAPROOT_INVALID_SIGHASH_MIDSTATE: felt252 = 'Invalid taproot sighash midstat';

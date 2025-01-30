@@ -4,25 +4,10 @@ use crate::transaction::{
 };
 use crate::signature::{schnorr, taproot_signature::{TaprootSigVerifierImpl}};
 use crate::engine::Engine;
+use core::hash::{HashStateTrait, HashStateExTrait, Hash};
 
 use starknet::secp256k1::{Secp256k1Point};
 
-#[derive(Destruct)]
-pub struct TaprootContext {
-    pub annex: @ByteArray,
-    pub code_sep: u32,
-    pub tapleaf_hash: u256,
-    sig_ops_budget: i32,
-    pub must_succeed: bool,
-}
-
-#[derive(Drop)]
-pub struct ControlBlock {
-    internal_pubkey: Secp256k1Point,
-    output_key_y_is_odd: bool,
-    pub leaf_version: u8,
-    control_block: @ByteArray,
-}
 
 pub fn serialize_pub_key(pub_key: Secp256k1Point) -> @ByteArray {
     // TODO: Check this is valid
@@ -55,35 +40,105 @@ pub fn compute_taproot_output_key(pubkey: @Secp256k1Point, script: @ByteArray) -
     return pubkey.clone();
 }
 
-pub fn tap_hash(sript: @ByteArray, version: u8) -> u256 {
+pub fn tap_hash(tap_leaf: TapLeaf) -> u256 {
     // TODO: Implement
     return 0;
 }
+// pub fn tap_hash(tap_leaf: TapBranch) -> u256 {
+//     // TODO: Implement
+//     return 0;
+// }
 
 pub fn serialized_compressed(pub_key: Secp256k1Point) -> ByteArray {
     // TODO: Implement
     return "";
 }
 
+
+// #[derive(Drop, Default, Debug)]
+// pub enum TapscriptLeafVersion {
+//     #[default]
+//     BASE_LEAF_VERSION,
+// }
+
+// #[generate_trait()]
+// pub impl TapscriptLeafVersionImpl of TapscriptLeafVersionTrait {
+//     fn base_leaf_version() -> u8 {
+//         return 0xc0;
+//     }
+// }
+
+#[derive(Drop)]
+pub struct TapLeaf {
+    leaf_version: @u8,
+    script: @ByteArray,
+}
+
 #[generate_trait()]
-pub impl ControlBlockImpl of ControlBlockTrait {
-    // TODO: From parse
-    fn new(
-        internal_pubkey: Secp256k1Point,
-        output_key_y_is_odd: bool,
-        leaf_version: u8,
-        control_block: @ByteArray,
-    ) -> ControlBlock {
-        ControlBlock {
-            internal_pubkey: internal_pubkey,
-            output_key_y_is_odd: output_key_y_is_odd,
-            leaf_version: leaf_version,
-            control_block: control_block,
-        }
+pub impl TapLeafImpl of TapLeafTrait {
+    fn new_base_tap_leaf(script: @ByteArray) -> TapLeaf {
+        TapLeaf { leaf_version: @BASE_LEAF_VERSION, script: script }
     }
 
+    fn new_tap_leaf(leaf_version: @u8, script: @ByteArray) -> TapLeaf {
+        TapLeaf { leaf_version: leaf_version, script: script }
+    }
+}
+
+// impl TapLeafHash<S, +HashStateTrait<S>, +Drop<S>> of Hash<TapLeaf, S> {
+//     fn update_state(state: S, value: TapLeaf) -> S {// TapLeaf { leaf_version:
+//     @BASE_LEAF_VERSION, script: @"" }
+
+//     // let state = state.update(value.value.into());
+//     // let state = state.update_with(value.pk_script.into());
+//     // state
+//     }
+// }
+
+#[derive(Drop)]
+pub struct ControlBlock {
+    internal_pubkey: Secp256k1Point,
+    output_key_y_is_odd: bool,
+    pub leaf_version: u8,
+    control_block: @ByteArray,
+}
+
+#[generate_trait()]
+pub impl ControlBlockImpl of ControlBlockTrait {
+    fn new(control_block: @ByteArray) -> Result<ControlBlock, felt252> {
+        parse_control_block(control_block)
+    }
+
+    // // RootHash calculates the root hash of a tapscript given the revealed script.
+    // func (c *ControlBlock) RootHash(revealedScript []byte) []byte {
+    // // We'll start by creating a new tapleaf from the revealed script,
+    // // this'll serve as the initial hash we'll use to incrementally
+    // // reconstruct the merkle root using the control block elements.
+    // merkleAccumulator := NewTapLeaf(c.LeafVersion, revealedScript).TapHash()
+
+    // // Now that we have our initial hash, we'll parse the control block one
+    // // node at a time to build up our merkle accumulator into the taproot
+    // // commitment.
+    // //
+    // // The control block is a series of nodes that serve as an inclusion
+    // // proof as we can start hashing with our leaf, with each internal
+    // // branch, until we reach the root.
+    // numNodes := len(c.InclusionProof) / ControlBlockNodeSize
+    // for nodeOffset := 0; nodeOffset < numNodes; nodeOffset++ {
+    // // Extract the new node using our index to serve as a 32-byte
+    // // offset.
+    // leafOffset := 32 * nodeOffset
+    // nextNode := c.InclusionProof[leafOffset : leafOffset+32]
+
+    // merkleAccumulator = tapBranchHash(merkleAccumulator[:], nextNode)
+    // }
+
+    // return merkleAccumulator[:]
+    // }
+
     fn root_hash(self: @ControlBlock, script: @ByteArray) -> ByteArray {
-        // TODO: Implement
+        let merkleAccumulator = TapLeafTrait::new_tap_leaf(self.leaf_version, script);
+        let script_leaf_hash = tap_hash(merkleAccumulator);
         return "";
     }
 
@@ -117,6 +172,15 @@ const BASE_CODE_SEP: u32 = 0xFFFFFFFF;
 const TAPROOT_ANNEX_TAG: u8 = 0x50;
 const TAPROOT_LEAF_MASK: u8 = 0xFE;
 pub const BASE_LEAF_VERSION: u8 = 0xc0;
+
+#[derive(Destruct)]
+pub struct TaprootContext {
+    pub annex: @ByteArray,
+    pub code_sep: u32,
+    pub tapleaf_hash: u256,
+    sig_ops_budget: i32,
+    pub must_succeed: bool,
+}
 
 #[generate_trait()]
 pub impl TaprootContextImpl of TaprootContextTrait {
@@ -190,23 +254,25 @@ pub impl TaprootContextImpl of TaprootContextTrait {
 
 pub fn parse_control_block(control_block: @ByteArray) -> Result<ControlBlock, felt252> {
     let control_block_len = control_block.len();
-    if control_block_len < CONTROL_BLOCK_BASE_SIZE || control_block_len > CONTROL_BLOCK_MAX_SIZE {
-        return Result::Err(Error::TAPROOT_INVALID_CONTROL_BLOCK);
+    if control_block_len < CONTROL_BLOCK_BASE_SIZE {
+        return Result::Err(Error::TAPROOT_INVALID_CONTROL_BLOCK_TOO_SMALL);
     }
+    if control_block_len > CONTROL_BLOCK_MAX_SIZE {
+        return Result::Err(Error::TAPROOT_INVALID_CONTROL_BLOCK_MAX_SIZE);
+    }
+
     if (control_block_len - CONTROL_BLOCK_BASE_SIZE) % CONTROL_BLOCK_NODE_SIZE != 0 {
-        return Result::Err(Error::TAPROOT_INVALID_CONTROL_BLOCK);
+        return Result::Err(Error::TAPROOT_INVALID_CONTROL_BLOCK_SIZE);
     }
 
     let leaf_version = control_block[0] & TAPROOT_LEAF_MASK;
     let output_key_y_is_odd = (control_block[0] & 0x01) == 0x01;
 
     let mut raw_pubkey = "";
-    let pubkey_end = 33;
-    let mut i = 1;
-    while i != pubkey_end {
+    for i in 1..CONTROL_BLOCK_BASE_SIZE {
         raw_pubkey.append_byte(control_block[i]);
-        i += 1;
     };
+
     let pubkey = schnorr::parse_schnorr_pub_key(@raw_pubkey)?;
     return Result::Ok(
         ControlBlock {
@@ -225,4 +291,18 @@ pub fn is_annexed_witness(witness: Span<ByteArray>, witness_len: usize) -> bool 
 
     let last_elem = witness[witness_len - 1];
     return last_elem.len() > 0 && last_elem[0] == TAPROOT_ANNEX_TAG;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_perso_1() {
+        let test: TapLeaf = TapLeafTrait::new_base_tap_leaf(@"0xabc");
+        assert_eq!(test.script, @"0xabc");
+        // println!("version : {:x}", TapscriptLeafVersionTrait::base_leaf_version());
+        println!("version : {}", test.leaf_version);
+        // println!("version : {:x}", test.leaf_version);
+    }
 }
