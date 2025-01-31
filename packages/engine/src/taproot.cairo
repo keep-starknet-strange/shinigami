@@ -347,20 +347,14 @@ pub fn is_annexed_witness(witness: Span<ByteArray>, witness_len: usize) -> bool 
 mod tests {
     use super::{
         TapLeaf, tap_branch_hash, ControlBlock, parse_control_block, ControlBlockTrait,
-        TapLeafTrait // TapLeaf, TapLeafTrait, TapBranch, TapBranchTrait, TapNodeTrait, TapNode, tap_branch_hash,
+        TapLeafTrait,
     };
-    use shinigami_utils::hex::{to_hex};
     use shinigami_utils::bytecode::hex_to_bytecode;
     use shinigami_utils::digest::{Digest};
-    // use crate::hash_tag::{HashTag, tagged_hash, tagged_hash_digest};
-    use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
-    // use crate::validate;
+    use shinigami_engine::transaction::{EngineInternalTransactionTrait};
     use shinigami_utils::digest::{DigestIntoByteArray, DigestIntoByteArrayImpl};
 
-    use crate::transaction::{
-        EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
-        EngineTransactionInput,
-    };
+    use crate::transaction::{EngineTransactionTrait};
     #[test]
     fn test_leaf_hash0() {
         // https://learnmeabitcoin.com/explorer/tx/797505b104b5fb840931c115ea35d445eb1f64c9279bf23aa5bb4c3d779da0c2#input-0
@@ -413,6 +407,30 @@ mod tests {
     }
 
     #[test]
+    fn test_leaf_hash4() {
+        let script: ByteArray = hex_to_bytecode(@"0x5487");
+        let leaf: TapLeaf = TapLeafTrait::new_base_tap_leaf(@script);
+        let leaf_hash: Digest = leaf.tap_hash();
+
+        assert_eq!(
+            leaf_hash.into(),
+            hex_to_bytecode(@"0xbf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d"),
+        );
+    }
+
+    #[test]
+    fn test_leaf_hash5() {
+        let script: ByteArray = hex_to_bytecode(@"0x5587");
+        let leaf: TapLeaf = TapLeafTrait::new_base_tap_leaf(@script);
+        let leaf_hash: Digest = leaf.tap_hash();
+
+        assert_eq!(
+            leaf_hash.into(),
+            hex_to_bytecode(@"0x54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f"),
+        );
+    }
+
+    #[test]
     fn test_all_leaf_hash() {
         /// test tap_leaf_hash
         let leaf_hash1: Digest = TapLeafTrait::new_base_tap_leaf(@hex_to_bytecode(@"0x5187"))
@@ -425,31 +443,6 @@ mod tests {
             .tap_hash();
         let leaf_hash5: Digest = TapLeafTrait::new_base_tap_leaf(@hex_to_bytecode(@"0x5587"))
             .tap_hash();
-
-        assert_eq!(
-            leaf_hash1.into(),
-            hex_to_bytecode(@"0x6b13becdaf0eee497e2f304adcfa1c0c9e84561c9989b7f2b5fc39f5f90a60f6"),
-        );
-
-        assert_eq!(
-            leaf_hash2.into(),
-            hex_to_bytecode(@"0xed5af8352e2a54cce8d3ea326beb7907efa850bdfe3711cef9060c7bb5bcf59e"),
-        );
-
-        assert_eq!(
-            leaf_hash3.into(),
-            hex_to_bytecode(@"0x160bd30406f8d5333be044e6d2d14624470495da8a3f91242ce338599b233931"),
-        );
-
-        assert_eq!(
-            leaf_hash4.into(),
-            hex_to_bytecode(@"0xbf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d"),
-        );
-
-        assert_eq!(
-            leaf_hash5.into(),
-            hex_to_bytecode(@"0x54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f"),
-        );
 
         /// Test tap_branch_hash
         let branch1_hash: Digest = tap_branch_hash(@leaf_hash1.into(), @leaf_hash2.into());
