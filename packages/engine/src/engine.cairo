@@ -10,7 +10,7 @@ use crate::transaction::{
 use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
 use crate::taproot;
-use crate::taproot::{TaprootContext, TaprootContextImpl, ControlBlockImpl};
+use crate::taproot::{TaprootContext, TaprootContextImpl, ControlBlockImpl, TapLeafTrait};
 use shinigami_utils::byte_array::byte_array_to_bool;
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::hash::sha256_byte_array;
@@ -685,7 +685,8 @@ pub impl EngineInternalImpl<
 
                 self
                     .taproot_context
-                    .tapleaf_hash = taproot::tap_hash(witness_script, taproot::BASE_LEAF_VERSION);
+                    .tapleaf_hash = TapLeafTrait::new_base_tap_leaf(witness_script)
+                    .tap_hash();
                 self.scripts.append(witness_script);
                 self.dstack.set_stack(witness, 0, witness_len - 2);
             }
