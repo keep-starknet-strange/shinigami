@@ -7,14 +7,16 @@ use shinigami_engine::transaction::{
     EngineInternalTransactionTrait, EngineTransactionTrait, UTXO,
 };
 use shinigami_engine::taproot::{
-    TapLeaf, TapLeafTrait, tap_branch_hash, ControlBlock, parse_control_block, ControlBlockTrait,
+    TapLeaf, tap_branch_hash, ControlBlock, parse_control_block, ControlBlockTrait, TapLeafTrait,
+    serialize_pub_key, compute_tweak_hash, compute_taproot_output_key,
 };
 use shinigami_engine::hash_cache::{TxSigHashes, SigHashMidstateTrait};
 use shinigami_engine::utxo::{};
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::byte_array::{U256IntoByteArray};
 use shinigami_utils::digest::{Digest, DigestIntoByteArray, DigestIntoSnapByteArray};
-// use crate::transaction::{EngineTransactionTrait};
+
+use starknet::secp256k1::Secp256k1Point;
 
 #[test]
 fn test_new_sigHashMidstate() {
@@ -523,9 +525,10 @@ fn test_all_leaf_hash() {
     );
 }
 
+
 #[test]
-fn test_merkle_root_hash() {
-    // https://learnmeabitcoin.com/technical/upgrades/taproot/#taproot
+fn test_taproot_merkle_root_hash() {
+    //https://learnmeabitcoin.com/explorer/tx/fa7eb13f6d854ed32ef284983c620f74050dd6d119dc9e91ad09c083b0267f8f#input-1
     let raw_transaction_hex =
         "0x02000000000102c343d8dff98f817e9c2bd6d951e5ebc401ae0c6f60bb47e52e24846ae961e2f80000000000ffffffff20575041a5431f83a3d99f40816df85191a21a55155d1b862124e4c7447604880100000000ffffffff01801a00000000000022512021ecac4e3b7a2414b7c0718b80dccdc169c3caf3f2cc7727084e4c4fd2d3179602210249a825dd1e0c90daf615859baf41e34148f5c69b085408a294f0f277246223a70c093006020104020104017cac03010302538781c1a2fc329a085d8cfc4fa28795993d7b666cee024e94c40115141b8e9be4a29fa41324300a84045033ec539f60c70d582c48b9acf04150da091694d83171b44ec9bf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f00000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
@@ -540,5 +543,48 @@ fn test_merkle_root_hash() {
     assert_eq!(
         merkle_root.into(),
         hex_to_bytecode(@"0xb5b72eea07b3e338962944a752a98772bbe1f1b6550e6fb6ab8c6e6adb152e7c"),
+    );
+}
+
+#[test]
+fn test_taproot_tweak_hash() {
+    //https://learnmeabitcoin.com/technical/upgrades/taproot/#tweak
+    let raw_transaction_hex =
+        "0x02000000000102c343d8dff98f817e9c2bd6d951e5ebc401ae0c6f60bb47e52e24846ae961e2f80000000000ffffffff20575041a5431f83a3d99f40816df85191a21a55155d1b862124e4c7447604880100000000ffffffff01801a00000000000022512021ecac4e3b7a2414b7c0718b80dccdc169c3caf3f2cc7727084e4c4fd2d3179602210249a825dd1e0c90daf615859baf41e34148f5c69b085408a294f0f277246223a70c093006020104020104017cac03010302538781c1a2fc329a085d8cfc4fa28795993d7b666cee024e94c40115141b8e9be4a29fa41324300a84045033ec539f60c70d582c48b9acf04150da091694d83171b44ec9bf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f00000000";
+    let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
+
+    let witness_input_1: @Array<ByteArray> = transaction.get_transaction_inputs()[1].witness;
+    let revealed_script_input_1: @ByteArray = witness_input_1[1];
+    let control_block_input1: ControlBlock = parse_control_block(witness_input_1[2]).unwrap();
+    let merkle_root: Digest = control_block_input1.root_hash(revealed_script_input_1);
+    let tap_tweak_hash = compute_tweak_hash(control_block_input1.internal_pubkey, @merkle_root);
+
+    assert_eq!(
+        tap_tweak_hash.into(),
+        hex_to_bytecode(@"0xbf0094eae70ba67e2f9fc3c4b81f078c90931855a8d24c959619174c92060cde"),
+    );
+}
+
+#[test]
+fn test_taproot_output_key() {
+    //https://learnmeabitcoin.com/technical/upgrades/taproot/#tweak
+    let raw_transaction_hex =
+        "0x02000000000102c343d8dff98f817e9c2bd6d951e5ebc401ae0c6f60bb47e52e24846ae961e2f80000000000ffffffff20575041a5431f83a3d99f40816df85191a21a55155d1b862124e4c7447604880100000000ffffffff01801a00000000000022512021ecac4e3b7a2414b7c0718b80dccdc169c3caf3f2cc7727084e4c4fd2d3179602210249a825dd1e0c90daf615859baf41e34148f5c69b085408a294f0f277246223a70c093006020104020104017cac03010302538781c1a2fc329a085d8cfc4fa28795993d7b666cee024e94c40115141b8e9be4a29fa41324300a84045033ec539f60c70d582c48b9acf04150da091694d83171b44ec9bf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f00000000";
+    let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
+
+    let witness_input_1: @Array<ByteArray> = transaction.get_transaction_inputs()[1].witness;
+    let revealed_script_input_1: @ByteArray = witness_input_1[1];
+    let control_block_input1: ControlBlock = parse_control_block(witness_input_1[2]).unwrap();
+    let merkle_root: Digest = control_block_input1.root_hash(revealed_script_input_1);
+    let tap_tweak_pubkey: Secp256k1Point = compute_taproot_output_key(
+        control_block_input1.internal_pubkey, @merkle_root,
+    );
+
+    let tap_tweak_pubkey_bytes = serialize_pub_key(tap_tweak_pubkey);
+    assert_eq!(
+        tap_tweak_pubkey_bytes,
+        @hex_to_bytecode(@"0x562529047f476b9a833a5a780a75845ec32980330d76d1ac9f351dc76bce5d72"),
     );
 }

@@ -2,46 +2,76 @@ use crate::errors::Error;
 use crate::transaction::{
     EngineTransactionTrait, EngineTransactionInputTrait, EngineTransactionOutputTrait,
 };
-use crate::signature::{schnorr, taproot_signature::{TaprootSigVerifierImpl}};
+use crate::signature::{schnorr::{parse_schnorr_pub_key}, taproot_signature::TaprootSigVerifierImpl};
 use crate::engine::Engine;
-// use core::hash::{HashStateTrait, HashStateExTrait, Hash};
-use shinigami_utils::bytecode::write_var_int;
-use shinigami_utils::byte_array::ByteArrayLexicoParialOrder;
-use shinigami_utils::digest::{Digest, DigestIntoByteArray};
 use crate::hash_tag::{HashTag, tagged_hash_digest};
-// use crate::hash_tag::{HashTag, tagged_hash, tagged_hash_digest};
-use starknet::secp256k1::{Secp256k1Point};
+use shinigami_utils::hash::{hash_to_u256};
+use shinigami_utils::bytecode::write_var_int;
+use shinigami_utils::byte_array::{U256IntoByteArray, ByteArrayLexicoParialOrder};
+use shinigami_utils::digest::{Digest, DigestIntoByteArray, DigestIntoSnapByteArray};
 
+use starknet::secp256k1::Secp256k1Point;
+use starknet::secp256_trait::{Secp256Trait, Secp256PointTrait};
+use starknet::SyscallResultTrait;
 
 pub fn serialize_pub_key(pub_key: Secp256k1Point) -> @ByteArray {
-    // TODO: Check this is valid
-    let mut output_arr = array![];
-    pub_key.serialize(ref output_arr);
+    let pub_key_bytes: ByteArray = serialized_compressed(pub_key);
     let mut result = "";
-    let mut i = 0;
-    let output_arr_len = output_arr.len();
-    while i != output_arr_len {
-        result.append_word(*output_arr[i], 31);
-        i += 1;
-    };
-    return @result;
-}
-
-pub fn serialize_schnorr_pub_key(pub_key: Secp256k1Point) -> @ByteArray {
-    let pub_key_bytes: @ByteArray = serialize_pub_key(pub_key);
-    let mut result = "";
-    let mut i = 1;
-    let pub_key_bytes_len = pub_key_bytes.len();
-    while i != pub_key_bytes_len {
+    for i in 1..pub_key_bytes.len() {
         result.append_byte(pub_key_bytes[i]);
-        i += 1;
     };
+
     return @result;
 }
 
-pub fn compute_taproot_output_key(pubkey: @Secp256k1Point, script: @Digest) -> Secp256k1Point {
-    // TODO: Implement
-    return pubkey.clone();
+// SerializeCompressed serializes a public key in the 33-byte compressed format.
+pub fn serialized_compressed(pub_key: Secp256k1Point) -> ByteArray {
+    let mut format = 0x02;
+    let (x, y) = pub_key.get_coordinates().unwrap();
+    if y & 1 == 1 {
+        format = 0x03
+    }
+
+    // 0x02 or 0x03 || 32-byte x coordinate
+    let mut result = "";
+    result.append_byte(format);
+    result.append(@x.into());
+
+    result
+}
+
+pub fn compute_tweak_hash(pubkey: Secp256k1Point, script_root: @Digest) -> Digest {
+    // This routine only operates on x-only public keys where the public
+    // key always has an even y coordinate, so we'll re-parse it as such.
+    // TODO check pertinence
+    let serialized_pub_key: @ByteArray = serialize_pub_key(pubkey);
+    let internal_pubkey: Secp256k1Point = parse_schnorr_pub_key(serialized_pub_key).unwrap();
+    let serialize_pub_key2: @ByteArray = serialize_pub_key(internal_pubkey);
+
+    // compute the tap tweak hash that commits to the internal key and the merkle script root.
+    let mut msg: ByteArray = "";
+    msg.append(serialize_pub_key2);
+    msg.append(script_root.into());
+    tagged_hash_digest(HashTag::TapTweak, @msg)
+}
+
+pub fn compute_taproot_output_key(pubkey: Secp256k1Point, script_root: @Digest) -> Secp256k1Point {
+    let tap_tweak_hash: Digest = compute_tweak_hash(pubkey, script_root);
+
+    let G = Secp256Trait::<Secp256k1Point>::get_generator_point();
+    let tweak_point: Secp256k1Point = G.mul(hash_to_u256(tap_tweak_hash.value)).unwrap_syscall();
+    let tweaked_pubkey: Secp256k1Point = tweak_point.add(pubkey).unwrap_syscall();
+
+    let (x, y) = tweaked_pubkey.get_coordinates().unwrap_syscall();
+    let parity = y & 1 == 1;
+
+    let tweak_public_key = Secp256Trait::<
+        Secp256k1Point,
+    >::secp256_ec_get_point_from_x_syscall(x, parity)
+        .unwrap_syscall()
+        .unwrap();
+
+    tweak_public_key
 }
 
 pub fn tap_branch_hash(left: @ByteArray, right: @ByteArray) -> Digest {
@@ -61,10 +91,6 @@ pub fn tap_branch_hash(left: @ByteArray, right: @ByteArray) -> Digest {
     return tagged_hash_digest(HashTag::TapBranch, @result);
 }
 
-pub fn serialized_compressed(pub_key: Secp256k1Point) -> ByteArray {
-    // TODO: Implement
-    return "";
-}
 
 #[derive(Drop, Copy, Default, Debug)]
 pub struct TapNode {
@@ -148,7 +174,7 @@ pub impl TapLeafImpl of TapLeafTrait {
 #[derive(Drop)]
 pub struct ControlBlock {
     // Internal public key in the taproot commitment.
-    internal_pubkey: Secp256k1Point,
+    pub internal_pubkey: Secp256k1Point,
     // Denotes if the y coordinate of the output key
     output_key_y_is_odd: bool,
     // Leaf version of the tapscript leaf that the inclusion_proof below is based off of.
@@ -190,7 +216,7 @@ pub impl ControlBlockImpl of ControlBlockTrait {
         self: @ControlBlock, witness_program: @ByteArray, script: @ByteArray,
     ) -> Result<(), felt252> {
         let root_hash = self.root_hash(script);
-        let taproot_key = compute_taproot_output_key(self.internal_pubkey, @root_hash);
+        let taproot_key = compute_taproot_output_key(*self.internal_pubkey, @root_hash);
         let expected_witness_program = serialize_pub_key(taproot_key);
         if witness_program != expected_witness_program {
             return Result::Err(Error::TAPROOT_INVALID_MERKLE_PROOF);
@@ -322,7 +348,7 @@ pub fn parse_control_block(control_block: @ByteArray) -> Result<ControlBlock, fe
         inclusion_proof.append_byte(control_block[i]);
     };
 
-    let pubkey = schnorr::parse_schnorr_pub_key(@raw_pubkey)?;
+    let pubkey = parse_schnorr_pub_key(@raw_pubkey)?;
     return Result::Ok(
         ControlBlock {
             internal_pubkey: pubkey,
