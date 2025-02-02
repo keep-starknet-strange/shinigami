@@ -10,13 +10,10 @@ use shinigami_engine::taproot::{
     TapLeaf, tap_branch_hash, ControlBlock, parse_control_block, ControlBlockTrait, TapLeafTrait,
     serialize_pub_key, compute_tweak_hash, compute_taproot_output_key,
 };
-use shinigami_engine::signature::{schnorr::{parse_schnorr_pub_key}};
 use shinigami_engine::hash_cache::{TxSigHashes, SigHashMidstateTrait, TxSigHashesImpl};
-use shinigami_engine::utxo::{};
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::byte_array::{U256IntoByteArray};
 use shinigami_utils::digest::{Digest, DigestIntoByteArray, DigestIntoSnapByteArray};
-use shinigami_utils::hex::to_hex;
 use shinigami_tests::validate;
 use shinigami_engine::flags::ScriptFlags;
 
@@ -187,14 +184,6 @@ fn test_calc_taproot_signature_hash_key_path_spend() {
     };
 
     let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
-    println!("get_hash_prevouts_v0 {}", sig_hashes.get_hash_prevouts_v0());
-    println!("get_hash_sequence_v0 {}", sig_hashes.get_hash_sequence_v0());
-    println!("get_hash_outputs_v0 {}", sig_hashes.get_hash_outputs_v0());
-    println!("get_hash_prevouts_v1 {}", sig_hashes.get_hash_prevouts_v1());
-    println!("get_hash_sequence_v1 {}", sig_hashes.get_hash_sequence_v1());
-    println!("get_hash_outputs_v1 {}", sig_hashes.get_hash_outputs_v1());
-    println!("get_hash_input_amounts_v1 {}", sig_hashes.get_hash_input_amounts_v1());
-    println!("get_hash_input_scripts_v1 {}", sig_hashes.get_hash_input_scripts_v1());
     let input_idx: u32 = 0;
     let prev_output: EngineTransactionOutput = Default::default();
 
@@ -206,19 +195,9 @@ fn test_calc_taproot_signature_hash_key_path_spend() {
         code_sep_pos: 0,
     };
 
-    println!("hashtype: {}", h_type);
-    println!("inpud_idx: {}", input_idx);
-    // println!("prev_output: {}", prev_output);
-    println!("opts ext flag: {:?}", opts.ext_flag);
-    println!("opts annex: {}", to_hex(opts.annex_hash));
-    println!("opts tap leaf: {}", to_hex(opts.tap_leaf_hash));
-    println!("opts key version: {:?}", opts.key_version);
-    println!("opts code sep pos: {:?}", opts.code_sep_pos);
-
     let result = calc_taproot_signature_hash(
         sig_hashes, h_type, @transaction, input_idx, prev_output, ref opts,
     );
-    println!("result: {}", to_hex(@result.unwrap().into()));
     let expected_hash = 0xa7b390196945d71549a2454f0185ece1b47c56873cf41789d78926852c355132_u256;
 
     assert_eq!(result.is_ok(), true);
@@ -372,28 +351,9 @@ fn test_calc_taproot_signature_hash_script_path_spend_signature() {
         code_sep_pos: 0xffffffff,
     };
 
-    println!("get_hash_prevouts_v0 {}", sig_hashes.get_hash_prevouts_v0());
-    println!("get_hash_sequence_v0 {}", sig_hashes.get_hash_sequence_v0());
-    println!("get_hash_outputs_v0 {}", sig_hashes.get_hash_outputs_v0());
-    println!("get_hash_prevouts_v1 {}", sig_hashes.get_hash_prevouts_v1());
-    println!("get_hash_sequence_v1 {}", sig_hashes.get_hash_sequence_v1());
-    println!("get_hash_outputs_v1 {}", sig_hashes.get_hash_outputs_v1());
-    println!("get_hash_input_amounts_v1 {}", sig_hashes.get_hash_input_amounts_v1());
-    println!("get_hash_input_scripts_v1 {}", sig_hashes.get_hash_input_scripts_v1());
-
-    println!("hashtype: {}", h_type);
-    println!("inpud_idx: {}", input_idx);
-    // println!("prev_output: {}", prev_output);
-    println!("opts ext flag: {:?}", opts.ext_flag);
-    println!("opts annex: {}", to_hex(opts.annex_hash));
-    println!("opts tap leaf: {}", to_hex(opts.tap_leaf_hash));
-    println!("opts key version: {:?}", opts.key_version);
-    println!("opts code sep pos: {:?}", opts.code_sep_pos);
-
     let result = calc_taproot_signature_hash(
         sig_hashes, h_type, @transaction, input_idx, prev_output, ref opts,
     );
-    println!("result: {}", to_hex(@result.unwrap().into()));
     let expected_hash = 0x752453d473e511a0da2097d664d69fe5eb89d8d9d00eab924b42fc0801a980c9_u256;
 
     assert_eq!(result.is_ok(), true);
@@ -637,7 +597,6 @@ fn test_taproot_tweak_hash() {
 #[test]
 fn test_taproot_tweak_hash_key_path_spend1() {
     //https://learnmeabitcoin.com/explorer/tx/091d2aaadc409298fd8353a4cd94c319481a0b4623fb00872fe240448e93fcbe#input-0
-    let input_idx: u32 = 0;
     let raw_transaction_hex =
         "0x02000000000101ec9016580d98a93909faf9d2f431e74f781b438d81372bb6aab4db67725c11a70000000000ffffffff0110270000000000001600144e44ca792ce545acba99d41304460dd1f53be3840141b693a0797b24bae12ed0516a2f5ba765618dca89b75e498ba5b745b71644362298a45ca39230d10a02ee6290a91cebf9839600f7e35158a447ea182ea0e022ae0100000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
@@ -650,7 +609,6 @@ fn test_taproot_tweak_hash_key_path_spend1() {
             block_height: 861957,
         },
     ];
-    println!("here4");
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();

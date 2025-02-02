@@ -11,13 +11,11 @@ use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
 use crate::taproot;
 use crate::taproot::{
-    TaprootContext, TaprootContextImpl, ControlBlock, ControlBlockImpl, TapLeafTrait,
-    serialize_pub_key,
+    TaprootContext, TaprootContextImpl, ControlBlock, ControlBlockImpl, TapLeafTrait, TapLeafImpl,
 };
 use shinigami_utils::byte_array::byte_array_to_bool;
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::hash::sha256_byte_array;
-use shinigami_utils::hex::to_hex;
 
 pub const MAX_STACK_SIZE: u32 = 1000;
 pub const MAX_SCRIPT_SIZE: u32 = 10000;
@@ -209,13 +207,11 @@ pub impl EngineImpl<
 
             let mut witness_program: ByteArray = "";
             if witness::is_witness_program(script_pubkey) {
-                println!("Engine::new: witness program in script_pubkey");
                 if script_sig.len() != 0 {
                     return Result::Err(Error::WITNESS_MALLEATED);
                 }
                 witness_program = script_pubkey.clone();
             } else if witness_len != 0 && bip16 {
-                println!("Engine::new: witness program in script_sig");
                 let sig_clone = script_sig.clone();
                 if sig_clone.len() > 2 {
                     let first_elem = sig_clone[0];
@@ -244,7 +240,6 @@ pub impl EngineImpl<
                 )?;
                 engine.witness_version = witness_version;
                 engine.witness_program = witness_program;
-                println!("engine witness program: {}", engine.witness_program);
             } else if engine.witness_program.len() == 0 && witness_len != 0 {
                 return Result::Err(Error::WITNESS_UNEXPECTED);
             }
@@ -373,7 +368,6 @@ pub impl EngineImpl<
                         break;
                     }
                 }
-                println!("checking opcode: {}", opcode);
 
                 let res = Opcode::execute(opcode, ref self);
                 if res.is_err() {
@@ -402,10 +396,6 @@ pub impl EngineImpl<
             self.num_ops = 0;
             self.opcode_idx = 0;
 
-            println!("script_idx: {}", self.script_idx);
-            println!("bip16: {}", self.bip16);
-            println!("witness_program: {}", to_hex(@self.witness_program));
-
             if self.script_idx == 0 && self.bip16 {
                 self.script_idx += 1;
                 // TODO: Use @ instead of clone span
@@ -426,7 +416,6 @@ pub impl EngineImpl<
             } else if (self.script_idx == 1 && self.witness_program.len() != 0)
                 || (self.script_idx == 2 && self.witness_program.len() != 0 && self.bip16) {
                 self.script_idx += 1;
-                println!("Verify WITNRSS");
                 let tx_input = self.transaction.get_transaction_inputs()[self.tx_idx];
                 let witness = tx_input.get_witness();
                 let res = self.verify_witness(witness);
@@ -614,7 +603,6 @@ pub impl EngineInternalImpl<
     fn verify_witness(ref self: Engine<T>, witness: Span<ByteArray>) -> Result<(), felt252> {
         let witness_prog_len = self.witness_program.len();
         if self.is_witness_active(BASE_SEGWIT_WITNESS_VERSION) {
-            println!("Verify base witness");
             // Verify a base witness (segwit) program, ie P2WSH || P2WPKH
             if witness_prog_len == PAY_TO_WITNESS_PUBKEY_HASH_SIZE {
                 // P2WPKH
@@ -650,10 +638,6 @@ pub impl EngineInternalImpl<
         } else if self.is_witness_active(TAPROOT_WITNESS_VERSION)
             && witness_prog_len == PAY_TO_TAPROOT_DATA_SIZE
             && !self.bip16.clone() {
-            for w in witness {
-                println!("Witness: {}", to_hex(w));
-            };
-
             // Verify a taproot witness program
             if !self.has_flag(ScriptFlags::ScriptVerifyTaproot) {
                 return Result::Ok(());
@@ -672,7 +656,6 @@ pub impl EngineInternalImpl<
                 self.taproot_context.annex = witness[witness_len - 1];
                 witness_len -= 1; // Remove annex
             }
-            println!("Witness len: {}", witness_len);
             if witness_len == 1 {
                 TaprootContextImpl::verify_taproot_spend(
                     ref self, @self.witness_program, witness[0], self.transaction, self.tx_idx,
@@ -680,22 +663,11 @@ pub impl EngineInternalImpl<
                 self.taproot_context.must_succeed = true;
                 return Result::Ok(());
             } else {
-                println!("parse control block");
                 let control_block: ControlBlock = taproot::parse_control_block(
                     witness[witness_len - 1],
                 )?;
                 let witness_script = witness[witness_len - 2];
                 control_block.verify_taproot_leaf(@self.witness_program, witness_script)?;
-
-                println!(
-                    "control block internal pubkey {}",
-                    to_hex(serialize_pub_key(control_block.internal_pubkey)),
-                );
-                println!("control block leaf version {}", control_block.leaf_version);
-                println!("control block is odd {}", control_block.output_key_y_is_odd);
-                println!(
-                    "control block inclusion proof: {}", to_hex(@control_block.inclusion_proof),
-                );
 
                 if parser::has_success_opcode(witness_script) {
                     if self.has_flag(ScriptFlags::ScriptVerifyDiscourageOpSuccess) {
@@ -714,10 +686,10 @@ pub impl EngineInternalImpl<
                     }
                 }
 
-                let tmp = TapLeafTrait::new_base_tap_leaf(witness_script).tap_hash();
-                println!("tapleaf hash: {}", to_hex(@tmp.into()));
-                println!("witness script: {}", to_hex(witness_script));
-                self.taproot_context.tapleaf_hash = tmp;
+                self
+                    .taproot_context
+                    .tapleaf_hash = TapLeafTrait::new_base_tap_leaf(witness_script)
+                    .tap_hash();
                 self.scripts.append(witness_script);
                 self.dstack.set_stack(witness, 0, witness_len - 2);
             }

@@ -9,7 +9,7 @@ use crate::signature::{
     signature::{BaseSigVerifierTrait, BaseSegwitSigVerifierTrait},
     taproot_signature::{TaprootSigVerifierTrait, TaprootSigVerifierImpl},
 };
-use crate::signature::{sighash, constants, utils::VerifyResult};
+use crate::signature::{sighash, utils::VerifyResult};
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
@@ -99,7 +99,6 @@ pub fn opcode_checksig<
     //     is_valid = false;
     // }
     } else if engine.is_witness_active(BASE_SEGWIT_VERSION) {
-        println!("use segwit");
         // Witness Signature Verification
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
         if res.is_err() {
@@ -120,9 +119,7 @@ pub fn opcode_checksig<
     // }
     } else if engine.use_taproot {
         // Taproot Signature Verification
-        println!("use taproot");
         let pk_bytes_len = pk_bytes.len();
-        println!("PK BYTES LEN {}", pk_bytes_len);
         if (pk_bytes_len > 0) {
             engine.taproot_context.use_ops_budget()?;
         }
@@ -133,7 +130,6 @@ pub fn opcode_checksig<
 
         if (full_sig_bytes_len == 0) {
             engine.dstack.push_byte_array(""); // TODO verify this
-            println!("PUSHING EMPTY BYTE ARRAY");
             return Result::Ok(());
         }
 
@@ -145,8 +141,6 @@ pub fn opcode_checksig<
     }
 
     let is_valid = verify_result.sig_valid;
-    println!(" IS SIG VALID ? {}", is_valid);
-    println!("Sig match {:?}", verify_result.sig_match);
 
     if engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) && verify_result.sig_match {
         return Result::Err(Error::NON_CONST_SCRIPT_CODE);
@@ -452,7 +446,6 @@ pub fn opcode_checksigadd<
     >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
 
     if (verifier.verify(ref engine).is_err()) {
-        println!("opchecksigadd invalid sig");
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
 

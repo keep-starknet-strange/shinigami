@@ -9,7 +9,6 @@ use shinigami_utils::hash::{hash_to_u256};
 use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::byte_array::{U256IntoByteArray, ByteArrayLexicoParialOrder};
 use shinigami_utils::digest::{Digest, DigestIntoByteArray, DigestIntoSnapByteArray};
-use shinigami_utils::hex::to_hex;
 
 use starknet::secp256k1::Secp256k1Point;
 use starknet::secp256_trait::{Secp256Trait, Secp256PointTrait};
@@ -231,7 +230,6 @@ pub impl ControlBlockImpl of ControlBlockTrait {
     fn verify_taproot_leaf(
         self: @ControlBlock, witness_program: @ByteArray, script: @ByteArray,
     ) -> Result<(), felt252> {
-        println!("Verify taproot leaf");
         let root_hash = self.root_hash(script);
         let taproot_key = compute_taproot_output_key(*self.internal_pubkey, @root_hash);
         let expected_witness_program = serialize_pub_key(taproot_key);
@@ -300,17 +298,11 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         tx_idx: u32,
     ) -> Result<(), felt252> {
         let witness: Span<ByteArray> = tx.get_transaction_inputs()[tx_idx].get_witness();
-        println!("verify_taproot_spend");
-        println!("Witness program: {}", to_hex(witness_program));
-        for w in witness {
-            println!("Witness: {}", to_hex(w));
-        };
         let mut annex = @"";
         if is_annexed_witness(witness, witness.len()) {
             annex = witness[witness.len() - 1];
         }
-        println!("Annex: {}", to_hex(annex));
-        println!("raw sig : {}", to_hex(raw_sig));
+
         let verifier = TaprootSigVerifierImpl::<
             T,
         >::new(raw_sig, witness_program, annex, ref engine)?;

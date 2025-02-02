@@ -274,7 +274,6 @@ pub fn calc_taproot_signature_hash<
     ref opts: TaprootSighashOptions,
 ) -> Result<u256, felt252> {
     if !is_valid_taproot_sighash(h_type) {
-        println!("Invalid sighash calc_taproot_signature_hash");
         return Result::Err(Error::TAPROOT_INVALID_SIGHASH_TYPE);
     }
 

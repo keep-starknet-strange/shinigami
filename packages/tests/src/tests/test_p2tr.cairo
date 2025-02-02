@@ -1,6 +1,5 @@
 use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
 use shinigami_engine::flags::ScriptFlags;
-// use shinigami_engine::errors::Error;
 
 use crate::validate;
 use shinigami_utils::bytecode::hex_to_bytecode;
@@ -35,7 +34,6 @@ fn test_p2tr_random() {
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    println!("ok");
     let res = validate::validate_transaction(@transaction, flags);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
