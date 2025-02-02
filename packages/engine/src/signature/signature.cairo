@@ -6,13 +6,11 @@ use starknet::SyscallResultTrait;
 use starknet::secp256_trait::{Secp256Trait, Signature, is_valid_signature};
 use starknet::secp256k1::{Secp256k1Point};
 use crate::flags::ScriptFlags;
-use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
-use crate::signature::{sighash, constants};
+use crate::signature::{sighash, constants, utils::VerifyResult};
 use crate::errors::Error;
-use shinigami_utils::byte_array::{sub_byte_array};
+use shinigami_utils::byte_array::{sub_byte_array, u256_from_byte_array_with_offset};
 use crate::parser;
 use crate::hash_cache::{TxSigHashes, HashCacheTrait};
-
 
 //`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
@@ -42,7 +40,7 @@ pub trait BaseSigVerifierTrait<
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray,
     ) -> Result<BaseSigVerifier, felt252>;
-    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool;
+    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> VerifyResult;
 }
 
 impl BaseSigVerifierImpl<
@@ -68,13 +66,16 @@ impl BaseSigVerifierImpl<
     }
 
     // TODO: add signature cache mechanism for optimization
-    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool {
-        let sub_script = remove_signature(@self.sub_script, self.sig_bytes);
+    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> VerifyResult {
+        let (sub_script, is_match) = remove_signature(@self.sub_script, self.sig_bytes);
         let sig_hash: u256 = sighash::calc_signature_hash::<
             I, O, T,
         >(sub_script, self.hash_type, vm.transaction, vm.tx_idx);
 
-        is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
+        return VerifyResult {
+            sig_valid: is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key),
+            sig_match: is_match,
+        };
     }
 }
 
@@ -86,7 +87,7 @@ pub trait BaseSegwitSigVerifierTrait<
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>,
 > {
-    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool;
+    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> VerifyResult;
 }
 
 impl BaseSegwitSigVerifierImpl<
@@ -102,14 +103,17 @@ impl BaseSegwitSigVerifierImpl<
     +Drop<O>,
     +Drop<T>,
 > of BaseSegwitSigVerifierTrait<I, O, T> {
-    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> bool {
-        let mut sig_hashes: @TxSigHashes = vm.hash_cache.get_sig_hashes().unwrap();
+    fn verify(ref self: BaseSigVerifier, ref vm: Engine<T>) -> VerifyResult {
+        let sig_hashes: @TxSigHashes = vm.hash_cache.get_sig_hashes().unwrap();
 
         let sig_hash: u256 = sighash::calc_witness_signature_hash::<
             I, O, T,
         >(@self.sub_script, sig_hashes, self.hash_type, vm.transaction, vm.tx_idx, vm.amount);
 
-        is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
+        VerifyResult {
+            sig_valid: is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key),
+            sig_match: false,
+        }
     }
 }
 
@@ -571,15 +575,15 @@ pub fn parse_base_sig_and_pk<
 }
 
 // Removes the ECDSA signature from a given script.
-pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray {
-    if script.len() == 0 || sig_bytes.len() == 0 {
-        return script;
+pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> (@ByteArray, bool) {
+    let script_len = script.len();
+    if script_len == 0 || sig_bytes.len() == 0 {
+        return (script, false);
     }
 
     let mut processed_script: ByteArray = "";
     let mut i: usize = 0;
-
-    let script_len = script.len();
+    let mut is_match = false;
     while i < script_len {
         let opcode = script[i];
         let data_len = parser::data_len(script, i).unwrap();
@@ -588,6 +592,7 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
             let mut found = compare_data(script, sig_bytes, i, opcode);
             if found {
                 i = end;
+                is_match = true;
                 continue;
             }
         }
@@ -597,5 +602,5 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
         };
     };
 
-    @processed_script
+    (@processed_script, is_match)
 }

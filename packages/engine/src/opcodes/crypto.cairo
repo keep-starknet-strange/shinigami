@@ -5,12 +5,11 @@ use crate::transaction::{
 use crate::stack::ScriptStackTrait;
 use crate::flags::ScriptFlags;
 use crate::signature::signature;
-use crate::signature::sighash;
 use crate::signature::{
     signature::{BaseSigVerifierTrait, BaseSegwitSigVerifierTrait},
     taproot_signature::{TaprootSigVerifierTrait, TaprootSigVerifierImpl},
 };
-
+use crate::signature::{sighash, constants, utils::VerifyResult};
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
@@ -69,12 +68,15 @@ pub fn opcode_checksig<
 ) -> Result<(), felt252> {
     let pk_bytes = engine.dstack.pop_byte_array()?;
     let full_sig_bytes = engine.dstack.pop_byte_array()?;
-    if !engine.use_taproot && full_sig_bytes.len() < 1 {
+    let full_sig_bytes_len = full_sig_bytes.len();
+    if !engine.use_taproot && full_sig_bytes_len < 1 {
         engine.dstack.push_bool(false);
         return Result::Ok(());
     }
 
-    let mut is_valid: bool = false;
+    // let mut is_valid: bool = false;
+    let mut verify_result: VerifyResult = Default::default();
+
     if engine.witness_program.len() == 0 {
         // Base Signature Verification
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
@@ -89,14 +91,15 @@ pub fn opcode_checksig<
             engine.dstack.push_bool(false);
             return Result::Ok(());
         }
-
         let mut sig_verifier = res.unwrap();
-        if BaseSigVerifierTrait::verify(ref sig_verifier, ref engine) {
-            is_valid = true;
-        } else {
-            is_valid = false;
-        }
+        verify_result = BaseSigVerifierTrait::verify(ref sig_verifier, ref engine);
+        // if BaseSigVerifierTrait::verify(ref sig_verifier, ref engine) {
+    //     is_valid = true;
+    // } else {
+    //     is_valid = false;
+    // }
     } else if engine.is_witness_active(BASE_SEGWIT_VERSION) {
+        println!("use segwit");
         // Witness Signature Verification
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);
         if res.is_err() {
@@ -109,15 +112,17 @@ pub fn opcode_checksig<
         }
 
         let mut sig_verifier = res.unwrap();
-        if BaseSegwitSigVerifierTrait::verify(ref sig_verifier, ref engine) {
-            is_valid = true;
-        } else {
-            is_valid = false;
-        }
+        verify_result = BaseSegwitSigVerifierTrait::verify(ref sig_verifier, ref engine);
+        // if BaseSegwitSigVerifierTrait::verify(ref sig_verifier, ref engine) {
+    //     is_valid = true;
+    // } else {
+    //     is_valid = false;
+    // }
     } else if engine.use_taproot {
         // Taproot Signature Verification
-
+        println!("use taproot");
         let pk_bytes_len = pk_bytes.len();
+        println!("PK BYTES LEN {}", pk_bytes_len);
         if (pk_bytes_len > 0) {
             engine.taproot_context.use_ops_budget()?;
         }
@@ -126,8 +131,9 @@ pub fn opcode_checksig<
             return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
         }
 
-        if (full_sig_bytes.len() == 0) {
+        if (full_sig_bytes_len == 0) {
             engine.dstack.push_byte_array(""); // TODO verify this
+            println!("PUSHING EMPTY BYTE ARRAY");
             return Result::Ok(());
         }
 
@@ -135,19 +141,21 @@ pub fn opcode_checksig<
             I, O, T,
         >::new_base(@full_sig_bytes, @pk_bytes, ref engine)?;
 
-        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(verifier, ref engine).is_ok();
+        verify_result = verifier.verify_base(ref engine)?;
     }
 
-    // TODO already handle ?
-    // if vm.hasFlag(ScriptVerifyConstScriptCode) && result.sigMatch {
-    // str := "non-const script code"
-    // return scriptError(ErrNonConstScriptCode, str)
-    // }
+    let is_valid = verify_result.sig_valid;
+    println!(" IS SIG VALID ? {}", is_valid);
+    println!("Sig match {:?}", verify_result.sig_match);
 
-    if !is_valid && @engine.use_taproot == @true {
+    if engine.has_flag(ScriptFlags::ScriptVerifyConstScriptCode) && verify_result.sig_match {
+        return Result::Err(Error::NON_CONST_SCRIPT_CODE);
+    }
+
+    if !is_valid && @engine.use_taproot == @true && full_sig_bytes_len != 0 {
         return Result::Err(Error::SIG_NULLFAIL);
     }
-    if !is_valid && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) && full_sig_bytes.len() > 0 {
+    if !is_valid && engine.has_flag(ScriptFlags::ScriptVerifyNullFail) && full_sig_bytes_len > 0 {
         return Result::Err(Error::SIG_NULLFAIL);
     }
 
@@ -239,7 +247,8 @@ pub fn opcode_checkmultisig<
         let mut s: u32 = 0;
         let end = sigs.len();
         while s != end {
-            script = signature::remove_signature(@script, sigs.at(s)).clone();
+            let (_script, _) = signature::remove_signature(@script, sigs.at(s)).clone();
+            script = _script.clone();
             s += 1;
         };
     }
@@ -443,6 +452,7 @@ pub fn opcode_checksigadd<
     >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex, ref engine)?;
 
     if (verifier.verify(ref engine).is_err()) {
+        println!("opchecksigadd invalid sig");
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
 

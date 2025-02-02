@@ -6,6 +6,13 @@ use crate::transaction::{
 use crate::parser;
 use crate::opcodes::Opcode;
 
+
+#[derive(Clone, Copy, Drop, Default)]
+pub struct VerifyResult {
+    pub sig_valid: bool,
+    pub sig_match: bool,
+}
+
 // Removes `OP_CODESEPARATOR` opcodes from the `script`.
 // By removing this opcode, the script becomes suitable for hashing and signature verification.
 pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {

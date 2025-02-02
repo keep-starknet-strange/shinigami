@@ -18,7 +18,7 @@ pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), fe
     let mut i = 0;
 
     while i != input_count {
-        let utxo = tx.utxos.at(i);
+        let utxo = tx.utxos[i];
 
         let mut engine =
             match EngineImpl::new(utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache) {

@@ -4,6 +4,8 @@ use starknet::secp256k1::Secp256k1Point;
 use starknet::secp256_trait::{Secp256Trait, Signature, Secp256PointTrait};
 use starknet::SyscallResultTrait;
 use crate::hash_tag::{HashTag, tagged_hash};
+use shinigami_utils::hex::to_hex;
+use shinigami_utils::byte_array::{U256IntoByteArray, ByteArrayLexicoParialOrder};
 
 const p: u256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F;
 
@@ -90,6 +92,52 @@ pub fn verify_schnorr(
 
     let (Rx, Ry) = R.get_coordinates().unwrap_syscall();
 
+    // // Step 7.
+    // //
+    // // Fail if R is the point at infinity
+    // if (R.X.IsZero() && R.Y.IsZero()) || R.Z.IsZero() {
+    // str := "calculated R point is the point at infinity"
+    // return signatureError(ecdsa_schnorr.ErrSigRNotOnCurve, str)
+    // }
+    if (Rx == 0 && Ry == 0) {
+        return Result::Err(Error::SCHNORR_ERR_SIG_NOT_IN_CURVE);
+    }
+    // if Ry % 2 != 0 {
+    //     return Result::Err(Error::SECP256K1_INVALID_POINT);
+    // }
+
+    // // Step 8.
+    // //
+    // // Fail if R.y is odd
+    // //
+    // // Note that R must be in affine coordinates for this check.
+    // R.ToAffine()
+    // if R.Y.IsOdd() {
+    // str := "calculated R y-value is odd"
+    // return signatureError(ecdsa_schnorr.ErrSigRYIsOdd, str)
+    // }
+    if Ry % 2 != 0 {
+        return Result::Err(Error::SCHNORR_ERR_SIG_Y_IS_ODD);
+    }
+
+    println!("Rx: {}, Ry: {}", to_hex(@Rx.into()), to_hex(@Ry.into()));
+    println!("sig.r: {}", to_hex(@sig.r.into()));
+
+    if Rx != sig.r {
+        return Result::Err(Error::SCHNORR_ERRUNEQUAL_R_VALUE);
+    }
+
+    Result::Ok(true)
+    // // Step 9.
+// //
+// // Verified if R.x == r
+// //
+// // Note that R must be in affine coordinates for this check.
+// if !sig.r.Equals(&R.X) {
+// str := "calculated R point was not given R"
+// return signatureError(ecdsa_schnorr.ErrUnequalRValues, str)
+// }
+
     // Fail if is_infinite(R) || not has_even_y(R) || x(R) ≠ rx.
-    Result::Ok(!(Rx == 0 && Ry == 0) && Ry % 2 == 0 && Rx == sig.r)
+// Result::Ok(!(Rx == 0 && Ry == 0) && Ry % 2 == 0 && Rx == sig.r)
 }

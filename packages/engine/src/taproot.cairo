@@ -9,11 +9,25 @@ use shinigami_utils::hash::{hash_to_u256};
 use shinigami_utils::bytecode::write_var_int;
 use shinigami_utils::byte_array::{U256IntoByteArray, ByteArrayLexicoParialOrder};
 use shinigami_utils::digest::{Digest, DigestIntoByteArray, DigestIntoSnapByteArray};
+use shinigami_utils::hex::to_hex;
 
 use starknet::secp256k1::Secp256k1Point;
 use starknet::secp256_trait::{Secp256Trait, Secp256PointTrait};
 use starknet::SyscallResultTrait;
 
+const CONTROL_BLOCK_BASE_SIZE: u32 = 33;
+const CONTROL_BLOCK_NODE_SIZE: u32 = 32;
+const CONTROL_BLOCK_MAX_NODE_COUNT: u32 = 128;
+const CONTROL_BLOCK_MAX_SIZE: u32 = CONTROL_BLOCK_BASE_SIZE
+    + (CONTROL_BLOCK_MAX_NODE_COUNT * CONTROL_BLOCK_NODE_SIZE);
+
+const SIG_OPS_DELTA: i32 = 50;
+const BASE_CODE_SEP: u32 = 0xFFFFFFFF;
+const TAPROOT_ANNEX_TAG: u8 = 0x50;
+const TAPROOT_LEAF_MASK: u8 = 0xFE;
+pub const BASE_LEAF_VERSION: u8 = 0xc0;
+
+// SerializePubKey serializes a public key in the 32-byte format.
 pub fn serialize_pub_key(pub_key: Secp256k1Point) -> @ByteArray {
     let pub_key_bytes: ByteArray = serialized_compressed(pub_key);
     let mut result = "";
@@ -176,13 +190,15 @@ pub struct ControlBlock {
     // Internal public key in the taproot commitment.
     pub internal_pubkey: Secp256k1Point,
     // Denotes if the y coordinate of the output key
-    output_key_y_is_odd: bool,
+    pub output_key_y_is_odd: bool,
     // Leaf version of the tapscript leaf that the inclusion_proof below is based off of.
     pub leaf_version: u8,
     // Series of merkle branches that when hashed pairwise, starting with the revealed script, will
     // yield the taproot commitment root.
-    inclusion_proof: ByteArray,
+    pub inclusion_proof: ByteArray,
 }
+
+// TODO impl into ControlBLock -> ByteArray
 
 #[generate_trait()]
 pub impl ControlBlockImpl of ControlBlockTrait {
@@ -215,6 +231,7 @@ pub impl ControlBlockImpl of ControlBlockTrait {
     fn verify_taproot_leaf(
         self: @ControlBlock, witness_program: @ByteArray, script: @ByteArray,
     ) -> Result<(), felt252> {
+        println!("Verify taproot leaf");
         let root_hash = self.root_hash(script);
         let taproot_key = compute_taproot_output_key(*self.internal_pubkey, @root_hash);
         let expected_witness_program = serialize_pub_key(taproot_key);
@@ -230,18 +247,6 @@ pub impl ControlBlockImpl of ControlBlockTrait {
         return Result::Ok(());
     }
 }
-
-const CONTROL_BLOCK_BASE_SIZE: u32 = 33;
-const CONTROL_BLOCK_NODE_SIZE: u32 = 32;
-const CONTROL_BLOCK_MAX_NODE_COUNT: u32 = 128;
-const CONTROL_BLOCK_MAX_SIZE: u32 = CONTROL_BLOCK_BASE_SIZE
-    + (CONTROL_BLOCK_MAX_NODE_COUNT * CONTROL_BLOCK_NODE_SIZE);
-
-const SIG_OPS_DELTA: i32 = 50;
-const BASE_CODE_SEP: u32 = 0xFFFFFFFF;
-const TAPROOT_ANNEX_TAG: u8 = 0x50;
-const TAPROOT_LEAF_MASK: u8 = 0xFE;
-pub const BASE_LEAF_VERSION: u8 = 0xc0;
 
 #[derive(Destruct)]
 pub struct TaprootContext {
@@ -295,21 +300,26 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         tx_idx: u32,
     ) -> Result<(), felt252> {
         let witness: Span<ByteArray> = tx.get_transaction_inputs()[tx_idx].get_witness();
+        println!("verify_taproot_spend");
+        println!("Witness program: {}", to_hex(witness_program));
+        for w in witness {
+            println!("Witness: {}", to_hex(w));
+        };
         let mut annex = @"";
         if is_annexed_witness(witness, witness.len()) {
             annex = witness[witness.len() - 1];
         }
-
+        println!("Annex: {}", to_hex(annex));
+        println!("raw sig : {}", to_hex(raw_sig));
         let verifier = TaprootSigVerifierImpl::<
             T,
         >::new(raw_sig, witness_program, annex, ref engine)?;
 
-        let is_valid = verifier.verify(ref engine);
-        if is_valid.is_err() {
-            return Result::Err(Error::TAPROOT_INVALID_SIG);
+        let verify_result = verifier.verify(ref engine)?;
+        if verify_result.sig_valid {
+            return Result::Ok(());
         }
-        // if verify.sigvalid Ok() else error invalid sig
-        Result::Ok(())
+        Result::Err(Error::TAPROOT_INVALID_SIG)
     }
 
     fn use_ops_budget(ref self: TaprootContext) -> Result<(), felt252> {

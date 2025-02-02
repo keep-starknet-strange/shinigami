@@ -75,7 +75,7 @@ pub fn calc_witness_signature_hash<
     tx_idx: u32,
     amount: i64,
 ) -> u256 {
-    // TODO: Bounds check?
+    // TODO: Bounds check? // only if tx_idx is valid
     let mut sig_hash_bytes: ByteArray = "";
     sig_hash_bytes.append_word_rev(transaction.get_version().into(), 4);
 
@@ -193,9 +193,14 @@ pub impl TaprootSighashOptionsImpl of TaprootSighashOptionsTrait {
     }
 
     fn new_with_annex(annex: @ByteArray) -> TaprootSighashOptions {
+        let mut annex_hash: @ByteArray = @"";
+        if (annex.len() != 0) {
+            annex_hash = @sha256_byte_array(annex);
+        }
+
         TaprootSighashOptions {
             ext_flag: BASE_SIGHASH_EXT_FLAG,
-            annex_hash: @sha256_byte_array(annex),
+            annex_hash: annex_hash,
             tap_leaf_hash: @"",
             key_version: 0,
             code_sep_pos: 0,
@@ -269,6 +274,7 @@ pub fn calc_taproot_signature_hash<
     ref opts: TaprootSighashOptions,
 ) -> Result<u256, felt252> {
     if !is_valid_taproot_sighash(h_type) {
+        println!("Invalid sighash calc_taproot_signature_hash");
         return Result::Err(Error::TAPROOT_INVALID_SIGHASH_TYPE);
     }
 
