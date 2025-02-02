@@ -174,14 +174,6 @@ pub impl TxSigHashesImpl of TxSigHashesTrait {
         self.taproot = *sighash;
     }
 
-    fn get_hash_segwit_v0(self: @TxSigHashes) -> @SegwitSigHashMidstate {
-        self.segwit
-    }
-
-    fn get_hash_taproot_v1(self: @TxSigHashes) -> @TaprootSigHashMidState {
-        self.taproot
-    }
-
     fn get_hash_prevouts_v0(self: @TxSigHashes) -> u256 {
         *self.segwit.hash_prevouts_v0
     }

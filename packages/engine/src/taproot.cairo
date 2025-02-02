@@ -105,58 +105,58 @@ pub fn tap_branch_hash(left: @ByteArray, right: @ByteArray) -> Digest {
 }
 
 
-#[derive(Drop, Copy, Default, Debug)]
-pub struct TapNode {
-    tap_hash: Digest,
-    left: Option<TapNode>,
-    right: Option<TapNode>,
-}
+// #[derive(Drop, Copy, Default, Debug)]
+// pub struct TapNode {
+//     tap_hash: Digest,
+//     left: Option<TapNode>,
+//     right: Option<TapNode>,
+// }
 
-#[generate_trait()]
-pub impl TapNodeImpl of TapNodeTrait {
-    fn new(tap_hash: Digest, left: Option<TapNode>, right: Option<TapNode>) -> TapNode {
-        TapNode { tap_hash: tap_hash, left: left, right: right }
-    }
+// #[generate_trait()]
+// pub impl TapNodeImpl of TapNodeTrait {
+//     fn new(tap_hash: Digest, left: Option<TapNode>, right: Option<TapNode>) -> TapNode {
+//         TapNode { tap_hash: tap_hash, left: left, right: right }
+//     }
 
-    fn get_tap_hash(self: @TapNode) -> Digest {
-        self.tap_hash.clone()
-    }
+//     fn get_tap_hash(self: @TapNode) -> Digest {
+//         self.tap_hash.clone()
+//     }
 
-    fn get_left(self: @TapNode) -> @Option<TapNode> {
-        self.left
-    }
+//     fn get_left(self: @TapNode) -> @Option<TapNode> {
+//         self.left
+//     }
 
-    fn get_right(self: @TapNode) -> @Option<TapNode> {
-        self.right
-    }
-}
+//     fn get_right(self: @TapNode) -> @Option<TapNode> {
+//         self.right
+//     }
+// }
 
-#[derive(Drop)]
-pub struct TapBranch {
-    left_node: TapNode,
-    right_node: TapNode,
-}
+// #[derive(Drop)]
+// pub struct TapBranch {
+//     left_node: TapNode,
+//     right_node: TapNode,
+// }
 
-#[generate_trait()]
-pub impl TapBranchImpl of TapBranchTrait {
-    // fn new(left_node: TapNode, right_node: TapNode) -> TapBranch {
-    //     TapBranch { left_node: left_node, right_node: right_node }
-    // }
+// #[generate_trait()]
+// pub impl TapBranchImpl of TapBranchTrait {
+//     // fn new(left_node: TapNode, right_node: TapNode) -> TapBranch {
+//     //     TapBranch { left_node: left_node, right_node: right_node }
+//     // }
 
-    fn get_left(self: @TapBranch) -> TapNode {
-        self.left_node.clone()
-    }
+//     fn get_left(self: @TapBranch) -> TapNode {
+//         self.left_node.clone()
+//     }
 
-    fn get_right(self: @TapBranch) -> TapNode {
-        self.right_node.clone()
-    }
+//     fn get_right(self: @TapBranch) -> TapNode {
+//         self.right_node.clone()
+//     }
 
-    fn tap_hash(self: @TapBranch) -> Digest {
-        let left_hash: ByteArray = self.get_left().get_tap_hash().into();
-        let right_hash: ByteArray = self.get_right().get_tap_hash().into();
-        tap_branch_hash(@left_hash, @right_hash)
-    }
-}
+//     fn tap_hash(self: @TapBranch) -> Digest {
+//         let left_hash: ByteArray = self.get_left().get_tap_hash().into();
+//         let right_hash: ByteArray = self.get_right().get_tap_hash().into();
+//         tap_branch_hash(@left_hash, @right_hash)
+//     }
+// }
 
 #[derive(Drop)]
 pub struct TapLeaf {
@@ -184,6 +184,7 @@ pub impl TapLeafImpl of TapLeafTrait {
     }
 }
 
+// TODO impl into ControlBLock -> ByteArray
 #[derive(Drop)]
 pub struct ControlBlock {
     // Internal public key in the taproot commitment.
@@ -197,7 +198,6 @@ pub struct ControlBlock {
     pub inclusion_proof: ByteArray,
 }
 
-// TODO impl into ControlBLock -> ByteArray
 
 #[generate_trait()]
 pub impl ControlBlockImpl of ControlBlockTrait {
@@ -215,8 +215,6 @@ pub impl ControlBlockImpl of ControlBlockTrait {
         for node_offset in 0..num_nodes {
             let mut leaf_offset = 32 * node_offset;
             let mut next_node = "";
-            // let mut next_node = sub_byte_array(self.inclusion_proof, ref leaf_offset, 32);
-
             for i in leaf_offset..leaf_offset + 32 {
                 next_node.append_byte(self.inclusion_proof[i]);
             };

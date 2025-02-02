@@ -75,7 +75,7 @@ pub fn calc_witness_signature_hash<
     tx_idx: u32,
     amount: i64,
 ) -> u256 {
-    // TODO: Bounds check? // only if tx_idx is valid
+    // TODO: Bounds check? // only if tx_idx is not valid
     let mut sig_hash_bytes: ByteArray = "";
     sig_hash_bytes.append_word_rev(transaction.get_version().into(), 4);
 

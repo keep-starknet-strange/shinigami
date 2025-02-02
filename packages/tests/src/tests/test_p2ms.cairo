@@ -103,7 +103,6 @@ fn test_p2ms_2_of_3_random() {
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
     let utxo_hints = array![prev_out];
 
-    // TODO add flags
     let res = validate::validate_p2ms(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Random 2-of-3 multisig transaction validation failed");
 }
