@@ -1,7 +1,7 @@
 use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
 use shinigami_engine::transaction::{
-    EngineTransaction, EngineTransactionOutput, UTXO, UTXOIntoOutput,
+    EngineTransaction, EngineTransactionOutput, UTXO, UTXOSpanIntoOutput, UTXOIntoOutput,
 };
 use shinigami_engine::opcodes::Opcode;
 
@@ -52,12 +52,7 @@ pub fn validate_transaction(
 pub fn validate_transaction_at(
     tx: @EngineTransaction, flags: u32, prevout: UTXO, at: u32,
 ) -> Result<(), felt252> {
-    let utxos = array![
-        EngineTransactionOutput {
-            value: prevout.amount.clone(), publickey_script: prevout.pubkey_script.clone(),
-        },
-    ]
-        .span();
+    let utxos: Span<EngineTransactionOutput> = array![prevout.clone().into()].span();
     let hash_cache = HashCacheImpl::new(tx, 0, utxos);
 
     let mut engine = EngineImpl::new(

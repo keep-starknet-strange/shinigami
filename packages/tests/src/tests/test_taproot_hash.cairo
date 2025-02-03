@@ -4,7 +4,7 @@ use shinigami_engine::signature::sighash::{
 };
 use shinigami_engine::transaction::{
     EngineTransactionOutput, EngineTransaction, EngineTransactionInput, EngineOutPoint,
-    EngineInternalTransactionTrait, EngineTransactionTrait, UTXO, UTXOIntoOutput,
+    EngineInternalTransactionTrait, EngineTransactionTrait, UTXO, UTXOSpanIntoOutput,
 };
 use shinigami_engine::taproot::{
     TapLeaf, tap_branch_hash, ControlBlock, parse_control_block, ControlBlockTrait, TapLeafTrait,

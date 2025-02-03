@@ -25,14 +25,14 @@ pub struct EngineTransactionOutput {
     pub publickey_script: ByteArray,
 }
 
-#[derive(Debug, Drop)]
+#[derive(Debug, Drop, Clone)]
 pub struct UTXO {
     pub amount: i64,
     pub pubkey_script: ByteArray,
     pub block_height: u32,
 }
 
-pub impl UTXOIntoOutput of Into<Span<UTXO>, Span<EngineTransactionOutput>> {
+pub impl UTXOSpanIntoOutput of Into<Span<UTXO>, Span<EngineTransactionOutput>> {
     fn into(self: Span<UTXO>) -> Span<EngineTransactionOutput> {
         let mut outputs = array![];
         for utxo in self {
@@ -44,6 +44,12 @@ pub impl UTXOIntoOutput of Into<Span<UTXO>, Span<EngineTransactionOutput>> {
                 );
         };
         outputs.span()
+    }
+}
+
+pub impl UTXOIntoOutput of Into<UTXO, EngineTransactionOutput> {
+    fn into(self: UTXO) -> EngineTransactionOutput {
+        EngineTransactionOutput { value: self.amount, publickey_script: self.pubkey_script }
     }
 }
 
