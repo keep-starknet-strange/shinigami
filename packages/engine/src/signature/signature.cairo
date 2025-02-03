@@ -55,7 +55,6 @@ impl BaseSigVerifierImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
-    +Default<T>,
 > of BaseSigVerifierTrait<I, O, T> {
     fn new(
         ref vm: Engine<T>, sig_bytes: @ByteArray, pk_bytes: @ByteArray,
@@ -142,7 +141,6 @@ pub fn compare_data(script: @ByteArray, sig_bytes: @ByteArray, i: u32, push_data
 pub fn check_hash_type_encoding<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -183,7 +181,6 @@ pub fn check_hash_type_encoding<
 pub fn check_signature_encoding<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -339,7 +336,6 @@ fn is_supported_pub_key_type(pk_bytes: @ByteArray) -> bool {
 pub fn check_pub_key_encoding<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -496,7 +492,6 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 pub fn parse_base_sig_and_pk<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,

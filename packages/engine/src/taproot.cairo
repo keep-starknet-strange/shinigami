@@ -244,7 +244,7 @@ pub impl ControlBlockImpl of ControlBlockTrait {
     }
 }
 
-#[derive(Destruct)]
+#[derive(Destruct, Default)]
 pub struct TaprootContext {
     pub annex: @ByteArray,
     pub code_sep: u32,
@@ -287,7 +287,6 @@ pub impl TaprootContextImpl of TaprootContextTrait {
         +Drop<T>,
         +Drop<I>,
         +Drop<O>,
-        +Default<T>,
     >(
         ref engine: Engine<T>,
         witness_program: @ByteArray,

@@ -53,7 +53,6 @@ pub fn opcode_ripemd160<T, +Drop<T>>(ref engine: Engine<T>) -> Result<(), felt25
 pub fn opcode_checksig<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -147,7 +146,6 @@ pub fn opcode_checksig<
 pub fn opcode_checkmultisig<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     O,
@@ -323,7 +321,6 @@ pub fn opcode_codeseparator<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >,
     +Drop<T>,
-    +Default<T>,
     +Drop<I>,
     +Drop<O>,
 >(
@@ -345,7 +342,6 @@ pub fn opcode_codeseparator<
 pub fn opcode_checksigverify<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -366,7 +362,6 @@ pub fn opcode_checksigverify<
 pub fn opcode_checkmultisigverify<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -401,7 +396,6 @@ pub fn opcode_checksigadd<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >,
     +Drop<T>,
-    +Default<T>,
     +Drop<I>,
     +Drop<O>,
 >(

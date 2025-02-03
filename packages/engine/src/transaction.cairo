@@ -448,7 +448,7 @@ pub impl EngineInternalTransactionImpl of EngineInternalTransactionTrait {
     }
 }
 
-impl TransactionDefault of Default<EngineTransaction> {
+pub impl TransactionDefault of Default<EngineTransaction> {
     fn default() -> EngineTransaction {
         let default_txin = EngineTransactionInput {
             previous_outpoint: EngineOutPoint { txid: 0, vout: 0 },
