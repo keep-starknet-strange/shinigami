@@ -71,7 +71,6 @@ impl BaseSigVerifierImpl<
         let sig_hash: u256 = sighash::calc_signature_hash::<
             I, O, T,
         >(sub_script, self.hash_type, vm.transaction, vm.tx_idx);
-
         return VerifyResult {
             sig_valid: is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key),
             sig_match: is_match,

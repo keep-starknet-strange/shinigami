@@ -125,7 +125,7 @@ pub impl TaprootSigVerifierImpl<
             hash_type: 0,
             tx: @Default::default(),
             inputIndex: 0,
-            prevOuts: Default::<EngineTransactionOutput>::default(), // verify this
+            prevOuts: Default::default(),
             hashCache: Default::default(),
             annex: @"",
         }

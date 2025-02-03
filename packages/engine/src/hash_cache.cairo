@@ -59,7 +59,7 @@ pub impl SigHashMidstateImpl<
             }
 
             let utxo = transaction.get_input_utxo(i);
-            if is_witness_v1_pub_key_hash(@utxo.pubkey_script) {
+            if is_witness_v1_pub_key_hash(utxo.get_publickey_script()) {
                 hasV1Inputs = true;
             } else {
                 hasV0Inputs = true;
@@ -127,8 +127,9 @@ pub impl SigHashMidstateImpl<
     // inputs referenced in the passed transaction.
     fn calc_hash_inputs_amount(transaction: @T) -> u256 {
         let mut buffer: ByteArray = "";
-        for utxo in transaction.get_transaction_utxos() {
-            buffer.append_word_rev(utxo.amount.into(), 8);
+        for i in 0..transaction.get_transaction_inputs().len() {
+            let value = transaction.get_input_utxo(i).get_value();
+            buffer.append_word_rev(value.into(), 8);
         };
         return simple_sha256(@buffer);
     }
@@ -137,9 +138,10 @@ pub impl SigHashMidstateImpl<
     // referenced by the passed transaction.
     fn calc_hash_input_scripts(transaction: @T) -> u256 {
         let mut buffer: ByteArray = "";
-        for utxo in transaction.get_transaction_utxos() {
-            write_var_int(ref buffer, utxo.pubkey_script.len().into());
-            buffer.append(@utxo.pubkey_script);
+        for i in 0..transaction.get_transaction_inputs().len() {
+            let script = transaction.get_input_utxo(i).get_publickey_script();
+            write_var_int(ref buffer, script.len().into());
+            buffer.append(script);
         };
 
         return simple_sha256(@buffer);

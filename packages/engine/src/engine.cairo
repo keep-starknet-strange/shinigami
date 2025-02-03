@@ -395,7 +395,6 @@ pub impl EngineImpl<
             }
             self.num_ops = 0;
             self.opcode_idx = 0;
-
             if self.script_idx == 0 && self.bip16 {
                 self.script_idx += 1;
                 // TODO: Use @ instead of clone span

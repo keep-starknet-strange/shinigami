@@ -1,6 +1,6 @@
 use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
-use shinigami_engine::transaction::{EngineTransaction, UTXO};
+use shinigami_engine::transaction::{EngineTransaction, EngineTransactionOutputTrait, UTXO};
 use shinigami_engine::opcodes::Opcode;
 
 // TODO: Move validate coinbase here
@@ -21,7 +21,9 @@ pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), fe
         let utxo = tx.utxos[i];
 
         let mut engine =
-            match EngineImpl::new(utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache) {
+            match EngineImpl::new(
+                utxo.get_publickey_script(), tx, i, flags, utxo.get_value(), @hash_cache,
+            ) {
             Result::Ok(engine) => engine,
             Result::Err(err) => {
                 inner_result = Result::Err(err);

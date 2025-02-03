@@ -1,5 +1,5 @@
 use shinigami_engine::engine::{EngineImpl};
-use shinigami_engine::transaction::{UTXO, EngineInternalTransactionTrait};
+use shinigami_engine::transaction::{EngineInternalTransactionTrait, UTXO};
 use crate::validate;
 use shinigami_utils::bytecode::hex_to_bytecode;
 

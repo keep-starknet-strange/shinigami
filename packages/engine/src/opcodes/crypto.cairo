@@ -76,7 +76,6 @@ pub fn opcode_checksig<
 
     // let mut is_valid: bool = false;
     let mut verify_result: VerifyResult = Default::default();
-
     if engine.witness_program.len() == 0 {
         // Base Signature Verification
         let res = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes);

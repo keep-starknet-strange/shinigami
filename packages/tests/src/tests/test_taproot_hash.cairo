@@ -173,12 +173,11 @@ fn test_calc_taproot_signature_hash_key_path_spend() {
         ],
         locktime: 0,
         utxos: array![
-            UTXO {
-                amount: 20000,
-                pubkey_script: hex_to_bytecode(
+            EngineTransactionOutput {
+                value: 20000,
+                publickey_script: hex_to_bytecode(
                     @"0x51200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667",
                 ),
-                block_height: 861957,
             },
         ],
     };
@@ -254,17 +253,17 @@ fn test_calc_taproot_signature_hash_script_path_spend_simple() {
         ],
         locktime: 0,
         utxos: array![
-            UTXO {
-                amount: 999,
-                pubkey_script: hex_to_bytecode(@"0x001492b8c3a56fac121ddcdffbc85b02fb9ef681038a"),
-                block_height: 862105,
+            EngineTransactionOutput {
+                value: 999,
+                publickey_script: hex_to_bytecode(
+                    @"0x001492b8c3a56fac121ddcdffbc85b02fb9ef681038a",
+                ),
             },
-            UTXO {
-                amount: 20000,
-                pubkey_script: hex_to_bytecode(
+            EngineTransactionOutput {
+                value: 20000,
+                publickey_script: hex_to_bytecode(
                     @"0x51201baeaaf9047cc42055a37a3ac981bdf7f5ab96fad0d2d07c54608e8a181b9477",
                 ),
-                block_height: 862100,
             },
         ],
     };
@@ -328,12 +327,11 @@ fn test_calc_taproot_signature_hash_script_path_spend_signature() {
         ],
         locktime: 0,
         utxos: array![
-            UTXO {
-                amount: 20000,
-                pubkey_script: hex_to_bytecode(
+            EngineTransactionOutput {
+                value: 20000,
+                publickey_script: hex_to_bytecode(
                     @"0x5120f3778defe5173a9bf7169575116224f961c03c725c0e98b8da8f15df29194b80",
                 ),
-                block_height: 863496,
             },
         ],
     };
@@ -395,12 +393,11 @@ fn test_calc_taproot_signature_hash_script_path_spend_tree() {
         ],
         locktime: 0,
         utxos: array![
-            UTXO {
-                amount: 10000,
-                pubkey_script: hex_to_bytecode(
+            EngineTransactionOutput {
+                value: 10000,
+                publickey_script: hex_to_bytecode(
                     @"0x5120979cff99636da1b0e49f8711514c642f640d1f64340c3784942296368fadd0a5",
                 ),
-                block_height: 863496,
             },
         ],
     };

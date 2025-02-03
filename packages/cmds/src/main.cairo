@@ -14,7 +14,6 @@ use shinigami_tests::validate;
 struct InputData {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
-    txid: u256,
 }
 
 #[derive(Clone, Drop)]
@@ -22,7 +21,6 @@ struct InputDataWithFlags {
     ScriptSig: ByteArray,
     ScriptPubKey: ByteArray,
     Flags: ByteArray,
-    txid: u256,
 }
 
 #[derive(Clone, Drop)]
@@ -31,7 +29,6 @@ struct InputDataWithWitness {
     ScriptPubKey: ByteArray,
     Flags: ByteArray,
     Witness: ByteArray,
-    txid: u256,
 }
 
 fn run_with_flags(input: InputDataWithFlags) -> Result<(), felt252> {
@@ -209,7 +206,6 @@ struct ValidateRawInput {
     raw_transaction: ByteArray,
     utxo_hints: Array<UTXO>,
     flags: ByteArray,
-    txid: u256 // from raito or calculate from raw_transaction in decode ?
 }
 
 fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
@@ -240,7 +236,9 @@ fn run_raw_transaction(mut input: ValidateRawInput) -> u8 {
             );
     };
 
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
+    let transaction = EngineInternalTransactionTrait::deserialize(
+        raw_transaction, input.utxo_hints,
+    );
 
     let res = validate::validate_transaction(@transaction, script_flags);
     match res {
