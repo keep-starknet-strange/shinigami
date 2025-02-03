@@ -9,6 +9,7 @@ pub mod tests {
         mod test_locktime;
         mod test_stack;
         mod test_splice;
+
         mod test_bitwise;
         mod test_arithmetic;
         mod test_crypto;
@@ -23,4 +24,6 @@ pub mod tests {
     mod test_p2wsh;
     mod test_p2ms;
     mod test_p2sh;
+    mod test_taproot_hash;
+    mod test_p2tr;
 }

@@ -142,3 +142,23 @@ pub impl U256IntoByteArray of Into<u256, ByteArray> {
         ba
     }
 }
+
+pub impl ByteArrayLexicoParialOrder of PartialOrd<@ByteArray> {
+    fn lt(lhs: @ByteArray, rhs: @ByteArray) -> bool {
+        let mut left_is_smaller = false;
+
+        let mut i = 0;
+        let left_len = lhs.len();
+        let right_len = rhs.len();
+        while i < left_len && i < right_len {
+            if lhs[i] < rhs[i] {
+                left_is_smaller = true;
+                break;
+            } else if lhs[i] > rhs[i] {
+                break;
+            }
+            i += 1;
+        };
+        left_is_smaller
+    }
+}

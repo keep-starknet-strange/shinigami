@@ -10,7 +10,9 @@ use crate::transaction::{
 use crate::hash_cache::{HashCache, HashCacheTrait};
 use crate::witness;
 use crate::taproot;
-use crate::taproot::{TaprootContext, TaprootContextImpl, ControlBlockImpl};
+use crate::taproot::{
+    TaprootContext, TaprootContextImpl, ControlBlock, ControlBlockImpl, TapLeafTrait, TapLeafImpl,
+};
 use shinigami_utils::byte_array::byte_array_to_bool;
 use shinigami_utils::bytecode::hex_to_bytecode;
 use shinigami_utils::hash::sha256_byte_array;
@@ -107,7 +109,6 @@ pub impl EngineImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
-    +Default<T>,
 > of EngineTrait<I, O, T> {
     // Create a new Engine with the given script
     fn new(
@@ -487,7 +488,6 @@ pub impl EngineInternalImpl<
     +Drop<I>,
     +Drop<O>,
     +Drop<T>,
-    +Default<T>,
 > of EngineInternalTrait<I, O, T> {
     fn pull_data(ref self: Engine<T>, len: usize) -> Result<ByteArray, felt252> {
         let script = *(self.scripts[self.script_idx]);
@@ -653,7 +653,6 @@ pub impl EngineInternalImpl<
                 self.taproot_context.annex = witness[witness_len - 1];
                 witness_len -= 1; // Remove annex
             }
-
             if witness_len == 1 {
                 TaprootContextImpl::verify_taproot_spend(
                     ref self, @self.witness_program, witness[0], self.transaction, self.tx_idx,
@@ -661,7 +660,9 @@ pub impl EngineInternalImpl<
                 self.taproot_context.must_succeed = true;
                 return Result::Ok(());
             } else {
-                let control_block = taproot::parse_control_block(witness[witness_len - 1])?;
+                let control_block: ControlBlock = taproot::parse_control_block(
+                    witness[witness_len - 1],
+                )?;
                 let witness_script = witness[witness_len - 2];
                 control_block.verify_taproot_leaf(@self.witness_program, witness_script)?;
 
@@ -669,7 +670,6 @@ pub impl EngineInternalImpl<
                     if self.has_flag(ScriptFlags::ScriptVerifyDiscourageOpSuccess) {
                         return Result::Err(Error::DISCOURAGE_OP_SUCCESS);
                     }
-
                     self.taproot_context.must_succeed = true;
                     return Result::Ok(());
                 }
@@ -685,7 +685,8 @@ pub impl EngineInternalImpl<
 
                 self
                     .taproot_context
-                    .tapleaf_hash = taproot::tap_hash(witness_script, taproot::BASE_LEAF_VERSION);
+                    .tapleaf_hash = TapLeafTrait::new_base_tap_leaf(witness_script)
+                    .tap_hash();
                 self.scripts.append(witness_script);
                 self.dstack.set_stack(witness, 0, witness_len - 2);
             }

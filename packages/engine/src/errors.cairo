@@ -39,12 +39,18 @@ pub mod Error {
     pub const TAPROOT_EMPTY_PUBKEY: felt252 = 'Empty pubkey in taproot script';
     pub const TAPROOT_INVALID_PUBKEY_SIZE: felt252 = 'Bad pubkey size in tapscript';
     pub const TAPROOT_INVALID_CONTROL_BLOCK: felt252 = 'Invalid control block';
+    pub const TAPROOT_INVALID_CONTROL_BLOCK_SIZE: felt252 = 'Invalid control block size';
+    pub const TAPROOT_INVALID_CONTROL_BLOCK_TOO_SMALL: felt252 = 'Control block too small';
+    pub const TAPROOT_INVALID_CONTROL_BLOCK_MAX_SIZE: felt252 = 'Control block too large';
     pub const TAPROOT_INVALID_SIG: felt252 = 'Invalid signature in tap script';
     pub const TAPROOT_INVALID_SIGHASH_TYPE: felt252 = 'Invalid taproot sighash type';
     pub const TAPROOT_INVALID_SIGHASH_MIDSTATE: felt252 = 'Invalid taproot sighash midstat';
     pub const TAPROOT_PARITY_MISMATCH: felt252 = 'Parity mismatch in tap script';
     pub const TAPROOT_INVALID_MERKLE_PROOF: felt252 = 'Invalid taproot merkle proof';
     pub const SCHNORR_INVALID_SIG_SIZE: felt252 = 'Invalid schnorr sig size';
+    pub const SCHNORR_ERRUNEQUAL_R_VALUE: felt252 = 'Schnorr unequal R values';
+    pub const SCHNORR_ERR_SIG_Y_IS_ODD: felt252 = 'Schnorr sig y is odd';
+    pub const SCHNORR_ERR_SIG_NOT_IN_CURVE: felt252 = 'Schnorr sig not in curve';
     pub const SCHNORR_INVALID_SIG_R_FIELD: felt252 = 'Schnorr sig r >= field';
     pub const SCHNORR_INVALID_MSG_SIZE: felt252 = 'Schnorr msg size != 32';
     pub const DISCOURAGE_OP_SUCCESS: felt252 = 'OP_SUCCESS is discouraged';
@@ -60,6 +66,7 @@ pub mod Error {
     pub const INVALID_PUBKEY_LEN: felt252 = 'Invalid public key length';
     pub const NEGATIVE_LOCKTIME: felt252 = 'Stack top is negative';
     pub const INVALID_INDEX_INPUTS: felt252 = 'Invalid index for inputs';
+    pub const NON_CONST_SCRIPT_CODE: felt252 = 'Signature match in non-segwit';
 }
 
 pub fn byte_array_err(err: felt252) -> ByteArray {

@@ -6,6 +6,13 @@ use crate::transaction::{
 use crate::parser;
 use crate::opcodes::Opcode;
 
+
+#[derive(Clone, Copy, Drop, Default)]
+pub struct VerifyResult {
+    pub sig_valid: bool,
+    pub sig_match: bool,
+}
+
 // Removes `OP_CODESEPARATOR` opcodes from the `script`.
 // By removing this opcode, the script becomes suitable for hashing and signature verification.
 pub fn remove_opcodeseparator(script: @ByteArray) -> @ByteArray {
@@ -70,6 +77,7 @@ pub fn transaction_procedure<
         };
         transaction_inputs_clone.append(new_transaction_input);
     };
+
     let mut transaction_outputs_clone = array![];
     for output in transaction.get_transaction_outputs() {
         let new_transaction_output = EngineTransactionOutput {
@@ -77,13 +85,13 @@ pub fn transaction_procedure<
         };
         transaction_outputs_clone.append(new_transaction_output);
     };
+
     let mut transaction_copy = EngineTransaction {
         version: transaction.get_version(),
         transaction_inputs: transaction_inputs_clone,
         transaction_outputs: transaction_outputs_clone,
         locktime: transaction.get_locktime(),
-        utxos: transaction.get_transaction_utxos(),
-        txid: transaction.get_txid(),
+        // utxos: array![],
     };
     let mut i: usize = 0;
     let mut transaction_input: Array<EngineTransactionInput> = transaction_copy.transaction_inputs;

@@ -1,39 +1,49 @@
 use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
-use shinigami_engine::transaction::{EngineTransaction, UTXO};
+use shinigami_engine::transaction::{
+    EngineTransaction, EngineTransactionOutput, UTXO, UTXOSpanIntoOutput, UTXOIntoOutput,
+};
 use shinigami_engine::opcodes::Opcode;
 
 // TODO: Move validate coinbase here
 
 // utxo_hints: Set of existing utxos that are being spent by this transaction
-pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), felt252> {
+pub fn validate_transaction(
+    tx: @EngineTransaction, flags: u32, utxo_hints: Span<UTXO>,
+) -> Result<(), felt252> {
     let input_count = tx.transaction_inputs.len();
-    let utxo_count = tx.utxos.len();
+    let utxo_count = utxo_hints.len();
     if input_count != utxo_count {
         return Result::Err('Invalid number of utxo hints');
     }
 
+    let mut inner_result = Result::Ok(());
+    let hash_cache = HashCacheImpl::new(tx, flags, utxo_hints.into());
     let mut i = 0;
-    let mut err = '';
+
     while i != input_count {
-        let utxo = tx.utxos.at(i);
-        let hash_cache = HashCacheImpl::new(tx);
-        // TODO: Error handling
-        let mut engine = EngineImpl::new(
-            utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache,
-        )
-            .unwrap();
+        let utxo = utxo_hints[i];
 
-        let res = engine.execute();
-        if res.is_err() {
-            err = res.unwrap_err();
-            break;
-        }
-
+        let mut engine =
+            match EngineImpl::new(utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache) {
+            Result::Ok(engine) => engine,
+            Result::Err(err) => {
+                inner_result = Result::Err(err);
+                break;
+            },
+        };
+        match engine.execute() {
+            Result::Ok(res) => res,
+            Result::Err(err) => {
+                inner_result = Result::Err(err);
+                break;
+            },
+        };
         i += 1;
     };
-    if err != '' {
-        return Result::Err(err);
+
+    if (inner_result.is_err()) {
+        return Result::Err(inner_result.unwrap_err());
     }
 
     Result::Ok(())
@@ -42,7 +52,9 @@ pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), fe
 pub fn validate_transaction_at(
     tx: @EngineTransaction, flags: u32, prevout: UTXO, at: u32,
 ) -> Result<(), felt252> {
-    let hash_cache = HashCacheImpl::new(tx);
+    let utxos: Span<EngineTransactionOutput> = array![prevout.clone().into()].span();
+    let hash_cache = HashCacheImpl::new(tx, 0, utxos);
+
     let mut engine = EngineImpl::new(
         @prevout.pubkey_script, tx, at, flags, prevout.amount, @hash_cache,
     )
@@ -123,7 +135,7 @@ pub fn validate_p2ms(
         }
 
         // Verify signatures using the EngineImpl
-        let hash_cache = HashCacheImpl::new(tx);
+        let hash_cache = HashCacheImpl::new(tx, flags, array![].span());
         let mut engine = EngineImpl::new(redeem_script, tx, i, flags, *utxo.amount, @hash_cache)
             .unwrap();
 

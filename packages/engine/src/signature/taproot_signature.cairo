@@ -1,17 +1,18 @@
 use crate::engine::{Engine, EngineInternalImpl};
 use crate::transaction::{
     EngineTransactionOutput, EngineTransactionInputTrait, EngineTransactionOutputTrait,
-    EngineTransactionTrait,
+    TransactionDefault, EngineTransactionTrait,
 };
 use crate::flags::ScriptFlags;
-use crate::signature::{constants, schnorr, sighash, sighash::{TaprootSighashOptionsTrait}};
-use crate::hash_cache::{TxSigHashes, SigHashMidstateTrait};
+use crate::signature::{
+    constants, schnorr, sighash, sighash::TaprootSighashOptionsTrait, utils::VerifyResult,
+};
+use crate::hash_cache::{TxSigHashes, HashCacheTrait};
 use crate::errors::Error;
 
 use shinigami_utils::byte_array::{U256IntoByteArray};
 use starknet::secp256_trait::{Signature};
 use starknet::secp256k1::{Secp256k1Point};
-
 pub const SCHNORR_SIGNATURE_LEN: usize = 64;
 
 // Parses the public key and signature for taproot spend.
@@ -54,15 +55,8 @@ pub fn parse_taproot_sig_and_pk<
     return Result::Ok((pk, sig, sighash_type));
 }
 
-// TODO: remplace sig result by VerifyResult ?
-// #[derive(Clone, Copy, Drop, Default)]
-// pub struct VerifyResult {
-//     sigValid: bool,
-//     sigMatch: bool,
-// }
-
 #[derive(Drop)]
-pub struct TaprootSigVerifier<T> {
+pub struct TaprootSigVerifier<T, O> {
     // public key as a point on the secp256k1 curve, used to verify the signature
     pub pub_key: Option<Secp256k1Point>,
     // ECDSA signature
@@ -74,7 +68,7 @@ pub struct TaprootSigVerifier<T> {
     // specifies how the transaction was hashed for signing
     pub hash_type: u32,
     // transaction being verified
-    pub tx: @T,
+    pub tx: Option<@T>,
     // index of the input being verified
     pub inputIndex: u32,
     // output being spent
@@ -82,7 +76,7 @@ pub struct TaprootSigVerifier<T> {
     //
     // sigCache: SigCache TODO?
     //
-    pub hashCache: TxSigHashes,
+    pub hashCache: @TxSigHashes,
     // annex data used for taproot verification
     pub annex: @ByteArray,
 }
@@ -95,21 +89,24 @@ pub trait TaprootSigVerifierTrait<
     +EngineTransactionOutputTrait<O>,
     +EngineTransactionTrait<T, I, O>,
 > {
-    fn empty() -> TaprootSigVerifier<T>;
+    fn empty() -> TaprootSigVerifier<T, O>;
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
-    ) -> Result<TaprootSigVerifier<T>, felt252>;
+    ) -> Result<TaprootSigVerifier<T, O>, felt252>;
     fn new_base(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>,
-    ) -> Result<TaprootSigVerifier<T>, felt252>;
-    fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252>;
-    fn verify_base(self: TaprootSigVerifier<T>, ref engine: Engine<T>) -> Result<(), felt252>;
+    ) -> Result<TaprootSigVerifier<T, O>, felt252>;
+    fn verify(
+        self: TaprootSigVerifier<T, O>, ref engine: Engine<T>,
+    ) -> Result<VerifyResult, felt252>;
+    fn verify_base(
+        self: TaprootSigVerifier<T, O>, ref engine: Engine<T>,
+    ) -> Result<VerifyResult, felt252>;
 }
 
 pub impl TaprootSigVerifierImpl<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -120,16 +117,16 @@ pub impl TaprootSigVerifierImpl<
         T, I, O, IEngineTransactionInputTrait, IEngineTransactionOutputTrait,
     >,
 > of TaprootSigVerifierTrait<I, O, T> {
-    fn empty() -> TaprootSigVerifier<T> {
+    fn empty() -> TaprootSigVerifier<T, O> {
         TaprootSigVerifier {
             pub_key: Option::None,
             sig: Signature { r: 0, s: 0, y_parity: false },
             sig_bytes: @"",
             pk_bytes: @"",
             hash_type: 0,
-            tx: @Default::default(),
+            tx: Option::None,
             inputIndex: 0,
-            prevOuts: Default::<EngineTransactionOutput>::default(), // verify this
+            prevOuts: Default::default(),
             hashCache: Default::default(),
             annex: @"",
         }
@@ -137,13 +134,12 @@ pub impl TaprootSigVerifierImpl<
 
     fn new(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, annex: @ByteArray, ref engine: Engine<T>,
-    ) -> Result<TaprootSigVerifier<T>, felt252> {
+    ) -> Result<TaprootSigVerifier<T, O>, felt252> {
         let (pub_key, sig, hash_type) = parse_taproot_sig_and_pk(ref engine, pk_bytes, sig_bytes)?;
-        let sig_hashes = SigHashMidstateTrait::new(engine.transaction);
         let prevOutput = EngineTransactionOutput {
             value: engine.amount, publickey_script: (*engine.scripts[1]).clone(),
         };
-
+        let mut hashcahce = engine.hash_cache.get_sig_hashes().unwrap();
         Result::Ok(
             TaprootSigVerifier {
                 pub_key: Option::Some(pub_key),
@@ -151,10 +147,10 @@ pub impl TaprootSigVerifierImpl<
                 sig_bytes,
                 pk_bytes,
                 hash_type,
-                tx: engine.transaction,
+                tx: Option::Some(engine.transaction),
                 inputIndex: engine.tx_idx,
                 prevOuts: prevOutput,
-                hashCache: sig_hashes,
+                hashCache: hashcahce,
                 annex,
             },
         )
@@ -162,7 +158,7 @@ pub impl TaprootSigVerifierImpl<
 
     fn new_base(
         sig_bytes: @ByteArray, pk_bytes: @ByteArray, ref engine: Engine<T>,
-    ) -> Result<TaprootSigVerifier<T>, felt252> {
+    ) -> Result<TaprootSigVerifier<T, O>, felt252> {
         let pk_bytes_len = pk_bytes.len();
 
         // Fail immediately if public key length is zero
@@ -181,26 +177,31 @@ pub impl TaprootSigVerifierImpl<
         }
     }
 
-
-    fn verify(self: TaprootSigVerifier<T>) -> Result<(), felt252> {
+    fn verify(
+        self: TaprootSigVerifier<T, O>, ref engine: Engine<T>,
+    ) -> Result<VerifyResult, felt252> {
         let mut opts = TaprootSighashOptionsTrait::new_with_annex(self.annex);
+
         let sig_hash = sighash::calc_taproot_signature_hash::<
             T,
         >(
-            self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts,
+            self.hashCache,
+            self.hash_type,
+            self.tx.unwrap(),
+            self.inputIndex,
+            self.prevOuts,
+            ref opts,
         )?; // on error should return error or false ?
 
-        if !schnorr::verify_schnorr(self.sig, @sig_hash.into(), self.pk_bytes)? {
-            return Result::Err(
-                Error::TAPROOT_INVALID_SIG,
-            ); // should not return error ? VerifyResult ?
-        }
-        Result::Ok(())
+        let sig_valid = schnorr::verify_schnorr(self.sig, @sig_hash.into(), self.pk_bytes)?;
+        Result::Ok(VerifyResult { sig_valid: sig_valid, sig_match: false })
     }
 
-    fn verify_base(self: TaprootSigVerifier<T>, ref engine: Engine<T>) -> Result<(), felt252> {
+    fn verify_base(
+        self: TaprootSigVerifier<T, O>, ref engine: Engine<T>,
+    ) -> Result<VerifyResult, felt252> {
         if (self.pub_key.is_none()) {
-            return Result::Ok(());
+            return Result::Ok(Default::default());
         }
 
         let mut opts = TaprootSighashOptionsTrait::new_with_tapscript_version(
@@ -214,7 +215,12 @@ pub impl TaprootSigVerifierImpl<
         let sig_hash = sighash::calc_taproot_signature_hash::<
             T,
         >(
-            self.hashCache, self.hash_type, self.tx, self.inputIndex, self.prevOuts, ref opts,
+            self.hashCache,
+            self.hash_type,
+            self.tx.unwrap(),
+            self.inputIndex,
+            self.prevOuts,
+            ref opts,
         )?; // on error should return error or false ?
 
         if !schnorr::verify_schnorr(self.sig, @sig_hash.into(), self.pk_bytes)? {
@@ -222,7 +228,7 @@ pub impl TaprootSigVerifierImpl<
                 Error::TAPROOT_INVALID_SIG,
             ); // should not return error ? VerifyResult ?
         }
-        Result::Ok(())
+        Result::Ok(VerifyResult { sig_valid: true, sig_match: false })
     }
 }
 

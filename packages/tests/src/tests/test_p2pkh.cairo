@@ -22,10 +22,10 @@ fn test_p2pkh_transaction() {
         pubkey_script: hex_to_bytecode(@prevout_pk_script_2),
         block_height: 357,
     };
-    let utxo_hints = array![prevout_1, prevout_2];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let utxo_hints = array![prevout_1, prevout_2].span();
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, 0);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -61,11 +61,11 @@ fn test_p2pkh_transaction_spend() {
         block_height: 17233,
     };
 
-    let utxo_hints = array![prev_out0, prev_out1, prev_out2];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let utxo_hints = array![prev_out0, prev_out1, prev_out2].span();
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
     // Run Shinigami and validate the transaction execution
-    let res = validate::validate_transaction(@transaction, 0);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -89,10 +89,10 @@ fn test_block_770000_p2pkh_transaction() {
         pubkey_script: hex_to_bytecode(@prevout_pk_script),
         block_height: 769998,
     };
-    let utxo_hints = array![prevout];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let utxo_hints = array![prevout].span();
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, 0);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }
 
@@ -109,9 +109,9 @@ fn test_block_770002_p2pkh_transaction() {
         pubkey_script: hex_to_bytecode(@prevout_pk_script),
         block_height: 769998,
     };
-    let utxo_hints = array![prevout];
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, 0, utxo_hints);
+    let utxo_hints = array![prevout].span();
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, 0);
+    let res = validate::validate_transaction(@transaction, 0, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed");
 }

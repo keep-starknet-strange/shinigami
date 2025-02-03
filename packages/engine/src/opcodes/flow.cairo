@@ -10,7 +10,6 @@ use crate::errors::Error;
 pub fn opcode_nop<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -39,7 +38,6 @@ const op_cond_skip: u8 = 2;
 pub fn opcode_if<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,
@@ -69,7 +67,6 @@ pub fn opcode_if<
 pub fn opcode_notif<
     T,
     +Drop<T>,
-    +Default<T>,
     I,
     +Drop<I>,
     impl IEngineTransactionInputTrait: EngineTransactionInputTrait<I>,

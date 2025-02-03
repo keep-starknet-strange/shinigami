@@ -1,13 +1,12 @@
 use crate::transaction::{
     EngineTransactionInputTrait, EngineTransactionOutputTrait, EngineTransactionTrait,
+    EngineTransactionOutput,
 };
+use crate::flags::ScriptFlags;
+
 use shinigami_utils::{bytecode::{write_var_int}, hash::{hash_to_u256, sha256_u256, simple_sha256}};
 use core::sha256::compute_sha256_byte_array;
 use crate::signature::utils::is_witness_v1_pub_key_hash;
-use core::dict::Felt252Dict;
-
-// use core::poseidon::PoseidonTrait;
-// use core::hash::{HashStateTrait, HashStateExTrait};
 
 // SegwitSigHashMidstate is the sighash midstate used in the base segwit
 // sighash calculation as defined in BIP 143.
@@ -30,9 +29,7 @@ pub struct TaprootSigHashMidState {
 }
 
 pub trait SigHashMidstateTrait<T> {
-    fn new(transaction: @T) -> TxSigHashes;
-    fn calc_hash_inputs_amount(transaction: @T) -> u256;
-    fn calc_hash_input_scripts(transaction: @T) -> u256;
+    fn new(transaction: @T, utxos: Span<EngineTransactionOutput>) -> @TxSigHashes;
 }
 
 // TxSigHashes houses the partial set of sighashes introduced within BIP0143.
@@ -46,7 +43,7 @@ pub impl SigHashMidstateImpl<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
 > of SigHashMidstateTrait<T> {
-    fn new(transaction: @T) -> TxSigHashes {
+    fn new(transaction: @T, utxos: Span<EngineTransactionOutput>) -> @TxSigHashes {
         let mut hasV0Inputs = false;
         let mut hasV1Inputs = false;
 
@@ -60,8 +57,8 @@ pub impl SigHashMidstateImpl<
                 continue;
             }
 
-            let utxo = transaction.get_input_utxo(i);
-            if is_witness_v1_pub_key_hash(@utxo.pubkey_script) {
+            let utxo = utxos[i];
+            if is_witness_v1_pub_key_hash(utxo.get_publickey_script()) {
                 hasV1Inputs = true;
             } else {
                 hasV0Inputs = true;
@@ -100,7 +97,7 @@ pub impl SigHashMidstateImpl<
         if hasV0Inputs {
             txSigHashes
                 .set_v0_sighash(
-                    SegwitSigHashMidstate {
+                    @SegwitSigHashMidstate {
                         hash_prevouts_v0: sha256_u256(hashPrevOutsV1),
                         hash_sequence_v0: sha256_u256(hashSequenceV1),
                         hash_outputs_v0: sha256_u256(hashOutputsV1),
@@ -108,43 +105,27 @@ pub impl SigHashMidstateImpl<
                 );
         }
         if hasV1Inputs {
-            let hash_input_amounts_v1 = Self::calc_hash_inputs_amount(transaction);
-            let hash_input_scripts_v1 = Self::calc_hash_input_scripts(transaction);
+            let mut buffer_amount = "";
+            let mut buffer_scripts = "";
+            for utxo in utxos {
+                let script = utxo.get_publickey_script();
+                write_var_int(ref buffer_scripts, script.len().into());
+                buffer_scripts.append(script);
+                buffer_amount.append_word_rev(utxo.get_value().into(), 8);
+            };
 
             txSigHashes
                 .set_v1_sighash(
-                    TaprootSigHashMidState {
+                    @TaprootSigHashMidState {
                         hash_prevouts_v1: hash_to_u256(hashPrevOutsV1),
                         hash_sequence_v1: hash_to_u256(hashSequenceV1),
                         hash_outputs_v1: hash_to_u256(hashOutputsV1),
-                        hash_input_scripts_v1: hash_input_scripts_v1,
-                        hash_input_amounts_v1: hash_input_amounts_v1,
+                        hash_input_amounts_v1: simple_sha256(@buffer_amount),
+                        hash_input_scripts_v1: simple_sha256(@buffer_scripts),
                     },
                 );
         }
-        txSigHashes
-    }
-
-    // calcHashInputAmounts computes a hash digest of the input amounts of all
-    // inputs referenced in the passed transaction.
-    fn calc_hash_inputs_amount(transaction: @T) -> u256 {
-        let mut buffer: ByteArray = "";
-        for utxo in transaction.get_transaction_utxos() {
-            buffer.append_word_rev(utxo.amount.into(), 8);
-        };
-        return simple_sha256(@buffer);
-    }
-
-    // calcHashInputScript computes the hash digest of all the previous input scripts
-    // referenced by the passed transaction.
-    fn calc_hash_input_scripts(transaction: @T) -> u256 {
-        let mut buffer: ByteArray = "";
-        for utxo in transaction.get_transaction_utxos() {
-            write_var_int(ref buffer, utxo.pubkey_script.len().into());
-            buffer.append(@utxo.pubkey_script);
-        };
-
-        return simple_sha256(@buffer);
+        @txSigHashes
     }
 }
 
@@ -156,7 +137,6 @@ pub trait SigCacheTrait<S> {
     // Adds a signature to the cache
     fn add(sig_hash: u256, signature: ByteArray, pub_key: ByteArray);
 }
-
 #[derive(Drop, Default, Copy)]
 pub struct TxSigHashes {
     pub segwit: SegwitSigHashMidstate,
@@ -164,50 +144,79 @@ pub struct TxSigHashes {
 }
 
 #[generate_trait]
-impl TxSigHashesImpl of TxSigHashesTrait {
+pub impl TxSigHashesImpl of TxSigHashesTrait {
     fn new() -> TxSigHashes {
         TxSigHashes { segwit: Default::default(), taproot: Default::default() }
     }
 
-    fn set_v0_sighash(ref self: TxSigHashes, sighash: SegwitSigHashMidstate) {
-        self.segwit = sighash;
+    fn set_v0_sighash(ref self: TxSigHashes, sighash: @SegwitSigHashMidstate) {
+        self.segwit = *sighash;
     }
 
-    fn set_v1_sighash(ref self: TxSigHashes, sighash: TaprootSigHashMidState) {
-        self.taproot = sighash;
+    fn set_v1_sighash(ref self: TxSigHashes, sighash: @TaprootSigHashMidState) {
+        self.taproot = *sighash;
+    }
+
+    fn get_hash_prevouts_v0(self: @TxSigHashes) -> u256 {
+        *self.segwit.hash_prevouts_v0
+    }
+
+    fn get_hash_sequence_v0(self: @TxSigHashes) -> u256 {
+        *self.segwit.hash_sequence_v0
+    }
+
+    fn get_hash_outputs_v0(self: @TxSigHashes) -> u256 {
+        *self.segwit.hash_outputs_v0
+    }
+
+    fn get_hash_prevouts_v1(self: @TxSigHashes) -> u256 {
+        *self.taproot.hash_prevouts_v1
+    }
+
+    fn get_hash_sequence_v1(self: @TxSigHashes) -> u256 {
+        *self.taproot.hash_sequence_v1
+    }
+
+    fn get_hash_outputs_v1(self: @TxSigHashes) -> u256 {
+        *self.taproot.hash_outputs_v1
+    }
+
+    fn get_hash_input_amounts_v1(self: @TxSigHashes) -> u256 {
+        *self.taproot.hash_input_amounts_v1
+    }
+
+    fn get_hash_input_scripts_v1(self: @TxSigHashes) -> u256 {
+        *self.taproot.hash_input_scripts_v1
     }
 }
 
-#[derive(Destruct, Default)]
+#[derive(Drop, Default)]
 pub struct HashCache<T> {
-    sigHashes: Felt252Dict<Nullable<TxSigHashes>>,
+    pub sigHashes: Option<@TxSigHashes>,
 }
 
-// HashCache caches the midstate of segwit v0 and v1 sighashes
-// pub trait HashCacheTrait<
-//     I,
-//     O,
-//     T,
-//     +EngineTransactionInputTrait<I>,
-//     +EngineTransactionOutputTrait<O>,
-//     +EngineTransactionTrait<T, I, O>,
-// > {
-//     fn new(transaction: @T) -> HashCache<T>;
-//     // fn add_sig_hashes(ref self: HashCache<T>, tx: @T);
-//     // fn get_sig_hashes(ref self: HashCache<T>, tx_hash: felt252) -> Option<TxSigHashes>;
+pub trait HashCacheTrait<
+    I,
+    O,
+    T,
+    impl IEngineTransactionInput: EngineTransactionInputTrait<I>,
+    impl IEngineTransactionOutput: EngineTransactionOutputTrait<O>,
+    impl IEngineTransaction: EngineTransactionTrait<
+        T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
+    >,
+> {
+    fn new(tx: @T, flags: u32, utxos: Span<EngineTransactionOutput>) -> HashCache<T>;
+    fn get_sig_hashes(self: @HashCache<T>) -> Option<@TxSigHashes>;
+    fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256;
+    fn get_hash_sequence_v0(self: @HashCache<T>) -> u256;
+    fn get_hash_outputs_v0(self: @HashCache<T>) -> u256;
+    fn get_hash_prevouts_v1(self: @HashCache<T>) -> u256;
+    fn get_hash_sequence_v1(self: @HashCache<T>) -> u256;
+    fn get_hash_outputs_v1(self: @HashCache<T>) -> u256;
+    fn get_hash_input_amounts_v1(self: @HashCache<T>) -> u256;
+    fn get_hash_input_scripts_v1(self: @HashCache<T>) -> u256;
+}
 
-//     // v0 represents sighash midstate used in the base segwit signatures BIP-143
-//     fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256;
-//     fn get_hash_sequence_v0(self: @HashCache<T>) -> u256;
-//     fn get_hash_outputs_v0(self: @HashCache<T>) -> u256;
-
-//     // v1 represents sighash midstate used to compute taproot signatures BIP-341
-//     fn get_hash_prevouts_v1(self: @HashCache<T>) -> u256;
-//     fn get_hash_sequence_v1(self: @HashCache<T>) -> u256;
-//     fn get_hash_outputs_v1(self: @HashCache<T>) -> u256;
-//     fn get_hash_input_scripts_v1(self: @HashCache<T>) -> u256;
-// }
-#[generate_trait]
 pub impl HashCacheImpl<
     I,
     O,
@@ -217,51 +226,61 @@ pub impl HashCacheImpl<
     impl IEngineTransaction: EngineTransactionTrait<
         T, I, O, IEngineTransactionInput, IEngineTransactionOutput,
     >,
+    +Drop<I>,
+    +Drop<O>,
+    +Drop<T>,
 > of HashCacheTrait<I, O, T> {
-    fn new(transaction: @T) -> HashCache<T> {
-        HashCache { sigHashes: Default::default() }
+    fn new(tx: @T, flags: u32, utxos: Span<EngineTransactionOutput>) -> HashCache<T> {
+        let segwit_active = flags
+            & ScriptFlags::ScriptVerifyWitness.into() == ScriptFlags::ScriptVerifyWitness.into();
+
+        let mut has_witness = false;
+        for input in tx.get_transaction_inputs() {
+            if input.get_witness().len() != 0 {
+                has_witness = true;
+                break;
+            }
+        };
+
+        if (segwit_active && has_witness) {
+            return HashCache { sigHashes: Option::Some(SigHashMidstateTrait::new(tx, utxos)) };
+        }
+        return HashCache { sigHashes: Default::default() };
     }
 
-    // fn set_v0_sighash(self: @HashCache<T>, tx_hash: u256, sighash: SegwitSigHashMidstate) {
-    //     self.sigHashes.insert(tx_hash, NullableTrait::new(TxSigHashes::Segwit(@sighash)));
-    // }
-
-    // Add sighashes for a transaction
-    // fn add_sig_hashes(ref self: HashCache<T>, tx: @T) {
-    //     let txid_hash = PoseidonTrait::new().update_with(tx.get_txid()).finalize();
-    //     self.sigHashes.insert(txid_hash, NullableTrait::new(SigHashMidstateTrait::new(tx)));
-    // }
-
-    // Get sighashes for a transaction
-    // fn get_sig_hashes(ref self: HashCache, tx_hash: felt252) -> Option<TxSigHashes> {
-    //     self.sig_hashes.get(tx_hash)
-    // }
+    fn get_sig_hashes(self: @HashCache<T>) -> Option<@TxSigHashes> {
+        *self.sigHashes
+    }
 
     fn get_hash_prevouts_v0(self: @HashCache<T>) -> u256 {
-        0
+        self.get_sig_hashes().unwrap().get_hash_prevouts_v0()
     }
 
     fn get_hash_sequence_v0(self: @HashCache<T>) -> u256 {
-        0
+        self.get_sig_hashes().unwrap().get_hash_sequence_v0()
     }
 
     fn get_hash_outputs_v0(self: @HashCache<T>) -> u256 {
-        0
+        self.get_sig_hashes().unwrap().get_hash_outputs_v0()
     }
 
     fn get_hash_prevouts_v1(self: @HashCache<T>) -> u256 {
-        0
+        self.get_sig_hashes().unwrap().get_hash_prevouts_v1()
     }
 
     fn get_hash_sequence_v1(self: @HashCache<T>) -> u256 {
-        0
+        self.get_sig_hashes().unwrap().get_hash_sequence_v1()
     }
 
     fn get_hash_outputs_v1(self: @HashCache<T>) -> u256 {
-        0
+        self.get_sig_hashes().unwrap().get_hash_outputs_v1()
+    }
+
+    fn get_hash_input_amounts_v1(self: @HashCache<T>) -> u256 {
+        self.get_sig_hashes().unwrap().get_hash_input_amounts_v1()
     }
 
     fn get_hash_input_scripts_v1(self: @HashCache<T>) -> u256 {
-        0
+        self.get_sig_hashes().unwrap().get_hash_input_scripts_v1()
     }
 }

@@ -37,5 +37,4 @@ pub mod transaction;
 mod tests {
     mod test_scriptnum;
     mod test_schnorr;
-    mod test_taproot_hash;
 }
