@@ -705,14 +705,12 @@ pub impl EngineInternalImpl<
             || self.is_witness_active(TAPROOT_WITNESS_VERSION) {
             // Sanity checks
             let mut err = '';
-            for w in self
-                .dstack
-                .stack_to_span() {
-                    if w.len() > MAX_SCRIPT_ELEMENT_SIZE {
-                        err = Error::SCRIPT_PUSH_SIZE;
-                        break;
-                    }
-                };
+            for w in self.dstack.stack_to_span() {
+                if w.len() > MAX_SCRIPT_ELEMENT_SIZE {
+                    err = Error::SCRIPT_PUSH_SIZE;
+                    break;
+                }
+            };
             if err != '' {
                 return Result::Err(err);
             }

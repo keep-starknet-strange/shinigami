@@ -212,17 +212,15 @@ pub impl ControlBlockImpl of ControlBlockTrait {
             .tap_hash();
 
         let num_nodes = self.inclusion_proof.len() / CONTROL_BLOCK_NODE_SIZE;
-        for node_offset in 0
-            ..num_nodes {
-                let mut leaf_offset = 32 * node_offset;
-                let mut next_node = "";
-                for i in leaf_offset
-                    ..leaf_offset + 32 {
-                        next_node.append_byte(self.inclusion_proof[i]);
-                    };
-
-                merkleAccumulator = tap_branch_hash(@merkleAccumulator.into(), @next_node);
+        for node_offset in 0..num_nodes {
+            let mut leaf_offset = 32 * node_offset;
+            let mut next_node = "";
+            for i in leaf_offset..leaf_offset + 32 {
+                next_node.append_byte(self.inclusion_proof[i]);
             };
+
+            merkleAccumulator = tap_branch_hash(@merkleAccumulator.into(), @next_node);
+        };
 
         return merkleAccumulator;
     }
@@ -345,10 +343,9 @@ pub fn parse_control_block(control_block: @ByteArray) -> Result<ControlBlock, fe
     };
 
     let mut inclusion_proof = "";
-    for i in CONTROL_BLOCK_BASE_SIZE
-        ..control_block_len {
-            inclusion_proof.append_byte(control_block[i]);
-        };
+    for i in CONTROL_BLOCK_BASE_SIZE..control_block_len {
+        inclusion_proof.append_byte(control_block[i]);
+    };
 
     let pubkey = parse_schnorr_pub_key(@raw_pubkey)?;
     return Result::Ok(

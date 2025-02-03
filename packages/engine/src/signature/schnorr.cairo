@@ -28,17 +28,15 @@ pub fn parse_schnorr_signature(sig_bytes: @ByteArray) -> Result<Signature, felt2
 
     let mut r: u256 = 0;
     let mut s: u256 = 0;
-    for i in 0
-        ..sig_bytes
-            .len() {
-                if i < 32 {
-                    r *= 256;
-                    r += sig_bytes[i].into();
-                } else {
-                    s *= 256;
-                    s += sig_bytes[i].into();
-                }
-            };
+    for i in 0..sig_bytes.len() {
+        if i < 32 {
+            r *= 256;
+            r += sig_bytes[i].into();
+        } else {
+            s *= 256;
+            s += sig_bytes[i].into();
+        }
+    };
     if r >= constants::SECP256_FIELD_VAL {
         return Result::Err(Error::SCHNORR_INVALID_SIG_R_FIELD);
     }

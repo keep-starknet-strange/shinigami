@@ -47,30 +47,27 @@ pub impl SigHashMidstateImpl<
         let mut hasV0Inputs = false;
         let mut hasV1Inputs = false;
 
-        for i in 0
-            ..transaction
-                .get_transaction_inputs()
-                .len() {
-                    let input = transaction.get_transaction_inputs()[i];
-                    let input_txid = input.get_prevout_txid();
-                    let input_vout = input.get_prevout_vout();
+        for i in 0..transaction.get_transaction_inputs().len() {
+            let input = transaction.get_transaction_inputs()[i];
+            let input_txid = input.get_prevout_txid();
+            let input_vout = input.get_prevout_vout();
 
-                    if (input_vout == 0xFFFFFFFF && input_txid == 0) {
-                        hasV0Inputs = true;
-                        continue;
-                    }
+            if (input_vout == 0xFFFFFFFF && input_txid == 0) {
+                hasV0Inputs = true;
+                continue;
+            }
 
-                    let utxo = utxos[i];
-                    if is_witness_v1_pub_key_hash(utxo.get_publickey_script()) {
-                        hasV1Inputs = true;
-                    } else {
-                        hasV0Inputs = true;
-                    }
+            let utxo = utxos[i];
+            if is_witness_v1_pub_key_hash(utxo.get_publickey_script()) {
+                hasV1Inputs = true;
+            } else {
+                hasV0Inputs = true;
+            }
 
-                    if hasV0Inputs && hasV1Inputs {
-                        break;
-                    }
-                };
+            if hasV0Inputs && hasV1Inputs {
+                break;
+            }
+        };
 
         let mut prevouts_v0_bytes: ByteArray = "";
         let inputs = transaction.get_transaction_inputs();
@@ -238,13 +235,12 @@ pub impl HashCacheImpl<
             & ScriptFlags::ScriptVerifyWitness.into() == ScriptFlags::ScriptVerifyWitness.into();
 
         let mut has_witness = false;
-        for input in tx
-            .get_transaction_inputs() {
-                if input.get_witness().len() != 0 {
-                    has_witness = true;
-                    break;
-                }
-            };
+        for input in tx.get_transaction_inputs() {
+            if input.get_witness().len() != 0 {
+                has_witness = true;
+                break;
+            }
+        };
 
         if (segwit_active && has_witness) {
             return HashCache { sigHashes: Option::Some(SigHashMidstateTrait::new(tx, utxos)) };
