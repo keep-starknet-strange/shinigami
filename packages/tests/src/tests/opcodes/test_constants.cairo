@@ -199,3 +199,4 @@ fn test_op_pushdata4_in_if() {
     let expected_stack = array![ScriptNum::wrap(1)];
     check_expected_dstack(ref engine, expected_stack.span());
 }
+

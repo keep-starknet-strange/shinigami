@@ -9,6 +9,7 @@ pub mod tests {
         mod test_locktime;
         mod test_stack;
         mod test_splice;
+
         mod test_bitwise;
         mod test_arithmetic;
         mod test_crypto;

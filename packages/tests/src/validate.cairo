@@ -1,29 +1,31 @@
 use shinigami_engine::engine::EngineImpl;
 use shinigami_engine::hash_cache::HashCacheImpl;
-use shinigami_engine::transaction::{EngineTransaction, EngineTransactionOutputTrait, UTXO};
+use shinigami_engine::transaction::{
+    EngineTransaction, EngineTransactionOutput, UTXO, UTXOIntoOutput,
+};
 use shinigami_engine::opcodes::Opcode;
 
 // TODO: Move validate coinbase here
 
 // utxo_hints: Set of existing utxos that are being spent by this transaction
-pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), felt252> {
+pub fn validate_transaction(
+    tx: @EngineTransaction, flags: u32, utxo_hints: Span<UTXO>,
+) -> Result<(), felt252> {
     let input_count = tx.transaction_inputs.len();
-    let utxo_count = tx.utxos.len();
+    let utxo_count = utxo_hints.len();
     if input_count != utxo_count {
         return Result::Err('Invalid number of utxo hints');
     }
 
     let mut inner_result = Result::Ok(());
-    let hash_cache = HashCacheImpl::new(tx, flags);
+    let hash_cache = HashCacheImpl::new(tx, flags, utxo_hints.into());
     let mut i = 0;
 
     while i != input_count {
-        let utxo = tx.utxos[i];
+        let utxo = utxo_hints[i];
 
         let mut engine =
-            match EngineImpl::new(
-                utxo.get_publickey_script(), tx, i, flags, utxo.get_value(), @hash_cache,
-            ) {
+            match EngineImpl::new(utxo.pubkey_script, tx, i, flags, *utxo.amount, @hash_cache) {
             Result::Ok(engine) => engine,
             Result::Err(err) => {
                 inner_result = Result::Err(err);
@@ -50,7 +52,14 @@ pub fn validate_transaction(tx: @EngineTransaction, flags: u32) -> Result<(), fe
 pub fn validate_transaction_at(
     tx: @EngineTransaction, flags: u32, prevout: UTXO, at: u32,
 ) -> Result<(), felt252> {
-    let hash_cache = HashCacheImpl::new(tx, 0);
+    let utxos = array![
+        EngineTransactionOutput {
+            value: prevout.amount.clone(), publickey_script: prevout.pubkey_script.clone(),
+        },
+    ]
+        .span();
+    let hash_cache = HashCacheImpl::new(tx, 0, utxos);
+
     let mut engine = EngineImpl::new(
         @prevout.pubkey_script, tx, at, flags, prevout.amount, @hash_cache,
     )
@@ -131,7 +140,7 @@ pub fn validate_p2ms(
         }
 
         // Verify signatures using the EngineImpl
-        let hash_cache = HashCacheImpl::new(tx, flags);
+        let hash_cache = HashCacheImpl::new(tx, flags, array![].span());
         let mut engine = EngineImpl::new(redeem_script, tx, i, flags, *utxo.amount, @hash_cache)
             .unwrap();
 

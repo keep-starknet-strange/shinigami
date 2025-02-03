@@ -356,7 +356,6 @@ pub impl CompilerImpl of CompilerTrait {
         if current != "" {
             split_script.append(current);
         }
-
         // Compile the script into bytecode
         let mut i = 0;
         let script_len = split_script.len();

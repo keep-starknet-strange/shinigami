@@ -4,7 +4,7 @@ use shinigami_engine::signature::sighash::{
 };
 use shinigami_engine::transaction::{
     EngineTransactionOutput, EngineTransaction, EngineTransactionInput, EngineOutPoint,
-    EngineInternalTransactionTrait, EngineTransactionTrait, UTXO,
+    EngineInternalTransactionTrait, EngineTransactionTrait, UTXO, UTXOIntoOutput,
 };
 use shinigami_engine::taproot::{
     TapLeaf, tap_branch_hash, ControlBlock, parse_control_block, ControlBlockTrait, TapLeafTrait,
@@ -86,10 +86,11 @@ fn test_new_sigHashMidstate() {
             ),
             block_height: Default::default(),
         },
-    ];
+    ]
+        .span();
 
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxos);
-    let sig_hash = SigHashMidstateTrait::new(@transaction);
+    let sig_hash = SigHashMidstateTrait::new(@transaction, utxos.into());
 
     assert_eq!(
         sig_hash.taproot.hash_prevouts_v1,
@@ -130,13 +131,14 @@ fn test_taproot_tweak_hash_key_path_spend2() {
             ),
             block_height: 861957,
         },
-    ];
+    ]
+        .span();
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
 
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
 
     assert_eq!(res.is_ok(), true);
 }
@@ -172,17 +174,20 @@ fn test_calc_taproot_signature_hash_key_path_spend() {
             },
         ],
         locktime: 0,
-        utxos: array![
-            EngineTransactionOutput {
-                value: 20000,
-                publickey_script: hex_to_bytecode(
-                    @"0x51200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667",
-                ),
-            },
-        ],
     };
 
-    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let utxo_hints = array![
+        UTXO {
+            amount: 20000,
+            pubkey_script: hex_to_bytecode(
+                @"0x51200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667",
+            ),
+            block_height: 861957,
+        },
+    ]
+        .span();
+
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction, utxo_hints.into());
     let input_idx: u32 = 0;
     let prev_output: EngineTransactionOutput = Default::default();
 
@@ -252,24 +257,26 @@ fn test_calc_taproot_signature_hash_script_path_spend_simple() {
             },
         ],
         locktime: 0,
-        utxos: array![
-            EngineTransactionOutput {
-                value: 999,
-                publickey_script: hex_to_bytecode(
-                    @"0x001492b8c3a56fac121ddcdffbc85b02fb9ef681038a",
-                ),
-            },
-            EngineTransactionOutput {
-                value: 20000,
-                publickey_script: hex_to_bytecode(
-                    @"0x51201baeaaf9047cc42055a37a3ac981bdf7f5ab96fad0d2d07c54608e8a181b9477",
-                ),
-            },
-        ],
     };
 
+    let utxo_hints = array![
+        UTXO {
+            amount: 999,
+            pubkey_script: hex_to_bytecode(@"0x001492b8c3a56fac121ddcdffbc85b02fb9ef681038a"),
+            block_height: 861957,
+        },
+        UTXO {
+            amount: 20000,
+            pubkey_script: hex_to_bytecode(
+                @"0x51201baeaaf9047cc42055a37a3ac981bdf7f5ab96fad0d2d07c54608e8a181b9477",
+            ),
+            block_height: 861957,
+        },
+    ]
+        .span();
+
     let input_idx: u32 = 1;
-    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction, utxo_hints.into());
     let prev_output: EngineTransactionOutput = Default::default();
 
     let mut opts = TaprootSighashOptions {
@@ -326,17 +333,20 @@ fn test_calc_taproot_signature_hash_script_path_spend_signature() {
             },
         ],
         locktime: 0,
-        utxos: array![
-            EngineTransactionOutput {
-                value: 20000,
-                publickey_script: hex_to_bytecode(
-                    @"0x5120f3778defe5173a9bf7169575116224f961c03c725c0e98b8da8f15df29194b80",
-                ),
-            },
-        ],
     };
 
-    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let utxo_hints = array![
+        UTXO {
+            amount: 20000,
+            pubkey_script: hex_to_bytecode(
+                @"0x5120f3778defe5173a9bf7169575116224f961c03c725c0e98b8da8f15df29194b80",
+            ),
+            block_height: 861957,
+        },
+    ]
+        .span();
+
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction, utxo_hints.into());
     let prev_output: EngineTransactionOutput = Default::default();
 
     let mut opts = TaprootSighashOptions {
@@ -392,17 +402,20 @@ fn test_calc_taproot_signature_hash_script_path_spend_tree() {
             },
         ],
         locktime: 0,
-        utxos: array![
-            EngineTransactionOutput {
-                value: 10000,
-                publickey_script: hex_to_bytecode(
-                    @"0x5120979cff99636da1b0e49f8711514c642f640d1f64340c3784942296368fadd0a5",
-                ),
-            },
-        ],
     };
 
-    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction);
+    let utxo_hints = array![
+        UTXO {
+            amount: 10000,
+            pubkey_script: hex_to_bytecode(
+                @"0x5120979cff99636da1b0e49f8711514c642f640d1f64340c3784942296368fadd0a5",
+            ),
+            block_height: 861957,
+        },
+    ]
+        .span();
+
+    let sig_hashes: @TxSigHashes = SigHashMidstateTrait::new(@transaction, utxo_hints.into());
     let prev_output: EngineTransactionOutput = Default::default();
 
     let mut opts = TaprootSighashOptions {
@@ -557,7 +570,7 @@ fn test_taproot_merkle_root_hash() {
     let raw_transaction_hex =
         "0x02000000000102c343d8dff98f817e9c2bd6d951e5ebc401ae0c6f60bb47e52e24846ae961e2f80000000000ffffffff20575041a5431f83a3d99f40816df85191a21a55155d1b862124e4c7447604880100000000ffffffff01801a00000000000022512021ecac4e3b7a2414b7c0718b80dccdc169c3caf3f2cc7727084e4c4fd2d3179602210249a825dd1e0c90daf615859baf41e34148f5c69b085408a294f0f277246223a70c093006020104020104017cac03010302538781c1a2fc329a085d8cfc4fa28795993d7b666cee024e94c40115141b8e9be4a29fa41324300a84045033ec539f60c70d582c48b9acf04150da091694d83171b44ec9bf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f00000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![].span());
 
     let witness_input_1: @Array<ByteArray> = transaction.get_transaction_inputs()[1].witness;
     let revealed_script_input_1: @ByteArray = witness_input_1[1];
@@ -577,7 +590,7 @@ fn test_taproot_tweak_hash() {
     let raw_transaction_hex =
         "0x02000000000102c343d8dff98f817e9c2bd6d951e5ebc401ae0c6f60bb47e52e24846ae961e2f80000000000ffffffff20575041a5431f83a3d99f40816df85191a21a55155d1b862124e4c7447604880100000000ffffffff01801a00000000000022512021ecac4e3b7a2414b7c0718b80dccdc169c3caf3f2cc7727084e4c4fd2d3179602210249a825dd1e0c90daf615859baf41e34148f5c69b085408a294f0f277246223a70c093006020104020104017cac03010302538781c1a2fc329a085d8cfc4fa28795993d7b666cee024e94c40115141b8e9be4a29fa41324300a84045033ec539f60c70d582c48b9acf04150da091694d83171b44ec9bf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f00000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![].span());
 
     let witness_input_1: @Array<ByteArray> = transaction.get_transaction_inputs()[1].witness;
     let revealed_script_input_1: @ByteArray = witness_input_1[1];
@@ -605,13 +618,14 @@ fn test_taproot_tweak_hash_key_path_spend1() {
             ),
             block_height: 861957,
         },
-    ];
+    ]
+        .span();
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
 
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
 
     assert_eq!(res.is_ok(), true);
 }
@@ -623,7 +637,7 @@ fn test_taproot_output_key() {
     let raw_transaction_hex =
         "0x02000000000102c343d8dff98f817e9c2bd6d951e5ebc401ae0c6f60bb47e52e24846ae961e2f80000000000ffffffff20575041a5431f83a3d99f40816df85191a21a55155d1b862124e4c7447604880100000000ffffffff01801a00000000000022512021ecac4e3b7a2414b7c0718b80dccdc169c3caf3f2cc7727084e4c4fd2d3179602210249a825dd1e0c90daf615859baf41e34148f5c69b085408a294f0f277246223a70c093006020104020104017cac03010302538781c1a2fc329a085d8cfc4fa28795993d7b666cee024e94c40115141b8e9be4a29fa41324300a84045033ec539f60c70d582c48b9acf04150da091694d83171b44ec9bf2c4bf1ca72f7b8538e9df9bdfd3ba4c305ad11587f12bbfafa00d58ad6051d54962df196af2827a86f4bde3cf7d7c1a9dcb6e17f660badefbc892309bb145f00000000";
     let raw_transaction = hex_to_bytecode(@raw_transaction_hex);
-    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![]);
+    let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, array![].span());
 
     let witness_input_1: @Array<ByteArray> = transaction.get_transaction_inputs()[1].witness;
     let revealed_script_input_1: @ByteArray = witness_input_1[1];

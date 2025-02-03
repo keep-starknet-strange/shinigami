@@ -27,14 +27,15 @@ fn test_p2tr_random() {
             ),
             block_height: 872044,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -53,14 +54,15 @@ fn test_p2tr_script_key_path_spend() {
             ),
             block_height: 861957,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -86,14 +88,15 @@ fn test_p2tr_script_path_spend_simple() {
             ), // P2TR
             block_height: 862100,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -112,14 +115,15 @@ fn test_p2tr_script_path_spend_signature() {
             ),
             block_height: 863496,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -138,14 +142,15 @@ fn test_p2tr_script_path_spend_tree() {
             ),
             block_height: 863633,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -164,14 +169,15 @@ fn test_p2tr_random_script_path_spend_1() {
             ),
             block_height: 881907,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -190,14 +196,15 @@ fn test_p2tr_random_script_path_spend_2() {
             ),
             block_height: 881907,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -216,14 +223,15 @@ fn test_p2tr_random_script_path_spend_3() {
             ),
             block_height: 881907,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -242,14 +250,15 @@ fn test_p2tr_random_script_path_spend_4() {
             ),
             block_height: 881907,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -273,14 +282,15 @@ fn test_p2tr_random_key_path_spend_1() {
             ),
             block_height: 881907,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -299,14 +309,15 @@ fn test_p2tr_random_key_path_spend_2() {
             ),
             block_height: 881907,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
@@ -325,13 +336,14 @@ fn test_p2tr_random_key_path_spend_3() {
             ),
             block_height: 881907,
         },
-    ];
+    ]
+        .span();
 
     let flags: u32 = ScriptFlags::ScriptVerifyWitness.into()
         | ScriptFlags::ScriptBip16.into()
         | ScriptFlags::ScriptVerifyTaproot.into();
     let transaction = EngineInternalTransactionTrait::deserialize(raw_transaction, utxo_hints);
 
-    let res = validate::validate_transaction(@transaction, flags);
+    let res = validate::validate_transaction(@transaction, flags, utxo_hints);
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
