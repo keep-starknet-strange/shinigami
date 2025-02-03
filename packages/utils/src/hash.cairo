@@ -18,10 +18,11 @@ pub fn sha256_u256(hash: [u32; 8]) -> u256 {
 
     let msg_hash = compute_sha256_byte_array(@bytes);
     let mut hash_value: u256 = 0;
-    for word in msg_hash.span() {
-        hash_value *= 0x100000000;
-        hash_value = hash_value + (*word).into();
-    };
+    for word in msg_hash
+        .span() {
+            hash_value *= 0x100000000;
+            hash_value = hash_value + (*word).into();
+        };
 
     hash_value
 }
@@ -33,10 +34,11 @@ pub fn double_sha256_bytearray(byte: @ByteArray) -> ByteArray {
 pub fn simple_sha256(byte: @ByteArray) -> u256 {
     let msg_hash = compute_sha256_byte_array(byte);
     let mut hash_value: u256 = 0;
-    for word in msg_hash.span() {
-        hash_value *= 0x100000000;
-        hash_value = hash_value + (*word).into();
-    };
+    for word in msg_hash
+        .span() {
+            hash_value *= 0x100000000;
+            hash_value = hash_value + (*word).into();
+        };
 
     hash_value
 }
@@ -49,10 +51,11 @@ pub fn double_sha256(byte: @ByteArray) -> u256 {
     };
     let msg_hash = compute_sha256_byte_array(@res_bytes);
     let mut hash_value: u256 = 0;
-    for word in msg_hash.span() {
-        hash_value *= 0x100000000;
-        hash_value = hash_value + (*word).into();
-    };
+    for word in msg_hash
+        .span() {
+            hash_value *= 0x100000000;
+            hash_value = hash_value + (*word).into();
+        };
 
     hash_value
 }

@@ -99,10 +99,14 @@ pub impl U256IntoDigest of Into<u256, Digest> {
 
         Digest {
             value: [
-                high_128_96.try_into().unwrap(), high_96_64.try_into().unwrap(),
-                high_64_32.try_into().unwrap(), high_32_0.try_into().unwrap(),
-                low_128_96.try_into().unwrap(), low_96_64.try_into().unwrap(),
-                low_64_32.try_into().unwrap(), low_32_0.try_into().unwrap(),
+                high_128_96.try_into().unwrap(),
+                high_96_64.try_into().unwrap(),
+                high_64_32.try_into().unwrap(),
+                high_32_0.try_into().unwrap(),
+                low_128_96.try_into().unwrap(),
+                low_96_64.try_into().unwrap(),
+                low_64_32.try_into().unwrap(),
+                low_32_0.try_into().unwrap(),
             ],
         }
     }
@@ -145,7 +149,13 @@ mod tests {
 
         let expected_hash = Digest {
             value: [
-                0xefcdab90, 0x78563412, 0xefcdab90, 0x78563412, 0x21436587, 0x09badcfe, 0x21436587,
+                0xefcdab90,
+                0x78563412,
+                0xefcdab90,
+                0x78563412,
+                0x21436587,
+                0x09badcfe,
+                0x21436587,
                 0x09badcfe,
             ],
         };
@@ -157,7 +167,13 @@ mod tests {
     fn test_hash_to_u256() {
         let hash_value = Digest {
             value: [
-                0xfedcba09, 0x87654321, 0xfedcba09, 0x87654321, 0x12345678, 0x90abcdef, 0x12345678,
+                0xfedcba09,
+                0x87654321,
+                0xfedcba09,
+                0x87654321,
+                0x12345678,
+                0x90abcdef,
+                0x12345678,
                 0x90abcdef,
             ],
         };
@@ -176,7 +192,13 @@ mod tests {
     fn test_hash_to_u256_to_hash() {
         let hash_value = Digest {
             value: [
-                0xfedcba09, 0x87654321, 0xfedcba09, 0x87654321, 0x12345678, 0x90abcdef, 0x12345678,
+                0xfedcba09,
+                0x87654321,
+                0xfedcba09,
+                0x87654321,
+                0x12345678,
+                0x90abcdef,
+                0x12345678,
                 0x90abcdef,
             ],
         };
@@ -204,8 +226,14 @@ mod tests {
     fn test_hash_into_bytearray() {
         let hash = Digest {
             value: [
-                0x12345678_u32, 0x9abcdef0_u32, 0x11223344_u32, 0x55667788_u32, 0xaabbccdd_u32,
-                0xeeff0011_u32, 0x22334455_u32, 0x66778899_u32,
+                0x12345678_u32,
+                0x9abcdef0_u32,
+                0x11223344_u32,
+                0x55667788_u32,
+                0xaabbccdd_u32,
+                0xeeff0011_u32,
+                0x22334455_u32,
+                0x66778899_u32,
             ],
         };
 

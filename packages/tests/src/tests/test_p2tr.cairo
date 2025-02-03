@@ -262,10 +262,11 @@ fn test_p2tr_random_script_path_spend_4() {
     assert!(res.is_ok(), "Transaction validation failed: {}", res.unwrap_err());
 }
 
-#[test]
-fn test_p2tr_random_4() { // https://learnmeabitcoin.com/explorer/tx/385490f4b2755f3004b150a128bc16ead6e653badde4f5e06867021ac6bbf85b
+// #[test]
+// fn test_p2tr_random_4() {
+// https://learnmeabitcoin.com/explorer/tx/385490f4b2755f3004b150a128bc16ead6e653badde4f5e06867021ac6bbf85b
 // excesive witness
-}
+// }
 
 #[test]
 fn test_p2tr_random_key_path_spend_1() {
