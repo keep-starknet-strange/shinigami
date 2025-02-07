@@ -14,4 +14,12 @@ repository = "https://github.com/keep-starknet-strange/shinigami.git"
 [workspace.dependencies]
 ripemd160 = { git = "https://github.com/j1mbo64/ripemd160_cairo.git" }
 sha1 = { git = "https://github.com/j1mbo64/sha1_cairo.git" }
-cairo_test = "2.8.2"
+
+[dev-dependencies]
+assert_macros = "2.8.2"
+snforge_std = "0.31.0"
+
+[profile.dev.cairo]
+unstable-add-statements-code-locations-debug-info = true
+unstable-add-statements-functions-debug-info = true
+inlining-strategy = "avoid"
